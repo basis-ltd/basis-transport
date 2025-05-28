@@ -3,7 +3,7 @@ import { FC, ReactNode } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Navbar from './Navbar';
 import Sidebar from './Sidebar';
-import { setIsOpen } from '@/states/slices/sidebarSlice';
+import { setSidebarOpen } from '@/states/slices/sidebarSlice';
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -35,7 +35,7 @@ const AppLayout: FC<AppLayoutProps> = ({ children }) => {
           className="fixed inset-0 top-0 left-0 bg-black/50 z-[998] md:hidden"
           onClick={(e) => {
             e.stopPropagation();
-            dispatch(setIsOpen(false));
+            dispatch(setSidebarOpen(false));
           }}
           aria-hidden="true"
         />

@@ -1,5 +1,5 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser } from '@fortawesome/free-solid-svg-icons';
+import { faUser, faUserCircle, faRightFromBracket } from '@fortawesome/free-solid-svg-icons';
 import { Link } from 'react-router-dom';
 import { useRef, useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
@@ -74,20 +74,21 @@ const Navbar = () => {
                 <li>
                   <Link
                     to="/user/profile"
-                    className="block px-4 py-2 text-gray-700 hover:bg-primary/10 hover:text-primary transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-primary/10 hover:text-primary transition-colors rounded-md group"
                     role="menuitem"
                     onClick={(e) => {
                       e.preventDefault();
                       setDropdownOpen(false);
                     }}
                   >
-                    Profile
+                    <FontAwesomeIcon icon={faUserCircle} className="text-primary/70 group-hover:text-primary" />
+                    <span className="font-medium">Profile</span>
                   </Link>
                 </li>
                 <li>
                   <Link
                     to="#"
-                    className="w-full text-left block px-4 py-2 text-gray-700 hover:bg-primary/10 hover:text-primary transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-destructive/10 hover:text-destructive transition-colors rounded-md group"
                     role="menuitem"
                     onClick={(e) => {
                       e.preventDefault();
@@ -96,7 +97,8 @@ const Navbar = () => {
                       setDropdownOpen(false);
                     }}
                   >
-                    Logout
+                    <FontAwesomeIcon icon={faRightFromBracket} className="text-destructive/70 group-hover:text-destructive" />
+                    <span className="font-medium">Logout</span>
                   </Link>
                 </li>
               </ul>

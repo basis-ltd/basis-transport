@@ -10,7 +10,7 @@ import {
   faChevronUp,
 } from '@fortawesome/free-solid-svg-icons';
 import { SIDEBAR_NAV_ITEMS } from '@/constants/sidebar.constants';
-import { setIsOpen } from '@/states/slices/sidebarSlice';
+import { setSidebarOpen } from '@/states/slices/sidebarSlice';
 
 const Sidebar = () => {
   const { pathname } = useLocation();
@@ -74,7 +74,7 @@ const Sidebar = () => {
           to="#"
           onClick={(e) => {
             e.preventDefault();
-            dispatch(setIsOpen(!isOpen));
+            dispatch(setSidebarOpen(!isOpen));
           }}
           className={`cursor-pointer p-1 px-[8.2px] rounded-full bg-primary text-white hover:bg-primary/80 transition-colors duration-200 focus:outline-none focus:ring-opacity-50 ${
             !isOpen ? 'mx-auto' : ''
@@ -91,7 +91,7 @@ const Sidebar = () => {
         }`}
       >
         {SIDEBAR_NAV_ITEMS.map((nav, index) => {
-          const selected = pathname === nav.path;
+          const selected = pathname.includes(nav.path);
           const subcategoriesIsOpen = openCategories.includes(nav.title);
           const isSubcategoryActive = nav.subcategories?.some((sub) =>
             pathname.startsWith(sub.path)
@@ -114,13 +114,13 @@ const Sidebar = () => {
                   if (nav.subcategories) {
                     e.preventDefault();
                     if (!isOpen) {
-                      dispatch(setIsOpen(true));
+                      dispatch(setSidebarOpen(true));
                     } else {
                       toggleCategory(nav.title);
                     }
                   } else {
                     if (!isOpen) {
-                      dispatch(setIsOpen(true));
+                      dispatch(setSidebarOpen(true));
                     }
                   }
                 }}

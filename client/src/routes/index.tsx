@@ -6,6 +6,7 @@ import { Routes, Route } from 'react-router-dom';
 import AuthenticatedRoutes from './outlets/AuthenticatedRoutes';
 import TripDetailsPage from '@/pages/trips/TripDetailsPage';
 import CreateTripPage from '@/pages/trips/CreateTripPage';
+import Signup from '@/pages/auth/Signup';
 
 const Router = () => {
   return (
@@ -18,6 +19,7 @@ const Router = () => {
        */}
       <Route path="/auth">
         <Route path="login" element={<Login />} />
+        <Route path="register" element={<Signup />} />
       </Route>
 
       {/**

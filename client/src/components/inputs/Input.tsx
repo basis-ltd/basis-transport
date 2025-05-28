@@ -22,7 +22,16 @@ import { Checkbox } from '../ui/checkbox';
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   placeholder?: string;
   className?: string;
-  type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'search' | 'file' | 'checkbox' | 'radio';
+  type?:
+    | 'text'
+    | 'email'
+    | 'password'
+    | 'number'
+    | 'tel'
+    | 'search'
+    | 'file'
+    | 'checkbox'
+    | 'radio';
   value?: string;
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
   onBlur?: (e: FocusEvent<HTMLInputElement>) => void;
@@ -92,7 +101,6 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     },
     ref: ForwardedRef<HTMLInputElement>
   ) => {
-
     if (['checkbox', 'radio'].includes(type)) {
       if (['checkbox'].includes(type)) {
         return (
@@ -138,10 +146,10 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     }
 
     return (
-      <label className={`flex flex-col gap-[5px] w-full ${labelClassName}`}>
-        <p
+      <label className={`flex flex-col gap-[8px] w-full ${labelClassName}`}>
+        <header
           className={`${
-            label ? 'pl-1 flex items-center gap-[5px] text-[14px]' : 'hidden'
+            label ? 'pl-2 flex items-center gap-[8px] text-[14px]' : 'hidden'
           }`}
         >
           {label}{' '}
@@ -153,11 +161,11 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
               <span className="text-red-600 cursor-pointer">*</span>
             </CustomTooltip>
           )}
-        </p>
+        </header>
 
-        <section className="relative w-full">
+        <article className="relative w-full">
           {prefixIcon || prefixText ? (
-            <div className="absolute inset-y-0 start-0 flex items-center ps-3.5">
+            <nav className="absolute inset-y-0 start-0 flex items-center ps-4">
               <Link
                 to={'#'}
                 onClick={prefixIconHandler}
@@ -166,13 +174,15 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
                 {prefixIcon && (
                   <FontAwesomeIcon className="text-[14px]" icon={prefixIcon} />
                 )}
-                {prefixText && <p className="text-[14px]">{prefixText}</p>}
+                {prefixText && (
+                  <span className="text-[14px]">{prefixText}</span>
+                )}
               </Link>
-            </div>
+            </nav>
           ) : null}
 
           {(suffixIcon || showSearchSuffix) && (
-            <div className="absolute inset-y-0 end-0 flex items-center pe-3.5">
+            <nav className="absolute inset-y-0 end-0 flex items-center pe-4">
               <Link
                 to={'#'}
                 onClick={suffixIconHandler}
@@ -180,12 +190,12 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
                   suffixIconPrimary ? 'text-primary' : ''
                 }`}
               >
-                <FontAwesomeIcon 
-                  className="text-[14px]" 
-                  icon={suffixIcon || faSearch} 
+                <FontAwesomeIcon
+                  className="text-[14px]"
+                  icon={suffixIcon || faSearch}
                 />
               </Link>
-            </div>
+            </nav>
           )}
 
           {isLoading ? (
@@ -209,7 +219,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
               inputMode={inputMode}
               pattern={pattern}
               className={`
-                py-[7px] px-4 
+                !py-[14px] px-5
                 font-normal
                 placeholder:!font-light
                 placeholder:text-[13px] 
@@ -221,9 +231,9 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
                 focus:border-[1.6px] focus:border-primary
                 ease-in-out duration-50
                 ${className}
-                ${prefixIcon && 'ps-10'}
-                ${prefixText ? 'ps-[3.6rem]' : ''}
-                ${(suffixIcon || showSearchSuffix) && 'pe-10'}
+                ${prefixIcon && 'ps-12'}
+                ${prefixText ? 'ps-[4rem]' : ''}
+                ${(suffixIcon || showSearchSuffix) && 'pe-12'}
                 ${
                   readOnly &&
                   '!border-[.1px] !border-background hover:cursor-default focus:!border-background'
@@ -232,7 +242,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             />
           )}
           {errorMessage && <InputErrorMessage message={errorMessage} />}
-        </section>
+        </article>
       </label>
     );
   }
