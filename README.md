@@ -1,5 +1,7 @@
 # Basis Transport Monorepo
 
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/basis-ltd/basis-transport)
+
 A monorepo containing both the backend (API) and frontend (Client) applications for Basis Transport—a platform for bus tracking, trip management, and real-time fleet operations.
 
 ---

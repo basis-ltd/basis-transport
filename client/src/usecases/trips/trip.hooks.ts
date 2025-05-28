@@ -145,7 +145,12 @@ export const useGetTripLocations = ({ trip }: { trip?: Trip }) => {
       /**
        * CURRENT LOCATION IS AVAILABLE
        */
-      if (trip?.currentLocation && userLocation) {
+      if (
+        trip?.currentLocation &&
+        userLocation &&
+        userLocation?.lat !== 0 &&
+        userLocation?.lng !== 0
+      ) {
         // SET ORIGIN
         setOrigin({
           lat: trip?.currentLocation?.coordinates?.[0] ?? 0,
@@ -180,8 +185,8 @@ export const useGetTripLocations = ({ trip }: { trip?: Trip }) => {
 
         // SET DESTINATION
         setDestination({
-          lat: userLocation.lat,
-          lng: userLocation.lng,
+          lat: trip?.locationTo?.address?.coordinates?.[0] ?? 0,
+          lng: trip?.locationTo?.address?.coordinates?.[1] ?? 0,
         });
       }
 

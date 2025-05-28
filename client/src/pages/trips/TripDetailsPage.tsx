@@ -60,7 +60,6 @@ const TripDetailsPage = () => {
               e.preventDefault();
               navigate(-1);
             }}
-            variant="outline"
           >
             Back
           </Button>

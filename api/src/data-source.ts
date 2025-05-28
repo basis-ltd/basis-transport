@@ -15,9 +15,12 @@ export const AppDataSource = new DataSource({
   logging: false,
   entities: [`${__dirname}/**/**/*.entity.{ts,js}`],
   migrations: [`${__dirname}/**/migrations/*.{ts,js}`],
-  ssl: ['localhost', 'host.docker.internal'].includes(
-    String(DB_HOST)
-  )
+  ssl: [
+    'localhost',
+    'host.docker.internal',
+    '127.0.0.1',
+    '/var/run/postgresql',
+  ].includes(String(DB_HOST))
     ? false
     : {
         rejectUnauthorized: false,
