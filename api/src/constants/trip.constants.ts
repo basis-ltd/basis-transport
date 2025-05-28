@@ -1,0 +1,6 @@
+export enum TripStatus {
+  PENDING = 'PENDING',
+  COMPLETED = 'COMPLETED',
+  CANCELLED = 'CANCELLED',
+  IN_PROGRESS = 'IN_PROGRESS',
+}

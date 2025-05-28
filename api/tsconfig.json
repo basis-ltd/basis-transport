@@ -1,0 +1,68 @@
+{
+  "compilerOptions": {
+    // Specifies the ECMAScript target version for the compiled JavaScript
+    "target": "es2018",
+
+    // Specifies which library files to include in the compilation
+    // es5: Basic JavaScript features
+    // es6: ES2015 features like classes, modules, etc.
+    // ES2018: Latest JavaScript features
+    "lib": ["es5", "es6", "ES2018"],
+
+    // Enables experimental support for decorators
+    // Used for features like @Component, @Injectable, etc.
+    "experimentalDecorators": true,
+
+    // Enables emitting type metadata for decorators
+    // Required for features like dependency injection
+    "emitDecoratorMetadata": true,
+
+    // Specifies the module system for the compiled code
+    // commonjs is the standard for Node.js applications
+    "module": "commonjs",
+
+    // Specifies how TypeScript looks up files from module specifiers
+    // node strategy follows Node.js module resolution rules
+    "moduleResolution": "node",
+
+    // Allows importing JSON files as modules
+    "resolveJsonModule": true,
+
+    // Allows JavaScript files to be compiled
+    "allowJs": true,
+
+    // Specifies the output directory for compiled files
+    "outDir": "./dist",
+
+    // Enables compatibility with CommonJS modules
+    // Makes it easier to import from CommonJS modules
+    "esModuleInterop": true,
+
+    // Ensures consistent casing in file names
+    // Prevents issues with case-sensitive file systems
+    "forceConsistentCasingInFileNames": true,
+
+    // Enables all strict type checking options
+    "strict": true,
+
+    // Raises an error on expressions and declarations with an implied 'any' type
+    "noImplicitAny": true,
+
+    // Disables strict checking of property initialization in classes
+    // Useful when using dependency injection or other frameworks
+    "strictPropertyInitialization": false
+  },
+
+  // Specifies which files to include in the compilation
+  // **/* means all files in src directory and its subdirectories
+  "include": ["src/**/*"],
+
+  // Specifies which files to exclude from compilation
+  "exclude": ["node_modules", "dist"],
+
+  // Configuration specific to ts-node
+  "ts-node": {
+    // Enables file watching for ts-node
+    "files": true
+  }
+}
