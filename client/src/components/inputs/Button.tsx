@@ -1,66 +1,115 @@
-import { MouseEventHandler, ReactNode } from 'react';
-import { Link, To } from 'react-router-dom';
+import { IconProp } from '@fortawesome/fontawesome-svg-core';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { FC, MouseEventHandler, ReactNode } from 'react';
+import { Link } from 'react-router-dom';
 import Loader from './Loader';
 
 interface ButtonProps {
-  children: ReactNode;
-  className?: string;
-  to?: To;
-  type?: 'button' | 'submit' | 'reset';
+  route?: string;
+  value?: ReactNode;
   onClick?: MouseEventHandler<HTMLAnchorElement>;
-  isLoading?: boolean;
+  type?: 'submit' | 'button' | 'reset';
+  disabled?: boolean;
   primary?: boolean;
+  styled?: boolean;
+  className?: string;
+  submit?: boolean;
   danger?: boolean;
-  variant?: 'primary' | 'danger' | 'secondary' | 'outline';
+  icon?: IconProp;
+  isLoading?: boolean;
+  children?: ReactNode;
 }
 
-const Button = ({
-  children,
-  className,
-  to,
-  type,
+const Button: FC<ButtonProps> = ({
+  route = '#',
+  value,
   onClick,
-  isLoading,
-  variant = 'primary',
-}: ButtonProps) => {
+  type = null,
+  disabled = false,
+  primary = false,
+  styled = true,
+  className,
+  submit = false,
+  danger = false,
+  icon = undefined,
+  isLoading = false,
+  children,
+}) => {
+  const baseStyles = `py-[6px] flex items-center gap-2 justify-center text-center border border-primary px-4 rounded-md text-[13px] text-primary bg-white hover:bg-primary hover:text-white cursor-pointer ease-in-out duration-400 hover:scale-[1.005] 
+    sm:text-[12px] md:text-[13px] lg:text-[13px]
+    sm:py-[4px] md:py-[6px]
+    sm:px-3 md:px-4 lg:px-5
+    sm:gap-1 md:gap-2 lg:gap-2
+    ${
+      !styled &&
+      'bg-transparent! shadow-none! text-primary! hover:scale-[1.005]! py-0! px-0! border-none! hover:bg-transparent! hover:text-primary!'
+    }
+    ${className}
+    ${
+      primary &&
+      'bg-primary! text-white! hover:bg-primary! hover:text-white! shadow-xs!'
+    }
+    ${
+      danger &&
+      'bg-red-700! border-none! text-white! hover:bg-red-700! hover:text-white! shadow-xs!'
+    }
+    ${
+      disabled &&
+      'bg-secondary! shadow-none! hover:scale-[1]! cursor-default! hover:bg-secondary! hover:text-opacity-80 duration-0! text-white text-opacity-80 border-none! text-center transition-all'
+    }`;
 
-  let variantClasses = '';
-
-  switch (variant) {
-    case 'primary':
-      variantClasses = '!bg-primary text-white';
-      break;
-    case 'danger':
-      variantClasses = '!bg-red-700 text-white';
-      break;
-    case 'secondary':
-      variantClasses = 'bg-white text-primary';
-      break;
-    case 'outline':
-      variantClasses = 'bg-white text-primary border border-primary';
-      break;
-    default:
-      variantClasses = 'bg-white text-primary';
-  }
-
-  if (type && ['submit', 'reset'].includes(type)) {
+  if (submit || type === 'submit') {
     return (
       <button
-        type={type}
-        className={`${variantClasses} inline-flex items-center justify-center cursor-pointer px-4 py-2 text-sm font-normal text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 transition-colors duration-200 ${className}`}
+        type={type || 'submit'}
+        onClick={onClick as MouseEventHandler<HTMLButtonElement> | undefined}
+        className={baseStyles}
+        disabled={disabled}
       >
-        {isLoading ? <Loader className="text-white" /> : children}
+        {isLoading ? (
+          <Loader className={primary ? 'text-white' : 'text-primary'} />
+        ) : (
+          <>
+            {icon && (
+              <FontAwesomeIcon
+                icon={icon}
+                className="sm:text-[11px] md:text-[12px] lg:text-[13px]"
+              />
+            )}
+            {children || value}
+          </>
+        )}
       </button>
     );
   }
 
   return (
     <Link
-      to={to || ''}
-      onClick={onClick}
-      className={`${variantClasses} inline-flex items-center justify-center cursor-pointer px-4 py-2 text-sm font-normal text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 transition-colors duration-200 ${className}`}
+      to={route}
+      onClick={(e) => {
+        if (disabled) {
+          e.preventDefault();
+          return;
+        }
+        if (onClick) {
+          onClick(e);
+        }
+      }}
+      className={baseStyles}
     >
-      {isLoading ? <Loader className="text-white" /> : children}
+      {isLoading ? (
+        <Loader className={primary ? 'text-white' : 'text-primary'} />
+      ) : (
+        <>
+          {icon && (
+            <FontAwesomeIcon
+              icon={icon}
+              className="sm:text-[11px] md:text-[12px] lg:text-[13px]"
+            />
+          )}
+          {children || value}
+        </>
+      )}
     </Link>
   );
 };

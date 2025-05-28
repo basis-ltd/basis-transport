@@ -1,4 +1,5 @@
 import CustomPopover from '@/components/custom/CustomPopover';
+import { TableUserLabel } from '@/components/users/TableUserLabel';
 import {
   ellipsisHClassName,
   tableActionClassName,
@@ -30,16 +31,17 @@ export const useTripColumns = () => {
         accessorKey: 'status',
       },
       {
-        header: 'Created By',
-        accessorKey: 'createdBy.name',
-      },
-      {
         header: 'Start Time',
         accessorKey: 'startTime',
       },
       {
         header: 'End Time',
         accessorKey: 'endTime',
+      },
+      {
+        header: 'Created By',
+        accessorKey: 'createdBy.name',
+        cell: ({ row }) => <TableUserLabel user={row?.original?.createdBy} />,
       },
       {
         header: 'Actions',

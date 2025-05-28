@@ -19,9 +19,9 @@ export const useFetchTrips = () => {
     size,
     setPage,
     setSize,
-    totalElements,
+    totalCount,
     totalPages,
-    setTotalElements,
+    setTotalCount,
     setTotalPages,
   } = usePagination();
 
@@ -39,16 +39,16 @@ export const useFetchTrips = () => {
 
   useEffect(() => {
     if (tripsIsSuccess) {
-      setTotalElements(tripsData?.data?.totalElements);
+      setTotalCount(tripsData?.data?.totalCount);
       setTotalPages(tripsData?.data?.totalPages);
       dispatch(setTripsList(tripsData?.data?.rows));
     }
   }, [
     dispatch,
-    setTotalElements,
+    setTotalCount,
     setTotalPages,
     tripsData?.data?.rows,
-    tripsData?.data?.totalElements,
+    tripsData?.data?.totalCount,
     tripsData?.data?.totalPages,
     tripsIsSuccess,
   ]);
@@ -60,7 +60,7 @@ export const useFetchTrips = () => {
     tripsIsError,
     page,
     size,
-    totalElements,
+    totalCount,
     totalPages,
     setPage,
     setSize,

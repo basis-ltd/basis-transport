@@ -5,6 +5,7 @@ import TripsPage from '@/pages/trips/TripsPage';
 import { Routes, Route } from 'react-router-dom';
 import AuthenticatedRoutes from './outlets/AuthenticatedRoutes';
 import TripDetailsPage from '@/pages/trips/TripDetailsPage';
+import CreateTripPage from '@/pages/trips/CreateTripPage';
 
 const Router = () => {
   return (
@@ -36,6 +37,7 @@ const Router = () => {
         <Route path="/trips">
           <Route path="" element={<TripsPage />} />
           <Route path=":id" element={<TripDetailsPage />} />
+          <Route path="create" element={<CreateTripPage />} />
         </Route>
       </Route>
     </Routes>

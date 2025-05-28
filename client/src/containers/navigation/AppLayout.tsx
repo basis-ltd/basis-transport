@@ -18,7 +18,7 @@ const AppLayout: FC<AppLayoutProps> = ({ children }) => {
 
   const sectionClasses = [
     'absolute top-[9vh] left-0',
-    'h-[89.5vh]',
+    'max-h-[89.5vh] overflow-y-auto',
     'px-8 py-6 mt-2 rounded-lg',
     'transition-all duration-300 ease-in-out bg-white',
     isSidebarOpen

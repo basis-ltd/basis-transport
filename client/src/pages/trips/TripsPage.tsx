@@ -1,9 +1,11 @@
+import Button from '@/components/inputs/Button';
 import { Heading } from '@/components/inputs/TextInputs';
 import Table from '@/components/table/Table';
 import AppLayout from '@/containers/navigation/AppLayout';
 import { useAppSelector } from '@/states/hooks';
 import { useTripColumns } from '@/usecases/trips/columns.trip';
 import { useFetchTrips } from '@/usecases/trips/trip.hooks';
+import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { useEffect } from 'react';
 
 const TripsPage = () => {
@@ -19,7 +21,7 @@ const TripsPage = () => {
     tripsIsFetching,
     page,
     size,
-    totalElements,
+    totalCount,
     totalPages,
     setPage,
     setSize,
@@ -38,7 +40,12 @@ const TripsPage = () => {
     <AppLayout>
       <main className="w-full flex flex-col gap-4">
         <nav className="w-full flex flex-col gap-4">
+          <ul className='w-full flex items-center gap-3 justify-between'>
           <Heading>Trips</Heading>
+          <Button route='/trips/create' icon={faPlus} primary>
+            Create
+          </Button>
+          </ul>
         </nav>
         <section className="w-full flex flex-col gap-4">
           <Table
@@ -47,7 +54,7 @@ const TripsPage = () => {
             isLoading={tripsIsFetching}
             page={page}
             size={size}
-            totalElements={totalElements}
+            totalCount={totalCount}
             totalPages={totalPages}
             setPage={setPage}
             setSize={setSize}

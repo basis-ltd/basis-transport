@@ -2,8 +2,14 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser } from '@fortawesome/free-solid-svg-icons';
 import { Link } from 'react-router-dom';
 import { useRef, useState, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import { setLogout } from '@/states/slices/authSlice';
 
 const Navbar = () => {
+  /**
+   * STATE VARIABLES
+   */
+  const dispatch = useDispatch();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLUListElement>(null);
 
@@ -85,6 +91,8 @@ const Navbar = () => {
                     role="menuitem"
                     onClick={(e) => {
                       e.preventDefault();
+                      dispatch(setLogout());
+                      window.location.href = '/auth/login';
                       setDropdownOpen(false);
                     }}
                   >
