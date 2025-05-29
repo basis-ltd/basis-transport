@@ -8,8 +8,8 @@ interface AuthState {
 }
 
 const initialState: AuthState = {
-  user: await localStorageAdapter.getItem('user') || undefined,
-  token: await localStorageAdapter.getItem('token') || undefined,
+  user: undefined,
+  token: undefined,
 };
 
 const authSlice = createSlice({
