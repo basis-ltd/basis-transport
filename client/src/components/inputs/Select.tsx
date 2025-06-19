@@ -62,7 +62,7 @@ const Select = ({
           <SelectValue
             className="text-[10px]!"
             placeholder={
-              <p className="text-[14px] text-gray-500">{placeholder}</p>
+              <p className="text-[13px] text-gray-500">{placeholder}</p>
             }
           />
         </SelectTrigger>

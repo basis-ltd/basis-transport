@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import { usePagination } from '../common/pagination.hooks';
 import { setTrip, setTripsList } from '@/states/slices/tripSlice';
 import { Trip } from '@/types/trip.type';
+import { useCreateTripMutation } from '@/api/mutations/apiSlice';
 
 // FETCH TRIPS
 export const useFetchTrips = () => {
@@ -216,5 +217,25 @@ export const useGetTripLocations = ({ trip }: { trip?: Trip }) => {
     origin,
     destination,
     defaultCenter,
+  };
+};
+
+// CREATE TRIP
+export const useCreateTrip = () => {
+  // MUTATION
+  const [
+    createTrip,
+    {
+      isLoading: createTripIsLoading,
+      isSuccess: createTripIsSuccess,
+      reset: createTripReset,
+    },
+  ] = useCreateTripMutation();
+
+  return {
+    createTrip,
+    createTripIsLoading,
+    createTripIsSuccess,
+    createTripReset,
   };
 };
