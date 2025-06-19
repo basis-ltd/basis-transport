@@ -1,6 +1,6 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faUserCircle, faRightFromBracket } from '@fortawesome/free-solid-svg-icons';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useRef, useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { setLogout } from '@/states/slices/authSlice';
@@ -12,6 +12,11 @@ const Navbar = () => {
   const dispatch = useDispatch();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLUListElement>(null);
+
+  /**
+   * NAVIGATION
+   */
+  const navigate = useNavigate();
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -73,11 +78,12 @@ const Navbar = () => {
               >
                 <li>
                   <Link
-                    to="/user/profile"
+                    to="/account/profile"
                     className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-primary/10 hover:text-primary transition-colors rounded-md group"
                     role="menuitem"
                     onClick={(e) => {
                       e.preventDefault();
+                      navigate('/account/profile');
                       setDropdownOpen(false);
                     }}
                   >

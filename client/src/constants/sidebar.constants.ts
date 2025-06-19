@@ -1,6 +1,7 @@
 import {
   faBus,
   faChartLine,
+  faUsers,
   IconDefinition,
 } from '@fortawesome/free-solid-svg-icons';
 
@@ -21,5 +22,10 @@ export const SIDEBAR_NAV_ITEMS: NavigationItem[] = [
     title: 'Trips',
     path: `/trips`,
     icon: faBus,
+  },
+  {
+    title: 'Users',
+    path: `/users`,
+    icon: faUsers,
   },
 ];

@@ -3,7 +3,7 @@ import { UserStatus } from '@/constants/user.constants';
 import { UUID } from '.';
 import { AbstractEntity } from '.';
 import { Role } from './role.type';
-import { TransportCard } from './transportCart.type';
+import { TransportCard } from './transportCard.type';
 
 export interface User extends AbstractEntity {
   name?: string;

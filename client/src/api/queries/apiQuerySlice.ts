@@ -4,7 +4,7 @@ import { baseQuery } from '../rootApi';
 export const apiQuerySlice = createApi({
   reducerPath: 'apiQuery',
   baseQuery,
-  tagTypes: ['Trips', 'Locations'],
+  tagTypes: ['Trips', 'Locations', 'UserTrips', 'Users', 'User', 'TransportCards'],
   endpoints: (builder) => ({
     /**
      * TRIPS
@@ -96,6 +96,64 @@ export const apiQuerySlice = createApi({
         };
       },
     }),
+
+    /**
+     * USERS
+     */
+    fetchUsers: builder.query({
+      query: ({ page, size }) => {
+        return {
+          url: '/users',
+          params: {
+            page,
+            size,
+          },
+          method: 'GET',
+          tag: ['Users'],
+        };
+      },
+    }),
+
+    // GET USER BY ID
+    getUserById: builder.query({
+      query: (id) => {
+        return {
+          url: `/users/${id}`,
+          method: 'GET',
+          tag: ['Users'],
+        };
+      },
+    }),
+
+    /**
+     * TRANSPORT CARDS
+     */
+    fetchTransportCards: builder.query({
+      query: ({ page, size, name, createdById }) => {
+        return {
+          url: '/transport-cards',
+          params: {
+            page,
+            size,
+            name,
+            createdById,
+          },
+          method: 'GET',
+          tag: ['TransportCards'],
+        };
+      },
+    }),
+
+    // GET TRANSPORT CARD BY ID
+    getTransportCardById: builder.query({
+      query: (id) => {
+        return {
+          url: `/transport-cards/${id}`,
+          method: 'GET',
+          tag: ['TransportCards'],
+        };
+      },
+    }),
   }),
 });
 
@@ -105,4 +163,8 @@ export const {
   useLazyFetchLocationsQuery,
   useLazyGetLocationByIdQuery,
   useLazyFetchUserTripsQuery,
+  useLazyFetchUsersQuery,
+  useLazyGetUserByIdQuery,
+  useLazyFetchTransportCardsQuery,
+  useLazyGetTransportCardByIdQuery,
 } = apiQuerySlice;

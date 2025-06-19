@@ -6,6 +6,8 @@ import { apiQuerySlice } from '@/api/queries/apiQuerySlice';
 import tripSlice from './slices/tripSlice';
 import locationSlice from './slices/locationSlice';
 import userTripSlice from './slices/userTripSlice';
+import userSlice from './slices/userSlice';
+import transportCardSlice from './slices/transportCardSlice';
 
 export const store = configureStore({
   reducer: {
@@ -16,7 +18,9 @@ export const store = configureStore({
     trip: tripSlice,
     location: locationSlice,
     userTrip: userTripSlice,
-    },
+    user: userSlice,
+    transportCard: transportCardSlice,
+  },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
       apiSlice.middleware,

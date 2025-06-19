@@ -207,6 +207,9 @@ export class UserTripService {
         user: true,
         trip: true,
       },
+      order: {
+        startTime: 'DESC',
+      },
     });
 
     return getPagingData({

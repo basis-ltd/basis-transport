@@ -7,6 +7,10 @@ import AuthenticatedRoutes from './outlets/AuthenticatedRoutes';
 import TripDetailsPage from '@/pages/trips/TripDetailsPage';
 import CreateTripPage from '@/pages/trips/CreateTripPage';
 import Signup from '@/pages/auth/Signup';
+import UsersPage from '@/pages/users/UsersPage';
+import UserDetailsPage from '@/pages/users/UserDetailsPage';
+import UserProfilePage from '@/pages/profile/UserProfilePage';
+import TransportCardsPage from '@/pages/profile/TransportCardsPage';
 
 const Router = () => {
   return (
@@ -40,6 +44,22 @@ const Router = () => {
           <Route path="" element={<TripsPage />} />
           <Route path=":id" element={<TripDetailsPage />} />
           <Route path="create" element={<CreateTripPage />} />
+        </Route>
+
+        {/**
+         * USERS
+         */}
+        <Route path="/users">
+          <Route path="" element={<UsersPage />} />
+          <Route path=":id" element={<UserDetailsPage />} />
+        </Route>
+
+        {/**
+         * PROFILE
+         */}
+        <Route path="/account">
+          <Route path="profile" element={<UserProfilePage />} />
+          <Route path="transport-cards" element={<TransportCardsPage />} />
         </Route>
       </Route>
     </Routes>

@@ -6,6 +6,7 @@ import { auditContextMiddleware } from '../middlewares/auditContext.middleware';
 import locationRoutes from './location.routes';
 import tripRoutes from './trip.routes';
 import userTripRoutes from './userTrip.routes';
+import userRoutes from './user.routes';
 
 const router = Router();
 
@@ -20,6 +21,9 @@ router.use(auditContextMiddleware);
 /**
  * ALL ROUTES BELOW HAVE AUDIT CONTEXT AVAILABLE
  */
+
+// USER ROUTES
+router.use('/users', userRoutes);
 
 // TRANSPORT CARD ROUTES
 router.use('/transport-cards', transportCardRoutes);

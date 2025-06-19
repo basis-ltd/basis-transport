@@ -76,13 +76,19 @@ export class TransportCardController {
   async fetchTransportCards(req: Request, res: Response, next: NextFunction) {
     try {
       const { user } = req as AuthenticatedRequest;
-      const { page = 0, size = 10, name, cardNumber } = req.query;
+      const { page = 0, size = 10, name, cardNumber, createdById } = req.query;
 
       // BUILD CONDITION
       let condition:
         | FindOptionsWhere<TransportCard>
         | FindOptionsWhere<TransportCard>[] = {};
 
+      // USER ID
+      if (createdById) {
+        condition.createdById = createdById as UUID;
+      }
+
+      // NAME
       if (name) {
         condition = [
           {
@@ -91,6 +97,7 @@ export class TransportCardController {
         ];
       }
 
+      // CARD NUMBER
       if (cardNumber) {
         condition = [
           {
