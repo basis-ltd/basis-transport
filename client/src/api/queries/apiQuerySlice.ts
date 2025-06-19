@@ -154,6 +154,45 @@ export const apiQuerySlice = createApi({
         };
       },
     }),
+
+    /**
+     * DASHBOARD
+     */
+
+    // COUNT USER TRIPS
+    countUserTrips: builder.query({
+      query: ({ userId, startDate, endDate }) => {
+        return {
+          url: '/dashboard/user-trips/count',
+          params: {
+            userId,
+            startDate,
+            endDate,
+          },
+        };
+      },
+    }),
+
+    // COUNT TRANSPORT CARDS
+    countTransportCards: builder.query({
+      query: () => {
+        return {
+          url: '/dashboard/transport-cards/count',
+        };
+      },
+    }),
+
+    // COUNT USERS
+    countUsers: builder.query({
+      query: ({ status }) => {
+        return {
+          url: '/dashboard/users/count',
+          params: {
+            status,
+          },
+        };
+      },
+    }),
   }),
 });
 
@@ -167,4 +206,7 @@ export const {
   useLazyGetUserByIdQuery,
   useLazyFetchTransportCardsQuery,
   useLazyGetTransportCardByIdQuery,
+  useLazyCountUserTripsQuery,
+  useLazyCountTransportCardsQuery,
+  useLazyCountUsersQuery,
 } = apiQuerySlice;
