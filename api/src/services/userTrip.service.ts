@@ -16,6 +16,7 @@ import {
   getPagingData,
   Pagination,
 } from '../helpers/pagination.helper';
+import { UserTripStatus } from '../constants/userTrip.constants';
 
 export class UserTripService {
   private readonly userTripRepository: Repository<UserTrip>;
@@ -74,6 +75,30 @@ export class UserTripService {
         referenceId: value?.createdById,
         referenceType: LogReferenceTypes.USER_TRIP,
       });
+    }
+
+    // CHECK IF USER TRIP ALREADY EXISTS
+    const userTripExists = await this.userTripRepository.findOne({
+      where: { userId: value?.userId, tripId: value?.tripId },
+      relations: {
+        trip: true,
+        user: true,
+        createdBy: true,
+      },
+    });
+
+    if (userTripExists) {
+      // UPDATE USER TRIP
+      userTripExists.status = UserTripStatus.IN_PROGRESS;
+      userTripExists.entranceLocation = value?.entranceLocation;
+      userTripExists.startTime = value?.startTime || new Date();
+
+      // SAVE USER TRIP
+      const updatedUserTrip = await this.userTripRepository.save(
+        userTripExists
+      );
+
+      return updatedUserTrip;
     }
 
     // CREATE USER TRIP
