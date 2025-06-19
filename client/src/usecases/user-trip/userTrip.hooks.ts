@@ -1,8 +1,9 @@
-import { useLazyFetchUserTripsQuery } from '@/api/queries/apiQuerySlice';
+import { useLazyFetchUserTripsQuery, useLazyGetUserTripByIdQuery } from '@/api/queries/apiQuerySlice';
 import { useAppDispatch } from '@/states/hooks';
 import {
   setAddToUserTripList,
   setCurrentUserTrip,
+  setUserTrip,
   setUserTripsList,
 } from '@/states/slices/userTripSlice';
 import { useEffect } from 'react';
@@ -163,5 +164,42 @@ export const useUpdateUserTrip = () => {
     updateUserTripIsSuccess,
     updateUserTripReset,
     updateUserTripData,
+  };
+};
+
+/**
+ * GET USER TRIP
+ */
+export const useGetUserTrip = () => {
+  /**
+   * STATE VARIABLES
+   */
+  const dispatch = useAppDispatch();
+
+  /**
+   * MUTATION
+   */
+  const [
+    getUserTrip,
+    {
+      data: userTripData,
+      isFetching: userTripIsFetching,
+      isSuccess: userTripIsSuccess,
+      isError: userTripIsError,
+    },
+  ] = useLazyGetUserTripByIdQuery();
+
+  useEffect(() => {
+    if (userTripIsSuccess) {
+      dispatch(setUserTrip(userTripData?.data));
+    }
+  }, [userTripIsSuccess, dispatch, userTripData?.data]);
+
+  return {
+    getUserTrip,
+    userTripData,
+    userTripIsFetching,
+    userTripIsSuccess,
+    userTripIsError,
   };
 };

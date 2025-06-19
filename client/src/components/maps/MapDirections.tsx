@@ -27,6 +27,7 @@ const MapDirections = ({
     useState<google.maps.DirectionsRenderer>();
   const [routes, setRoutes] = useState<google.maps.DirectionsRoute[]>([]);
   const [routeIndex, setRouteIndex] = useState<number>(0);
+  const [error, setError] = useState<string | null>(null);
   const selectedRoute = routes?.[routeIndex];
   const leg = selectedRoute?.legs?.[0];
 
@@ -46,6 +47,9 @@ const MapDirections = ({
   // DIRECTIONS
   useEffect(() => {
     if (!directionService || !directionsRenderer) return;
+    
+    setError(null); // Reset error state before new request
+    
     directionService
       .route({
         origin,
@@ -59,6 +63,13 @@ const MapDirections = ({
       })
       .catch((error) => {
         console.error(error);
+        if (error.code === 'ZERO_RESULTS') {
+          setError('No driving route found between these points. Showing locations as markers instead.');
+        } else {
+          setError('Unable to calculate route. Showing locations as markers instead.');
+        }
+        // Clear the directions renderer when there's an error
+        directionsRenderer.setMap(null);
       });
   }, [destination, directionService, directionsRenderer, origin]);
 
@@ -84,6 +95,37 @@ const MapDirections = ({
       });
     }
   }, [routeIndex, routes, directionsRenderer, origin, destination]);
+
+  // If there's an error, show error message
+  if (error) {
+    return (
+      <aside
+        className="absolute top-2 right-2 bg-white/95 backdrop-blur-sm shadow-xl rounded-xl p-2 sm:p-4 w-[96vw] max-w-md md:w-[32vw] flex flex-col gap-3 z-[1000] border border-gray-100"
+        aria-label="Route information"
+      >
+        <header className="space-y-2">
+          <Heading className="text-xl font-semibold text-gray-800">Location Information</Heading>
+          <section className="bg-gray-50 rounded-lg p-2 sm:p-3 space-y-2">
+            <article className="flex items-start gap-2">
+              <span className="font-bold text-primary">A</span>
+              <section className="text-gray-600 text-sm">
+                <p className="font-medium">{fromLabel}</p>
+                <p className="text-gray-500">({origin.lat}, {origin.lng})</p>
+              </section>
+            </article>
+            <article className="flex items-start gap-2">
+              <span className="font-bold text-primary">B</span>
+              <section className="text-gray-600 text-sm">
+                <p className="font-medium">{toLabel}</p>
+                <p className="text-gray-500">({destination.lat}, {destination.lng})</p>
+              </section>
+            </article>
+          </section>
+        </header>
+        <p className="text-yellow-600 bg-yellow-50 p-3 rounded-lg text-sm">{error}</p>
+      </aside>
+    );
+  }
 
   if (!leg) return null;
 

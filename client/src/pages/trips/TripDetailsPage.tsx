@@ -1,17 +1,14 @@
 import Button from '@/components/inputs/Button';
 import { Heading } from '@/components/inputs/TextInputs';
-import MapView from '@/components/maps/MapView';
 import Table from '@/components/table/Table';
 import { UserTripStatus } from '@/constants/userTrip.constants';
 import AppLayout from '@/containers/navigation/AppLayout';
+import TripMap from '@/containers/trips/TripMap';
 import { useAppDispatch, useAppSelector } from '@/states/hooks';
 import { setCurrentUserTrip } from '@/states/slices/userTripSlice';
 import { UserTrip } from '@/types/userTrip.type';
 import { useBrowseLocations } from '@/usecases/locations/location.hooks';
-import {
-  useGetTripById,
-  useGetTripLocations,
-} from '@/usecases/trips/trip.hooks';
+import { useGetTripById } from '@/usecases/trips/trip.hooks';
 import { useUserTripColumns } from '@/usecases/user-trip/columns.userTrip';
 import {
   useCreateUserTrip,
@@ -21,6 +18,7 @@ import {
 import { faFileLines } from '@fortawesome/free-regular-svg-icons';
 import { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import moment from 'moment';
 
 const TripDetailsPage = () => {
   /**
@@ -54,11 +52,6 @@ const TripDetailsPage = () => {
 
   // GET TRIP BY ID
   const { getTripById } = useGetTripById();
-
-  // GET TRIP LOCATIONS
-  const { origin, destination, defaultCenter } = useGetTripLocations({
-    trip,
-  });
 
   /**
    * USER TRIP HOOKS
@@ -155,6 +148,7 @@ const TripDetailsPage = () => {
                         type: 'Point',
                         coordinates: [browserLocation.lat, browserLocation.lng],
                       },
+                      endTime: new Date().toISOString(),
                     },
                   });
                 } else if (trip?.id && user?.id && browserLocation) {
@@ -180,19 +174,85 @@ const TripDetailsPage = () => {
           </ul>
         </nav>
         <section className="w-full flex flex-col gap-4">
+          <Heading type="h2">Trip Details</Heading>
+          <article className="w-full grid grid-cols-4 gap-4">
+            {/* Trip Status */}
+            <article className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+              <h3 className="text-sm font-medium text-gray-500 mb-2">
+                Trip Status
+              </h3>
+              <p className="text-lg font-semibold text-gray-900">
+                {trip?.status || 'N/A'}
+              </p>
+            </article>
+
+            {/* Trip Times */}
+            <article className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+              <h3 className="text-sm font-medium text-gray-500 mb-2">
+                Trip Times
+              </h3>
+              <section className="space-y-1">
+                <ul className="w-full flex items-center gap-2 justify-between py-2">
+                  <p className="text-sm text-gray-600">
+                    Start:{' '}
+                    {trip?.startTime
+                      ? moment(new Date(trip.startTime)).format('HH:mm')
+                      : 'Not started'}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    End:{' '}
+                    {trip?.endTime
+                      ? moment(new Date(trip.endTime)).format('HH:mm')
+                      : 'Not completed'}
+                  </p>
+                </ul>
+                <p className="text-sm text-gray-600 font-medium underline">
+                  Duration:{' '}
+                  {trip?.startTime && trip?.endTime
+                    ? moment(new Date(trip.endTime)).diff(
+                        moment(new Date(trip.startTime)),
+                        'minutes'
+                      )
+                    : 'N/A'}{' '}
+                  minutes
+                </p>
+              </section>
+            </article>
+
+            {/* Trip Locations */}
+            <article className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+              <h3 className="text-sm font-medium text-gray-500 mb-2">
+                Trip Locations
+              </h3>
+              <section className="space-y-1">
+                <p className="text-sm text-gray-600">
+                  From: {trip?.locationFrom?.name || 'N/A'}
+                </p>
+                <p className="text-sm text-gray-600">
+                  To: {trip?.locationTo?.name || 'N/A'}
+                </p>
+              </section>
+            </article>
+
+            {/* Trip Reference */}
+            <article className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+              <h3 className="text-sm font-medium text-gray-500 mb-2">
+                Trip Reference
+              </h3>
+              <p className="text-lg font-semibold text-gray-900">
+                #{trip?.referenceId || 'N/A'}
+              </p>
+            </article>
+          </article>
+        </section>
+        <section className="w-full flex flex-col gap-4">
           <Heading type="h2">Map</Heading>
-          <MapView
-            origin={origin}
-            destination={destination}
-            defaultCenter={defaultCenter}
-            fromLabel="Current Bus Location"
-            toLabel="Your Location"
-          />
+          <TripMap trip={trip} />
         </section>
         <section className="w-full flex flex-col gap-4 mt-6">
           <ul className="w-full flex items-center gap-3 justify-between">
             <Heading type="h2">Passengers</Heading>
-            <Button icon={faFileLines} route={`/trips/${trip?.id}/passengers`}>
+            <Button icon={faFileLines} route={`/user-trips?tripId=${trip?.id}`}>
               View all
             </Button>
           </ul>

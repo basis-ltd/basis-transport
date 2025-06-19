@@ -8,6 +8,7 @@ import { UserTrip } from '@/types/userTrip.type';
 import { faCircleInfo, faEllipsisH } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ColumnDef } from '@tanstack/react-table';
+import moment from 'moment';
 import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -48,15 +49,26 @@ export const useUserTripColumns = ({
           if (row?.original?.startTime) {
             return (
               <p className="text-sm">
-                {new Date(row?.original?.startTime).toLocaleString()}
+                {moment(row?.original?.startTime).format('HH:mm')} (
+                {moment(row?.original?.startTime).format('DD/MM/YYYY')})
               </p>
             );
           }
         },
       },
       {
-        header: 'End Time',
+        header: 'Exit Time',
         accessorKey: 'endTime',
+        cell: ({ row }) => {
+          if (row?.original?.endTime) {
+            return (
+              <p className="text-sm">
+                {moment(row?.original?.endTime).format('HH:mm')} (
+                {moment(row?.original?.endTime).format('DD/MM/YYYY')})
+              </p>
+            );
+          }
+        },
       },
       {
         header: 'Created By',

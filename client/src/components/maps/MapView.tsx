@@ -1,5 +1,5 @@
 import { environment } from '@/constants/environment.constants';
-import { APIProvider, Map } from '@vis.gl/react-google-maps';
+import { APIProvider, Map, Marker } from '@vis.gl/react-google-maps';
 import MapDirections from './MapDirections';
 
 interface MapViewProps {
@@ -39,12 +39,22 @@ const MapView = ({
         fullscreenControl={true}
       >
         {origin && destination && (
-          <MapDirections
-            origin={origin}
-            destination={destination}
-            fromLabel={fromLabel}
-            toLabel={toLabel}
-          />
+          <>
+            <MapDirections
+              origin={origin}
+              destination={destination}
+              fromLabel={fromLabel}
+              toLabel={toLabel}
+            />
+            <Marker 
+              position={origin}
+              title={fromLabel}
+            />
+            <Marker 
+              position={destination}
+              title={toLabel}
+            />
+          </>
         )}
       </Map>
     </APIProvider>

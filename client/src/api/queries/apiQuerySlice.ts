@@ -78,6 +78,8 @@ export const apiQuerySlice = createApi({
     /**
      * USER TRIPS
      */
+
+    // FETCH USER TRIPS
     fetchUserTrips: builder.query({
       query: ({ page, size, tripId, userId, startTime, endTime, status }) => {
         return {
@@ -93,6 +95,15 @@ export const apiQuerySlice = createApi({
           },
           method: 'GET',
           tag: ['UserTrips'],
+        };
+      },
+    }),
+
+    // GET USER TRIP BY ID
+    getUserTripById: builder.query({
+      query: (id) => {
+        return {
+          url: `/user-trips/${id}`,
         };
       },
     }),
@@ -209,4 +220,5 @@ export const {
   useLazyCountUserTripsQuery,
   useLazyCountTransportCardsQuery,
   useLazyCountUsersQuery,
+  useLazyGetUserTripByIdQuery,
 } = apiQuerySlice;

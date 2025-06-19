@@ -11,6 +11,8 @@ import UsersPage from '@/pages/users/UsersPage';
 import UserDetailsPage from '@/pages/users/UserDetailsPage';
 import UserProfilePage from '@/pages/profile/UserProfilePage';
 import TransportCardsPage from '@/pages/profile/TransportCardsPage';
+import UserTripsPage from '@/pages/user-trips/UserTripsPage';
+import UserTripDetailsPage from '@/pages/user-trips/UserTripDetailsPage';
 
 const Router = () => {
   return (
@@ -52,6 +54,14 @@ const Router = () => {
         <Route path="/users">
           <Route path="" element={<UsersPage />} />
           <Route path=":id" element={<UserDetailsPage />} />
+        </Route>
+
+        {/**
+         * USER TRIPS
+         */}
+        <Route path="/user-trips">
+          <Route path="" element={<UserTripsPage />} />
+          <Route path=":id" element={<UserTripDetailsPage />} />
         </Route>
 
         {/**

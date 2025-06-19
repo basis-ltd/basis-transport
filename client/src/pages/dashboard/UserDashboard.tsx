@@ -69,7 +69,7 @@ const UserDashboard = () => {
         value: userTripsCount,
         change: 0,
         icon: faBus,
-        route: '/trips',
+        route: '/user-trips',
         isLoading: userTripsCountIsFetching,
       },
       {
@@ -77,7 +77,7 @@ const UserDashboard = () => {
         value: userTripsCount,
         change: 0,
         icon: faClockRotateLeft,
-        route: '/trips',
+        route: '/user-trips',
         isLoading: userTripsCountIsFetching,
       },
       {

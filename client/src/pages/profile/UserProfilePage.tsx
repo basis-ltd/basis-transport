@@ -192,14 +192,14 @@ const UserProfilePage = () => {
                 </p>
               </Link>
               <Link
-                to="/account/settings"
+                  to="/user-trips"
                 className="group p-6 border-2 border-gray-200 rounded-xl hover:border-blue-300 hover:bg-blue-50 transition-all duration-200 transform hover:scale-105 hover:shadow-md"
               >
                 <h3 className="font-semibold text-lg mb-2 text-gray-900 group-hover:text-blue-800">
-                  Settings
+                  My Trips
                 </h3>
                 <p className="text-gray-600 group-hover:text-blue-700">
-                  Manage your preferences
+                  View your trips
                 </p>
               </Link>
             </nav>
