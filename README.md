@@ -9,11 +9,11 @@ A monorepo containing both the backend (API) and frontend (Client) applications 
 ## Table of Contents
 
 - [Monorepo Structure](#monorepo-structure)
+- [Architecture Overview](#architecture-overview)
+- [Key Features](#key-features)
 - [Setup & Development](#setup--development)
 - [API Documentation](#api-documentation)
 - [Client Documentation](#client-documentation)
-- [Key Features](#key-features)
-- [Trip Details Visualization](#trip-details-visualization)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -27,6 +27,90 @@ basis-transport/
   client/   # Frontend (React, Vite, TypeScript)
   dev.sh    # Script to run both API and Client in development
 ```
+
+---
+
+## Architecture Overview
+
+This project follows a client-server architecture where a React frontend communicates with a Node.js/Express backend via a REST API. The backend is designed with a service-oriented approach to separate concerns and improve maintainability.
+
+```mermaid
+graph TD
+    subgraph "User Interface"
+        Client[("React Client<br/>(Vite, Redux, Tailwind)")]
+    end
+
+    subgraph "Backend Services (Node.js/Express)"
+        API["API Gateway<br/>(Express)"]
+        AuthService["Auth Service"]
+        TripService["Trip Service"]
+        UserTripService["User Trip Service"]
+        DashboardService["Dashboard Service"]
+        AuditLogService["Audit Log Service"]
+        LocationService["Location Service"]
+        UserService["User Service"]
+    end
+
+    subgraph "Data Storage"
+        Database[("PostgreSQL DB")]
+    end
+
+    subgraph "External Services"
+        GoogleMaps[("Google Maps API")]
+    end
+
+    Client -- "REST API Calls" --> API
+
+    API --> AuthService
+    API --> TripService
+    API --> UserTripService
+    API --> DashboardService
+    API --> AuditLogService
+    API --> LocationService
+    API --> UserService
+
+    AuthService -- "Manages Users & Roles" --> Database
+    TripService -- "Manages Trips" --> Database
+    UserTripService -- "Manages User Trips" --> Database
+    DashboardService -- "Aggregates Data" --> Database
+    UserService -- "Manages User Data" --> Database
+    LocationService -- "Handles Location Data" --> Database
+
+    AuditLogService -- "Records all entity changes" --> Database
+
+    Client -- "Renders Map & Routes" --> GoogleMaps
+    LocationService -- "Geocoding, Routes" --> GoogleMaps
+```
+
+---
+
+## Key Features
+
+### Real-time Trip Tracking with `MapView`
+The platform offers a dynamic, real-time map visualization powered by Google Maps. The `MapView` component is central to the user experience, providing:
+- **Live Location Tracking**: Displays live bus and user locations on an interactive map.
+- **Dynamic Routing**: Calculates and displays the optimal route from the bus to the user, including distance and estimated time of arrival.
+- **Context-Aware**: If a bus's live location isn't available, it intelligently defaults to showing the route from the trip's origin.
+
+### Comprehensive Audit Trail
+Every critical action within the system is captured through automated audit logs. This ensures full traceability and accountability for all data modifications.
+- **Automated Logging**: Automatically records create, update, and delete events for key entities like `Trip`, `User`, and `TransportCard`.
+- **Detailed Records**: Each log entry contains the action performed, the entity changed, who made the change, and a timestamp.
+
+### User Trip Management
+This feature enables detailed tracking of a user's journey within the transport network.
+- **Boarding & Alighting**: Associates users with specific trips, managing their status from boarding to arrival.
+- **Travel History**: Provides users with a history of their past trips.
+- **Seamless Integration**: Connects users, trips, and transport cards into a cohesive experience.
+
+### Dashboard & Analytics
+The user dashboard provides at-a-glance insights into the transport system's operations through various analytical components.
+- **Key Metrics**: Displays important KPIs, such as active trips, total users, and fleet status, in easily digestible cards.
+- **Data Visualization**: Utilizes charts and graphs to represent trends and operational data over time.
+
+### Other Core Features
+- **Role-Based Access Control (RBAC)**: A robust, secure system for managing user permissions, ensuring users only access data and features appropriate for their role.
+- **Transport Card Management**: A dedicated module for creating, assigning, and managing transport cards used for payments and identity.
 
 ---
 
@@ -148,53 +232,6 @@ client/
     states/           # Redux store, slices, hooks
     usecases/         # Business logic hooks
 ```
-
-### Key Features
-- Modular, scalable architecture
-- Typed domain models
-- Reusable UI components
-- Centralized state management
-- Organized API queries and mutations
-- Hooks-based business logic
-- **Live Trip Tracking**: Real-time bus and user location tracking with Google Maps
-- **Interactive Trip Details**: View trip metadata and live map for each trip
-
----
-
-## Key Features
-
-- User authentication and role-based access
-- Trip and user trip management
-- Real-time bus and user location tracking
-- Automated audit logging for all critical actions
-- Modern, responsive UI with live maps and trip details
-
----
-
-## Trip Details Visualization
-
-### Trip Details Page (`/trips/:id`)
-
-The Trip Details page provides a detailed view of a single trip, including a live map and trip metadata.
-
-**Features:**
-- **Live Map Tracking:**
-  - Uses Google Maps to show the current bus location (if available) and the user's location.
-  - Displays the route from the bus to the user, with distance and estimated time.
-  - Responsive and visually integrated with the rest of the UI.
-- **Trip Metadata:**
-  - Reference ID, origin, destination, and other trip details.
-- **Location Handling:**
-  - If the bus's current location is available, the map shows the route from the bus to the user.
-  - If not, it shows the route from the trip's starting point to the user.
-  - Uses browser geolocation to determine the user's current position.
-
-**Key Components & Hooks:**
-- `MapView` – Embeds a Google Map with dynamic origin/destination and custom labels.
-- `useGetTripById`, `useGetTripLocations` – Custom hooks for fetching trip details and computing map locations.
-
-**Example Implementation:**
-See `client/src/pages/trips/TripDetailsPage.tsx` for the full implementation.
 
 ---
 
