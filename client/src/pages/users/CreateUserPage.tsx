@@ -166,7 +166,7 @@ const CreateUserPage = () => {
               <menu className="w-full grid grid-cols-3 gap-4 justify-between">
                 {rolesList
                   ?.filter(
-                    (role) => !['SUPER_ADMIN', 'ADMIN'].includes(role.name)
+                    (role) => !['SUPER_ADMIN', 'USER'].includes(role.name)
                   )
                   .map((role) => (
                     <label
