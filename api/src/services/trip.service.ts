@@ -220,6 +220,9 @@ export class TripService {
         locationTo: true,
         createdBy: true,
       },
+      order: {
+        updatedAt: 'DESC',
+      }
     });
 
     return getPagingData({
@@ -396,6 +399,7 @@ export class TripService {
       userTrips.map((userTrip) =>
         this.userTripRepository.update(userTrip.id, {
           status: UserTripStatus.COMPLETED,
+          endTime: new Date(),
         })
       )
     );
@@ -451,6 +455,7 @@ export class TripService {
       userTrips.map((userTrip) =>
         this.userTripRepository.update(userTrip.id, {
           status: UserTripStatus.CANCELLED,
+          endTime: new Date(),
         })
       )
     );

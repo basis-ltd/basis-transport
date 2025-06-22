@@ -79,6 +79,9 @@ export class UserService {
           role: true,
         },
       },
+      order: {
+        updatedAt: 'DESC',
+      }
     });
 
     return getPagingData({

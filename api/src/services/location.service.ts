@@ -74,6 +74,9 @@ export class LocationService {
       where: condition,
       relations: {
         createdBy: true,
+      },
+      order: {
+        updatedAt: 'DESC',
       }
     });
 

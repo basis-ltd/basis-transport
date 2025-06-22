@@ -89,6 +89,7 @@ export class AuthService {
         userId: newUser?.id,
         roleId: userRole?.id,
       });
+
     } else {
       await Promise.all(
         publicUserRoles.map((role) =>
@@ -103,11 +104,20 @@ export class AuthService {
     // GENERATE JWT TOKEN
     const jwtToken = jwt.sign({ id: newUser.id }, String(JWT_SECRET));
 
-    return {
-      user: {
-        ...newUser,
-        passwordHash: undefined,
+    const createdUser = await this.userRepository.findOne({
+      where: { id: newUser?.id },
+      relations: {
+        userRoles: {
+          role: true,
+        },
       },
+      order: {
+        updatedAt: 'DESC',
+      }
+    });
+
+    return {
+      user: createdUser as User,
       token: jwtToken,
     };
   }
