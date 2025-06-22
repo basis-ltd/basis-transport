@@ -50,9 +50,7 @@ const TripDetailsPage = () => {
   useEffect(() => {
     if (
       trip?.status === TripStatus.PENDING &&
-      user?.userRoles?.flatMap((role) =>
-        ['DRIVER'].includes(role.role?.name ?? '')
-      )
+      user?.userRoles?.flatMap((role) => role.role?.name ?? '').includes('DRIVER')
     ) {
       setShowStartTrip(true);
     }
@@ -62,9 +60,7 @@ const TripDetailsPage = () => {
   useEffect(() => {
     if (
       trip?.status === TripStatus.IN_PROGRESS &&
-      user?.userRoles?.flatMap((role) =>
-        ['DRIVER'].includes(role.role?.name ?? '')
-      )
+      user?.userRoles?.flatMap((role) => role.role?.name ?? '').includes('DRIVER')
     ) {
       setShowCompleteTrip(true);
     }
@@ -74,9 +70,7 @@ const TripDetailsPage = () => {
   useEffect(() => {
     if (
       trip?.status === TripStatus.PENDING &&
-      user?.userRoles?.flatMap((role) =>
-        ['DRIVER'].includes(role.role?.name ?? '')
-      )
+      user?.userRoles?.flatMap((role) => role.role?.name ?? '').includes('DRIVER')
     ) {
       setShowCancelTrip(true);
     }

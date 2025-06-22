@@ -1,9 +1,14 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser, faUserCircle, faRightFromBracket } from '@fortawesome/free-solid-svg-icons';
+import {
+  faUser,
+  faUserCircle,
+  faRightFromBracket,
+} from '@fortawesome/free-solid-svg-icons';
 import { Link, useNavigate } from 'react-router-dom';
 import { useRef, useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { setLogout } from '@/states/slices/authSlice';
+import { useAppSelector } from '@/states/hooks';
 
 const Navbar = () => {
   /**
@@ -12,6 +17,7 @@ const Navbar = () => {
   const dispatch = useDispatch();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLUListElement>(null);
+  const { token } = useAppSelector((state) => state.auth);
 
   /**
    * NAVIGATION
@@ -46,7 +52,14 @@ const Navbar = () => {
       >
         <ul className="flex items-center gap-4 list-none p-0 m-0">
           <Link
-            to="/"
+            to={token ? '/dashboard' : '/'}
+            onClick={() => {
+              if (token) {
+                navigate('/dashboard');
+              } else {
+                navigate('/');
+              }
+            }}
             className="text-xl font-bold text-primary tracking-wide select-none"
           >
             Basis Transport
@@ -87,7 +100,10 @@ const Navbar = () => {
                       setDropdownOpen(false);
                     }}
                   >
-                    <FontAwesomeIcon icon={faUserCircle} className="text-primary/70 group-hover:text-primary" />
+                    <FontAwesomeIcon
+                      icon={faUserCircle}
+                      className="text-primary/70 group-hover:text-primary"
+                    />
                     <span className="font-medium">Profile</span>
                   </Link>
                 </li>
@@ -103,7 +119,10 @@ const Navbar = () => {
                       setDropdownOpen(false);
                     }}
                   >
-                    <FontAwesomeIcon icon={faRightFromBracket} className="text-destructive/70 group-hover:text-destructive" />
+                    <FontAwesomeIcon
+                      icon={faRightFromBracket}
+                      className="text-destructive/70 group-hover:text-destructive"
+                    />
                     <span className="font-medium">Logout</span>
                   </Link>
                 </li>

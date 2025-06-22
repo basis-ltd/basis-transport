@@ -163,7 +163,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           )}
         </header>
 
-        <article className="relative w-full">
+        <article className="relative w-full flex flex-col gap-[6px]">
           {prefixIcon || prefixText ? (
             <nav className="absolute inset-y-0 start-0 flex items-center ps-4">
               <Link

@@ -149,7 +149,7 @@ const CreateTripPage = () => {
                   <Input
                     label="Total Capacity"
                     {...field}
-                    placeholder="Enter total capacity (optional)"
+                    placeholder="Enter total capacity"
                     type="number"
                     errorMessage={errors.totalCapacity?.message}
                     required

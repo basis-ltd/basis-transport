@@ -16,6 +16,7 @@ const UserTripsPage = () => {
   const { userTripsList } = useAppSelector((state) => state.userTrip);
   const { user } = useAppSelector((state) => state.auth);
   const [tripId, setTripId] = useState<UUID | null>(null);
+  const [userId, setUserId] = useState<UUID | null>(null);
 
   /**
    * NAVIGATION
@@ -29,6 +30,14 @@ const UserTripsPage = () => {
       setTripId(tripId as UUID);
     }
   }, [searchParams]);
+
+  useEffect(() => {
+    if (user?.id && user?.userRoles?.flatMap((role) => role.role?.name ?? '').includes('USER')) {
+      setUserId(user?.id);
+    } else {
+      setUserId(null);
+    }
+  }, [user?.id, user?.userRoles]);
 
   /**
    * USER TRIPS HOOKS
@@ -51,8 +60,8 @@ const UserTripsPage = () => {
 
   // FETCH USER TRIPS
   useEffect(() => {
-    fetchUserTrips({ page, size, tripId: tripId ?? undefined, userId: user?.id });
-  }, [fetchUserTrips, page, size, tripId, user?.id]);
+    fetchUserTrips({ page, size, tripId: tripId ?? undefined, userId: userId ?? undefined });
+  }, [fetchUserTrips, page, size, tripId, userId]);
 
   return (
     <AppLayout>

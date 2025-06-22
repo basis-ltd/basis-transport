@@ -33,7 +33,7 @@ export const useLogin = () => {
       toast.success('Login successful');
       dispatch(setToken(loginData?.data.token));
       dispatch(setUser(loginData?.data.user));
-      navigate('/');
+      navigate('/dashboard');
     } else if (loginIsError) {
       toast.error(
         (
@@ -72,7 +72,7 @@ export const useSignup = () => {
       toast.success('Signup successful');
       dispatch(setToken(signupData?.data.token));
       dispatch(setUser(signupData?.data.user));
-      navigate('/');
+      navigate('/dashboard');
     } else if (signupIsError) {
       toast.error(
         (
