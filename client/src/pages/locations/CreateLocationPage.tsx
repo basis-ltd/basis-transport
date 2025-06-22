@@ -104,7 +104,7 @@ const CreateLocationPage = () => {
             </h2>
             <article className="w-full h-[50vh]">
               <MapView
-                height="100%"
+                height="50vh"
                 onMapClick={handleMapClick}
                 selectedPosition={selectedPosition}
               />
