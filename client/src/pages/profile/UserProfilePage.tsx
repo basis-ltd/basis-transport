@@ -2,6 +2,7 @@ import Button from '@/components/inputs/Button';
 import { Heading } from '@/components/inputs/TextInputs';
 import { Gender, getGenderLabel } from '@/constants/user.constants';
 import AppLayout from '@/containers/navigation/AppLayout';
+import { capitalizeString } from '@/helpers/strings.helper';
 import { useAppSelector } from '@/states/hooks';
 import { faEdit, faKey } from '@fortawesome/free-solid-svg-icons';
 import { Link, useNavigate } from 'react-router-dom';
@@ -91,7 +92,10 @@ const UserProfilePage = () => {
           {/* Personal Information Card */}
           <section className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
             <header className="mb-8">
-              <Heading type="h2" className="text-2xl font-semibold text-gray-900 mb-2">
+              <Heading
+                type="h2"
+                className="text-2xl font-semibold text-gray-900 mb-2"
+              >
                 Personal Information
               </Heading>
               <p className="text-gray-600">Your basic profile details</p>
@@ -141,7 +145,10 @@ const UserProfilePage = () => {
           {/* Roles & Permissions Card */}
           <section className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
             <header className="mb-8">
-              <Heading type="h2" className="text-2xl font-semibold text-gray-900 mb-2">
+              <Heading
+                type="h2"
+                className="text-2xl font-semibold text-gray-900 mb-2"
+              >
                 Roles & Permissions
               </Heading>
               <p className="text-gray-600">
@@ -155,7 +162,7 @@ const UserProfilePage = () => {
                     key={index}
                     className="px-6 py-3 bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-800 hover:from-blue-100 hover:to-indigo-100 transition-all duration-200 rounded-xl text-sm font-semibold border border-blue-200 shadow-sm"
                   >
-                    {userRole?.role?.name}
+                    {capitalizeString(userRole?.role?.name)}
                   </li>
                 ))}
               </ul>
@@ -172,7 +179,10 @@ const UserProfilePage = () => {
           {/* Quick Actions Card */}
           <section className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
             <header className="mb-8">
-                <Heading type="h2" className="text-2xl font-semibold text-gray-900 mb-2">
+              <Heading
+                type="h2"
+                className="text-2xl font-semibold text-gray-900 mb-2"
+              >
                 Quick Actions
               </Heading>
               <p className="text-gray-600">
@@ -184,7 +194,10 @@ const UserProfilePage = () => {
                 to="/account/transport-cards"
                 className="group p-6 border-2 border-gray-200 rounded-xl hover:border-blue-300 hover:bg-blue-50 transition-all duration-200 transform hover:scale-105 hover:shadow-md"
               >
-                <Heading type="h3" className="font-semibold text-lg mb-2 text-gray-900 group-hover:text-blue-800">
+                <Heading
+                  type="h3"
+                  className="font-semibold text-lg mb-2 text-gray-900 group-hover:text-blue-800"
+                >
                   My Cards
                 </Heading>
                 <p className="text-gray-600 group-hover:text-blue-700">
@@ -192,7 +205,7 @@ const UserProfilePage = () => {
                 </p>
               </Link>
               <Link
-                  to="/user-trips"
+                to="/user-trips"
                 className="group p-6 border-2 border-gray-200 rounded-xl hover:border-blue-300 hover:bg-blue-50 transition-all duration-200 transform hover:scale-105 hover:shadow-md"
               >
                 <h3 className="font-semibold text-lg mb-2 text-gray-900 group-hover:text-blue-800">

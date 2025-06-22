@@ -73,6 +73,7 @@ export const getStatusBackgroundColor = (status?: string) => {
       break;
     case 'REJECTED':
     case 'CLOSED':
+    case 'CANCELLED':
       bgColor =
         'bg-red-700 text-center p-1 px-4 text-white text-normal rounded-lg text-[12px]';
       break;

@@ -2,6 +2,7 @@ import Button from '@/components/inputs/Button';
 import { Heading } from '@/components/inputs/TextInputs';
 import { Gender, getGenderLabel } from '@/constants/user.constants';
 import AppLayout from '@/containers/navigation/AppLayout';
+import { capitalizeString } from '@/helpers/strings.helper';
 import { useAppSelector } from '@/states/hooks';
 import { useGetUserById } from '@/usecases/users/user.hooks';
 import { useEffect } from 'react';
@@ -180,7 +181,7 @@ const UserDetailsPage = () => {
                     key={index}
                     className="px-6 py-3 bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-800 hover:from-blue-100 hover:to-indigo-100 transition-all duration-200 rounded-xl text-sm font-semibold border border-blue-200 shadow-sm"
                   >
-                    {userRole?.role?.name}
+                    {capitalizeString(userRole?.role?.name)}
                   </li>
                 ))}
               </ul>

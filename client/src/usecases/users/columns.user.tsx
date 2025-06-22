@@ -1,9 +1,11 @@
 import CustomPopover from '@/components/custom/CustomPopover';
+import TableStatusLabel from '@/components/custom/TableStatusLabel';
 import {
   ellipsisHClassName,
   tableActionClassName,
 } from '@/constants/input.constants';
 import { Gender, getGenderLabel } from '@/constants/user.constants';
+import { capitalizeString } from '@/helpers/strings.helper';
 import { User } from '@/types/user.type';
 import { faCircleInfo, faEllipsisH } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -48,6 +50,43 @@ export const useUserColumns = ({
       {
         header: 'Status',
         accessorKey: 'status',
+        cell: ({ row }) => <TableStatusLabel status={row?.original?.status} />,
+      },
+      {
+        header: 'Roles',
+        accessorKey: 'userRoles',
+        id: 'roles',
+        cell: ({ row }) => {
+          const roles = row?.original?.userRoles?.map((role) => role.role?.name) || [];
+          if (roles.length === 1) {
+            return capitalizeString(roles[0] as string);
+          }
+          return (
+            <span className="flex items-center gap-2">
+              <span className="text-[13px]">
+                {capitalizeString(roles[0] as string)}
+              </span>
+              <CustomPopover
+                trigger={
+                  <span className="text-primary cursor-pointer text-[13px]">
+                    (+{roles.length - 1})
+                  </span>
+                }
+              >
+                <menu className="flex flex-col w-full gap-1 p-1">
+                  {roles?.map((role, index) => (
+                    <li
+                      key={index}
+                      className="text-sm p-1 px-3 rounded-md hover:bg-background"
+                    >
+                      {capitalizeString(role as string)}
+                    </li>
+                  ))}
+                </menu>
+              </CustomPopover>
+            </span>
+          );
+        },
       },
       {
         header: 'Nationality',

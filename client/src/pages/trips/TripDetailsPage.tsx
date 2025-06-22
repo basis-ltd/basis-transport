@@ -9,8 +9,11 @@ import { setCurrentUserTrip } from '@/states/slices/userTripSlice';
 import { UserTrip } from '@/types/userTrip.type';
 import { useBrowseLocations } from '@/usecases/locations/location.hooks';
 import {
+  useCancelTrip,
+  useCompleteTrip,
   useCountAvailableCapacity,
   useGetTripById,
+  useStartTrip,
 } from '@/usecases/trips/trip.hooks';
 import { useUserTripColumns } from '@/usecases/user-trip/columns.userTrip';
 import {
@@ -19,10 +22,11 @@ import {
   useUpdateUserTrip,
 } from '@/usecases/user-trip/userTrip.hooks';
 import { faFileLines } from '@fortawesome/free-regular-svg-icons';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import moment from 'moment';
 import Loader from '@/components/inputs/Loader';
+import { TripStatus } from '@/constants/trip.constants';
 
 const TripDetailsPage = () => {
   /**
@@ -34,6 +38,49 @@ const TripDetailsPage = () => {
     (state) => state.userTrip
   );
   const { user } = useAppSelector((state) => state.auth);
+
+  /**
+   * TRIP STATES
+   */
+  const [showStartTrip, setShowStartTrip] = useState(false);
+  const [showCompleteTrip, setShowCompleteTrip] = useState(false);
+  const [showCancelTrip, setShowCancelTrip] = useState(false);
+
+  // SHOW START TRIP
+  useEffect(() => {
+    if (
+      trip?.status === TripStatus.PENDING &&
+      user?.userRoles?.flatMap((role) =>
+        ['DRIVER'].includes(role.role?.name ?? '')
+      )
+    ) {
+      setShowStartTrip(true);
+    }
+  }, [trip?.status, user?.userRoles, trip]);
+
+  // SHOW COMPLETE TRIP
+  useEffect(() => {
+    if (
+      trip?.status === TripStatus.IN_PROGRESS &&
+      user?.userRoles?.flatMap((role) =>
+        ['DRIVER'].includes(role.role?.name ?? '')
+      )
+    ) {
+      setShowCompleteTrip(true);
+    }
+  }, [trip?.status, user?.userRoles, trip]);
+
+  // SHOW CANCEL TRIP
+  useEffect(() => {
+    if (
+      trip?.status === TripStatus.PENDING &&
+      user?.userRoles?.flatMap((role) =>
+        ['DRIVER'].includes(role.role?.name ?? '')
+      )
+    ) {
+      setShowCancelTrip(true);
+    }
+  }, [trip?.status, user?.userRoles, trip]);
 
   /**
    * NAVIGATION
@@ -56,6 +103,15 @@ const TripDetailsPage = () => {
 
   // GET TRIP BY ID
   const { getTripById } = useGetTripById();
+
+  // START TRIP
+  const { startTrip, startTripIsLoading } = useStartTrip();
+
+  // COMPLETE TRIP
+  const { completeTrip, completeTripIsLoading } = useCompleteTrip();
+
+  // CANCEL TRIP
+  const { cancelTrip, cancelTripIsLoading } = useCancelTrip();
 
   // COUNT AVAILABLE CAPACITY
   const {
@@ -130,15 +186,28 @@ const TripDetailsPage = () => {
 
   // FETCH USER TRIPS
   useEffect(() => {
+    let status: UserTripStatus = UserTripStatus.IN_PROGRESS;
+    if (trip?.status === TripStatus.IN_PROGRESS) {
+      status = UserTripStatus.IN_PROGRESS;
+    } else if (trip?.status === TripStatus.COMPLETED) {
+      status = UserTripStatus.COMPLETED;
+    }
     if (trip?.id) {
       fetchUserTrips({
         page,
         size,
         tripId: trip?.id,
-        status: UserTripStatus.IN_PROGRESS,
+        status,
       });
     }
-  }, [fetchUserTrips, trip?.id, page, size, updateUserTripIsSuccess]);
+  }, [
+    fetchUserTrips,
+    trip?.id,
+    page,
+    size,
+    updateUserTripIsSuccess,
+    trip?.status,
+  ]);
 
   // EFFECTS
   useEffect(() => {
@@ -149,46 +218,107 @@ const TripDetailsPage = () => {
     <AppLayout>
       <main className="w-full flex flex-col gap-4">
         <nav className="w-full flex flex-col gap-4">
-          <ul className="w-full flex items-center gap-3 justify-between">
+          <menu className="w-full flex items-start gap-3 justify-between">
             <Heading>#{trip?.referenceId}</Heading>
-            <Button
-              primary={!currentUserTrip}
-              danger={!!currentUserTrip}
-              onClick={(e) => {
-                e.preventDefault();
-                if (currentUserTrip && browserLocation) {
-                  updateUserTrip({
-                    id: currentUserTrip?.id,
-                    userTrip: {
-                      status: UserTripStatus.COMPLETED,
-                      exitLocation: {
-                        type: 'Point',
-                        coordinates: [browserLocation.lat, browserLocation.lng],
-                      },
-                      endTime: new Date().toISOString(),
-                    },
-                  });
-                } else if (trip?.id && user?.id && browserLocation) {
-                  createUserTrip({
-                    tripId: trip?.id,
-                    userId: user?.id,
-                    entranceLocation: {
-                      type: 'Point',
-                      coordinates: [browserLocation.lat, browserLocation.lng],
-                    },
-                  });
-                }
-              }}
-              disabled={
-                createUserTripIsLoading ||
-                updateUserTripIsLoading ||
-                browserLocationIsLoading
-              }
-              isLoading={createUserTripIsLoading || updateUserTripIsLoading}
-            >
-              {currentUserTrip ? 'Exit Trip' : 'Join Trip'}
-            </Button>
-          </ul>
+
+            <ul className="flex flex-col gap-1">
+              {/* JOIN/EXIT TRIP */}
+              {user?.userRoles?.flatMap(
+                (role) =>
+                  ['USER'].includes(role.role?.name ?? '') && (
+                    <Button
+                      primary={!currentUserTrip}
+                      danger={!!currentUserTrip}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (currentUserTrip && browserLocation) {
+                          updateUserTrip({
+                            id: currentUserTrip?.id,
+                            userTrip: {
+                              status: UserTripStatus.COMPLETED,
+                              exitLocation: {
+                                type: 'Point',
+                                coordinates: [
+                                  browserLocation.lat,
+                                  browserLocation.lng,
+                                ],
+                              },
+                              endTime: new Date().toISOString(),
+                            },
+                          });
+                        } else if (trip?.id && user?.id && browserLocation) {
+                          createUserTrip({
+                            tripId: trip?.id,
+                            userId: user?.id,
+                            entranceLocation: {
+                              type: 'Point',
+                              coordinates: [
+                                browserLocation.lat,
+                                browserLocation.lng,
+                              ],
+                            },
+                          });
+                        }
+                      }}
+                      disabled={
+                        createUserTripIsLoading ||
+                        updateUserTripIsLoading ||
+                        browserLocationIsLoading
+                      }
+                      isLoading={
+                        createUserTripIsLoading || updateUserTripIsLoading
+                      }
+                    >
+                      {currentUserTrip ? 'Exit Trip' : 'Join Trip'}
+                    </Button>
+                  )
+              )}
+
+              {/* START/END/CANCEL TRIP */}
+              {showStartTrip && (
+                <Button
+                  primary
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (trip?.id) {
+                      startTrip(trip?.id);
+                    }
+                  }}
+                  isLoading={startTripIsLoading}
+                >
+                  Start Trip
+                </Button>
+              )}
+              {showCompleteTrip && (
+                <Button
+                  className="!bg-green-700 !border-none !text-white hover:!bg-green-800"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (trip?.id) {
+                      completeTrip(trip?.id);
+                    }
+                  }}
+                  isLoading={completeTripIsLoading}
+                >
+                  Complete Trip
+                </Button>
+              )}
+              {showCancelTrip && (
+                <Button
+                  danger
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (trip?.id) {
+                      cancelTrip(trip?.id);
+                    }
+                  }}
+                  isLoading={cancelTripIsLoading}
+                >
+                  Cancel Trip
+                </Button>
+              )}
+            </ul>
+          </menu>
         </nav>
         <section className="w-full flex flex-col gap-4">
           <Heading type="h2">Trip Details</Heading>

@@ -11,11 +11,15 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { SIDEBAR_NAV_ITEMS } from '@/constants/sidebar.constants';
 import { setSidebarOpen } from '@/states/slices/sidebarSlice';
+import { User } from '@/types/user.type';
 
 const Sidebar = () => {
   const { pathname } = useLocation();
   const dispatch: AppDispatch = useDispatch();
   const { isOpen } = useSelector((state: RootState) => state.sidebar);
+  const { user } = useSelector((state: RootState) => state.auth) as {
+    user: User;
+  };
   const [openCategories, setOpenCategories] = useState<string[]>([]);
 
   const controlText = useAnimation();
@@ -90,7 +94,14 @@ const Sidebar = () => {
           isOpen ? '' : 'overflow-hidden'
         }`}
       >
-        {SIDEBAR_NAV_ITEMS.map((nav, index) => {
+        {SIDEBAR_NAV_ITEMS.filter((nav) => {
+          if (!nav.roles) {
+            return true;
+          }
+          const userRoles =
+            user?.userRoles?.map((userRole) => userRole.role?.name) || [];
+          return nav.roles.some((role) => userRoles.includes(role));
+        }).map((nav, index) => {
           const selected = pathname.includes(nav.path);
           const subcategoriesIsOpen = openCategories.includes(nav.title);
           const isSubcategoryActive = nav.subcategories?.some((sub) =>

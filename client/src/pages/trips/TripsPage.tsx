@@ -15,6 +15,7 @@ const TripsPage = () => {
    */
   const dispatch = useAppDispatch();
   const { tripsList } = useAppSelector((state) => state.trip);
+  const { user } = useAppSelector((state) => state.auth);
 
   /**
    * FETCH TRIPS
@@ -50,9 +51,14 @@ const TripsPage = () => {
         <nav className="w-full flex flex-col gap-4">
           <ul className="w-full flex items-center gap-3 justify-between">
             <Heading>Trips</Heading>
-            <Button route="/trips/create" icon={faPlus} primary>
-              Create
-            </Button>
+            {user?.userRoles?.flatMap(
+              (role) =>
+                ['DRIVER', 'SUPER_ADMIN'].includes(role.role?.name ?? '') && (
+                  <Button route="/trips/create" icon={faPlus} primary>
+                    Create
+                  </Button>
+                )
+            )}
           </ul>
         </nav>
         <section className="w-full flex flex-col gap-4">

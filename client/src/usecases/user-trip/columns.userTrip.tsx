@@ -1,4 +1,5 @@
 import CustomPopover from '@/components/custom/CustomPopover';
+import TableStatusLabel from '@/components/custom/TableStatusLabel';
 import { TableUserLabel } from '@/components/users/TableUserLabel';
 import {
   ellipsisHClassName,
@@ -41,9 +42,10 @@ export const useUserTripColumns = ({
       {
         header: 'Status',
         accessorKey: 'status',
+        cell: ({ row }) => <TableStatusLabel status={row?.original?.status} />,
       },
       {
-        header: 'Entance time',
+        header: 'Entrance time',
         accessorKey: 'startTime',
         cell: ({ row }) => {
           if (row?.original?.startTime) {

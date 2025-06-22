@@ -8,7 +8,12 @@ import { useEffect, useState } from 'react';
 import { usePagination } from '../common/pagination.hooks';
 import { setTrip, setTripsList } from '@/states/slices/tripSlice';
 import { Trip } from '@/types/trip.type';
-import { useCreateTripMutation } from '@/api/mutations/apiSlice';
+import {
+  useCancelTripMutation,
+  useCompleteTripMutation,
+  useCreateTripMutation,
+  useStartTripMutation,
+} from '@/api/mutations/apiSlice';
 
 // FETCH TRIPS
 export const useFetchTrips = () => {
@@ -282,5 +287,124 @@ export const useCountAvailableCapacity = () => {
     tripAvailableCapacityIsFetching,
     tripAvailableCapacityIsSuccess,
     availableCapacity,
+  };
+};
+
+/**
+ * START TRIP
+ */
+export const useStartTrip = () => {
+
+  /**
+   * STATE VARIABLES
+   */
+  const dispatch = useAppDispatch();
+
+  // GET TRIP BY ID
+  const { getTripById } = useGetTripById();
+
+  // MUTATION
+  const [
+    startTrip,
+    {
+      isLoading: startTripIsLoading,
+      isSuccess: startTripIsSuccess,
+      reset: startTripReset,
+      data: startTripData,
+    },
+  ] = useStartTripMutation();
+
+  useEffect(() => {
+    if (startTripIsSuccess) {
+      dispatch(setTrip(startTripData?.data));
+      startTripReset();
+      getTripById(startTripData?.data?.id);
+    }
+  }, [dispatch, startTripData?.data, startTripIsSuccess, startTripReset, getTripById]);
+
+  return {
+    startTrip,
+    startTripIsLoading,
+    startTripIsSuccess,
+  };
+};
+
+/**
+ * COMPLETE TRIP
+ */
+export const useCompleteTrip = () => {
+  /**
+   * STATE VARIABLES
+   */
+  const dispatch = useAppDispatch();
+
+  // GET TRIP BY ID
+  const { getTripById } = useGetTripById();
+
+  // MUTATION
+  const [
+    completeTrip,
+    {
+      isLoading: completeTripIsLoading,
+      isSuccess: completeTripIsSuccess,
+      reset: completeTripReset,
+      data: completeTripData,
+    },
+  ] = useCompleteTripMutation();
+
+  useEffect(() => {
+    if (completeTripIsSuccess) {
+      dispatch(setTrip(completeTripData?.data));
+      completeTripReset();
+      getTripById(completeTripData?.data?.id);
+    }
+  }, [dispatch, completeTripData, completeTripData?.data, completeTripIsSuccess, completeTripReset, getTripById]);
+
+  return {
+    completeTrip,
+    completeTripIsLoading,
+    completeTripIsSuccess,
+    completeTripData,
+    completeTripReset,
+  };
+};
+
+/**
+ * CANCEL TRIP
+ */
+export const useCancelTrip = () => {
+  /**
+   * STATE VARIABLES
+   */
+  const dispatch = useAppDispatch();
+
+  // GET TRIP BY ID
+  const { getTripById } = useGetTripById();
+
+  // MUTATION
+  const [
+    cancelTrip,
+    {
+      isLoading: cancelTripIsLoading,
+      isSuccess: cancelTripIsSuccess,
+      reset: cancelTripReset,
+      data: cancelTripData,
+    },
+  ] = useCancelTripMutation();
+
+  useEffect(() => {
+    if (cancelTripIsSuccess) {
+      dispatch(setTrip(cancelTripData?.data));
+      cancelTripReset();
+      getTripById(cancelTripData?.data?.id);
+    }
+  }, [dispatch, cancelTripData?.data, cancelTripIsSuccess, cancelTripReset, getTripById]);
+
+  return {
+    cancelTrip,
+    cancelTripIsLoading,
+    cancelTripIsSuccess,
+    cancelTripData,
+    cancelTripReset,
   };
 };

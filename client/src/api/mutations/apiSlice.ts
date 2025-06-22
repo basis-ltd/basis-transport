@@ -59,6 +59,30 @@ export const apiSlice = createApi({
       }),
     }),
 
+    // START TRIP
+    startTrip: builder.mutation({
+      query: (id: UUID) => ({
+        url: `/trips/${id}/start`,
+        method: 'PATCH',
+      }),
+    }),
+
+    // END TRIP
+    completeTrip: builder.mutation({
+      query: (id: UUID) => ({
+        url: `/trips/${id}/complete`,
+        method: 'PATCH',
+      }),
+    }),
+
+    // CANCEL TRIP
+    cancelTrip: builder.mutation({
+      query: (id: UUID) => ({
+        url: `/trips/${id}/cancel`,
+        method: 'PATCH',
+      }),
+    }),
+
     /**
      * USER TRIPS
      */
@@ -107,4 +131,7 @@ export const {
   useCreateUserTripMutation,
   useUpdateUserTripMutation,
   useCreateUserMutation,
+  useStartTripMutation,
+  useCompleteTripMutation,
+  useCancelTripMutation,
 } = apiSlice;

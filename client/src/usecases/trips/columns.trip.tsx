@@ -5,12 +5,18 @@ import {
   tableActionClassName,
 } from '@/constants/input.constants';
 import { Trip } from '@/types/trip.type';
-import { faCircleInfo, faEllipsisH } from '@fortawesome/free-solid-svg-icons';
+import {
+  faCircleInfo,
+  faEllipsisH,
+  faUsers,
+} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ColumnDef } from '@tanstack/react-table';
 import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { TripAvailableCapacity } from '@/components/trips/TripAvailableCapacity';
+import moment from 'moment';
+import TableStatusLabel from '@/components/custom/TableStatusLabel';
 
 export const useTripColumns = () => {
   const tripsColumns: ColumnDef<Trip>[] = useMemo(
@@ -30,14 +36,33 @@ export const useTripColumns = () => {
       {
         header: 'Status',
         accessorKey: 'status',
+        cell: ({ row }) => <TableStatusLabel status={row?.original?.status} />,
       },
       {
         header: 'Start Time',
         accessorKey: 'startTime',
+        cell: ({ row }) => {
+          if (!row?.original?.startTime) return null;
+          return (
+            <p className="text-[12px]">
+              {moment(row?.original?.startTime).format('HH:mm')} (
+              {moment(row?.original?.startTime).format('DD/MM/YYYY')})
+            </p>
+          );
+        },
       },
       {
         header: 'End Time',
         accessorKey: 'endTime',
+        cell: ({ row }) => {
+          if (!row?.original?.endTime) return null;
+          return (
+            <p className="text-[12px]">
+              {moment(row?.original?.endTime).format('HH:mm')} (
+              {moment(row?.original?.endTime).format('DD/MM/YYYY')})
+            </p>
+          );
+        },
       },
       {
         header: 'Available Seats',
@@ -69,6 +94,13 @@ export const useTripColumns = () => {
                 >
                   <FontAwesomeIcon icon={faCircleInfo} />
                   View details
+                </Link>
+                <Link
+                  to={`/user-trips?tripId=${row?.original?.id}`}
+                  className={tableActionClassName}
+                >
+                  <FontAwesomeIcon icon={faUsers} />
+                  Passengers
                 </Link>
               </menu>
             </CustomPopover>
