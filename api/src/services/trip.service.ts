@@ -17,6 +17,7 @@ import { getPagingData } from '../helpers/pagination.helper';
 import { getPagination, Pagination } from '../helpers/pagination.helper';
 import { UserTrip } from '../entities/userTrip.entity';
 import { UserTripStatus } from '../constants/userTrip.constants';
+import { TripStatus } from '../constants/trip.constants';
 
 export class TripService {
   private readonly tripRepository: Repository<Trip>;
@@ -307,5 +308,157 @@ export class TripService {
       availableCapacity: trip.totalCapacity - inProgressUserTrips.length,
       totalCapacity: trip.totalCapacity,
     };
+  }
+
+  /**
+   * START TRIP
+   */
+  @AuditUpdate({
+    entityType: 'Trip',
+    getEntityId: (args) => args[0],
+    getUserId: (args) => args[1]?.createdById,
+  })
+  async startTrip(id: UUID, metadata?: { createdById?: UUID }): Promise<Trip> {
+    const trip = await this.tripRepository.findOne({
+      where: { id: id as UUID },
+      relations: {
+        locationFrom: true,
+        locationTo: true,
+        createdBy: true,
+      },
+    });
+
+    if (!trip) {
+      throw new NotFoundError('Trip not found', {
+        referenceId: id,
+        referenceType: LogReferenceTypes.TRIP,
+      });
+    }
+
+    // CHECK IF TRIP IS PENDING
+    if (trip.status !== TripStatus.PENDING) {
+      throw new ValidationError('Trip is not pending', {
+        referenceId: id,
+        referenceType: LogReferenceTypes.TRIP,
+      });
+    }
+
+    // UPDATE TRIP STATUS
+    trip.status = TripStatus.IN_PROGRESS;
+    trip.startTime = new Date();
+
+    return await this.tripRepository.save(trip);
+  }
+
+  /**
+   * COMPLETE TRIP
+   */
+  @AuditUpdate({
+    entityType: 'Trip',
+    getEntityId: (args) => args[0],
+    getUserId: (args) => args[1]?.createdById,
+  })
+  async completeTrip(id: UUID, metadata?: { createdById?: UUID }): Promise<Trip> {
+    const trip = await this.tripRepository.findOne({
+      where: { id: id as UUID },
+      relations: {
+        locationFrom: true,
+        locationTo: true,
+        createdBy: true,
+      },
+    });
+
+    if (!trip) {
+      throw new NotFoundError('Trip not found', {
+        referenceId: id,
+        referenceType: LogReferenceTypes.TRIP,
+      });
+    }
+
+    // CHECK IF TRIP IS IN PROGRESS
+    if (trip.status !== TripStatus.IN_PROGRESS) {
+      throw new ValidationError('Trip is not in progress', {
+        referenceId: id,
+        referenceType: LogReferenceTypes.TRIP,
+      });
+    }
+
+    // FIND USER TRIP
+    const userTrips = await this.userTripRepository.find({
+      where: {
+        tripId: trip?.id,
+        status: UserTripStatus.IN_PROGRESS,
+      },
+    });
+
+    // UPDATE USER TRIP STATUS
+    await Promise.all(
+      userTrips.map((userTrip) =>
+        this.userTripRepository.update(userTrip.id, {
+          status: UserTripStatus.COMPLETED,
+        })
+      )
+    );
+
+    // UPDATE TRIP STATUS
+    trip.status = TripStatus.COMPLETED;
+    trip.endTime = new Date();
+
+    return await this.tripRepository.save(trip);
+  }
+  
+  /**
+   * CANCEL TRIP
+   */
+  @AuditUpdate({
+    entityType: 'Trip',
+    getEntityId: (args) => args[0],
+    getUserId: (args) => args[1]?.createdById,
+  })
+  async cancelTrip(id: UUID, metadata?: { createdById?: UUID }): Promise<Trip> {
+    const trip = await this.tripRepository.findOne({
+      where: { id: id as UUID },
+    });
+
+    if (!trip) {
+      throw new NotFoundError('Trip not found', {
+        referenceId: id,
+        referenceType: LogReferenceTypes.TRIP,
+      });
+    }
+
+    // CHECK IF TRIP IS PENDING OR IN PROGRESS
+    if (
+      trip.status !== TripStatus.PENDING &&
+      trip.status !== TripStatus.IN_PROGRESS
+    ) {
+      throw new ValidationError('Trip is not pending or in progress', {
+        referenceId: id,
+        referenceType: LogReferenceTypes.TRIP,
+      });
+    }
+
+    // FIND USER TRIP
+    const userTrips = await this.userTripRepository.find({
+      where: {
+        tripId: trip?.id,
+        status: UserTripStatus.IN_PROGRESS,
+      },
+    });
+
+    // UPDATE USER TRIP STATUS
+    await Promise.all(
+      userTrips.map((userTrip) =>
+        this.userTripRepository.update(userTrip.id, {
+          status: UserTripStatus.CANCELLED,
+        })
+      )
+    );
+
+    // UPDATE TRIP STATUS
+    trip.status = TripStatus.CANCELLED;
+    trip.endTime = new Date();
+
+    return await this.tripRepository.save(trip);
   }
 }

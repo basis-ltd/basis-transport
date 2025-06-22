@@ -27,4 +27,13 @@ router.get('/reference/:referenceId', authMiddleware, tripController.getTripByRe
 // COUNT AVAILABLE CAPACITY
 router.get('/:id/capacity', authMiddleware, tripController.countAvailableCapacity);
 
+// START TRIP
+router.patch('/:id/start', authMiddleware, tripController.startTrip);
+
+// COMPLETE TRIP
+router.patch('/:id/complete', authMiddleware, tripController.completeTrip);
+
+// CANCEL TRIP
+router.patch('/:id/cancel', authMiddleware, tripController.cancelTrip);
+
 export default router;

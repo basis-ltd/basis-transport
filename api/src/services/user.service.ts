@@ -74,6 +74,11 @@ export class UserService {
       skip,
       take,
       where: condition,
+      relations: {
+        userRoles: {
+          role: true,
+        },
+      },
     });
 
     return getPagingData({

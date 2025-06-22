@@ -186,7 +186,11 @@ export class TripController {
   /**
    * COUNT AVAILABLE CAPACITY
    */
-  async countAvailableCapacity(req: Request, res: Response, next: NextFunction) {
+  async countAvailableCapacity(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
     try {
       const { id } = req.params;
 
@@ -199,6 +203,72 @@ export class TripController {
           availableCapacity,
           totalCapacity,
         },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * START TRIP
+   */
+  async startTrip(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+
+      const { user } = req as AuthenticatedRequest;
+
+      const trip = await tripService.startTrip(id as UUID, {
+        createdById: user?.id,
+      });
+
+      return res.status(200).json({
+        message: 'Trip started successfully',
+        data: trip,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * COMPLETE TRIP
+   */
+  async completeTrip(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+
+      const { user } = req as AuthenticatedRequest;
+
+      const trip = await tripService.completeTrip(id as UUID, {
+        createdById: user?.id,
+      });
+
+      return res.status(200).json({
+        message: 'Trip completed successfully',
+        data: trip,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * CANCEL TRIP
+   */
+  async cancelTrip(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+
+      const { user } = req as AuthenticatedRequest;
+
+      const trip = await tripService.cancelTrip(id as UUID, {
+        createdById: user?.id,
+      });
+
+      return res.status(200).json({
+        message: 'Trip cancelled successfully',
+        data: trip,
       });
     } catch (error) {
       next(error);

@@ -127,25 +127,13 @@ export class AuthService {
       throw new ValidationError(error?.message);
     }
 
-    const userExists = await this.userRepository.findOne({
-      where: { email: value.email },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        phoneNumber: true,
-        gender: true,
-        dateOfBirth: true,
-        status: true,
-        nationality: true,
-        passwordHash: true,
-      },
-      relations: {
-        userRoles: {
-          role: true,
-        },
-      },
-    });
+    const userExists = await this.userRepository
+      .createQueryBuilder('user')
+      .where('user.email = :email', { email: value.email })
+      .leftJoinAndSelect('user.userRoles', 'userRoles')
+      .leftJoinAndSelect('userRoles.role', 'role')
+      .addSelect('user.passwordHash')
+      .getOne();
 
     if (!userExists) {
       throw new ValidationError('Invalid email or password');
