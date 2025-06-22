@@ -13,6 +13,9 @@ import UserProfilePage from '@/pages/profile/UserProfilePage';
 import TransportCardsPage from '@/pages/profile/TransportCardsPage';
 import UserTripsPage from '@/pages/user-trips/UserTripsPage';
 import UserTripDetailsPage from '@/pages/user-trips/UserTripDetailsPage';
+import LocationsPage from '@/pages/locations/LocationsPage';
+import LocationDetailsPage from '@/pages/locations/LocationDetailsPage';
+import CreateLocationPage from '@/pages/locations/CreateLocationPage';
 
 const Router = () => {
   return (
@@ -62,6 +65,15 @@ const Router = () => {
         <Route path="/user-trips">
           <Route path="" element={<UserTripsPage />} />
           <Route path=":id" element={<UserTripDetailsPage />} />
+        </Route>
+
+        {/**
+         * LOCATIONS
+         */}
+        <Route path="/locations">
+          <Route path="" element={<LocationsPage />} />
+          <Route path=":id" element={<LocationDetailsPage />} />
+          <Route path="create" element={<CreateLocationPage />} />
         </Route>
 
         {/**

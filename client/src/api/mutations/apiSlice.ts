@@ -3,6 +3,7 @@ import { baseQuery } from '../rootApi';
 import { Trip } from '@/types/trip.type';
 import { UserTrip } from '@/types/userTrip.type';
 import { UUID } from '@/types';
+import { Location } from '@/types/location.type';
 
 export const apiSlice = createApi({
   reducerPath: 'api',
@@ -28,6 +29,19 @@ export const apiSlice = createApi({
         url: '/auth/signup',
         method: 'POST',
         body: { name, email, password, phoneNumber },
+      }),
+    }),
+
+    /**
+     * LOCATIONS
+     */
+
+    // CREATE LOCATION
+    createLocation: builder.mutation({
+      query: (location: Partial<Location>) => ({
+        url: '/locations',
+        method: 'POST',
+        body: location,
       }),
     }),
 
@@ -71,6 +85,7 @@ export const apiSlice = createApi({
 export const {
   useLoginMutation,
   useSignupMutation,
+  useCreateLocationMutation,
   useCreateTripMutation,
   useCreateUserTripMutation,
   useUpdateUserTripMutation,

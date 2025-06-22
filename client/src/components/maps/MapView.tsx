@@ -1,5 +1,10 @@
 import { environment } from '@/constants/environment.constants';
-import { APIProvider, Map, Marker } from '@vis.gl/react-google-maps';
+import {
+  APIProvider,
+  Map,
+  MapMouseEvent,
+  Marker,
+} from '@vis.gl/react-google-maps';
 import MapDirections from './MapDirections';
 
 interface MapViewProps {
@@ -13,6 +18,8 @@ interface MapViewProps {
   destination?: { lat: number; lng: number };
   fromLabel?: string;
   toLabel?: string;
+  onMapClick?: (e: MapMouseEvent) => void;
+  selectedPosition?: { lat: number; lng: number } | null;
 }
 
 const MapView = ({
@@ -26,6 +33,8 @@ const MapView = ({
   destination,
   fromLabel,
   toLabel,
+  onMapClick,
+  selectedPosition,
 }: MapViewProps) => {
   return (
     <APIProvider apiKey={environment.googleMapsApiKey}>
@@ -37,6 +46,7 @@ const MapView = ({
         gestureHandling={'greedy'}
         zoom={zoom}
         fullscreenControl={true}
+        onClick={onMapClick}
       >
         {origin && destination && (
           <>
@@ -55,6 +65,11 @@ const MapView = ({
               title={toLabel}
             />
           </>
+        )}
+        {selectedPosition && (
+          <Marker 
+            position={selectedPosition}
+          />
         )}
       </Map>
     </APIProvider>

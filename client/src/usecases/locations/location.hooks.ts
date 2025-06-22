@@ -1,8 +1,9 @@
-import { useLazyFetchLocationsQuery } from '@/api/queries/apiQuerySlice';
+import { useLazyFetchLocationsQuery, useLazyGetLocationByIdQuery } from '@/api/queries/apiQuerySlice';
 import { useAppDispatch } from '@/states/hooks';
 import { useEffect, useState } from 'react';
 import { usePagination } from '../common/pagination.hooks';
-import { setLocationsList } from '@/states/slices/locationSlice';
+import { setLocation, setLocationsList } from '@/states/slices/locationSlice';
+import { useCreateLocationMutation } from '@/api/mutations/apiSlice';
 
 /**
  * FETCH LOCATIONS
@@ -68,6 +69,64 @@ export const useFetchLocations = () => {
     totalPages,
     setTotalCount,
     setTotalPages,
+  };
+};
+
+/**
+ * GET LOCATION BY ID
+ */
+export const useGetLocationById = () => {
+  /**
+   * STATE VARIABLES
+   */
+  const dispatch = useAppDispatch();
+
+  const [
+    getLocationById,
+    {
+      data,
+      isFetching: locationIsFetching,
+      isError: locationIsError,
+      isSuccess: locationIsSuccess,
+    },
+  ] = useLazyGetLocationByIdQuery();
+
+  useEffect(() => {
+    if (locationIsSuccess) {
+      dispatch(setLocation(data?.data));
+    }
+  }, [data?.data, dispatch, locationIsSuccess]);
+
+  return {
+    getLocationById,
+    data,
+    locationIsFetching,
+    locationIsError,
+    locationIsSuccess,
+  };
+};
+
+/**
+ * CREATE LOCATION
+ */
+export const useCreateLocation = () => {
+  // MUTATION
+  const [
+    createLocation,
+    {
+      isLoading: createLocationIsLoading,
+      isSuccess: createLocationIsSuccess,
+      isError: createLocationIsError,
+      reset: createLocationReset,
+    },
+  ] = useCreateLocationMutation();
+
+  return {
+    createLocation,
+    createLocationIsLoading,
+    createLocationIsSuccess,
+    createLocationIsError,
+    createLocationReset,
   };
 };
 
