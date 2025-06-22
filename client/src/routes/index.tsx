@@ -16,6 +16,7 @@ import UserTripDetailsPage from '@/pages/user-trips/UserTripDetailsPage';
 import LocationsPage from '@/pages/locations/LocationsPage';
 import LocationDetailsPage from '@/pages/locations/LocationDetailsPage';
 import CreateLocationPage from '@/pages/locations/CreateLocationPage';
+import CreateUserPage from '@/pages/users/CreateUserPage';
 
 const Router = () => {
   return (
@@ -57,6 +58,7 @@ const Router = () => {
         <Route path="/users">
           <Route path="" element={<UsersPage />} />
           <Route path=":id" element={<UserDetailsPage />} />
+          <Route path="create" element={<CreateUserPage />} />
         </Route>
 
         {/**

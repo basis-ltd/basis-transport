@@ -14,6 +14,7 @@ const UserTripsPage = () => {
    * STATE VARIABLES
    */
   const { userTripsList } = useAppSelector((state) => state.userTrip);
+  const { user } = useAppSelector((state) => state.auth);
   const [tripId, setTripId] = useState<UUID | null>(null);
 
   /**
@@ -24,7 +25,7 @@ const UserTripsPage = () => {
 
   useEffect(() => {
     const tripId = searchParams.get('tripId');
-    if (tripId) {
+    if (tripId && !['null', 'undefined'].includes(tripId)) {
       setTripId(tripId as UUID);
     }
   }, [searchParams]);
@@ -50,8 +51,8 @@ const UserTripsPage = () => {
 
   // FETCH USER TRIPS
   useEffect(() => {
-    fetchUserTrips({ page, size, tripId });
-  }, [fetchUserTrips, page, size, tripId]);
+    fetchUserTrips({ page, size, tripId: tripId ?? undefined, userId: user?.id });
+  }, [fetchUserTrips, page, size, tripId, user?.id]);
 
   return (
     <AppLayout>

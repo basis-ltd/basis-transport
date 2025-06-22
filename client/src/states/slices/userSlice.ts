@@ -26,9 +26,12 @@ const userSlice = createSlice({
     setUsersList: (state, action) => {
       state.usersList = action.payload;
     },
+    setAddUserToUsersList: (state, action) => {
+      state.usersList.unshift(action.payload);
+    },
   },
 });
 
-export const { setUser, setSelectedUser, setUsersList } = userSlice.actions;
+export const { setUser, setSelectedUser, setUsersList, setAddUserToUsersList } = userSlice.actions;
 
 export default userSlice.reducer;

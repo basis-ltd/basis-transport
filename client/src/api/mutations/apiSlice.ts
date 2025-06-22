@@ -4,6 +4,7 @@ import { Trip } from '@/types/trip.type';
 import { UserTrip } from '@/types/userTrip.type';
 import { UUID } from '@/types';
 import { Location } from '@/types/location.type';
+import { User } from '@/types/user.type';
 
 export const apiSlice = createApi({
   reducerPath: 'api',
@@ -79,6 +80,22 @@ export const apiSlice = createApi({
         body: userTrip,
       }),
     }),
+
+    /**
+     * USERS
+     */
+
+    // CREATE USER
+    createUser: builder.mutation({
+      query: ({ user, roleIds }: { user: Partial<User>; roleIds: UUID[] }) => ({
+        url: '/users',
+        method: 'POST',
+        body: {
+          user,
+          roleIds,
+        },
+      }),
+    }),
   }),
 });
 
@@ -89,4 +106,5 @@ export const {
   useCreateTripMutation,
   useCreateUserTripMutation,
   useUpdateUserTripMutation,
+  useCreateUserMutation,
 } = apiSlice;

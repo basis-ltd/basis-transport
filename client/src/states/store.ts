@@ -8,6 +8,7 @@ import locationSlice from './slices/locationSlice';
 import userTripSlice from './slices/userTripSlice';
 import userSlice from './slices/userSlice';
 import transportCardSlice from './slices/transportCardSlice';
+import roleSlice from './slices/roleSlice';
 
 export const store = configureStore({
   reducer: {
@@ -20,6 +21,7 @@ export const store = configureStore({
     userTrip: userTripSlice,
     user: userSlice,
     transportCard: transportCardSlice,
+    role: roleSlice,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(

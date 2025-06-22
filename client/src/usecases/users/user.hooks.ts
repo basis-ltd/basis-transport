@@ -3,9 +3,14 @@ import {
   useLazyGetUserByIdQuery,
 } from '@/api/queries/apiQuerySlice';
 import { useAppDispatch } from '@/states/hooks';
-import { setUser, setUsersList } from '@/states/slices/userSlice';
+import {
+  setAddUserToUsersList,
+  setUser,
+  setUsersList,
+} from '@/states/slices/userSlice';
 import { useEffect } from 'react';
 import { usePagination } from '../common/pagination.hooks';
+import { useCreateUserMutation } from '@/api/mutations/apiSlice';
 
 /**
  * FETCH USERS
@@ -90,5 +95,41 @@ export const useGetUserById = () => {
     userIsFetching,
     userIsError,
     userIsSuccess,
+  };
+};
+
+/**
+ * CREATE USER
+ */
+export const useCreateUser = () => {
+  /**
+   * STATE VARIABLES
+   */
+  const dispatch = useAppDispatch();
+
+  const [
+    createUser,
+    {
+      data: createUserData,
+      isLoading: createUserIsLoading,
+      isError: createUserIsError,
+      isSuccess: createUserIsSuccess,
+      reset: createUserReset,
+    },
+  ] = useCreateUserMutation();
+
+  useEffect(() => {
+    if (createUserIsSuccess) {
+      dispatch(setAddUserToUsersList(createUserData?.data));
+      createUserReset();
+    }
+  }, [createUserIsSuccess, createUserData, dispatch, createUserReset]);
+
+  return {
+    createUser,
+    createUserIsLoading,
+    createUserIsError,
+    createUserIsSuccess,
+    createUserReset,
   };
 };

@@ -204,6 +204,28 @@ export const apiQuerySlice = createApi({
         };
       },
     }),
+
+    /**
+     * ROLES
+     */
+
+    // FETCH ROLES
+    fetchRoles: builder.query({
+      query: () => {
+        return {
+          url: '/roles',
+        };
+      },
+    }),
+
+    // GET ROLE BY ID
+    getRoleById: builder.query({
+      query: (id) => {
+        return {
+          url: `/roles/${id}`,
+        };
+      },
+    }),
   }),
 });
 
@@ -221,4 +243,6 @@ export const {
   useLazyCountTransportCardsQuery,
   useLazyCountUsersQuery,
   useLazyGetUserTripByIdQuery,
+  useLazyFetchRolesQuery,
+  useLazyGetRoleByIdQuery,
 } = apiQuerySlice;
