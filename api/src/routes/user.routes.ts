@@ -15,4 +15,7 @@ router.get('/:id', userController.getUserById);
 // DELETE ROUTES
 router.delete('/:id', userController.deleteUser);
 
-export default router; 
+// CREATE ROUTES
+router.post('/', userController.createUser);
+
+export default router;

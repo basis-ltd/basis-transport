@@ -8,6 +8,7 @@ import tripRoutes from './trip.routes';
 import userTripRoutes from './userTrip.routes';
 import userRoutes from './user.routes';
 import dashboardRoutes from './dashboard.routes';
+import roleRoutes from './role.routes';
 
 const router = Router();
 
@@ -28,6 +29,9 @@ router.use('/dashboard', dashboardRoutes);
 
 // USER ROUTES
 router.use('/users', userRoutes);
+
+// ROLE ROUTES
+router.use('/roles', roleRoutes);
 
 // TRANSPORT CARD ROUTES
 router.use('/transport-cards', transportCardRoutes);

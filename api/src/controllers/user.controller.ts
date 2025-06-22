@@ -73,4 +73,28 @@ export class UserController {
       next(error);
     }
   }
+
+  /**
+   * CREATE USER
+   */
+  async createUser(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { user, roleIds } = req.body as {
+        user: Partial<User>;
+        roleIds: UUID[];
+      };
+
+      const newUser = await userService.createUser({
+        user,
+        roleIds,
+      });
+
+      return res.status(201).json({
+        message: 'User created successfully',
+        data: newUser,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
