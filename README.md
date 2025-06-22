@@ -108,6 +108,11 @@ The user dashboard provides at-a-glance insights into the transport system's ope
 - **Key Metrics**: Displays important KPIs, such as active trips, total users, and fleet status, in easily digestible cards.
 - **Data Visualization**: Utilizes charts and graphs to represent trends and operational data over time.
 
+### User Management & Email Notifications
+The platform includes comprehensive user management features, complete with automated and visually consistent email notifications.
+- **User Creation & Onboarding**: New users can be created with specific roles. Upon creation, an email is automatically sent with a temporary password and instructions.
+- **Themed Email Templates**: Emails are styled to match the client's branding, ensuring a consistent user experience from the very first interaction.
+
 ### Other Core Features
 - **Role-Based Access Control (RBAC)**: A robust, secure system for managing user permissions, ensuring users only access data and features appropriate for their role.
 - **Transport Card Management**: A dedicated module for creating, assigning, and managing transport cards used for payments and identity.
@@ -201,6 +206,12 @@ The backend is built with Node.js, TypeScript, and Express. It manages buses, ro
 - `DELETE /user-trips/:id` — Delete a user trip
 - `GET    /user-trips` — List user trips (with filters)
 - `GET    /user-trips/:id` — Get user trip by ID
+
+#### User
+- `POST   /users` — Create a new user and send a welcome email
+- `GET    /users` — Get a list of users
+- `GET    /users/:id` — Get a user by their ID
+- `DELETE /users/:id` — Delete a user
 
 #### Audit Trail
 - Automatic logging of create, update, and delete actions on entities, including who made the change and when.
