@@ -1,5 +1,5 @@
 import Login from '@/pages/auth/Login';
-import Home from '@/pages/common/Home';
+import LandingPage from '@/pages/common/LandingPage';
 import UserDashboard from '@/pages/dashboard/UserDashboard';
 import TripsPage from '@/pages/trips/TripsPage';
 import { Routes, Route } from 'react-router-dom';
@@ -22,7 +22,7 @@ const Router = () => {
   return (
     <Routes>
       {/*Home*/}
-      <Route path="/" element={<Home />} />
+      <Route path="/" element={<LandingPage />} />
 
       {/**
        * AUTH

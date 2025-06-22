@@ -13,7 +13,7 @@ const Home = () => {
    */
   useEffect(() => {
     if (!user || !token) {
-      window.location.href = '/auth/login';
+      window.location.href = '/';
     }
   }, [user, token]);
 
