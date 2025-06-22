@@ -24,4 +24,7 @@ router.get('/:id', authMiddleware, tripController.getTripById);
 // GET TRIP BY REFERENCE ID
 router.get('/reference/:referenceId', authMiddleware, tripController.getTripByReferenceId);
 
+// COUNT AVAILABLE CAPACITY
+router.get('/:id/capacity', authMiddleware, tripController.countAvailableCapacity);
+
 export default router;

@@ -15,16 +15,20 @@ import { AuditDelete, AuditUpdate } from '../decorators/auditLog.decorator';
 import { UUID } from '../types';
 import { getPagingData } from '../helpers/pagination.helper';
 import { getPagination, Pagination } from '../helpers/pagination.helper';
+import { UserTrip } from '../entities/userTrip.entity';
+import { UserTripStatus } from '../constants/userTrip.constants';
 
 export class TripService {
   private readonly tripRepository: Repository<Trip>;
   private readonly locationRepository: Repository<Location>;
   private readonly userRepository: Repository<User>;
+  private readonly userTripRepository: Repository<UserTrip>;
 
   constructor() {
     this.tripRepository = AppDataSource.getRepository(Trip);
     this.locationRepository = AppDataSource.getRepository(Location);
     this.userRepository = AppDataSource.getRepository(User);
+    this.userTripRepository = AppDataSource.getRepository(UserTrip);
   }
 
   /**
@@ -272,5 +276,36 @@ export class TripService {
     }
 
     return trip;
+  }
+
+  /**
+   * COUNT AVAILABLE CAPACITY
+   */
+  async countAvailableCapacity(tripId: UUID): Promise<{
+    availableCapacity: number;
+    totalCapacity: number;
+  }> {
+    const trip = await this.tripRepository.findOne({
+      where: { id: tripId as UUID },
+    });
+
+    if (!trip) {
+      throw new NotFoundError('Trip not found', {
+        referenceId: tripId,
+        referenceType: LogReferenceTypes.TRIP,
+      });
+    }
+
+    const inProgressUserTrips = await this.userTripRepository.find({
+      where: {
+        tripId: trip?.id,
+        status: UserTripStatus.IN_PROGRESS,
+      },
+    });
+
+    return {
+      availableCapacity: trip.totalCapacity - inProgressUserTrips.length,
+      totalCapacity: trip.totalCapacity,
+    };
   }
 }

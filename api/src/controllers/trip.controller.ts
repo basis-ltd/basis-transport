@@ -182,4 +182,26 @@ export class TripController {
       next(error);
     }
   }
+
+  /**
+   * COUNT AVAILABLE CAPACITY
+   */
+  async countAvailableCapacity(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+
+      const { availableCapacity, totalCapacity } =
+        await tripService.countAvailableCapacity(id as UUID);
+
+      return res.status(200).json({
+        message: 'Available capacity counted successfully',
+        data: {
+          availableCapacity,
+          totalCapacity,
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
