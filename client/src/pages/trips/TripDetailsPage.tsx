@@ -8,7 +8,10 @@ import { useAppDispatch, useAppSelector } from '@/states/hooks';
 import { setCurrentUserTrip } from '@/states/slices/userTripSlice';
 import { UserTrip } from '@/types/userTrip.type';
 import { useBrowseLocations } from '@/usecases/locations/location.hooks';
-import { useGetTripById } from '@/usecases/trips/trip.hooks';
+import {
+  useCountAvailableCapacity,
+  useGetTripById,
+} from '@/usecases/trips/trip.hooks';
 import { useUserTripColumns } from '@/usecases/user-trip/columns.userTrip';
 import {
   useCreateUserTrip,
@@ -19,6 +22,7 @@ import { faFileLines } from '@fortawesome/free-regular-svg-icons';
 import { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import moment from 'moment';
+import Loader from '@/components/inputs/Loader';
 
 const TripDetailsPage = () => {
   /**
@@ -52,6 +56,19 @@ const TripDetailsPage = () => {
 
   // GET TRIP BY ID
   const { getTripById } = useGetTripById();
+
+  // COUNT AVAILABLE CAPACITY
+  const {
+    countAvailableCapacity,
+    tripAvailableCapacityIsFetching,
+    availableCapacity,
+  } = useCountAvailableCapacity();
+
+  useEffect(() => {
+    if (trip?.id) {
+      countAvailableCapacity({ id: trip?.id });
+    }
+  }, [trip?.id, countAvailableCapacity]);
 
   /**
    * USER TRIP HOOKS
@@ -234,13 +251,17 @@ const TripDetailsPage = () => {
               </section>
             </article>
 
-            {/* Trip Reference */}
+            {/* Available Seats */}
             <article className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
               <h3 className="text-sm font-medium text-gray-500 mb-2">
-                Trip Reference
+                Available Seats
               </h3>
               <p className="text-lg font-semibold text-gray-900">
-                #{trip?.referenceId || 'N/A'}
+                {tripAvailableCapacityIsFetching ? (
+                  <Loader className="text-primary" />
+                ) : (
+                  availableCapacity?.availableCapacity ?? 0
+                )}
               </p>
             </article>
           </article>

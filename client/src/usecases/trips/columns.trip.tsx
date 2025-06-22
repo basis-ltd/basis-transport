@@ -10,6 +10,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ColumnDef } from '@tanstack/react-table';
 import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import { TripAvailableCapacity } from '@/components/trips/TripAvailableCapacity';
 
 export const useTripColumns = () => {
   const tripsColumns: ColumnDef<Trip>[] = useMemo(
@@ -37,6 +38,11 @@ export const useTripColumns = () => {
       {
         header: 'End Time',
         accessorKey: 'endTime',
+      },
+      {
+        header: 'Available Seats',
+        accessorKey: 'availableCapacity',
+        cell: ({ row }) => <TripAvailableCapacity tripId={row.original.id} />,
       },
       {
         header: 'Created By',

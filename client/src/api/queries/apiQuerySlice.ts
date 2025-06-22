@@ -4,7 +4,14 @@ import { baseQuery } from '../rootApi';
 export const apiQuerySlice = createApi({
   reducerPath: 'apiQuery',
   baseQuery,
-  tagTypes: ['Trips', 'Locations', 'UserTrips', 'Users', 'User', 'TransportCards'],
+  tagTypes: [
+    'Trips',
+    'Locations',
+    'UserTrips',
+    'Users',
+    'User',
+    'TransportCards',
+  ],
   endpoints: (builder) => ({
     /**
      * TRIPS
@@ -43,6 +50,15 @@ export const apiQuerySlice = createApi({
       query: (id) => {
         return {
           url: `/trips/${id}`,
+        };
+      },
+    }),
+
+    // COUNT AVAILABLE CAPACITY
+    countAvailableCapacity: builder.query({
+      query: ({ id }) => {
+        return {
+          url: `/trips/${id}/capacity`,
         };
       },
     }),
@@ -245,4 +261,5 @@ export const {
   useLazyGetUserTripByIdQuery,
   useLazyFetchRolesQuery,
   useLazyGetRoleByIdQuery,
+  useLazyCountAvailableCapacityQuery,
 } = apiQuerySlice;

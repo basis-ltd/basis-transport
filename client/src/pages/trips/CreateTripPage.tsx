@@ -137,6 +137,13 @@ const CreateTripPage = () => {
             <Controller
               name="totalCapacity"
               control={control}
+              rules={{
+                required: `Please enter the total capacity`,
+                min: {
+                  value: 10,
+                  message: `Total capacity must be at least 10`,
+                },
+              }}
               render={({ field }) => {
                 return (
                   <Input
@@ -144,6 +151,8 @@ const CreateTripPage = () => {
                     {...field}
                     placeholder="Enter total capacity (optional)"
                     type="number"
+                    errorMessage={errors.totalCapacity?.message}
+                    required
                   />
                 );
               }}

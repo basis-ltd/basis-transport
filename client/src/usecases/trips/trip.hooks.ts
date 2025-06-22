@@ -1,4 +1,5 @@
 import {
+  useLazyCountAvailableCapacityQuery,
   useLazyFetchTripsQuery,
   useLazyGetTripByIdQuery,
 } from '@/api/queries/apiQuerySlice';
@@ -237,5 +238,49 @@ export const useCreateTrip = () => {
     createTripIsLoading,
     createTripIsSuccess,
     createTripReset,
+  };
+};
+
+/**
+ * COUNT AVAILABLE CAPACITY
+ */
+export const useCountAvailableCapacity = () => {
+
+  const [availableCapacity, setAvailableCapacity] = useState<{
+    availableCapacity: number;
+    totalCapacity: number;
+  }>({
+    availableCapacity: 0,
+    totalCapacity: 0,
+  });
+
+  // MUTATION
+  const [
+    countAvailableCapacity,
+    {
+      isFetching: tripAvailableCapacityIsFetching,
+      isSuccess: tripAvailableCapacityIsSuccess,
+      data: tripAvailableCapacityData,
+    },
+  ] = useLazyCountAvailableCapacityQuery();
+
+  useEffect(() => {
+    if (tripAvailableCapacityIsSuccess) {
+      setAvailableCapacity({
+        availableCapacity: tripAvailableCapacityData?.data?.availableCapacity,
+        totalCapacity: tripAvailableCapacityData?.data?.totalCapacity ?? 0,
+      });
+    }
+  }, [
+    tripAvailableCapacityData?.data?.availableCapacity,
+    tripAvailableCapacityData?.data?.totalCapacity,
+    tripAvailableCapacityIsSuccess,
+  ]);
+
+  return {
+    countAvailableCapacity,
+    tripAvailableCapacityIsFetching,
+    tripAvailableCapacityIsSuccess,
+    availableCapacity,
   };
 };
