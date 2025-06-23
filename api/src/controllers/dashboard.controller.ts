@@ -75,4 +75,26 @@ export class DashboardController {
       next(error);
     }
   }
+
+  /**
+   * COUNT TOTAL TIME SPENT ON TRIPS
+   */
+  async countTotalTimeSpentOnTrips(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { userId, startDate, endDate } = req.query;
+
+      const totalTimeSpent = await dashboardService.countTotalTimeSpentOnTrips({
+        userId: userId as UUID,
+        startDate: startDate ? new Date(startDate as string) : undefined,
+        endDate: endDate ? new Date(endDate as string) : undefined,
+      });
+
+      return res.status(200).json({
+        message: 'Total time spent on trips counted successfully',
+        data: totalTimeSpent,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }

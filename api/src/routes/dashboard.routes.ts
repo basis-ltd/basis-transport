@@ -20,4 +20,7 @@ router.get('/transport-cards/count', dashboardController.countTotalTransportCard
 // COUNT USERS
 router.get('/users/count', dashboardController.countTotalUsers);
 
+// COUNT TOTAL TIME SPENT ON TRIPS
+router.get('/user-trips/time-spent', dashboardController.countTotalTimeSpentOnTrips);
+
 export default router;

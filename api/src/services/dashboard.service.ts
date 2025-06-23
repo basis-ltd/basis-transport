@@ -37,7 +37,8 @@ export class DashboardService {
     startDate?: Date;
     endDate?: Date;
   }): Promise<number> {
-    let condition: FindOptionsWhere<UserTrip> | FindOptionsWhere<UserTrip>[] = {};
+    let condition: FindOptionsWhere<UserTrip> | FindOptionsWhere<UserTrip>[] =
+      {};
 
     if (userId) {
       condition.userId = userId;
@@ -102,5 +103,48 @@ export class DashboardService {
     return this.userRepository.count({
       where: condition,
     });
+  }
+
+  /**
+   * COUNT TOTAL TIME SPENT ON TRIPS
+   */
+  async countTotalTimeSpentOnTrips({
+    userId,
+    startDate,
+    endDate,
+  }: {
+    userId?: UUID;
+    startDate?: Date;
+    endDate?: Date;
+  }): Promise<number> {
+    let condition: FindOptionsWhere<UserTrip> | FindOptionsWhere<UserTrip>[] =
+      {};
+
+    if (userId) {
+      condition.userId = userId;
+    }
+
+    if (startDate) {
+      condition.createdAt = MoreThanOrEqual(startDate);
+    }
+
+    if (endDate) {
+      condition.createdAt = LessThanOrEqual(endDate);
+    }
+
+    const userTrips = await this.userTripRepository.find({
+      where: condition,
+    });
+
+    let totalTimeSpent = 0;
+
+    for (const trip of userTrips) {
+      const startTime = new Date(trip.startTime).getTime();
+      const endTime = new Date(trip.endTime).getTime();
+      const timeSpentInSeconds = (endTime - startTime) / 1000;
+      totalTimeSpent += timeSpentInSeconds;
+    }
+
+    return Math.round(totalTimeSpent);
   }
 }
