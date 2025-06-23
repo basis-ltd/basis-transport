@@ -22,6 +22,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import moment from 'moment';
 import { useEffect, useMemo, useState } from 'react';
+import { Helmet } from 'react-helmet';
 
 const UserDashboard = () => {
   /**
@@ -172,50 +173,65 @@ const UserDashboard = () => {
   const { tripsColumns } = useTripColumns();
 
   return (
-    <AppLayout>
-      <main className="h-full w-full flex flex-col gap-4">
-        <nav className="w-full flex flex-col gap-4">
-          <Heading>Dashboard</Heading>
-        </nav>
-        <section
-          className={`w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 justify-between`}
-        >
-          {cardsData?.map((card, idx) => (
-            <article
-              key={idx}
-              className="transition-transform duration-300 w-full ease-in-out"
-            >
-              <DashboardCard {...card} />
-            </article>
-          ))}
-        </section>
+    <>
+      <Helmet>
+        <title>User Dashboard | Basis Transport</title>
+        <meta name="description" content="View your personalized dashboard with real-time bus tracking, trip metrics, and transport analytics. Optimize your commute and monitor your public transport activity with Basis Transport." />
+        <meta name="robots" content="index, follow" />
+        <meta name="author" content="Basis Transport Team" />
+        <meta property="og:title" content="User Dashboard | Basis Transport" />
+        <meta property="og:description" content="View your personalized dashboard with real-time bus tracking, trip metrics, and transport analytics." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://transport.basis.rw/dashboard" />
+        <meta property="og:image" content="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%F0%9F%9A%8C%3C/text%3E%3C/svg%3E" />
+        <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%F0%9F%9A%8C%3C/text%3E%3C/svg%3E" />
+        <link rel="canonical" href="https://transport.basis.rw/dashboard" />
+      </Helmet>
+      <AppLayout>
+        <main className="h-full w-full flex flex-col gap-4">
+          <nav className="w-full flex flex-col gap-4">
+            <Heading>Dashboard</Heading>
+          </nav>
+          <section
+            className={`w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 justify-between`}
+          >
+            {cardsData?.map((card, idx) => (
+              <article
+                key={idx}
+                className="transition-transform duration-300 w-full ease-in-out"
+              >
+                <DashboardCard {...card} />
+              </article>
+            ))}
+          </section>
 
-        <section className="w-full bg-background/5 rounded-xl shadow p-6 flex flex-col gap-4">
-          <header>
-            <Heading type="h3" className="text-primary">
-              Monthly Trips Trend
-            </Heading>
-          </header>
-          <figure className="w-full h-[300px]">
-            <DashboardGraph data={graphData} dataKey="month" />
-          </figure>
-        </section>
-        <section className="w-full flex flex-col gap-3 my-4">
-          <ul className="w-full flex items-center gap-3 justify-between">
-            <Heading>Trips near you</Heading>
-            <Button icon={faFileLines} route="/trips">
-              View all
-            </Button>
-          </ul>
-          <Table
-            columns={tripsColumns}
-            data={tripsList}
-            isLoading={tripsIsFetching}
-            showPagination={false}
-          />
-        </section>
-      </main>
-    </AppLayout>
+          <section className="w-full bg-background/5 rounded-xl shadow p-6 flex flex-col gap-4">
+            <header>
+              <Heading type="h3" className="text-primary">
+                Monthly Trips Trend
+              </Heading>
+            </header>
+            <figure className="w-full h-[300px]">
+              <DashboardGraph data={graphData} dataKey="month" />
+            </figure>
+          </section>
+          <section className="w-full flex flex-col gap-3 my-4">
+            <ul className="w-full flex items-center gap-3 justify-between">
+              <Heading>Trips near you</Heading>
+              <Button icon={faFileLines} route="/trips">
+                View all
+              </Button>
+            </ul>
+            <Table
+              columns={tripsColumns}
+              data={tripsList}
+              isLoading={tripsIsFetching}
+              showPagination={false}
+            />
+          </section>
+        </main>
+      </AppLayout>
+    </>
   );
 };
 
