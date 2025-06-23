@@ -60,9 +60,10 @@ const Navbar = () => {
                 navigate('/');
               }
             }}
-            className="text-xl font-bold text-primary tracking-wide select-none"
+            className="flex items-center gap-2 text-xl font-bold text-primary tracking-wide select-none hover:text-primary/80 transition-colors duration-200"
           >
-            Basis Transport
+            <span className="text-2xl">🚌</span>
+            <span>Basis Transport</span>
           </Link>
         </ul>
         <ul className="flex items-center gap-4 list-none p-0 m-0">

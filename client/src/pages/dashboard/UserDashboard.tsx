@@ -9,6 +9,7 @@ import {
   useCountTransportCards,
   useCountUsers,
   useCountUserTrips,
+  useTimeSpentInTrips,
 } from '@/usecases/dashboard/dashboard.hooks';
 import { useTripColumns } from '@/usecases/trips/columns.trip';
 import { useFetchTrips } from '@/usecases/trips/trip.hooks';
@@ -19,6 +20,7 @@ import {
   faCreditCard,
   faUsers,
 } from '@fortawesome/free-solid-svg-icons';
+import moment from 'moment';
 import { useEffect, useMemo, useState } from 'react';
 
 const UserDashboard = () => {
@@ -26,6 +28,7 @@ const UserDashboard = () => {
    * STATE VARIABLES
    */
   const { tripsList } = useAppSelector((state) => state.trip);
+  const { user } = useAppSelector((state) => state.auth);
 
   /**
    * DASHBOARD HOOKS
@@ -38,6 +41,21 @@ const UserDashboard = () => {
   useEffect(() => {
     countUserTrips({});
   }, [countUserTrips]);
+
+  // TIME SPENT IN TRIPS
+  const {
+    timeSpentInTrips,
+    timeSpentInTripsIsFetching,
+    fetchTimeSpentInTrips,
+  } = useTimeSpentInTrips();
+
+  useEffect(() => {
+    fetchTimeSpentInTrips({
+      startDate: moment().startOf('month').format('YYYY-MM-DD'),
+      endDate: moment().endOf('month').format('YYYY-MM-DD'),
+      userId: user?.id,
+    });
+  }, [fetchTimeSpentInTrips, user?.id]);
 
   // COUNT TRANSPORT CARDS
   const {
@@ -73,12 +91,12 @@ const UserDashboard = () => {
         isLoading: userTripsCountIsFetching,
       },
       {
-        title: 'Time spent on trips',
-        value: userTripsCount,
+        title: 'Time spent on trips (hours)',
+        value: timeSpentInTrips,
         change: 0,
         icon: faClockRotateLeft,
         route: '/user-trips',
-        isLoading: userTripsCountIsFetching,
+        isLoading: timeSpentInTripsIsFetching,
       },
       {
         title: 'Active cards',
@@ -104,6 +122,8 @@ const UserDashboard = () => {
       transportCardsCountIsFetching,
       usersCount,
       usersCountIsFetching,
+      timeSpentInTrips,
+      timeSpentInTripsIsFetching,
     ]
   );
 

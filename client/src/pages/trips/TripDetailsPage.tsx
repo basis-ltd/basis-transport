@@ -27,6 +27,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import moment from 'moment';
 import Loader from '@/components/inputs/Loader';
 import { TripStatus } from '@/constants/trip.constants';
+import { capitalizeString } from '@/helpers/strings.helper';
 
 const TripDetailsPage = () => {
   /**
@@ -208,6 +209,20 @@ const TripDetailsPage = () => {
     if (id) getTripById(id);
   }, [getTripById, id, updateUserTripIsSuccess]);
 
+    // Helper function to get status color
+    const getStatusColor = (status: TripStatus) => {
+      switch (status) {
+        case TripStatus.IN_PROGRESS:
+          return 'text-blue-600 bg-blue-50';
+        case TripStatus.COMPLETED:
+          return 'text-green-600 bg-green-50';
+        case TripStatus.CANCELLED:
+          return 'text-red-600 bg-red-50';
+        default:
+          return 'text-gray-600 bg-gray-50';
+      }
+    };
+
   return (
     <AppLayout>
       <main className="w-full flex flex-col gap-4">
@@ -322,8 +337,12 @@ const TripDetailsPage = () => {
               <h3 className="text-sm font-medium text-gray-500 mb-2">
                 Trip Status
               </h3>
-              <p className="text-lg font-semibold text-gray-900">
-                {trip?.status || 'N/A'}
+              <p
+                className={`${getStatusColor(
+                  trip?.status as TripStatus
+                )} inline-block px-3 py-1 rounded-full text-sm font-medium`}
+              >
+                {capitalizeString(trip?.status) || 'N/A'}
               </p>
             </article>
 

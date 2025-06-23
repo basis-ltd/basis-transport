@@ -34,95 +34,108 @@ const Login = () => {
     });
   });
   return (
-    <main className="w-full h-screen items-center justify-center flex flex-col gap-4">
-      <form
-        className="w-full py-8 max-w-[35%] sm:max-w-[35%] md:max-w-[35%] lg:max-w-[35%] shadow-md rounded-md bg-white p-8 mx-auto flex flex-col gap-4"
-        onSubmit={onSubmit}
-      >
-        <header className="flex flex-col gap-2 items-center mb-4">
-          <Heading type="h1">Welcome Back</Heading>
-          <p className="text-sm text-secondary">
-            Please sign in to your account
-          </p>
-        </header>
-        <fieldset className="w-full flex flex-col gap-5">
-          <Controller
-            control={control}
-            name="email"
-            rules={{
-              required: `Please enter your email address`,
-              validate: (value) =>
-                validateInputs(value, 'email') ||
-                'Please enter a valid email address',
-            }}
-            render={({ field }) => (
-              <Input
-                {...field}
-                errorMessage={errors.email?.message}
-                placeholder="Enter email address"
-                label="Email"
-                required
-              />
-            )}
-          />
-          <Controller
-            control={control}
-            name="password"
-            rules={{
-              required: `Please enter your password`,
-            }}
-            render={({ field }) => (
-              <Input
-                {...field}
-                placeholder="Enter password"
-                label="Password"
-                required
-                type={showPassword ? 'text' : 'password'}
-                suffixIcon={showPassword ? faEyeSlash : faEye}
-                suffixIconHandler={(e) => {
-                  e.preventDefault();
-                  setShowPassword(!showPassword);
-                }}
-              />
-            )}
-          />
-        </fieldset>
-        <menu className="w-full flex items-center justify-between gap-2">
-          <Controller
-            control={control}
-            name="rememberMe"
-            render={({ field }) => (
-              <Input
-                type="checkbox"
-                label="Remember me"
-                checked={field.value}
-                onChange={field.onChange}
-              />
-            )}
-          />
-          <Link
-            to="/auth/forgot-password"
-            className="text-secondary text-sm hover:underline hover:text-primary transition-colors duration-200"
-          >
-            Forgot Password?
-          </Link>
-        </menu>
-        <menu className="w-full flex flex-col items-center justify-between gap-2">
-          <Button type="submit" className='w-full' isLoading={loginIsLoading} primary>
-            Login
-          </Button>
-          <p className="text-sm text-secondary">
-            Don't have an account?{' '}
+    <>
+      <nav className="w-full flex items-center px-8 py-3 bg-gradient-to-r from-primary/10 to-white border-b border-gray-200 shadow-sm">
+        <Link to="/" className="flex items-center gap-2 text-2xl font-bold text-primary hover:text-primary/80 transition-colors duration-200">
+          <span className="text-3xl">🚌</span>
+          <span>Basis Transport</span>
+        </Link>
+      </nav>
+      <main className="w-full h-screen items-center justify-center flex flex-col gap-4">
+        <form
+          className="w-full py-8 max-w-[35%] sm:max-w-[35%] md:max-w-[35%] lg:max-w-[35%] shadow-md rounded-md bg-white p-8 mx-auto flex flex-col gap-4"
+          onSubmit={onSubmit}
+        >
+          <header className="flex flex-col gap-2 items-center mb-4">
+            <Heading type="h1">Welcome Back</Heading>
+            <p className="text-sm text-secondary">
+              Please sign in to your account
+            </p>
+          </header>
+          <fieldset className="w-full flex flex-col gap-5">
+            <Controller
+              control={control}
+              name="email"
+              rules={{
+                required: `Please enter your email address`,
+                validate: (value) =>
+                  validateInputs(value, 'email') ||
+                  'Please enter a valid email address',
+              }}
+              render={({ field }) => (
+                <Input
+                  {...field}
+                  errorMessage={errors.email?.message}
+                  placeholder="Enter email address"
+                  label="Email"
+                  required
+                />
+              )}
+            />
+            <Controller
+              control={control}
+              name="password"
+              rules={{
+                required: `Please enter your password`,
+              }}
+              render={({ field }) => (
+                <Input
+                  {...field}
+                  placeholder="Enter password"
+                  label="Password"
+                  required
+                  type={showPassword ? 'text' : 'password'}
+                  suffixIcon={showPassword ? faEyeSlash : faEye}
+                  suffixIconHandler={(e) => {
+                    e.preventDefault();
+                    setShowPassword(!showPassword);
+                  }}
+                />
+              )}
+            />
+          </fieldset>
+          <menu className="w-full flex items-center justify-between gap-2">
+            <Controller
+              control={control}
+              name="rememberMe"
+              render={({ field }) => (
+                <Input
+                  type="checkbox"
+                  label="Remember me"
+                  checked={field.value}
+                  onChange={field.onChange}
+                />
+              )}
+            />
             <Link
-              to="/auth/register"
-              className="text-primary hover:underline transition-colors duration-200"
+              to="/auth/forgot-password"
+              className="text-secondary text-sm hover:underline hover:text-primary transition-colors duration-200"
             >
-              Sign up
+              Forgot Password?
             </Link>
-          </p>
-        </menu>
-      </form>
-    </main>
+          </menu>
+          <menu className="w-full flex flex-col items-center justify-between gap-2">
+            <Button
+              type="submit"
+              className="w-full"
+              isLoading={loginIsLoading}
+              primary
+            >
+              Login
+            </Button>
+            <p className="text-sm text-secondary">
+              Don't have an account?{' '}
+              <Link
+                to="/auth/register"
+                className="text-primary hover:underline transition-colors duration-200"
+              >
+                Sign up
+              </Link>
+            </p>
+          </menu>
+        </form>
+      </main>
+    </>
   );
 };
 

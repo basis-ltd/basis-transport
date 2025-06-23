@@ -2,7 +2,9 @@ import {
   useLazyCountTransportCardsQuery,
   useLazyCountUsersQuery,
   useLazyCountUserTripsQuery,
+  useLazyTimeSpentInTripsQuery,
 } from '@/api/queries/apiQuerySlice';
+import moment from 'moment';
 import { useEffect, useState } from 'react';
 
 /**
@@ -97,5 +99,39 @@ export const useCountUsers = () => {
     usersCount,
     usersCountIsFetching,
     usersCountIsError,
+  };
+};
+
+/**
+ * TIME SPENT IN TRIPS
+ */
+
+export const useTimeSpentInTrips = () => {
+  const [timeSpentInTrips, setTimeSpentInTrips] = useState(0);
+
+  const [
+    fetchTimeSpentInTrips,
+    {
+      data: timeSpentInTripsData,
+      isFetching: timeSpentInTripsIsFetching,
+      isError: timeSpentInTripsIsError,
+    },
+  ] = useLazyTimeSpentInTripsQuery();
+
+  // FETCH TIME SPENT IN TRIPS
+  useEffect(() => {
+    if (timeSpentInTripsData) {
+      const timeInHours = moment
+        .duration(timeSpentInTripsData?.data, 'seconds')
+        .asHours();
+      setTimeSpentInTrips(timeInHours);
+    }
+  }, [timeSpentInTripsData]);
+
+  return {
+    timeSpentInTrips,
+    fetchTimeSpentInTrips,
+    timeSpentInTripsIsFetching,
+    timeSpentInTripsIsError,
   };
 };

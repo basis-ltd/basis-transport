@@ -59,6 +59,29 @@ export const useUserTripColumns = ({
         },
       },
       {
+        header: `Time spent`,
+        accessorKey: 'timeSpent',
+        cell: ({ row }) => {
+          if (!row?.original?.startTime || !row?.original?.endTime) {
+            return <p className="text-sm">-</p>;
+          }
+          const timeSpentInMinutes = moment(row?.original?.endTime).diff(
+            moment(row?.original?.startTime),
+            'minutes'
+          );
+
+          let timeSpent;
+          if (timeSpentInMinutes < 60) {
+            timeSpent = `${timeSpentInMinutes} minutes`;
+          } else {
+            const hours = Math.floor(timeSpentInMinutes / 60);
+            const minutes = timeSpentInMinutes % 60;
+            timeSpent = minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
+          }
+          return <p className="text-sm">{timeSpent}</p>;
+        },
+      },
+      {
         header: 'Exit Time',
         accessorKey: 'endTime',
         cell: ({ row }) => {
@@ -71,15 +94,6 @@ export const useUserTripColumns = ({
             );
           }
         },
-      },
-      {
-        header: 'Created By',
-        accessorKey: 'createdBy.name',
-        cell: ({ row }) => (
-          <TableUserLabel
-            user={row?.original?.createdBy || row?.original?.user}
-          />
-        ),
       },
       {
         header: 'Actions',

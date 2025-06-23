@@ -122,6 +122,11 @@ const UserTripDetailsPage = () => {
     }
   };
 
+  // Before rendering, ensure defaultCenter is not zero
+  const mapDefaultCenter = (defaultCenter.lat === 0 && defaultCenter.lng === 0)
+    ? origin
+    : defaultCenter;
+
   return (
     <AppLayout>
       <main className="w-full flex flex-col gap-4">
@@ -220,14 +225,13 @@ const UserTripDetailsPage = () => {
         </article>
 
         <section className="w-full flex flex-col gap-4">
+          <Heading type="h2">Trip Map</Heading>
           <MapView
             height="40vh"
             origin={origin}
             destination={destination}
-            defaultCenter={defaultCenter}
-            fromLabel={
-              userTrip?.entranceLocation ? 'Entry Point' : 'Start Location'
-            }
+            defaultCenter={mapDefaultCenter}
+            fromLabel={userTrip?.entranceLocation ? 'Entry Point' : 'Start Location'}
             toLabel={userTrip?.exitLocation ? 'Exit Point' : 'Destination'}
           />
         </section>

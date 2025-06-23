@@ -221,6 +221,20 @@ export const apiQuerySlice = createApi({
       },
     }),
 
+    // TIME SPENT IN TRIPS
+    timeSpentInTrips: builder.query({
+      query: ({ startDate, endDate, userId }) => {
+        return {
+          url: '/dashboard/user-trips/time-spent',
+          params: {
+            startDate,
+            endDate,
+            userId,
+          },
+        };
+      },
+    }),
+
     /**
      * ROLES
      */
@@ -262,4 +276,5 @@ export const {
   useLazyFetchRolesQuery,
   useLazyGetRoleByIdQuery,
   useLazyCountAvailableCapacityQuery,
+  useLazyTimeSpentInTripsQuery,
 } = apiQuerySlice;
