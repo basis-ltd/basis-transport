@@ -1,7 +1,176 @@
 import Button from '@/components/inputs/Button';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
+import * as THREE from 'three';
+
+// Simplified color palette
+const Colors = {
+  primary: '#283618',        // Deep forest green
+  primaryLight: '#4a6741',   // Lighter sage
+  primaryLighter: '#6b8563', // Even lighter sage
+  neutral: '#2d2d2d',        // Near black
+  neutralLight: '#666666',   // Medium gray
+  neutralLighter: '#999999', // Light gray
+  bg: '#fafaf8',            // Off-white
+  bgAlt: '#f3f3f1',         // Slightly darker off-white
+  white: '#ffffff',
+};
+
+// Three.js Passenger Journey Visualization
+const PassengerFlowCanvas = () => {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const animationRef = useRef<number | undefined>(undefined);
+  const sceneRef = useRef<THREE.Scene | undefined>(undefined);
+  const rendererRef = useRef<THREE.WebGLRenderer | undefined>(undefined);
+
+  const initThree = useCallback(() => {
+    if (!canvasRef.current) return;
+
+    const canvas = canvasRef.current;
+    const width = canvas.clientWidth;
+    const height = canvas.clientHeight;
+
+    // Scene setup
+    const scene = new THREE.Scene();
+    sceneRef.current = scene;
+
+    // Camera
+    const camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1000);
+    camera.position.z = 25;
+
+    // Renderer
+    const renderer = new THREE.WebGLRenderer({
+      canvas,
+      alpha: true,
+      antialias: true,
+    });
+    renderer.setSize(width, height);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    rendererRef.current = renderer;
+
+    // Create gentle journey visualization - soft nodes representing daily commuters
+    const nodeCount = 80;
+    const positions = new Float32Array(nodeCount * 3);
+    const colors = new Float32Array(nodeCount * 3);
+
+    const primaryColor = new THREE.Color('#283618');
+    const lightColor = new THREE.Color('#6b8563');
+
+    for (let i = 0; i < nodeCount; i++) {
+      positions[i * 3] = (Math.random() - 0.5) * 40;
+      positions[i * 3 + 1] = (Math.random() - 0.5) * 25;
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 15;
+
+      const colorChoice = Math.random();
+      const chosenColor = colorChoice < 0.6 ? primaryColor : lightColor;
+      colors[i * 3] = chosenColor.r;
+      colors[i * 3 + 1] = chosenColor.g;
+      colors[i * 3 + 2] = chosenColor.b;
+    }
+
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+    const material = new THREE.PointsMaterial({
+      size: 0.3,
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.6,
+      sizeAttenuation: true,
+    });
+
+    const particles = new THREE.Points(geometry, material);
+    scene.add(particles);
+
+    // Soft connecting lines - representing journeys
+    const lineMaterial = new THREE.LineBasicMaterial({
+      color: 0x283618,
+      transparent: true,
+      opacity: 0.08,
+    });
+
+    const linePositions: number[] = [];
+    for (let i = 0; i < nodeCount; i++) {
+      for (let j = i + 1; j < nodeCount; j++) {
+        const dist = Math.sqrt(
+          Math.pow(positions[i * 3] - positions[j * 3], 2) +
+          Math.pow(positions[i * 3 + 1] - positions[j * 3 + 1], 2) +
+          Math.pow(positions[i * 3 + 2] - positions[j * 3 + 2], 2)
+        );
+        if (dist < 6) {
+          linePositions.push(
+            positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2],
+            positions[j * 3], positions[j * 3 + 1], positions[j * 3 + 2]
+          );
+        }
+      }
+    }
+
+    const lineGeometry = new THREE.BufferGeometry();
+    lineGeometry.setAttribute('position', new THREE.Float32BufferAttribute(linePositions, 3));
+    const lines = new THREE.LineSegments(lineGeometry, lineMaterial);
+    scene.add(lines);
+
+    // Animation - gentle and calming
+    let time = 0;
+    const animate = () => {
+      time += 0.0015;
+
+      particles.rotation.y = time * 0.08;
+      particles.rotation.x = Math.sin(time * 0.3) * 0.05;
+      lines.rotation.y = time * 0.08;
+      lines.rotation.x = Math.sin(time * 0.3) * 0.05;
+
+      renderer.render(scene, camera);
+      animationRef.current = requestAnimationFrame(animate);
+    };
+
+    animate();
+
+    const handleResize = () => {
+      if (!canvasRef.current) return;
+      const newWidth = canvasRef.current.clientWidth;
+      const newHeight = canvasRef.current.clientHeight;
+      camera.aspect = newWidth / newHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(newWidth, newHeight);
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+      renderer.dispose();
+      geometry.dispose();
+      material.dispose();
+      lineGeometry.dispose();
+      lineMaterial.dispose();
+    };
+  }, []);
+
+  useEffect(() => {
+    const cleanup = initThree();
+    return cleanup;
+  }, [initThree]);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{ 
+        width: '100%', 
+        height: '100%', 
+        display: 'block',
+        opacity: 0.9
+      }}
+      aria-hidden="true"
+    />
+  );
+};
 
 const LandingPage = () => {
   const observerRef = useRef<IntersectionObserver | null>(null);
@@ -16,43 +185,31 @@ const LandingPage = () => {
           }
         });
       },
-      {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-      }
+      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
     );
 
     const animatedElements = document.querySelectorAll('.animate-on-scroll');
-    animatedElements.forEach((el) => {
-      observerRef.current?.observe(el);
-    });
+    animatedElements.forEach((el) => observerRef.current?.observe(el));
 
-    return () => {
-      if (observerRef.current) {
-        observerRef.current.disconnect();
-      }
-    };
+    return () => observerRef.current?.disconnect();
   }, []);
 
   return (
     <>
       <Helmet>
-        <title>Basis Transport | Real-time Bus Tracking & Trip Insights</title>
-        <meta name="description" content="Basis Transport is your platform for live bus tracking, available seat monitoring, and actionable public transport analytics. Empowering commuters and operators with real-time data, trip metrics, and city-wide insights for a seamless commute and optimized operations." />
-        <meta name="keywords" content="bus tracking, public transport, real-time analytics, trip metrics, seat availability, transport dashboard, Kigali, Rwanda, city transport, commuter insights, operator analytics, live bus map, transport optimization" />
+        <title>Basis Transport | Know Your Bus. Trust Your Commute.</title>
+        <meta name="description" content="Get real-time bus arrival times, see available seats, and travel with confidence. Free app for everyday commuters. No surprises. No stress." />
+        <meta name="keywords" content="bus tracker, real-time arrivals, bus times, seat availability, commute app, public transport, travel app" />
         <meta name="robots" content="index, follow" />
-        <meta name="author" content="Basis Transport Team" />
+        <meta name="author" content="Basis Transport" />
         <meta httpEquiv="Content-Language" content="en" />
-        <meta property="og:title" content="Basis Transport | Real-time Bus Tracking & Trip Insights" />
-        <meta property="og:description" content="Live bus tracking, seat monitoring, and actionable analytics for public transport. Empowering commuters and operators with real-time data and trip metrics." />
+        <meta property="og:title" content="Basis Transport | Know Your Bus. Trust Your Commute." />
+        <meta property="og:description" content="Get real-time bus arrival times and travel with confidence. Free for everyday commuters." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://transport.basis.rw/" />
-        <meta property="og:image" content="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%F0%9F%9A%8C%3C/text%3E%3C/svg%3E" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Basis Transport | Real-time Bus Tracking & Trip Insights" />
-        <meta name="twitter:description" content="Live bus tracking, seat monitoring, and actionable analytics for public transport. Empowering commuters and operators with real-time data and trip metrics." />
-        <meta name="twitter:image" content="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%F0%9F%9A%8C%3C/text%3E%3C/svg%3E" />
-        <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%F0%9F%9A%8C%3C/text%3E%3C/svg%3E" />
+        <meta name="twitter:title" content="Basis Transport | Know Your Bus. Trust Your Commute." />
+        <meta name="twitter:description" content="Get real-time bus arrival times and travel with confidence. Free for everyday commuters." />
         <link rel="canonical" href="https://transport.basis.rw/" />
         <script type="application/ld+json">{`
           {
@@ -60,848 +217,518 @@ const LandingPage = () => {
             "@type": "Organization",
             "name": "Basis Transport",
             "url": "https://transport.basis.rw/",
-            "logo": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%F0%9F%9A%8C%3C/text%3E%3C/svg%3E",
-            "sameAs": [
-              "https://twitter.com/basistransport",
-              "https://www.linkedin.com/company/basistransport/"
-            ],
-            "description": "Basis Transport is your platform for live bus tracking, available seat monitoring, and actionable public transport analytics. Empowering commuters and operators with real-time data, trip metrics, and city-wide insights for a seamless commute and optimized operations."
+            "description": "A free app that helps you know when your bus arrives, see available seats, and travel with confidence."
           }
         `}</script>
       </Helmet>
-      <main className="min-h-screen bg-white">
-        <style
-          dangerouslySetInnerHTML={{
-            __html: `
-            .animate-fade-in-up {
-              animation: fadeInUp 0.8s ease-out forwards;
-            }
-            
-            @keyframes fadeInUp {
-              from {
-                opacity: 0;
-                transform: translateY(30px);
-              }
-              to {
-                opacity: 1;
-                transform: translateY(0);
-              }
-            }
-            
-            .animate-on-scroll {
-              opacity: 0;
-              transform: translateY(30px);
-              transition: all 0.8s ease-out;
-            }
-            html {
-              scroll-behavior: smooth;
-            }
-          `,
-          }}
-        ></style>
+
+      <style dangerouslySetInnerHTML={{ __html: `
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateY(30px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes subtle-float {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-6px); }
+        }
+        .animate-fade-in-up { animation: fadeInUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+        .animate-on-scroll { opacity: 0; transform: translateY(30px); }
+        .subtle-float { animation: subtle-float 3s ease-in-out infinite; }
+        html { scroll-behavior: smooth; }
+        .text-balance { text-wrap: balance; }
+      `}} />
+
+      <main className="min-h-screen" style={{ backgroundColor: Colors.bg }}>
         {/* Header */}
-        <header className="bg-white shadow-sm pt-4">
-          <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <section className="flex justify-between items-center h-16">
-              <span className="flex items-center gap-2 text-2xl font-bold text-primary hover:text-primary/80 transition-colors duration-200 cursor-pointer select-none">
-                <span className="text-2xl">🚌</span>
-                <Link to="/" className="text-xl font-bold text-primary hover:text-primary/80 transition-colors duration-200 cursor-pointer select-none">Basis Transport</Link>
-              </span>
-              <nav className="hidden md:flex space-x-8">
-                <a
-                  href="#features"
-                  className="text-secondary hover:text-primary transition-colors"
-                >
-                  Features
-                </a>
-                <a
-                  href="#pricing"
-                  className="text-secondary hover:text-primary transition-colors"
-                >
-                  Pricing
-                </a>
-                <a
-                  href="#resources"
-                  className="text-secondary hover:text-primary transition-colors"
-                >
-                  Resources
-                </a>
-              </nav>
-              <Button primary route="/dashboard">
-                Get Started
+        <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-sm border-b" style={{ backgroundColor: `${Colors.bg}/80`, borderColor: `${Colors.primary}15` }}>
+          <nav className="max-w-6xl mx-auto px-6 lg:px-8">
+            <section className="flex justify-between items-center h-20">
+              <Link to="/" className="flex items-center gap-2 group">
+                <figure className="w-10 h-10 rounded-lg flex items-center justify-center transition-transform duration-300 group-hover:scale-105" style={{ backgroundColor: Colors.primary }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2" stroke={Colors.white} strokeWidth="2" strokeLinecap="round"/>
+                    <rect x="4" y="6" width="16" height="12" rx="2" stroke={Colors.white} strokeWidth="2"/>
+                    <circle cx="8" cy="20" r="2" fill={Colors.white}/>
+                    <circle cx="16" cy="20" r="2" fill={Colors.white}/>
+                  </svg>
+                </figure>
+                <span className="text-base font-medium" style={{ color: Colors.primary }}>Basis</span>
+              </Link>
+
+              <Button primary route="/dashboard" className="!px-6 !py-2 !rounded-lg !text-sm !font-medium">
+                Open App
               </Button>
             </section>
           </nav>
         </header>
 
-        <main>
+        <article>
           {/* Hero Section */}
-          <section className="relative bg-white py-24 lg:py-20">
-            <article className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <header className="text-center mb-20 animate-on-scroll">
-                <h1 className="text-5xl lg:text-7xl font-bold text-primary mb-8 leading-tight">
-                  Real-time Bus Tracking & Trip Insights
+          <section className="relative min-h-screen flex items-center pt-20 overflow-hidden">
+            {/* Three.js Background */}
+            <figure className="absolute inset-0 z-0" aria-hidden="true">
+              <PassengerFlowCanvas />
+            </figure>
+
+            {/* Gradient overlays - subtle */}
+            <aside className="absolute inset-0 bg-gradient-to-b from-[#fafaf8]/95 via-transparent to-[#fafaf8]/95 z-10 pointer-events-none" aria-hidden="true" />
+            <aside className="absolute inset-0 bg-gradient-to-r from-[#fafaf8]/85 via-transparent to-[#fafaf8]/85 z-10 pointer-events-none" aria-hidden="true" />
+
+            <article className="relative z-20 max-w-4xl mx-auto px-6 lg:px-8 py-24 lg:py-32">
+              <header className="animate-on-scroll">
+                <h1 className="text-5xl lg:text-6xl leading-tight mb-6 font-light text-balance" style={{ color: Colors.primary }}>
+                  Never wonder when your bus is coming.
                 </h1>
-                <p className="text-lg text-secondary max-w-2xl mx-auto">
-                  Welcome to Basis Transport — your platform for live bus
-                  tracking, available seat monitoring, and actionable public
-                  transport analytics. Empowering commuters and operators with
-                  real-time data and trip metrics.
+
+                <p className="text-lg lg:text-xl leading-relaxed mb-10 max-w-2xl" style={{ color: Colors.neutralLight }}>
+                  Real-time arrivals, available seats, and the confidence to leave home exactly on time. It's free and takes 30 seconds to set up.
                 </p>
-              </header>
 
-              {/* Laptop Mockup with Green Background */}
-              <figure className="relative animate-on-scroll flex items-center justify-center bg-[#8fbc8f] rounded-3xl p-8 lg:p-16 mx-auto max-w-5xl min-h-[340px]">
-                <svg
-                  viewBox="0 0 900 340"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="w-full h-80 lg:h-[340px] object-contain"
-                  aria-label="Abstract busy traffic and phone tracking location"
-                >
-                  {/* Abstract road */}
-                  <rect
-                    x="0"
-                    y="140"
-                    width="900"
-                    height="60"
-                    rx="30"
-                    fill="#d4c5a0"
-                    opacity="0.5"
-                  />
-                  {/* Moving vehicles (animated) */}
-                  <g>
-                    <rect
-                      x="-80"
-                      y="155"
-                      width="60"
-                      height="30"
-                      rx="10"
-                      fill="#8fbc8f"
-                    >
-                      <animate
-                        attributeName="x"
-                        from="-80"
-                        to="900"
-                        dur="7s"
-                        repeatCount="indefinite"
-                      />
-                    </rect>
-                    <rect
-                      x="-200"
-                      y="170"
-                      width="40"
-                      height="20"
-                      rx="8"
-                      fill="#8d7053"
-                    >
-                      <animate
-                        attributeName="x"
-                        from="-200"
-                        to="900"
-                        dur="9s"
-                        repeatCount="indefinite"
-                      />
-                    </rect>
-                    <rect
-                      x="-300"
-                      y="150"
-                      width="50"
-                      height="25"
-                      rx="9"
-                      fill="#fff"
-                      opacity="0.8"
-                    >
-                      <animate
-                        attributeName="x"
-                        from="-300"
-                        to="900"
-                        dur="6s"
-                        repeatCount="indefinite"
-                      />
-                    </rect>
-                    <rect
-                      x="-400"
-                      y="180"
-                      width="70"
-                      height="28"
-                      rx="12"
-                      fill="#8fbc8f"
-                      opacity="0.7"
-                    >
-                      <animate
-                        attributeName="x"
-                        from="-400"
-                        to="900"
-                        dur="8s"
-                        repeatCount="indefinite"
-                      />
-                    </rect>
-                  </g>
-                  {/* Phone device */}
-                  <g>
-                    <rect
-                      x="650"
-                      y="40"
-                      width="120"
-                      height="240"
-                      rx="32"
-                      fill="#fff"
-                      stroke="#8d7053"
-                      strokeWidth="4"
-                    />
-                    {/* Phone screen */}
-                    <rect
-                      x="670"
-                      y="60"
-                      width="80"
-                      height="200"
-                      rx="16"
-                      fill="#f5f5f5"
-                    />
-                    {/* Location pin on screen */}
-                    <g>
-                      <circle cx="710" cy="120" r="16" fill="#8fbc8f" />
-                      <circle cx="710" cy="120" r="7" fill="#fff" />
-                      <path
-                        d="M710 120 Q710 140 720 150 Q730 140 730 120"
-                        fill="#8d7053"
-                        opacity="0.3"
-                      />
-                      {/* Animated pulse */}
-                      <circle
-                        cx="710"
-                        cy="120"
-                        r="20"
-                        fill="#8fbc8f"
-                        opacity="0.2"
-                      >
-                        <animate
-                          attributeName="r"
-                          values="20;32;20"
-                          dur="2s"
-                          repeatCount="indefinite"
-                        />
-                        <animate
-                          attributeName="opacity"
-                          values="0.2;0.05;0.2"
-                          dur="2s"
-                          repeatCount="indefinite"
-                        />
-                      </circle>
-                    </g>
-                    {/* Route line on screen */}
-                    <polyline
-                      points="710,120 710,180 740,200"
-                      fill="none"
-                      stroke="#8fbc8f"
-                      strokeWidth="4"
-                      strokeDasharray="6 6"
-                    />
-                    {/* Small moving dot on route */}
-                    <circle r="6" fill="#8d7053">
-                      <animateMotion
-                        dur="2.5s"
-                        repeatCount="indefinite"
-                        keyPoints="0;1"
-                        keyTimes="0;1"
-                        path="M 710 120 L 710 180 L 740 200"
-                      />
-                    </circle>
-                  </g>
-                  {/* Decorative abstract city/traffic elements */}
-                  <rect
-                    x="100"
-                    y="60"
-                    width="30"
-                    height="80"
-                    rx="10"
-                    fill="#8d7053"
-                    opacity="0.15"
-                  />
-                  <rect
-                    x="180"
-                    y="40"
-                    width="24"
-                    height="100"
-                    rx="8"
-                    fill="#8d7053"
-                    opacity="0.12"
-                  />
-                  <rect
-                    x="250"
-                    y="80"
-                    width="18"
-                    height="60"
-                    rx="6"
-                    fill="#8d7053"
-                    opacity="0.10"
-                  />
-                  <rect
-                    x="320"
-                    y="50"
-                    width="22"
-                    height="90"
-                    rx="7"
-                    fill="#8d7053"
-                    opacity="0.13"
-                  />
-                  {/* Analytics/AI abstract dots */}
-                  <circle cx="800" cy="60" r="8" fill="#8fbc8f" opacity="0.7" />
-                  <circle cx="850" cy="100" r="6" fill="#8fbc8f" opacity="0.5" />
-                  <circle cx="820" cy="140" r="5" fill="#8fbc8f" opacity="0.4" />
-                </svg>
-              </figure>
-              <footer className="text-center mt-10 animate-on-scroll">
-                <Button
-                  primary
-                  route="/dashboard"
-                  className="px-8 py-4 mt-10 max-w-xs mx-auto"
-                >
-                  Get Started
-                </Button>
-              </footer>
-            </article>
-          </section>
-
-          {/* Company Logos */}
-          <section className="py-20 bg-gray-50" id="resources">
-            <article className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <ul className="flex justify-center items-center space-x-12 opacity-60 animate-on-scroll">
-                <li className="text-gray-500 font-semibold">
-                  Rwanda Transport Board
-                </li>
-                <li className="text-gray-500 font-semibold">
-                  Kigali Bus Services
-                </li>
-                <li className="text-gray-500 font-semibold">City Express</li>
-                <li className="text-gray-500 font-semibold">Volcano</li>
-                <li className="text-gray-500 font-semibold">RFTC</li>
-              </ul>
-            </article>
-          </section>
-
-          {/* Features Section */}
-          <section className="py-28 bg-white" id="features">
-            <article className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <header className="text-center mb-20 animate-on-scroll">
-                <h2 className="text-4xl lg:text-5xl font-bold text-primary mb-6">
-                  The Future of Public Transport
-                </h2>
-                <p className="text-lg text-secondary max-w-2xl mx-auto">
-                  Powerful features designed to help you track, analyze, and
-                  optimize public transport operations.
-                </p>
-              </header>
-
-              <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
-                <li className="text-center animate-on-scroll">
-                  <figure className="mx-auto mb-6 flex items-center justify-center">
-                    <span className="text-4xl">🚌</span>
-                  </figure>
-                  <h3 className="text-xl font-semibold text-primary mb-4">
-                    Live Bus Tracking
-                  </h3>
-                  <p className="text-secondary">
-                    Track buses in real-time and view their current locations on
-                    the map for a seamless commute.
-                  </p>
-                </li>
-
-                <li className="text-center animate-on-scroll">
-                  <figure className="mx-auto mb-6 flex items-center justify-center">
-                    <span className="text-4xl">💺</span>
-                  </figure>
-                  <h3 className="text-xl font-semibold text-primary mb-4">
-                    Available Slots
-                  </h3>
-                  <p className="text-secondary">
-                    Instantly see available seats for each trip, helping you plan
-                    your journey with confidence.
-                  </p>
-                </li>
-
-                <li className="text-center animate-on-scroll">
-                  <figure className="mx-auto mb-6 flex items-center justify-center">
-                    <span className="text-4xl">📊</span>
-                  </figure>
-                  <h3 className="text-xl font-semibold text-primary mb-4">
-                    Trip Metrics
-                  </h3>
-                  <p className="text-secondary">
-                    Access detailed metrics: number of trips, time spent on trips,
-                    and unique public transport users.
-                  </p>
-                </li>
-
-                <li className="text-center animate-on-scroll">
-                  <figure className="mx-auto mb-6 flex items-center justify-center">
-                    <span className="text-4xl">📈</span>
-                  </figure>
-                  <h3 className="text-xl font-semibold text-primary mb-4">
-                    Growth Insights
-                  </h3>
-                  <p className="text-secondary">
-                    Discover trends and optimize routes with actionable analytics
-                    for operators and city planners.
-                  </p>
-                </li>
-              </ul>
-            </article>
-          </section>
-
-          {/* Large Landscape Image */}
-          <section className="py-16">
-            <article className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <figure className="rounded-3xl overflow-hidden animate-on-scroll bg-gradient-to-br from-[#8fbc8f]/30 to-[#d4c5a0]/30 flex items-center justify-center min-h-[384px] lg:min-h-[500px]">
-                <svg
-                  viewBox="0 0 800 400"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="w-full h-96 lg:h-[500px] object-cover"
-                  aria-label="Abstract bus and seats tracking with AI"
-                >
-                  {/* Abstract bus shape */}
-                  <rect
-                    x="120"
-                    y="180"
-                    rx="32"
-                    width="400"
-                    height="100"
-                    fill="#8fbc8f"
-                    opacity="0.85"
-                  />
-                  {/* Bus windows */}
-                  <rect
-                    x="160"
-                    y="200"
-                    width="60"
-                    height="40"
-                    rx="8"
-                    fill="#fff"
-                    opacity="0.9"
-                  />
-                  <rect
-                    x="240"
-                    y="200"
-                    width="60"
-                    height="40"
-                    rx="8"
-                    fill="#fff"
-                    opacity="0.9"
-                  />
-                  <rect
-                    x="320"
-                    y="200"
-                    width="60"
-                    height="40"
-                    rx="8"
-                    fill="#fff"
-                    opacity="0.9"
-                  />
-                  <rect
-                    x="400"
-                    y="200"
-                    width="60"
-                    height="40"
-                    rx="8"
-                    fill="#fff"
-                    opacity="0.9"
-                  />
-                  {/* Bus wheels */}
-                  <circle cx="180" cy="300" r="20" fill="#333" opacity="0.7" />
-                  <circle cx="440" cy="300" r="20" fill="#333" opacity="0.7" />
-                  {/* Abstract seats (dots) */}
-                  <g>
-                    <circle cx="600" cy="220" r="16" fill="#d4c5a0" />
-                    <circle cx="650" cy="220" r="16" fill="#d4c5a0" />
-                    <circle cx="700" cy="220" r="16" fill="#d4c5a0" />
-                    <circle cx="625" cy="260" r="16" fill="#d4c5a0" />
-                    <circle cx="675" cy="260" r="16" fill="#d4c5a0" />
-                  </g>
-                  {/* AI/analytics abstract: neural network nodes and lines */}
-                  <g stroke="#8d7053" strokeWidth="2" opacity="0.7">
-                    <circle cx="600" cy="100" r="8" fill="#fff" />
-                    <circle cx="700" cy="100" r="8" fill="#fff" />
-                    <circle cx="650" cy="60" r="8" fill="#fff" />
-                    <line x1="600" y1="100" x2="650" y2="60" />
-                    <line x1="650" y1="60" x2="700" y2="100" />
-                    <line x1="600" y1="100" x2="700" y2="100" />
-                    {/* Dotted connection to seats */}
-                    <line
-                      x1="650"
-                      y1="60"
-                      x2="650"
-                      y2="220"
-                      strokeDasharray="6 6"
-                    />
-                  </g>
-                  {/* Analytics bars */}
-                  <rect
-                    x="80"
-                    y="340"
-                    width="30"
-                    height="40"
-                    rx="6"
-                    fill="#8d7053"
-                    opacity="0.5"
-                  />
-                  <rect
-                    x="120"
-                    y="360"
-                    width="30"
-                    height="20"
-                    rx="6"
-                    fill="#8d7053"
-                    opacity="0.3"
-                  />
-                  <rect
-                    x="160"
-                    y="330"
-                    width="30"
-                    height="50"
-                    rx="6"
-                    fill="#8d7053"
-                    opacity="0.7"
-                  />
-                  {/* Decorative abstract lines */}
-                  <path
-                    d="M 100 100 Q 200 50 300 100 T 500 100"
-                    stroke="#8fbc8f"
-                    strokeWidth="3"
-                    fill="none"
-                    opacity="0.2"
-                  />
-                </svg>
-              </figure>
-            </article>
-          </section>
-
-          {/* See the Big Picture */}
-          <section className="py-28 bg-white">
-            <article className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <article className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-                <section className="animate-on-scroll">
-                  <h2 className="text-4xl lg:text-5xl font-bold text-primary mb-8">
-                    See the Big Picture
-                  </h2>
-                  <p className="text-lg text-secondary mb-10">
-                    Transform your city's public transport with comprehensive
-                    insights and real-time data.
-                  </p>
-
-                  <ul className="space-y-6">
-                    <li className="flex items-start">
-                      <span className="w-6 h-6 bg-primary rounded-full flex-shrink-0 mt-1 mr-4"></span>
-                      <span className="text-secondary">
-                        Live dashboards for bus locations and trip status
-                      </span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="w-6 h-6 bg-primary rounded-full flex-shrink-0 mt-1 mr-4"></span>
-                      <span className="text-secondary">
-                        Metrics on trip duration, frequency, and ridership
-                      </span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="w-6 h-6 bg-primary rounded-full flex-shrink-0 mt-1 mr-4"></span>
-                      <span className="text-secondary">
-                        Automated reporting for operators and city officials
-                      </span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="w-6 h-6 bg-primary rounded-full flex-shrink-0 mt-1 mr-4"></span>
-                      <span className="text-secondary">
-                        Seamless experience for commuters and staff
-                      </span>
-                    </li>
-                  </ul>
-
-                  <Button primary route="/dashboard" className="mt-10">
-                    Learn More
-                  </Button>
-                </section>
-
-                <figure className="relative animate-on-scroll">
-                  <article className="bg-[#d4c5a0] rounded-3xl p-8 lg:p-12">
-                    <article className="grid grid-cols-2 gap-4">
-                      <article className="bg-white rounded-2xl h-32"></article>
-                      <article className="bg-white rounded-2xl h-32"></article>
-                      <article className="bg-white rounded-2xl h-32 col-span-2"></article>
-                    </article>
-                  </article>
-                </figure>
-              </article>
-            </article>
-          </section>
-
-          {/* Why Choose Basis Transport */}
-          <section className="py-28 bg-gray-50" id="pricing">
-            <article className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <header className="text-center mb-20 animate-on-scroll">
-                <h2 className="text-4xl lg:text-5xl font-bold text-primary mb-6">
-                  Why Choose Basis Transport?
-                </h2>
-                <p className="text-lg text-secondary max-w-2xl mx-auto">
-                  Discover the advantages that make us the preferred choice for
-                  public transport operators and commuters.
-                </p>
-              </header>
-
-              <article className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-16">
-                <section className="animate-on-scroll">
-                  <h3 className="text-xl font-semibold text-primary mb-6">
-                    Performance
-                  </h3>
-                  <ul className="space-y-3 text-secondary">
-                    <li>Lightning fast live updates</li>
-                    <li>99.9% uptime guarantee</li>
-                    <li>Scalable for city-wide operations</li>
-                    <li>Optimized for mobile and desktop</li>
-                  </ul>
-                </section>
-
-                <section className="animate-on-scroll">
-                  <h3 className="text-xl font-semibold text-primary mb-6">
-                    Security
-                  </h3>
-                  <ul className="space-y-3 text-secondary">
-                    <li>End-to-end encrypted data</li>
-                    <li>Compliance with local regulations</li>
-                    <li>Regular security audits</li>
-                    <li>Advanced threat protection</li>
-                  </ul>
-                </section>
-
-                <section className="animate-on-scroll">
-                  <h3 className="text-xl font-semibold text-primary mb-6">
-                    Support
-                  </h3>
-                  <ul className="space-y-3 text-secondary">
-                    <li>24/7 customer support</li>
-                    <li>Dedicated onboarding for operators</li>
-                    <li>Comprehensive documentation</li>
-                    <li>Community and city partnerships</li>
-                  </ul>
-                </section>
-              </article>
-
-              <footer className="text-center animate-on-scroll">
-                <Button primary route="/dashboard" className="px-8 py-4 mt-10 max-w-xs mx-auto">
-                  Get Started
-                </Button>
-              </footer>
-            </article>
-          </section>
-
-          {/* Testimonial */}
-          <section className="py-28 bg-white">
-            <article className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <article className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-                <section className="relative rounded-3xl p-8 lg:p-12 animate-on-scroll overflow-hidden">
-                  <span className="absolute inset-0 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent"></span>
-                  <span className="absolute inset-0 bg-gradient-to-tr from-[#8fbc8f]/20 to-transparent"></span>
-                  <span className="relative w-full h-64 lg:h-80 flex items-center justify-center rounded-2xl">
-                    <svg
-                      viewBox="0 0 200 200"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="w-32 h-32 lg:w-40 lg:h-40 drop-shadow-lg"
-                      aria-label="Abstract user profile icon"
-                    >
-                      {/* User head */}
-                      <circle
-                        cx="100"
-                        cy="70"
-                        r="35"
-                        fill="#8fbc8f"
-                        opacity="0.9"
-                      />
-                      {/* User body */}
-                      <path
-                        d="M 50 120 Q 100 180 150 120"
-                        stroke="#8fbc8f"
-                        strokeWidth="8"
-                        fill="none"
-                        opacity="0.9"
-                      />
-                      {/* Bus icon overlay */}
-                      <g transform="translate(85, 85)">
-                        <rect
-                          x="0"
-                          y="0"
-                          width="30"
-                          height="20"
-                          rx="4"
-                          fill="#8d7053"
-                          opacity="0.8"
-                        />
-                        <rect
-                          x="5"
-                          y="5"
-                          width="20"
-                          height="10"
-                          rx="2"
-                          fill="#ffffff"
-                          opacity="0.9"
-                        />
-                      </g>
+                <nav className="flex flex-col sm:flex-row gap-4">
+                  <Button primary route="/dashboard" className="!px-8 !py-4 !rounded-lg !text-base !font-medium inline-flex items-center gap-3">
+                    Create Free Account
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
-                  </span>
-                </section>
-
-                <section className="animate-on-scroll">
-                  <blockquote className="text-2xl lg:text-3xl font-medium text-primary mb-8 leading-relaxed">
-                    "Basis Transport has revolutionized our city's public
-                    transport. Real-time tracking and trip analytics have made our
-                    operations more efficient and our riders happier."
-                  </blockquote>
-                  <footer>
-                    <p className="font-semibold text-primary">Sarah Johnson</p>
-                    <p className="text-secondary">
-                      Operations Manager, Kigali Bus Services
-                    </p>
-                  </footer>
-                </section>
-              </article>
-            </article>
-          </section>
-
-          {/* Map Your Success */}
-          <section className="py-28 bg-gray-50">
-            <article className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <header className="text-center mb-20 animate-on-scroll">
-                <h2 className="text-4xl lg:text-5xl font-bold text-primary mb-6">
-                  Map Your Success
-                </h2>
-                <Button
-                  primary
-                  route="/dashboard"
-                  className="px-8 py-4 mt-10 max-w-xs mx-auto"
-                >
-                  Get Started
-                </Button>
-              </header>
-
-              <article className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-20">
-                <section className="text-center animate-on-scroll">
-                  <span className="text-6xl font-bold text-primary mb-6 block">
-                    01
-                  </span>
-                  <h3 className="text-xl font-semibold text-primary mb-4">
-                    Sign Up
-                  </h3>
-                  <p className="text-secondary">
-                    Create your account and join the Basis Transport network to
-                    access real-time data.
-                  </p>
-                </section>
-
-                <section className="text-center animate-on-scroll">
-                  <span className="text-6xl font-bold text-primary mb-6 block">
-                    02
-                  </span>
-                  <h3 className="text-xl font-semibold text-primary mb-4">
-                    Track & Analyze
-                  </h3>
-                  <p className="text-secondary">
-                    Track buses, monitor available slots, and analyze trip metrics
-                    from your dashboard.
-                  </p>
-                </section>
-
-                <section className="text-center animate-on-scroll">
-                  <span className="text-6xl font-bold text-primary mb-6 block">
-                    03
-                  </span>
-                  <h3 className="text-xl font-semibold text-primary mb-4">
-                    Optimize & Grow
-                  </h3>
-                  <p className="text-secondary">
-                    Use insights to optimize routes, improve service, and grow
-                    your operations.
-                  </p>
-                </section>
-              </article>
-
-            </article>
-          </section>
-        </main>
-
-        {/* Footer / Connect with us */}
-        <footer className="py-28 bg-white">
-          <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <header className="text-center mb-20 animate-on-scroll">
-              <h2 className="text-4xl lg:text-5xl font-bold text-primary mb-6">
-                Connect with us
-              </h2>
-              <p className="text-lg text-secondary max-w-2xl mx-auto">
-                Ready to transform your city's public transport? Get in touch with
-                our team today.
-              </p>
-            </header>
-
-            <section className="max-w-2xl mx-auto animate-on-scroll">
-              <form className="space-y-8">
-                <fieldset className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                  <label className="space-y-2">
-                    <input
-                      type="text"
-                      placeholder="First Name"
-                      className="w-full px-4 py-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                    />
-                  </label>
-                  <label className="space-y-2">
-                    <input
-                      type="text"
-                      placeholder="Last Name"
-                      className="w-full px-4 py-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                    />
-                  </label>
-                </fieldset>
-
-                <label className="block mb-8">
-                  <input
-                    type="email"
-                    placeholder="Email Address"
-                    className="w-full px-4 py-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                  />
-                </label>
-
-                <label className="block mb-8">
-                  <textarea
-                    placeholder="Message"
-                    rows={4}
-                    className="w-full px-4 py-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                  ></textarea>
-                </label>
-
-                <footer className="text-center">
-                  <Button type="submit" primary className="px-8 py-4">
-                    Send Message
                   </Button>
-                </footer>
-              </form>
-            </section>
-
-            <footer className="mt-20 pt-8 border-t border-gray-200">
-              <section className="flex justify-between items-center">
-                <span className="text-2xl font-bold text-primary">
-                  Basis Transport
-                </span>
-                <nav className="flex space-x-6 text-secondary">
-                  <a href="#" className="hover:text-primary transition-colors">
-                    Privacy
-                  </a>
-                  <a href="#" className="hover:text-primary transition-colors">
-                    Terms
-                  </a>
-                  <a href="#" className="hover:text-primary transition-colors">
-                    Contact
+                  <a href="#how-it-works" className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-lg border border-current transition-colors" style={{ color: Colors.primary, borderColor: Colors.primary }}>
+                    See how it works
                   </a>
                 </nav>
+
+                <p className="mt-8 text-sm" style={{ color: Colors.neutralLight }}>
+                  Free to use. No credit card needed.
+                </p>
+              </header>
+
+              {/* Live Stats */}
+              <aside className="mt-20 animate-on-scroll grid grid-cols-3 gap-8 lg:gap-12" style={{ animationDelay: '0.2s' }}>
+                <div className="text-center">
+                  <data className="block text-3xl lg:text-4xl font-light mb-2" style={{ color: Colors.primary }}>2.3M</data>
+                  <span className="text-sm" style={{ color: Colors.neutralLight }}>Daily commuters</span>
+                </div>
+                <div className="text-center">
+                  <data className="block text-3xl lg:text-4xl font-light mb-2" style={{ color: Colors.primary }}>15 mins</data>
+                  <span className="text-sm" style={{ color: Colors.neutralLight }}>Avg time saved</span>
+                </div>
+                <div className="text-center">
+                  <data className="block text-3xl lg:text-4xl font-light mb-2" style={{ color: Colors.primary }}>98%</data>
+                  <span className="text-sm" style={{ color: Colors.neutralLight }}>Happy users</span>
+                </div>
+              </aside>
+            </article>
+          </section>
+
+          {/* Problem → Relief Section */}
+          <section className="py-24" style={{ backgroundColor: Colors.white }}>
+            <article className="max-w-4xl mx-auto px-6 lg:px-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-16 items-center">
+                <aside className="animate-on-scroll">
+                  <h2 className="text-3xl lg:text-4xl leading-tight mb-6 font-light" style={{ color: Colors.primary }}>
+                    The stress of not knowing
+                  </h2>
+                  <p className="text-base leading-relaxed mb-6" style={{ color: Colors.neutralLight }}>
+                    You check the time. You check the street. Is your bus here? Did you miss it? Will you be late? Every commute is a guess, and guessing makes you anxious.
+                  </p>
+                  <p className="text-base leading-relaxed" style={{ color: Colors.neutralLight }}>
+                    You wonder if there's a seat. You stress about being packed in. You don't know if you should wait or walk to the next stop.
+                  </p>
+                </aside>
+
+                <aside className="animate-on-scroll" style={{ animationDelay: '0.15s' }}>
+                  <h2 className="text-3xl lg:text-4xl leading-tight mb-6 font-light" style={{ color: Colors.primary }}>
+                    The calm of knowing
+                  </h2>
+                  <p className="text-base leading-relaxed mb-6" style={{ color: Colors.neutralLight }}>
+                    Open Basis. See your bus coming in 7 minutes. You know exactly when to leave. No stress. No surprises.
+                  </p>
+                  <p className="text-base leading-relaxed" style={{ color: Colors.neutralLight }}>
+                    Check how many seats are open. Travel when you're ready. That 15 minutes you save every day? That's time for coffee, or just breathing.
+                  </p>
+                </aside>
+              </div>
+            </article>
+          </section>
+
+          {/* Why People Use Basis Daily */}
+          <section className="py-24" style={{ backgroundColor: Colors.bgAlt }}>
+            <article className="max-w-4xl mx-auto px-6 lg:px-8">
+              <header className="text-center mb-16 animate-on-scroll">
+                <h2 className="text-4xl lg:text-5xl leading-tight mb-6 font-light" style={{ color: Colors.primary }}>
+                  Why commuters keep using Basis
+                </h2>
+                <p className="text-lg" style={{ color: Colors.neutralLight }}>
+                  It's not about fancy features. It's about how you feel.
+                </p>
+              </header>
+
+              <ul className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* Benefit 1 */}
+                <li className="animate-on-scroll p-8 rounded-xl" style={{ backgroundColor: Colors.white }}>
+                  <h3 className="text-xl font-medium mb-3" style={{ color: Colors.primary }}>
+                    Confidence before you leave
+                  </h3>
+                  <p style={{ color: Colors.neutralLight }}>
+                    You know exactly when your bus arrives. No second-guessing. No checking twice. Just leave home with peace of mind.
+                  </p>
+                </li>
+
+                {/* Benefit 2 */}
+                <li className="animate-on-scroll p-8 rounded-xl" style={{ backgroundColor: Colors.white, animationDelay: '0.1s' }}>
+                  <h3 className="text-xl font-medium mb-3" style={{ color: Colors.primary }}>
+                    Saved time every single day
+                  </h3>
+                  <p style={{ color: Colors.neutralLight }}>
+                    No more waiting around. No more showing up early "just in case." You arrive at exactly the right moment.
+                  </p>
+                </li>
+
+                {/* Benefit 3 */}
+                <li className="animate-on-scroll p-8 rounded-xl" style={{ backgroundColor: Colors.white, animationDelay: '0.2s' }}>
+                  <h3 className="text-xl font-medium mb-3" style={{ color: Colors.primary }}>
+                    Know you'll have a seat
+                  </h3>
+                  <p style={{ color: Colors.neutralLight }}>
+                    See if your bus is crowded before you board. Choose to wait for a less busy one, or pack light and stand comfortably.
+                  </p>
+                </li>
+
+                {/* Benefit 4 */}
+                <li className="animate-on-scroll p-8 rounded-xl" style={{ backgroundColor: Colors.white, animationDelay: '0.3s' }}>
+                  <h3 className="text-xl font-medium mb-3" style={{ color: Colors.primary }}>
+                    In control of your commute
+                  </h3>
+                  <p style={{ color: Colors.neutralLight }}>
+                    No more hoping. No more guessing. You decide when to leave, when to travel, when to relax. That's control.
+                  </p>
+                </li>
+              </ul>
+            </article>
+          </section>
+
+          {/* Simple Feature Overview */}
+          <section className="py-24" style={{ backgroundColor: Colors.white }}>
+            <article className="max-w-4xl mx-auto px-6 lg:px-8">
+              <header className="text-center mb-16 animate-on-scroll">
+                <h2 className="text-4xl lg:text-5xl leading-tight mb-6 font-light" style={{ color: Colors.primary }}>
+                  Simple tools that actually help
+                </h2>
+              </header>
+
+              <ul className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                {/* Feature 1 */}
+                <li className="animate-on-scroll">
+                  <div className="flex gap-5 mb-4">
+                    <div className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: Colors.primary }}>
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={Colors.white} strokeWidth="2" aria-hidden="true">
+                        <circle cx="12" cy="12" r="1"/>
+                        <path d="M12 1v6m0 6v6"/>
+                        <path d="M4.22 4.22l4.24 4.24m5.08 5.08l4.24 4.24"/>
+                        <path d="M1 12h6m6 0h6"/>
+                        <path d="M4.22 19.78l4.24-4.24m5.08-5.08l4.24-4.24"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-medium mb-2" style={{ color: Colors.primary }}>Real-time arrivals</h3>
+                      <p style={{ color: Colors.neutralLight }}>See exactly when your bus will arrive. Updated every few seconds so you're never guessing.</p>
+                    </div>
+                  </div>
+                </li>
+
+                {/* Feature 2 */}
+                <li className="animate-on-scroll" style={{ animationDelay: '0.1s' }}>
+                  <div className="flex gap-5 mb-4">
+                    <div className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: Colors.primary }}>
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={Colors.white} strokeWidth="2" aria-hidden="true">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-medium mb-2" style={{ color: Colors.primary }}>Available seats</h3>
+                      <p style={{ color: Colors.neutralLight }}>Know how busy your bus is before you board. Travel comfortably or wait for the next one.</p>
+                    </div>
+                  </div>
+                </li>
+
+                {/* Feature 3 */}
+                <li className="animate-on-scroll" style={{ animationDelay: '0.2s' }}>
+                  <div className="flex gap-5 mb-4">
+                    <div className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: Colors.primary }}>
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={Colors.white} strokeWidth="2" aria-hidden="true">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                        <polyline points="17 21 17 13 7 13 7 21"/>
+                        <polyline points="7 3 7 8 15 8"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-medium mb-2" style={{ color: Colors.primary }}>Trip history</h3>
+                      <p style={{ color: Colors.neutralLight }}>See your routes and favorite stops. Quickly book the same commute over and over.</p>
+                    </div>
+                  </div>
+                </li>
+
+                {/* Feature 4 */}
+                <li className="animate-on-scroll" style={{ animationDelay: '0.3s' }}>
+                  <div className="flex gap-5 mb-4">
+                    <div className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: Colors.primary }}>
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={Colors.white} strokeWidth="2" aria-hidden="true">
+                        <path d="M18 9l-6 6-6-6"/>
+                        <path d="M18 5l-6 6-6-6"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-medium mb-2" style={{ color: Colors.primary }}>Smart alerts</h3>
+                      <p style={{ color: Colors.neutralLight }}>Get notified before your bus arrives. Never miss a ride again.</p>
+                    </div>
+                  </div>
+                </li>
+              </ul>
+            </article>
+          </section>
+
+          {/* How It Works */}
+          <section className="py-24" style={{ backgroundColor: Colors.bgAlt }} id="how-it-works">
+            <article className="max-w-4xl mx-auto px-6 lg:px-8">
+              <header className="text-center mb-16 animate-on-scroll">
+                <h2 className="text-4xl lg:text-5xl leading-tight mb-6 font-light" style={{ color: Colors.primary }}>
+                  Three steps to your first confident commute
+                </h2>
+              </header>
+
+              <ol className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <li className="animate-on-scroll">
+                  <article className="text-center">
+                    <figure className="w-16 h-16 mx-auto mb-6 rounded-lg flex items-center justify-center font-light text-xl" style={{ backgroundColor: Colors.primary, color: Colors.white }}>
+                      1
+                    </figure>
+                    <h3 className="text-xl font-medium mb-3" style={{ color: Colors.primary }}>
+                      Create your account
+                    </h3>
+                    <p style={{ color: Colors.neutralLight }}>
+                      Free signup. No credit card. Just your phone number and you're in.
+                    </p>
+                  </article>
+                </li>
+
+                <li className="animate-on-scroll" style={{ animationDelay: '0.15s' }}>
+                  <article className="text-center">
+                    <figure className="w-16 h-16 mx-auto mb-6 rounded-lg flex items-center justify-center font-light text-xl" style={{ backgroundColor: Colors.primary, color: Colors.white }}>
+                      2
+                    </figure>
+                    <h3 className="text-xl font-medium mb-3" style={{ color: Colors.primary }}>
+                      Pick your stop
+                    </h3>
+                    <p style={{ color: Colors.neutralLight }}>
+                      Search for your bus stop. Save your favorites for next time.
+                    </p>
+                  </article>
+                </li>
+
+                <li className="animate-on-scroll" style={{ animationDelay: '0.3s' }}>
+                  <article className="text-center">
+                    <figure className="w-16 h-16 mx-auto mb-6 rounded-lg flex items-center justify-center font-light text-xl" style={{ backgroundColor: Colors.primary, color: Colors.white }}>
+                      3
+                    </figure>
+                    <h3 className="text-xl font-medium mb-3" style={{ color: Colors.primary }}>
+                      Travel with confidence
+                    </h3>
+                    <p style={{ color: Colors.neutralLight }}>
+                      See your bus arriving. Know there's a seat. Leave home exactly on time.
+                    </p>
+                  </article>
+                </li>
+              </ol>
+            </article>
+          </section>
+
+          {/* Product Experience Preview */}
+          <section className="py-24" style={{ backgroundColor: Colors.white }}>
+            <article className="max-w-4xl mx-auto px-6 lg:px-8">
+              <header className="text-center mb-16 animate-on-scroll">
+                <h2 className="text-4xl lg:text-5xl leading-tight mb-6 font-light" style={{ color: Colors.primary }}>
+                  Designed to be simple
+                </h2>
+                <p style={{ color: Colors.neutralLight }}>
+                  No confusing menus. No unnecessary steps. Just the information you need.
+                </p>
+              </header>
+
+              <figure className="animate-on-scroll rounded-2xl overflow-hidden border-2" style={{ borderColor: `${Colors.primary}20` }}>
+                <article style={{ backgroundColor: Colors.bgAlt }}>
+                  {/* Simulated app interface */}
+                  <section className="p-6">
+                    {/* App header */}
+                    <header className="mb-8">
+                      <p className="text-xs mb-4" style={{ color: Colors.neutralLight }}>Your Next Bus</p>
+                      <div className="rounded-xl p-6" style={{ backgroundColor: Colors.white }}>
+                        <div className="flex items-start justify-between mb-4">
+                          <div>
+                            <p className="text-sm" style={{ color: Colors.neutralLight }}>Route 47 → Downtown</p>
+                            <p className="text-3xl font-light mt-1" style={{ color: Colors.primary }}>Arrives in 7 min</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-xs font-medium" style={{ color: '#16a34a' }}>On time</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-4">
+                          <div className="flex-1">
+                            <p className="text-xs mb-1" style={{ color: Colors.neutralLight }}>Available seats</p>
+                            <p className="text-2xl font-light" style={{ color: Colors.primary }}>12 left</p>
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-xs mb-1" style={{ color: Colors.neutralLight }}>Next buses</p>
+                            <p className="text-sm mt-1" style={{ color: Colors.neutralLight }}>+15, +28 min</p>
+                          </div>
+                        </div>
+                      </div>
+                    </header>
+
+                    {/* Stop favorites */}
+                    <section>
+                      <p className="text-xs mb-4 font-medium" style={{ color: Colors.neutralLight }}>YOUR STOPS</p>
+                      <ul className="space-y-3">
+                        <li className="rounded-lg p-4 cursor-pointer hover:opacity-80 transition-opacity" style={{ backgroundColor: Colors.white }}>
+                          <p className="font-medium" style={{ color: Colors.primary }}>Home (Downtown)</p>
+                          <p className="text-xs mt-1" style={{ color: Colors.neutralLight }}>4 routes</p>
+                        </li>
+                        <li className="rounded-lg p-4 cursor-pointer hover:opacity-80 transition-opacity" style={{ backgroundColor: Colors.white }}>
+                          <p className="font-medium" style={{ color: Colors.primary }}>Work (Central Station)</p>
+                          <p className="text-xs mt-1" style={{ color: Colors.neutralLight }}>3 routes</p>
+                        </li>
+                      </ul>
+                    </section>
+                  </section>
+                </article>
+              </figure>
+
+              <footer className="text-center mt-12 animate-on-scroll">
+                <p style={{ color: Colors.neutralLight }}>
+                  That's it. No clutter. No distractions. Just the bus information that matters to you.
+                </p>
+              </footer>
+            </article>
+          </section>
+
+          {/* Social Proof - Real Stories */}
+          <section className="py-24" style={{ backgroundColor: Colors.bgAlt }}>
+            <article className="max-w-4xl mx-auto px-6 lg:px-8">
+              <header className="text-center mb-16 animate-on-scroll">
+                <h2 className="text-4xl lg:text-5xl leading-tight mb-6 font-light" style={{ color: Colors.primary }}>
+                  Real people. Real time saved.
+                </h2>
+              </header>
+
+              <ul className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <li className="animate-on-scroll rounded-xl p-8" style={{ backgroundColor: Colors.white }}>
+                  <blockquote>
+                    <p className="text-lg leading-relaxed mb-6" style={{ color: Colors.neutral }}>
+                      "I used to wake up 30 minutes early just to be safe. Now I know exactly when my bus comes. That's 2.5 hours a week back."
+                    </p>
+                    <footer>
+                      <cite className="not-italic font-medium" style={{ color: Colors.primary }}>— James, student</cite>
+                    </footer>
+                  </blockquote>
+                </li>
+
+                <li className="animate-on-scroll rounded-xl p-8" style={{ backgroundColor: Colors.white, animationDelay: '0.1s' }}>
+                  <blockquote>
+                    <p className="text-lg leading-relaxed mb-6" style={{ color: Colors.neutral }}>
+                      "Checking seat availability changed everything. No more being packed in like sardines. I actually look forward to my commute now."
+                    </p>
+                    <footer>
+                      <cite className="not-italic font-medium" style={{ color: Colors.primary }}>— Sarah, professional</cite>
+                    </footer>
+                  </blockquote>
+                </li>
+              </ul>
+            </article>
+          </section>
+
+          {/* Final CTA */}
+          <section className="py-24" style={{ backgroundColor: Colors.white }}>
+            <article className="max-w-3xl mx-auto px-6 lg:px-8 text-center">
+              <header className="animate-on-scroll">
+                <h2 className="text-4xl lg:text-5xl leading-tight mb-6 font-light" style={{ color: Colors.primary }}>
+                  Done stressing about your commute?
+                </h2>
+                <p className="text-lg mb-10" style={{ color: Colors.neutralLight }}>
+                  Create your free account and start your confident commute today.
+                </p>
+                <nav className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <Button primary route="/dashboard" className="!px-10 !py-4 !rounded-lg !text-base !font-medium">
+                    Create Free Account
+                  </Button>
+                  <a href="/" className="inline-flex items-center justify-center px-10 py-4 rounded-lg transition-colors" style={{ color: Colors.primary, backgroundColor: `${Colors.primary}10` }}>
+                    Learn more
+                  </a>
+                </nav>
+              </header>
+            </article>
+          </section>
+        </article>
+
+        {/* Footer */}
+        <footer className="py-16 border-t" style={{ borderColor: `${Colors.primary}15` }}>
+          <section className="max-w-6xl mx-auto px-6 lg:px-8">
+            <article className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
+              <section>
+                <Link to="/" className="flex items-center gap-2 mb-4">
+                  <figure className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: Colors.primary }}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2" stroke={Colors.white} strokeWidth="2" strokeLinecap="round"/>
+                      <rect x="4" y="6" width="16" height="12" rx="2" stroke={Colors.white} strokeWidth="2"/>
+                      <circle cx="8" cy="20" r="2" fill={Colors.white}/>
+                      <circle cx="16" cy="20" r="2" fill={Colors.white}/>
+                    </svg>
+                  </figure>
+                  <span className="font-medium" style={{ color: Colors.primary }}>Basis Transport</span>
+                </Link>
+                <p style={{ color: Colors.neutralLight }} className="text-sm mt-4">
+                  Making daily commutes simple, predictable, and stress-free.
+                </p>
               </section>
-            </footer>
+
+              <section className="animate-on-scroll">
+                <h3 className="font-medium mb-4" style={{ color: Colors.primary }}>
+                  Product
+                </h3>
+                <ul className="space-y-3 text-sm" style={{ color: Colors.neutralLight }}>
+                  <li><a href="#how-it-works" className="hover:opacity-70 text-[13px] transition-opacity">How it works</a></li>
+                  <li><a href="#" className="hover:opacity-70 text-[13px] transition-opacity">Supported cities</a></li>
+                  <li><a href="#" className="hover:opacity-70 text-[13px] transition-opacity">About us</a></li>
+                </ul>
+              </section>
+
+              <section className="animate-on-scroll">
+                <h3 className="font-medium mb-4" style={{ color: Colors.primary }}>
+                  Support
+                </h3>
+                <ul className="space-y-3 text-sm" style={{ color: Colors.neutralLight }}>
+                  <li><a href="#" className="hover:opacity-70 text-[13px] transition-opacity">Help center</a></li>
+                  <li><a href="#" className="hover:opacity-70 text-[13px] transition-opacity">Contact us</a></li>
+                  <li><a href="#" className="hover:opacity-70 text-[13px] transition-opacity">Privacy</a></li>
+                </ul>
+              </section>
+            </article>
+
+            <section className="pt-8 border-t" style={{ borderColor: `${Colors.primary}15` }}>
+              <p className="text-sm leading-relaxed mb-4" style={{ color: Colors.neutralLight }}>
+                <span className='text-[13px] font-medium'>This service is free to use and supported by advertisements.</span> We will always be free for everyday commuters. Our goal is to help you travel with confidence, not to charge you for it.
+              </p>
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pt-4 border-t" style={{ borderColor: `${Colors.primary}15` }}>
+                <p className="text-xs" style={{ color: Colors.neutralLight }}>
+                  © 2026 Basis Transport. All rights reserved.
+                </p>
+                <nav className="flex gap-6 text-xs">
+                  <a href="#" className="hover:opacity-70 text-[13px] transition-opacity" style={{ color: Colors.neutralLight }}>Privacy Policy</a>
+                  <a href="#" className="hover:opacity-70 text-[13px] transition-opacity" style={{ color: Colors.neutralLight }}>Terms of Service</a>
+                  <a href="#" className="hover:opacity-70 text-[13px] transition-opacity" style={{ color: Colors.neutralLight }}>Cookies</a>
+                </nav>
+              </div>
+            </section>
           </section>
         </footer>
       </main>
