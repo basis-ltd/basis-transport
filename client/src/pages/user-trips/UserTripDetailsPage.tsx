@@ -112,13 +112,13 @@ const UserTripDetailsPage = () => {
   const getStatusColor = (status: UserTripStatus) => {
     switch (status) {
       case UserTripStatus.IN_PROGRESS:
-        return 'text-blue-600 bg-blue-50';
+        return 'text-blue-700 bg-blue-50';
       case UserTripStatus.COMPLETED:
-        return 'text-green-600 bg-green-50';
+        return 'text-green-700 bg-green-50';
       case UserTripStatus.CANCELLED:
-        return 'text-red-600 bg-red-50';
+        return 'text-red-700 bg-red-50';
       default:
-        return 'text-gray-600 bg-gray-50';
+        return 'text-secondary bg-background-secondary/60';
     }
   };
 
@@ -141,14 +141,14 @@ const UserTripDetailsPage = () => {
         </header>
 
         <article className="w-full flex flex-col gap-4">
-          <section className="w-full grid grid-cols-4 gap-4">
+          <section className="w-full grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
             {/* Trip Status */}
-            <article className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-              <h3 className="text-sm font-medium text-gray-500 mb-2">
+            <article className="bg-white rounded-2xl shadow-sm border border-primary/10 p-5">
+              <h3 className="text-sm font-medium text-secondary/70 mb-2">
                 Trip Status
               </h3>
               <span
-                className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(
+                className={`inline-block px-4 py-1 rounded-full text-sm font-medium ${getStatusColor(
                   userTrip?.status as UserTripStatus
                 )}`}
               >
@@ -157,8 +157,8 @@ const UserTripDetailsPage = () => {
             </article>
 
             {/* Trip Times */}
-            <article className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-              <h3 className="text-sm font-medium text-gray-500 mb-2">
+            <article className="bg-white rounded-2xl shadow-sm border border-primary/10 p-5">
+              <h3 className="text-sm font-medium text-secondary/70 mb-2">
                 Trip Times (
                 {moment(
                   new Date(
@@ -171,20 +171,20 @@ const UserTripDetailsPage = () => {
               </h3>
               <section className="space-y-1">
                 <ul className="w-full flex items-center gap-2 justify-between py-2">
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-secondary/80">
                     Start:{' '}
                     {userTrip?.startTime
                       ? moment(new Date(userTrip.startTime)).format('HH:mm')
                       : 'Not started'}
                   </p>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-secondary/80">
                     End:{' '}
                     {userTrip?.endTime
                       ? moment(new Date(userTrip.endTime)).format('HH:mm')
                       : 'Not completed'}
                   </p>
                 </ul>
-                <p className="text-sm text-gray-600 font-medium underline">
+                <p className="text-sm text-secondary/80 font-medium underline">
                   Time spent:{' '}
                   {userTrip?.endTime
                     ? moment(new Date(userTrip.endTime)).diff(
@@ -198,26 +198,26 @@ const UserTripDetailsPage = () => {
             </article>
 
             {/* User Information */}
-            <article className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-              <h3 className="text-sm font-medium text-gray-500 mb-2">
+            <article className="bg-white rounded-2xl shadow-sm border border-primary/10 p-5">
+              <h3 className="text-sm font-medium text-secondary/70 mb-2">
                 Passenger Information
               </h3>
               <section className="space-y-1">
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-secondary/80">
                   Name: {userTrip?.user?.name || 'Unknown'}
                 </p>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-secondary/80">
                   Phone: {userTrip?.user?.phoneNumber || 'N/A'}
                 </p>
               </section>
             </article>
 
             {/* Trip Reference */}
-            <article className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-              <h3 className="text-sm font-medium text-gray-500 mb-2">
+            <article className="bg-white rounded-2xl shadow-sm border border-primary/10 p-5">
+              <h3 className="text-sm font-medium text-secondary/70 mb-2">
                 Trip Reference
               </h3>
-              <p className="text-lg font-semibold text-gray-900">
+              <p className="text-lg font-semibold text-primary">
                 #{userTrip?.trip?.referenceId || 'N/A'}
               </p>
             </article>
@@ -235,7 +235,7 @@ const UserTripDetailsPage = () => {
             toLabel={userTrip?.exitLocation ? 'Exit Point' : 'Destination'}
           />
         </section>
-        <menu className='w-full flex items-center gap-3 justify-between'>
+        <menu className="w-full flex items-center gap-3 justify-between">
           <Button onClick={(e) => {
             e.preventDefault();
             navigate(-1);

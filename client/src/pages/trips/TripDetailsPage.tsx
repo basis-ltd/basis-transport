@@ -213,13 +213,13 @@ const TripDetailsPage = () => {
     const getStatusColor = (status: TripStatus) => {
       switch (status) {
         case TripStatus.IN_PROGRESS:
-          return 'text-blue-600 bg-blue-50';
+          return 'text-blue-700 bg-blue-50';
         case TripStatus.COMPLETED:
-          return 'text-green-600 bg-green-50';
+          return 'text-green-700 bg-green-50';
         case TripStatus.CANCELLED:
-          return 'text-red-600 bg-red-50';
+          return 'text-red-700 bg-red-50';
         default:
-          return 'text-gray-600 bg-gray-50';
+          return 'text-secondary bg-background-secondary/60';
       }
     };
 
@@ -227,7 +227,7 @@ const TripDetailsPage = () => {
     <AppLayout>
       <main className="w-full flex flex-col gap-4">
         <nav className="w-full flex flex-col gap-4">
-          <menu className="w-full flex items-start gap-3 justify-between">
+          <menu className="w-full flex flex-wrap items-start gap-3 justify-between">
             <Heading>#{trip?.referenceId}</Heading>
 
             <ul className="flex flex-col gap-1">
@@ -331,42 +331,42 @@ const TripDetailsPage = () => {
         </nav>
         <section className="w-full flex flex-col gap-4">
           <Heading type="h2">Trip Details</Heading>
-          <article className="w-full grid grid-cols-4 gap-4">
+          <article className="w-full grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
             {/* Trip Status */}
-            <article className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-              <h3 className="text-sm font-medium text-gray-500 mb-2">
+            <article className="bg-white rounded-2xl shadow-sm border border-primary/10 p-5">
+              <h3 className="text-sm font-medium text-secondary/70 mb-2">
                 Trip Status
               </h3>
               <p
                 className={`${getStatusColor(
                   trip?.status as TripStatus
-                )} inline-block px-3 py-1 rounded-full text-sm font-medium`}
+                )} inline-block px-4 py-1 rounded-full text-sm font-medium`}
               >
                 {capitalizeString(trip?.status) || 'N/A'}
               </p>
             </article>
 
             {/* Trip Times */}
-            <article className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-              <h3 className="text-sm font-medium text-gray-500 mb-2">
+            <article className="bg-white rounded-2xl shadow-sm border border-primary/10 p-5">
+              <h3 className="text-sm font-medium text-secondary/70 mb-2">
                 Trip Times
               </h3>
               <section className="space-y-1">
                 <ul className="w-full flex items-center gap-2 justify-between py-2">
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-secondary/80">
                     Start:{' '}
                     {trip?.startTime
                       ? moment(new Date(trip.startTime)).format('HH:mm')
                       : 'Not started'}
                   </p>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-secondary/80">
                     End:{' '}
                     {trip?.endTime
                       ? moment(new Date(trip.endTime)).format('HH:mm')
                       : 'Not completed'}
                   </p>
                 </ul>
-                <p className="text-sm text-gray-600 font-medium underline">
+                <p className="text-sm text-secondary/80 font-medium underline">
                   Duration:{' '}
                   {trip?.startTime && trip?.endTime
                     ? moment(new Date(trip.endTime)).diff(
@@ -380,26 +380,26 @@ const TripDetailsPage = () => {
             </article>
 
             {/* Trip Locations */}
-            <article className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-              <h3 className="text-sm font-medium text-gray-500 mb-2">
+            <article className="bg-white rounded-2xl shadow-sm border border-primary/10 p-5">
+              <h3 className="text-sm font-medium text-secondary/70 mb-2">
                 Trip Locations
               </h3>
               <section className="space-y-1">
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-secondary/80">
                   From: {trip?.locationFrom?.name || 'N/A'}
                 </p>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-secondary/80">
                   To: {trip?.locationTo?.name || 'N/A'}
                 </p>
               </section>
             </article>
 
             {/* Available Seats */}
-            <article className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-              <h3 className="text-sm font-medium text-gray-500 mb-2">
+            <article className="bg-white rounded-2xl shadow-sm border border-primary/10 p-5">
+              <h3 className="text-sm font-medium text-secondary/70 mb-2">
                 Available Seats
               </h3>
-              <p className="text-lg font-semibold text-gray-900">
+              <p className="text-lg font-semibold text-primary">
                 {tripAvailableCapacityIsFetching ? (
                   <Loader className="text-primary" />
                 ) : (

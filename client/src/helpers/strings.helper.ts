@@ -61,34 +61,34 @@ export const formatDate = (
  */
 export const getStatusBackgroundColor = (status?: string) => {
   let bgColor =
-    'bg-gray-700 text-center p-[3px] px-4 text-white text-normal rounded-md text-[12px]';
+    'bg-gray-700 text-center px-4 py-1 text-white text-normal rounded-full text-[12px]';
   switch (status) {
     case 'OPEN':
       bgColor =
-        'bg-primary text-center p-1 px-4 text-white text-normal rounded-lg text-[12px]';
+        'bg-primary text-center px-4 py-1 text-white text-normal rounded-full text-[12px]';
       break;
     case 'COMPLETED':
       bgColor =
-        'bg-green-700 text-center p-1 px-4 text-white text-normal rounded-lg text-[12px]';
+        'bg-green-700 text-center px-4 py-1 text-white text-normal rounded-full text-[12px]';
       break;
     case 'REJECTED':
     case 'CLOSED':
     case 'CANCELLED':
       bgColor =
-        'bg-red-700 text-center p-1 px-4 text-white text-normal rounded-lg text-[12px]';
+        'bg-red-700 text-center px-4 py-1 text-white text-normal rounded-full text-[12px]';
       break;
     case 'IN_PROGRESS':
       bgColor =
-        'bg-orange-700 text-center p-1 px-4 text-white text-normal rounded-lg text-[12px]';
+        'bg-orange-700 text-center px-4 py-1 text-white text-normal rounded-full text-[12px]';
       break;
     case 'REOPENED':
     case 'PENDING':
       bgColor =
-        'bg-yellow-700 text-center p-1 px-4 text-white text-normal rounded-lg text-[12px]';
+        'bg-yellow-700 text-center px-4 py-1 text-white text-normal rounded-full text-[12px]';
       break;
     default:
       bgColor =
-        'bg-gray-700 text-center p-1 px-4 text-white text-normal rounded-lg text-[12px]';
+        'bg-gray-700 text-center px-4 py-1 text-white text-normal rounded-full text-[12px]';
   }
   return bgColor;
 };

@@ -45,7 +45,7 @@ const Navbar = () => {
   }, [dropdownOpen]);
 
   return (
-    <header className="fixed top-0 left-0 w-full h-[9vh] bg-background shadow z-[1000] transition-all duration-300 flex items-center">
+    <header className="fixed top-0 left-0 w-full h-[9vh] bg-background/90 backdrop-blur border-b border-primary/10 shadow-sm z-[1000] transition-all duration-300 flex items-center">
       <nav
         className="w-full flex items-center justify-between px-6 md:px-12"
         aria-label="Main navigation"
@@ -60,7 +60,7 @@ const Navbar = () => {
                 navigate('/');
               }
             }}
-            className="flex items-center gap-2 text-xl font-bold text-primary tracking-wide select-none hover:text-primary/80 transition-colors duration-200"
+            className="flex items-center gap-2 text-xl font-semibold text-primary tracking-wide select-none hover:text-primary/80 transition-colors duration-200"
           >
             <span className="text-2xl">🚌</span>
             <span>Basis Transport</span>
@@ -70,7 +70,7 @@ const Navbar = () => {
           <li className="relative">
             <Link
               to="#"
-              className="p-2 px-[11px] rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground transition-colors focus:outline-none"
+              className="p-2 px-[11px] rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-white transition-colors focus:outline-none"
               aria-label="User profile"
               aria-haspopup="true"
               aria-expanded={dropdownOpen}

@@ -19,12 +19,17 @@ export const TripAvailableCapacity = ({ tripId }: { tripId: string }) => {
   return (
     <Link
       to={`/user-trips?tripId=${tripId}`}
-      className="text-sm p-1 rounded-md bg-gray-50 hover:bg-gray-100"
+      className="inline-flex items-center gap-2 text-[12px] font-medium px-3 py-1 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
     >
       {tripAvailableCapacityIsFetching ? (
         <Loader className="text-primary" />
       ) : (
-        availableCapacity?.availableCapacity ?? 'N/A'
+        <>
+          <span className="font-semibold">
+            {availableCapacity?.availableCapacity ?? 'N/A'}
+          </span>
+          <span className="text-[11px] text-secondary">seats</span>
+        </>
       )}
     </Link>
   );

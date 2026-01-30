@@ -14,7 +14,7 @@ export const TableStatusLabel: React.FC<TableStatusLabelProps> = ({
   if (!status) return null;
 
   return (
-    <p className={getStatusBackgroundColor(status)}>
+    <p className={`${getStatusBackgroundColor(status)} shadow-sm`}>
       {capitalizeString(status)}
     </p>
   );

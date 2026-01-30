@@ -49,20 +49,20 @@ const Login = () => {
         <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%F0%9F%9A%8C%3C/text%3E%3C/svg%3E" />
         <link rel="canonical" href="https://transport.basis.rw/auth/login" />
       </Helmet>
-      <nav className="w-full flex items-center px-8 py-3 bg-gradient-to-r from-primary/10 to-white border-b border-gray-200 shadow-sm">
-        <Link to="/" className="flex items-center gap-2 text-2xl font-bold text-primary hover:text-primary/80 transition-colors duration-200">
+      <nav className="w-full flex items-center px-6 py-4 bg-gradient-to-r from-primary/10 to-white border-b border-primary/10 shadow-sm">
+        <Link to="/" className="flex items-center gap-2 text-xl font-semibold text-primary hover:text-primary/80 transition-colors duration-200">
           <span className="text-3xl">🚌</span>
           <span>Basis Transport</span>
         </Link>
       </nav>
-      <main className="w-full h-screen items-center justify-center flex flex-col gap-4">
+      <main className="w-full min-h-screen items-center justify-center flex flex-col gap-4 bg-background-secondary/40 px-4">
         <form
-          className="w-full py-8 max-w-[35%] sm:max-w-[35%] md:max-w-[35%] lg:max-w-[35%] shadow-md rounded-md bg-white p-8 mx-auto flex flex-col gap-4"
+          className="w-full py-8 max-w-[420px] shadow-lg rounded-2xl bg-white/90 border border-primary/10 p-8 mx-auto flex flex-col gap-4"
           onSubmit={onSubmit}
         >
           <header className="flex flex-col gap-2 items-center mb-4">
             <Heading type="h1">Welcome Back</Heading>
-            <p className="text-sm text-secondary">
+            <p className="text-sm text-secondary/80">
               Please sign in to your account
             </p>
           </header>
@@ -82,6 +82,7 @@ const Login = () => {
                   errorMessage={errors.email?.message}
                   placeholder="Enter email address"
                   label="Email"
+                  autoComplete="email"
                   required
                 />
               )}
@@ -97,6 +98,7 @@ const Login = () => {
                   {...field}
                   placeholder="Enter password"
                   label="Password"
+                  autoComplete="current-password"
                   required
                   type={showPassword ? 'text' : 'password'}
                   suffixIcon={showPassword ? faEyeSlash : faEye}
@@ -137,7 +139,7 @@ const Login = () => {
             >
               Login
             </Button>
-            <p className="text-sm text-secondary">
+            <p className="text-sm text-secondary/80">
               Don't have an account?{' '}
               <Link
                 to="/auth/register"

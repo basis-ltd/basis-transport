@@ -19,10 +19,13 @@ import {
   faClockRotateLeft,
   faCreditCard,
   faUsers,
+  faLocationDot,
 } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import moment from 'moment';
 import { useEffect, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet';
+import { TripAvailableCapacity } from '@/components/trips/TripAvailableCapacity';
 
 const UserDashboard = () => {
   /**
@@ -205,7 +208,7 @@ const UserDashboard = () => {
             ))}
           </section>
 
-          <section className="w-full bg-background/5 rounded-xl shadow p-6 flex flex-col gap-4">
+          <section className="w-full bg-white/90 rounded-2xl border border-primary/10 shadow-sm p-6 flex flex-col gap-4">
             <header>
               <Heading type="h3" className="text-primary">
                 Monthly Trips Trend
@@ -222,12 +225,65 @@ const UserDashboard = () => {
                 View all
               </Button>
             </ul>
-            <Table
-              columns={tripsColumns}
-              data={tripsList}
-              isLoading={tripsIsFetching}
-              showPagination={false}
-            />
+            <section className="hidden md:block">
+              <Table
+                columns={tripsColumns}
+                data={tripsList}
+                isLoading={tripsIsFetching}
+                showPagination={false}
+              />
+            </section>
+            <section className="grid grid-cols-1 gap-4 md:hidden">
+              {tripsList?.map((trip) => (
+                <article
+                  key={trip.id}
+                  className="rounded-2xl border border-primary/10 bg-white p-4 shadow-sm"
+                >
+                  <header className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-[11px] uppercase tracking-wide text-secondary/70">
+                        Trip {trip.referenceId}
+                      </p>
+                      <h3 className="text-lg font-semibold text-primary">
+                        {trip.locationFrom?.name} → {trip.locationTo?.name}
+                      </h3>
+                      <p className="text-[12px] text-secondary/80 mt-1 flex items-center gap-1">
+                        <FontAwesomeIcon icon={faLocationDot} className="text-primary/70" />
+                        {trip.startTime
+                          ? moment(trip.startTime).format('MMM D, HH:mm')
+                          : 'Start time pending'}
+                      </p>
+                    </div>
+                    <span className="px-3 py-1 rounded-full text-[11px] font-medium bg-primary/10 text-primary">
+                      {trip.status
+                        ? trip.status.replace(/_/g, ' ')
+                        : 'Unknown'}
+                    </span>
+                  </header>
+                  <section className="grid grid-cols-2 gap-3 mt-4">
+                    <article className="p-3 rounded-xl bg-background-secondary/70">
+                      <p className="text-[11px] text-secondary/70">Available seats</p>
+                      <div className="mt-2">
+                        <TripAvailableCapacity tripId={trip.id} />
+                      </div>
+                    </article>
+                    <article className="p-3 rounded-xl bg-background-secondary/70">
+                      <p className="text-[11px] text-secondary/70">ETA</p>
+                      <p className="text-base font-semibold text-primary">
+                        {trip.startTime
+                          ? moment(trip.startTime).add(15, 'minutes').fromNow()
+                          : 'TBD'}
+                      </p>
+                    </article>
+                  </section>
+                  <footer className="flex items-center justify-between mt-4">
+                    <Button route={`/trips/${trip.id}`} primary className="w-full">
+                      View trip
+                    </Button>
+                  </footer>
+                </article>
+              ))}
+            </section>
           </section>
         </main>
       </AppLayout>

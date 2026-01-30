@@ -90,15 +90,15 @@ export default function Table<TData, TValue>({
 
   return (
     <>
-      <section className="rounded-md border w-full">
-        <DataTable>
+      <section className="rounded-xl border border-primary/10 w-full bg-white/90">
+        <DataTable className="min-w-[720px]">
           <TableHeader className="px-0">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
                     <TableHead
-                      className="text-[13px] text-black p-4"
+                      className="text-[13px] text-secondary p-4"
                       key={header.id}
                       colSpan={header.colSpan}
                     >

@@ -33,26 +33,26 @@ const DashboardCard = ({
 
   return (
     <article
-      className="relative flex flex-col items-start cursor-pointer justify-between w-full h-full bg-white/80 shadow-lg rounded-xl p-5 gap-4 overflow-hidden transition-transform duration-300 ease-in-out hover:scale-105"
+      className="relative flex flex-col items-start cursor-pointer justify-between w-full h-full bg-white shadow-sm rounded-2xl p-5 gap-4 overflow-hidden transition-transform duration-200 ease-in-out hover:scale-[1.02] border border-primary/10"
       tabIndex={0}
       aria-label={title}
     >
       <span
         aria-hidden
-        className="absolute inset-0 bg-gradient-to-tr from-primary/5 via-secondary/5 to-background/5 opacity-80 pointer-events-none rounded-xl"
+        className="absolute inset-0 bg-gradient-to-tr from-primary/5 via-transparent to-background/40 opacity-80 pointer-events-none rounded-2xl"
       />
-      <section className="flex items-center justify-between w-full gap-2 z-10">
-        <menu className="flex items-start flex-col gap-2 max-[700px]:gap-2">
-          <Heading isLoading={isLoading} type="h3" className="text-secondary font-semibold text-[15px] max-[1200px]:text-[14px] max-[700px]:text-[13px]">
+      <section className="flex items-start justify-between w-full gap-3 z-10">
+        <menu className="flex items-start flex-col gap-2">
+          <Heading isLoading={isLoading} type="h3" className="text-secondary font-medium text-[14px]">
             {title}
           </Heading>
-          <header className="flex items-end gap-2">
-            <Heading isLoading={isLoading} type="h1" className="font-bold text-[1.5rem] text-primary drop-shadow-sm">
+          <header className="flex flex-wrap items-end gap-2">
+            <Heading isLoading={isLoading} type="h1" className="font-semibold text-[1.8rem] text-primary">
               {Number(value).toLocaleString()}
             </Heading>
             {change !== undefined && (
               <span
-                className={`flex items-center gap-1 text-[13px] font-medium ${
+                className={`flex items-center gap-1 text-[12px] font-medium ${
                   isPositive
                     ? 'text-green-600'
                     : isNegative
@@ -66,18 +66,18 @@ const DashboardCard = ({
               </span>
             )}
           </header>
-          <p className="text-xs text-secondary/80 mt-1">{description}</p>
+          <p className="text-xs text-secondary/70">{description}</p>
         </menu>
-        <figure className="p-3 rounded-xl flex items-center justify-center bg-primary/90 shadow-md">
+        <figure className="p-3 rounded-2xl flex items-center justify-center bg-primary/10 text-primary shadow-sm">
           <FontAwesomeIcon
-            className="text-white text-[24px] max-[500px]:text-[18px] drop-shadow"
+            className="text-primary text-[22px] drop-shadow"
             icon={icon}
           />
         </figure>
       </section>
       <Link
         to={route ?? '#'}
-        className="flex w-full mt-2 text-[13px] z-10 text-secondary hover:text-primary transition-colors duration-300"
+        className="flex w-full mt-1 text-[13px] z-10 text-secondary hover:text-primary transition-colors duration-200"
       >
         <menu className="flex items-center gap-2 text-[12px] ease-in-out hover:gap-3 duration-300 hover:underline hover:underline-offset-4">
           View more

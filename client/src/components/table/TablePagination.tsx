@@ -88,7 +88,7 @@ export function DataTablePagination<TData>({
 
       <menu className="flex flex-wrap items-center gap-2 sm:gap-6 lg:space-x-8">
         <section className="flex items-center space-x-2">
-          <p className="hidden text-[13px] font-medium sm:block">Rows per page</p>
+          <p className="hidden text-[13px] font-medium text-secondary sm:block">Rows per page</p>
           <Select
             value={`${size}`}
             onValueChange={(value) => {
@@ -98,7 +98,7 @@ export function DataTablePagination<TData>({
               }
             }}
           >
-            <SelectTrigger className="h-8 w-[70px]">
+            <SelectTrigger className="h-9 w-[70px]">
               <SelectValue placeholder={size} />
             </SelectTrigger>
             <SelectContent side="top">
@@ -116,7 +116,7 @@ export function DataTablePagination<TData>({
         </section>
 
         <section className="flex items-center text-sm font-medium">
-          <p className="text-[13px]">
+          <p className="text-[13px] text-secondary">
             Page {page + 1} of {totalPages || 1}
           </p>
         </section>
@@ -126,7 +126,7 @@ export function DataTablePagination<TData>({
             type="number"
             min={1}
             max={totalPages}
-            className="w-12 text-center placeholder:text-[13px] text-[13px] py-1 px-2 border border-[#E5E5E5] rounded-md"
+            className="w-12 text-center placeholder:text-[13px] text-[13px] py-1 px-2 border border-primary/20 rounded-lg bg-white"
             onChange={(e) => {
               e.preventDefault();
               const value = Number(e.target.value);
