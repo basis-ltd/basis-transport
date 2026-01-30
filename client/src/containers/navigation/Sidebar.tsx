@@ -60,14 +60,14 @@ const Sidebar = () => {
   return (
     <motion.aside
       className={`fixed top-[9vh] shadow-md left-0 h-[91vh] flex flex-col 
-                 bg-background transition-all duration-300 ease-in-out 
+                 bg-background/95 backdrop-blur transition-all duration-300 ease-in-out 
                  ${isOpen ? 'z-[999]' : 'z-10'}
                  ${
                    isOpen
-                     ? 'w-[60vw] sm:w-[40vw] md:w-[20vw] shadow-xl p-4'
-                     : 'w-[10vw] md:w-[5vw] p-2 shadow-lg'
-                 } 
-                 md:p-4 md:shadow-none md:z-auto`}
+                      ? 'w-[75vw] sm:w-[40vw] md:w-[20vw] shadow-xl p-4'
+                      : 'w-[15vw] md:w-[5vw] p-2 shadow-lg'
+                  } 
+                  md:p-4 md:shadow-none md:z-auto`}
     >
       <header
         className={`flex items-center w-full mb-4 
@@ -113,12 +113,12 @@ const Sidebar = () => {
             <li key={index} className="w-full flex flex-col items-start">
               <Link
                 to={nav.path}
-                className={`flex w-full items-center gap-4 font-medium text-[13px] ease-in-out duration-200 rounded-lg 
+                className={`flex w-full items-center gap-4 font-medium text-[13px] ease-in-out duration-200 rounded-xl 
                             ${isOpen ? 'px-4 py-3' : 'p-3 justify-center'}
-                            hover:bg-primary/5 hover:text-primary
+                            hover:bg-primary/10 hover:text-primary
                             ${
                               isLinkActive
-                                ? 'bg-primary/10 text-primary font-semibold'
+                                ? 'bg-primary/15 text-primary font-semibold'
                                 : 'text-gray-700'
                             }`}
                 onClick={(e) => {
@@ -172,11 +172,11 @@ const Sidebar = () => {
                       <li key={subIndex}>
                         <Link
                           to={sub.path}
-                          className={`flex items-center w-full gap-3 px-4 py-3 font-medium text-xs ease-in-out duration-200 rounded-md 
-                                      hover:bg-primary/5 hover:text-primary
+                          className={`flex items-center w-full gap-3 px-4 py-3 font-medium text-xs ease-in-out duration-200 rounded-lg 
+                                      hover:bg-primary/10 hover:text-primary
                                       ${
                                         isSubLinkActive
-                                          ? 'bg-primary/10 text-primary font-semibold'
+                                          ? 'bg-primary/15 text-primary font-semibold'
                                           : 'text-gray-600'
                                       }`}
                         >

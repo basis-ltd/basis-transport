@@ -52,10 +52,10 @@ const TextArea: FC<TextAreaProps> = ({
   }, [defaultValue, value]);
 
   return (
-    <label className="grid w-full gap-1.5">
+    <label className="grid w-full gap-2">
       {label && (
         <header className="flex items-center gap-1">
-          <span className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+          <span className="text-sm font-medium leading-none text-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
             {label}
           </span>
           {required && <span className="text-destructive">*</span>}
@@ -68,7 +68,7 @@ const TextArea: FC<TextAreaProps> = ({
         value={value}
         readOnly={readonly}
         placeholder={placeholder}
-        className={cn(`w-full h-[20vh]`, !resize && 'resize-none', className)}
+        className={cn(`w-full h-[20vh] bg-white shadow-sm`, !resize && 'resize-none', className)}
         onChange={onChange}
         onBlur={onBlur}
         defaultValue={defaultValue}

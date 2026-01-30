@@ -43,20 +43,20 @@ const Signup = () => {
         <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%F0%9F%9A%8C%3C/text%3E%3C/svg%3E" />
         <link rel="canonical" href="https://transport.basis.rw/auth/register" />
       </Helmet>
-      <nav className="w-full flex items-center px-8 py-3 bg-gradient-to-r from-primary/10 to-white border-b border-gray-200 shadow-sm">
-        <Link to="/" className="flex items-center gap-2 text-2xl font-bold text-primary hover:text-primary/80 transition-colors duration-200">
+      <nav className="w-full flex items-center px-6 py-4 bg-gradient-to-r from-primary/10 to-white border-b border-primary/10 shadow-sm">
+        <Link to="/" className="flex items-center gap-2 text-xl font-semibold text-primary hover:text-primary/80 transition-colors duration-200">
           <span className="text-3xl">🚌</span>
           <span>Basis Transport</span>
         </Link>
       </nav>
-      <main className="w-full h-screen items-center justify-center flex flex-col gap-4">
+      <main className="w-full min-h-screen items-center justify-center flex flex-col gap-4 bg-background-secondary/40 px-4">
         <form
-          className="w-full py-8 max-w-[35%] sm:max-w-[90%] md:max-w-[60%] lg:max-w-[35%] shadow-md rounded-md bg-white p-8 mx-auto flex flex-col gap-4"
+          className="w-full py-8 max-w-[460px] shadow-lg rounded-2xl bg-white/90 border border-primary/10 p-8 mx-auto flex flex-col gap-4"
           onSubmit={onSubmit}
         >
           <header className="flex flex-col gap-2 items-center mb-4">
             <Heading type="h1">Create Account</Heading>
-            <p className="text-sm text-secondary">
+            <p className="text-sm text-secondary/80">
               Please fill in the form to create your account
             </p>
           </header>
@@ -75,6 +75,7 @@ const Signup = () => {
                   errorMessage={errors.name?.message}
                   placeholder="Enter your name"
                   label="Name"
+                  autoComplete="name"
                   required
                 />
               )}
@@ -94,6 +95,7 @@ const Signup = () => {
                   errorMessage={errors.email?.message}
                   placeholder="Enter email address"
                   label="Email"
+                  autoComplete="email"
                   required
                 />
               )}
@@ -113,6 +115,7 @@ const Signup = () => {
                   errorMessage={errors.phoneNumber?.message}
                   placeholder="Enter phone number"
                   label="Phone Number"
+                  autoComplete="tel"
                   required
                   type="tel"
                 />
@@ -133,6 +136,7 @@ const Signup = () => {
                   errorMessage={errors.password?.message}
                   placeholder="Enter password"
                   label="Password"
+                  autoComplete="new-password"
                   required
                   type={showPassword ? 'text' : 'password'}
                   suffixIcon={showPassword ? faEyeSlash : faEye}
@@ -146,17 +150,22 @@ const Signup = () => {
           </fieldset>
           <footer className="w-full flex flex-col items-center gap-2 mt-2">
             <menu className="w-full flex flex-col items-center justify-between gap-2">
-              <Button type="submit" className='w-full' isLoading={signupIsLoading} primary>
+              <Button
+                type="submit"
+                className="w-full"
+                isLoading={signupIsLoading}
+                primary
+              >
                 Sign Up
               </Button>
-            <p className="text-sm text-secondary">
-              Already have an account?{' '}
-              <Link
-                to="/auth/login"
-                className="text-primary hover:underline transition-colors duration-200"
-              >
-                Login
-              </Link>
+              <p className="text-sm text-secondary/80">
+                Already have an account?{' '}
+                <Link
+                  to="/auth/login"
+                  className="text-primary hover:underline transition-colors duration-200"
+                >
+                  Login
+                </Link>
               </p>
             </menu>
           </footer>

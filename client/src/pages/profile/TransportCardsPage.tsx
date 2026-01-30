@@ -75,7 +75,7 @@ export const TransportCardDetails = ({
 }) => {
   if (isLoading) {
     return (
-      <article className="w-full h-32 flex items-center justify-center bg-white rounded-lg shadow-md">
+      <article className="w-full h-32 flex items-center justify-center bg-white rounded-2xl shadow-sm border border-primary/10">
         <Loader size="large" className="text-primary" />
       </article>
     );
@@ -83,29 +83,29 @@ export const TransportCardDetails = ({
 
   if (!transportCard) {
     return (
-      <article className="w-full p-4 text-center text-gray-500 bg-white rounded-lg shadow-md">
+      <article className="w-full p-4 text-center text-secondary bg-white rounded-2xl shadow-sm border border-primary/10">
         <p>No transport card found</p>
       </article>
     );
   }
 
   return (
-    <article className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 p-4">
+    <article className="bg-white rounded-2xl border border-primary/10 shadow-sm hover:shadow-md transition-shadow duration-200 p-5">
       <header className="flex justify-between items-start mb-4">
         <section>
           <h1
             className={`${
               !transportCard?.name
-                ? 'text-gray-500 invisible'
-                : 'text-lg font-semibold text-gray-900 mb-1'
+                ? 'text-secondary/60 invisible'
+                : 'text-lg font-semibold text-primary mb-1'
             }`}
           >
             {transportCard?.name || 'Unnamed Card'}
           </h1>
-          <p className="text-gray-600 text-sm font-medium">
+          <p className="text-secondary/80 text-sm font-medium">
             Card: {transportCard?.cardNumber}
           </p>
-          <time className="text-xs text-gray-500 block mt-1">
+          <time className="text-xs text-secondary/60 block mt-1">
             Date added:{' '}
             {new Date(transportCard?.createdAt).toLocaleDateString()}
           </time>
@@ -114,7 +114,7 @@ export const TransportCardDetails = ({
           <CustomTooltip label={`Edit ${transportCard?.cardNumber}`}>
             <FontAwesomeIcon
               icon={faPenToSquare}
-              className="p-2 bg-primary text-white rounded-md transition-colors duration-200 cursor-pointer hover:bg-primary/80"
+              className="p-2 bg-primary/10 text-primary rounded-lg transition-colors duration-200 cursor-pointer hover:bg-primary/20"
               onClick={(e) => {
                 e.preventDefault();
                 /* TODO: Implement edit functionality */
@@ -129,7 +129,7 @@ export const TransportCardDetails = ({
           >
             <FontAwesomeIcon
               icon={faTrash}
-              className="p-2 bg-red-700 text-white rounded-md transition-colors duration-200 cursor-pointer hover:bg-red-800"
+              className="p-2 bg-red-100 text-red-700 rounded-lg transition-colors duration-200 cursor-pointer hover:bg-red-200"
               onClick={(e) => {
                 e.preventDefault();
                 /* TODO: Implement delete functionality */
@@ -141,18 +141,18 @@ export const TransportCardDetails = ({
         </nav>
       </header>
 
-      <footer className="p-3 bg-gray-50 rounded-md">
-        <h2 className="text-sm font-medium text-gray-900 mb-2">Card Details</h2>
+      <footer className="p-4 bg-background-secondary/70 rounded-xl">
+        <h2 className="text-sm font-medium text-primary mb-2">Card Details</h2>
         <section className="grid grid-cols-2 gap-2">
-          <article className="p-2 bg-white rounded-md shadow-sm">
-            <p className="text-xs text-gray-500">Created By</p>
-            <p className="text-sm text-gray-900 truncate">
+          <article className="p-3 bg-white rounded-lg shadow-sm border border-primary/10">
+            <p className="text-xs text-secondary/70">Created By</p>
+            <p className="text-sm text-primary truncate">
               {transportCard?.createdBy?.name || 'Unknown'}
             </p>
           </article>
-          <article className="p-2 bg-white rounded-md shadow-sm">
-            <p className="text-xs text-gray-500">Status</p>
-            <p className="text-sm text-gray-900">Active</p>
+          <article className="p-3 bg-white rounded-lg shadow-sm border border-primary/10">
+            <p className="text-xs text-secondary/70">Status</p>
+            <p className="text-sm text-primary">Active</p>
           </article>
         </section>
       </footer>

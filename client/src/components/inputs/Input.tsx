@@ -103,23 +103,23 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ) => {
     if (['checkbox', 'radio'].includes(type)) {
       if (['checkbox'].includes(type)) {
-        return (
-          <label className="flex w-fit items-center gap-2 text-[13px]">
-            <Checkbox
-              onCheckedChange={
-                onChange as ((checked: CheckedState) => void) | undefined
-              }
+          return (
+            <label className="flex w-fit items-center gap-2 text-[13px]">
+              <Checkbox
+                onCheckedChange={
+                  onChange as ((checked: CheckedState) => void) | undefined
+                }
               name={name}
               value={value}
               checked={checked || !!value}
               defaultChecked={defaultChecked || !!value}
-              className={`${
-                value || defaultChecked || checked
-                  ? 'data-[state=checked]:bg-primary text-white'
-                  : ''
-              } w-4 h-4 border-[1.5px] cursor-pointer border-secondary outline-none focus:outline-none ease-in-out duration-50`}
-            />
-            <p
+                className={`${
+                  value || defaultChecked || checked
+                    ? 'data-[state=checked]:bg-primary text-white'
+                    : ''
+                } w-4 h-4 border-[1.5px] cursor-pointer border-secondary outline-none focus:outline-none ease-in-out duration-50`}
+              />
+              <p
               className={`${
                 label ? 'flex' : 'hidden'
               } text-secondary text-[13px]`}
@@ -146,12 +146,12 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     }
 
     return (
-      <label className={`flex flex-col gap-[8px] w-full ${labelClassName}`}>
-        <header
-          className={`${
-            label ? 'pl-2 flex items-center gap-[8px] text-[14px]' : 'hidden'
-          }`}
-        >
+        <label className={`flex flex-col gap-[8px] w-full ${labelClassName}`}>
+          <header
+            className={`${
+              label ? 'pl-1 flex items-center gap-[8px] text-[14px] text-secondary' : 'hidden'
+            }`}
+          >
           {label}{' '}
           {required && (
             <CustomTooltip
@@ -163,7 +163,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           )}
         </header>
 
-        <article className="relative w-full flex flex-col gap-[6px]">
+          <article className="relative w-full flex flex-col gap-[6px]">
           {prefixIcon || prefixText ? (
             <nav className="absolute inset-y-0 start-0 flex items-center ps-4">
               <Link
@@ -219,17 +219,17 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
               inputMode={inputMode}
               pattern={pattern}
               className={`
-                !py-[14px] px-5
+                !py-[12px] px-5
                 font-normal
                 placeholder:!font-light
                 placeholder:text-[13px] 
                 text-[14px]
                 flex items-center w-full
                 rounded-lg border-[1.5px]
-                border-secondary border-opacity-50
+                border-secondary/30
                 outline-none focus:outline-none
-                focus:border-[1.6px] focus:border-primary
-                ease-in-out duration-50
+                focus:border-[1.6px] focus:border-primary/50
+                ease-in-out duration-100 bg-white shadow-sm
                 ${className}
                 ${prefixIcon && 'ps-12'}
                 ${prefixText ? 'ps-[4rem]' : ''}

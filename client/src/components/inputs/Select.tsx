@@ -46,8 +46,8 @@ const Select = ({
   errorMessage = undefined,
 }: SelectProps) => {
   return (
-    <label className={`flex flex-col gap-1 w-full ${labelClassName}`}>
-      <p className={label ? 'flex items-center gap-1 text-[14px]' : 'hidden'}>
+    <label className={`flex flex-col gap-2 w-full ${labelClassName}`}>
+      <p className={label ? 'flex items-center gap-1 text-[14px] text-secondary' : 'hidden'}>
         {label} <span className={required ? `text-red-600` : 'hidden'}>*</span>
       </p>
       <SelectComponent
@@ -57,12 +57,12 @@ const Select = ({
         name={name}
       >
         <SelectTrigger
-          className={`w-full focus:ring-transparent cursor-pointer ring-0 h-10 ${className}`}
+          className={`w-full focus:ring-transparent cursor-pointer ring-0 h-11 ${className}`}
         >
           <SelectValue
-            className="text-[10px]!"
+            className="text-[13px]"
             placeholder={
-              <p className="text-[13px] text-gray-500">{placeholder}</p>
+              <p className="text-[13px] text-secondary/70">{placeholder}</p>
             }
           />
         </SelectTrigger>

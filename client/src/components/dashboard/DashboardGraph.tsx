@@ -39,7 +39,7 @@ const DashboardGraph = ({
   width = '100%',
   type = 'natural',
   vertical = false,
-  fill = '#EAFAFE',
+  fill = '#e6ede5',
   strokeWidth = 2,
 }: DashboardGraphProps) => {
   return (
@@ -54,7 +54,7 @@ const DashboardGraph = ({
           strokeWidth={strokeWidth}
           stroke="#283618"
           type={type || 'natural'}
-          name="Applications"
+          name="Trips"
         />
         <XAxis
           dataKey={dataKey}
@@ -86,7 +86,7 @@ const DashboardGraph = ({
             fontSize: '12px',
             fontFamily: 'system-ui, -apple-system, sans-serif',
           }}
-          formatter={(value: number) => [`${value} Applications`, '']}
+          formatter={(value: number) => [`${value} Trips`, '']}
           labelFormatter={(label) => `Month: ${label}`}
         />
         <CartesianGrid

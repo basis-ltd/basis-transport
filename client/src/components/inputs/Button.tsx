@@ -35,23 +35,23 @@ const Button: FC<ButtonProps> = ({
   isLoading = false,
   children,
 }) => {
-  const baseStyles = `py-[6px] flex items-center gap-2 justify-center text-center border border-primary px-4 rounded-md text-[13px] text-primary bg-white hover:bg-primary hover:text-white cursor-pointer ease-in-out duration-400 hover:scale-[1.005] 
-    sm:text-[12px] md:text-[13px] lg:text-[13px]
-    sm:py-[4px] md:py-[6px]
-    sm:px-3 md:px-4 lg:px-5
+  const baseStyles = `py-[10px] flex items-center gap-2 justify-center text-center border border-primary/20 px-5 rounded-lg text-[14px] text-primary bg-white hover:bg-primary/10 hover:text-primary cursor-pointer ease-in-out duration-200 hover:scale-[1.01] shadow-sm
+    sm:text-[13px] md:text-[14px] lg:text-[14px]
+    sm:py-[8px] md:py-[10px]
+    sm:px-4 md:px-5 lg:px-6
     sm:gap-1 md:gap-2 lg:gap-2
     ${
       !styled &&
-      'bg-transparent! shadow-none! text-primary! hover:scale-[1.005]! py-0! px-0! border-none! hover:bg-transparent! hover:text-primary!'
+      'bg-transparent! shadow-none! text-primary! hover:scale-[1.01]! py-0! px-0! border-none! hover:bg-transparent! hover:text-primary!'
     }
     ${className}
     ${
       primary &&
-      'bg-primary! text-white! hover:bg-primary! hover:text-white! shadow-xs!'
+      'bg-primary! text-white! hover:bg-primary! hover:text-white! shadow-sm!'
     }
     ${
       danger &&
-      'bg-red-700! border-none! text-white! hover:bg-red-700! hover:text-white! shadow-xs!'
+      'bg-red-700! border-none! text-white! hover:bg-red-700! hover:text-white! shadow-sm!'
     }
     ${
       disabled &&
