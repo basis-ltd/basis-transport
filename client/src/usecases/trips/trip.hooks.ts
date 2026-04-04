@@ -1,12 +1,12 @@
 import {
   useLazyCountAvailableCapacityQuery,
-  useLazyFetchTripsQuery,
+  useFetchTripsQuery,
   useLazyGetTripByIdQuery,
 } from '@/api/queries/apiQuerySlice';
-import { useAppDispatch } from '@/states/hooks';
+import { useAppDispatch, useAppSelector } from '@/states/hooks';
 import { useEffect, useState } from 'react';
 import { usePagination } from '../common/pagination.hooks';
-import { setTrip, setTripsList } from '@/states/slices/tripSlice';
+import { setTrip } from '@/states/slices/tripSlice';
 import { Trip } from '@/types/trip.type';
 import {
   useCancelTripMutation,
@@ -18,57 +18,31 @@ import {
 // FETCH TRIPS
 export const useFetchTrips = () => {
   // STATE VARIABLES
-  const dispatch = useAppDispatch();
-
-  // PAGINATION
   const {
     page,
     size,
     setPage,
     setSize,
-    totalCount,
-    totalPages,
-    setTotalCount,
-    setTotalPages,
   } = usePagination();
-
-  // MUTATION
-
-  const [
-    fetchTrips,
-    {
-      data: tripsData,
-      isFetching: tripsIsFetching,
-      isError: tripsIsError,
-      isSuccess: tripsIsSuccess,
-    },
-  ] = useLazyFetchTripsQuery();
-
-  useEffect(() => {
-    if (tripsIsSuccess) {
-      setTotalCount(tripsData?.data?.totalCount);
-      setTotalPages(tripsData?.data?.totalPages);
-      dispatch(setTripsList(tripsData?.data?.rows));
-    }
-  }, [
-    dispatch,
-    setTotalCount,
-    setTotalPages,
-    tripsData?.data?.rows,
-    tripsData?.data?.totalCount,
-    tripsData?.data?.totalPages,
-    tripsIsSuccess,
-  ]);
+  const { isHydrated, token } = useAppSelector((state) => state.auth);
+  const {
+    data: tripsData,
+    isFetching: tripsIsFetching,
+    isError: tripsIsError,
+  } = useFetchTripsQuery(
+    { page, size },
+    { skip: !isHydrated || !token }
+  );
 
   return {
-    fetchTrips,
+    tripsList: tripsData?.data?.rows ?? [],
     tripsData,
     tripsIsFetching,
     tripsIsError,
     page,
     size,
-    totalCount,
-    totalPages,
+    totalCount: tripsData?.data?.totalCount ?? 0,
+    totalPages: tripsData?.data?.totalPages ?? 0,
     setPage,
     setSize,
   };

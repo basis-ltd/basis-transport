@@ -6,16 +6,20 @@ const Home = () => {
   /**
    * STATE VARIABLES
    */
-  const { user, token } = useAppSelector((state) => state.auth);
+  const { user, token, isHydrated } = useAppSelector((state) => state.auth);
 
   /**
    * EFFECTS
    */
   useEffect(() => {
+    if (!isHydrated) {
+      return;
+    }
+
     if (!user || !token) {
       window.location.href = '/';
     }
-  }, [user, token]);
+  }, [isHydrated, user, token]);
 
   return <Navigate to="/dashboard" />;
 };

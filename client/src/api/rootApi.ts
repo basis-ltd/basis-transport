@@ -1,9 +1,9 @@
 import { fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { localStorageAdapter } from '@/adapters/storage/localStorage.adapter';
 import { environment } from '@/constants/environment.constants';
+import { getCurrentAuthToken } from '@/states/authSession';
 
-const prepareHeaders = async (headers: Headers) => {
-  const token = await localStorageAdapter.getItem('token');
+const prepareHeaders = (headers: Headers) => {
+  const token = getCurrentAuthToken();
   const randomKey = crypto.randomUUID();
   if (token) {
     headers.set('authorization', `Bearer ${token}`);

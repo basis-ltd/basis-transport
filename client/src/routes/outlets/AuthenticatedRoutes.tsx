@@ -1,23 +1,15 @@
-import { useAppDispatch, useAppSelector } from "@/states/hooks";
-import { setLogout } from "@/states/slices/authSlice";
-import { useEffect } from "react";
+import { useAppSelector } from "@/states/hooks";
 import { Navigate, Outlet } from "react-router-dom";
 
 const AuthenticatedRoutes = () => {
   /**
    * STATE VARIABLES
    */
-  const dispatch = useAppDispatch();
-  const { user, token } = useAppSelector((state) => state.auth);
+  const { user, token, isHydrated } = useAppSelector((state) => state.auth);
 
-  /**
-   * EFFECTS
-   */
-  useEffect(() => {
-    if (!user || !token) {
-      dispatch(setLogout());
-    }
-  }, [user, token, dispatch]);
+  if (!isHydrated) {
+    return null;
+  }
 
   if (!user || !token) {
     return <Navigate to="/auth/login" />;

@@ -1,18 +1,18 @@
-import Modal from '@/components/cards/Modal';
-import { useAppDispatch, useAppSelector } from '@/states/hooks';
+import Modal from "@/components/cards/Modal";
+import { useAppDispatch, useAppSelector } from "@/states/hooks";
 import {
   setDeleteTransportCard,
   setSelectedTransportCard,
-} from '@/states/slices/transportCardSlice';
-import { useCallback } from 'react';
-import { useDeleteTransportCardMutation } from '@/api/queries/apiQuerySlice';
-import Button from '@/components/inputs/Button';
-import { UUID } from '@/types';
+} from "@/states/slices/transportCardSlice";
+import { useCallback } from "react";
+import { useDeleteTransportCardMutation } from "@/api/queries/apiQuerySlice";
+import Button from "@/components/inputs/Button";
+import { UUID } from "@/types";
 
 const DeleteTransportCard = () => {
   const dispatch = useAppDispatch();
   const { deleteTransportCard, selectedTransportCard } = useAppSelector(
-    (state) => state.transportCard
+    (state) => state.transportCard,
   );
   const [deleteMutation, { isLoading }] = useDeleteTransportCardMutation();
 
@@ -37,30 +37,29 @@ const DeleteTransportCard = () => {
     <Modal
       isOpen={deleteTransportCard}
       onClose={closeModal}
-      heading={`Delete ${selectedTransportCard?.name || 'card'}`}
+      heading={`Delete ${selectedTransportCard?.name || "card"}`}
     >
-      <p className="text-sm text-secondary font-light py-2">
-        This will permanently remove transport card{' '}
-        <span className="font-medium text-primary">
-          {selectedTransportCard?.cardNumber}
-        </span>
-        . This cannot be undone.
-      </p>
-      <menu className="flex gap-2 justify-end pt-4">
-        <Button submit type="button" onClick={closeModal}>
-          Cancel
-        </Button>
+      <article className="w-full flex flex-col gap-4">
+        <p className="text-sm text-secondary font-light py-2">
+          This will permanently remove transport card{" "}
+          <span className="font-medium text-primary">
+            {selectedTransportCard?.cardNumber}
+          </span>
+          . This cannot be undone.
+        </p>
+
         <Button
           submit
           type="button"
           danger
+          className="self-end"
           disabled={isLoading}
           isLoading={isLoading}
           onClick={handleConfirm}
         >
           Delete
         </Button>
-      </menu>
+      </article>
     </Modal>
   );
 };

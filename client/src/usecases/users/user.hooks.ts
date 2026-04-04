@@ -1,12 +1,11 @@
 import {
-  useLazyFetchUsersQuery,
+  useFetchUsersQuery,
   useLazyGetUserByIdQuery,
 } from '@/api/queries/apiQuerySlice';
-import { useAppDispatch } from '@/states/hooks';
+import { useAppDispatch, useAppSelector } from '@/states/hooks';
 import {
   setAddUserToUsersList,
   setUser,
-  setUsersList,
 } from '@/states/slices/userSlice';
 import { useEffect } from 'react';
 import { usePagination } from '../common/pagination.hooks';
@@ -19,44 +18,29 @@ export const useFetchUsers = () => {
   /**
    * STATE VARIABLES
    */
-  const dispatch = useAppDispatch();
-
-  /**
-   * PAGINATION
-   */
   const {
     page,
     size,
-    totalCount,
-    totalPages,
     setPage,
     setSize,
-    setTotalCount,
-    setTotalPages,
   } = usePagination();
+  const { isHydrated, token } = useAppSelector((state) => state.auth);
 
-  const [
-    fetchUsers,
-    { data: usersData, isFetching: usersIsFetching, isError: usersIsError },
-  ] = useLazyFetchUsersQuery();
-
-  useEffect(() => {
-    if (usersData) {
-      dispatch(setUsersList(usersData?.data?.rows));
-      setTotalCount(usersData?.data?.totalCount);
-      setTotalPages(usersData?.data?.totalPages);
-    }
-  }, [usersData, dispatch, setTotalCount, setTotalPages]);
+  const {
+    data: usersData,
+    isFetching: usersIsFetching,
+    isError: usersIsError,
+  } = useFetchUsersQuery({ page, size }, { skip: !isHydrated || !token });
 
   return {
-    fetchUsers,
+    usersList: usersData?.data?.rows ?? [],
     usersData,
     usersIsFetching,
     usersIsError,
     page,
     size,
-    totalCount,
-    totalPages,
+    totalCount: usersData?.data?.totalCount ?? 0,
+    totalPages: usersData?.data?.totalPages ?? 0,
     setPage,
     setSize,
   };

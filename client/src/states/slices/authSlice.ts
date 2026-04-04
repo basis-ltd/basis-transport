@@ -1,38 +1,46 @@
-import { localStorageAdapter } from '@/adapters/storage/localStorage.adapter';
+import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 import { User } from '@/types/user.type';
-import { createSlice } from '@reduxjs/toolkit';
 
 interface AuthState {
   user?: User;
   token?: string;
+  isHydrated: boolean;
 }
 
 const initialState: AuthState = {
   user: undefined,
   token: undefined,
+  isHydrated: false,
 };
 
 const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    setUser: (state, action) => {
-      state.user = action.payload;
-      localStorageAdapter.setItem('user', action.payload);
+    restoreSession: (
+      state,
+      action: PayloadAction<{ user?: User; token?: string }>
+    ) => {
+      state.user = action.payload.user;
+      state.token = action.payload.token;
+      state.isHydrated = true;
     },
-    setToken: (state, action) => {
+    setUser: (state, action: PayloadAction<User | undefined>) => {
+      state.user = action.payload;
+      state.isHydrated = true;
+    },
+    setToken: (state, action: PayloadAction<string | undefined>) => {
       state.token = action.payload;
-      localStorageAdapter.setItem('token', action.payload);
+      state.isHydrated = true;
     },
     setLogout: (state) => {
       state.user = undefined;
       state.token = undefined;
-      localStorageAdapter.removeItem('user');
-      localStorageAdapter.removeItem('token');
+      state.isHydrated = true;
     },
   },
 });
 
-export const { setUser, setToken, setLogout } = authSlice.actions;
+export const { restoreSession, setUser, setToken, setLogout } = authSlice.actions;
 
 export default authSlice.reducer;

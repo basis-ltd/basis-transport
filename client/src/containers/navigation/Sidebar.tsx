@@ -2,17 +2,22 @@ import {
   faAnglesLeft,
   faBars,
   faChevronDown,
+  faXmark,
 } from '@fortawesome/free-solid-svg-icons';
 import { AnimatePresence, motion } from 'framer-motion';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Link, useLocation } from 'react-router-dom';
 import {
   getSidebarNavigationForUser,
   type NavigationItem,
 } from '@/constants/sidebar.constants';
-import { setSidebarOpen } from '@/states/slices/sidebarSlice';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useAppDispatch, useAppSelector } from '@/states/hooks';
+import {
+  closeMobileSidebar,
+  setDesktopSidebarExpanded,
+} from '@/states/slices/sidebarSlice';
 
 const matchesPath = (pathname: string, targetPath: string) =>
   pathname === targetPath || pathname.startsWith(`${targetPath}/`);
@@ -22,9 +27,10 @@ const labelFade = { duration: 0.2, ease: 'easeOut' } as const;
 const Sidebar = () => {
   const { pathname } = useLocation();
   const dispatch = useAppDispatch();
-  const { isOpen: sidebarOpen } = useAppSelector(
+  const { desktopExpanded, mobileOpen } = useAppSelector(
     (state) => state.sidebar,
   );
+  const isDesktopViewport = useMediaQuery('(min-width: 768px)');
   const { user } = useAppSelector((state) => state.auth);
   const roleNames = useMemo(
     () =>
@@ -38,15 +44,17 @@ const Sidebar = () => {
     [roleNames],
   );
   const [openCategories, setOpenCategories] = useState<string[]>([]);
+  const sidebarExpanded = isDesktopViewport ? desktopExpanded : mobileOpen;
+  const previousPathnameRef = useRef(pathname);
 
   useEffect(() => {
-    if (!sidebarOpen) {
+    if (!sidebarExpanded) {
       setOpenCategories([]);
     }
-  }, [sidebarOpen]);
+  }, [sidebarExpanded]);
 
   useEffect(() => {
-    if (!sidebarOpen) return;
+    if (!sidebarExpanded) return;
 
     const activeCategories = sidebarNavItems
       .filter((nav: NavigationItem) =>
@@ -59,7 +67,52 @@ const Sidebar = () => {
     if (activeCategories.length) {
       setOpenCategories((prev) => Array.from(new Set([...prev, ...activeCategories])));
     }
-  }, [pathname, sidebarOpen, sidebarNavItems]);
+  }, [pathname, sidebarExpanded, sidebarNavItems]);
+
+  useEffect(() => {
+    if (previousPathnameRef.current !== pathname && mobileOpen) {
+      dispatch(closeMobileSidebar());
+    }
+
+    previousPathnameRef.current = pathname;
+  }, [dispatch, mobileOpen, pathname]);
+
+  useEffect(() => {
+    if (isDesktopViewport && mobileOpen) {
+      dispatch(closeMobileSidebar());
+    }
+  }, [dispatch, isDesktopViewport, mobileOpen]);
+
+  useEffect(() => {
+    if (isDesktopViewport || !mobileOpen) {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        dispatch(closeMobileSidebar());
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [dispatch, isDesktopViewport, mobileOpen]);
+
+  useEffect(() => {
+    if (isDesktopViewport || !mobileOpen) {
+      return;
+    }
+
+    const { overflow } = document.body.style;
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.body.style.overflow = overflow;
+    };
+  }, [isDesktopViewport, mobileOpen]);
 
   const toggleCategory = useCallback((title: string) => {
     setOpenCategories((prev) =>
@@ -71,35 +124,54 @@ const Sidebar = () => {
 
   return (
     <motion.aside
-      className={`fixed left-0 top-[clamp(55px,8vh,55px)] z-40 h-[calc(100vh-clamp(55px,8vh,55px))] flex flex-col bg-background-secondary text-foreground transition-all duration-300 ease-in-out shadow-sm
-        ${
-          sidebarOpen
-            ? 'w-[18vw] min-w-[220px] max-w-[260px]'
-            : 'w-[12vw] min-w-[60px] max-w-[80px]'
-        }
-      `}
+      id="app-sidebar"
+      initial={false}
+      animate={isDesktopViewport ? { x: 0 } : { x: mobileOpen ? 0 : '-100%' }}
+      transition={{ duration: 0.3, ease: 'easeInOut' }}
+      className="fixed left-0 top-[var(--navbar-height)] z-[50000] flex h-[calc(100vh-var(--navbar-height))] w-[var(--mobile-sidebar-width)] flex-col bg-background-secondary text-foreground shadow-sm transition-[width] duration-300 ease-in-out md:z-40 md:w-[var(--app-sidebar-width)]"
+      aria-hidden={!isDesktopViewport && !mobileOpen}
     >
       <header
         className={`flex w-full px-4 pt-5 pb-4 ${
-          sidebarOpen
+          isDesktopViewport
+            ? desktopExpanded
             ? 'items-end justify-end'
             : 'flex-col items-center justify-center gap-3'
+            : 'items-center justify-between gap-3'
         }`}
       >
-        <button
-          type="button"
-          onClick={(e) => {
-            e.preventDefault();
-            dispatch(setSidebarOpen(!sidebarOpen));
-          }}
-          className="flex h-8 w-8 items-center cursor-pointer justify-center rounded-md bg-primary/10 text-primary transition-all duration-200 ease-in-out hover:bg-primary/15 hover:text-primary"
-          aria-label={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
-        >
-          <FontAwesomeIcon
-            icon={sidebarOpen ? faAnglesLeft : faBars}
-            className="text-[12px] cursor-pointer"
-          />
-        </button>
+        {isDesktopViewport ? (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              dispatch(setDesktopSidebarExpanded(!desktopExpanded));
+            }}
+            className="flex h-8 w-8 items-center cursor-pointer justify-center rounded-md bg-primary/10 text-primary transition-all duration-200 ease-in-out hover:bg-primary/15 hover:text-primary"
+            aria-label={desktopExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
+          >
+            <FontAwesomeIcon
+              icon={desktopExpanded ? faAnglesLeft : faBars}
+              className="text-[12px] cursor-pointer"
+            />
+          </button>
+        ) : (
+          <>
+            <p className="text-[12px] font-light uppercase tracking-wide text-secondary/60">
+              Basis Transport
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                dispatch(closeMobileSidebar());
+              }}
+              className="flex h-8 w-8 items-center justify-center rounded-md bg-primary/10 text-primary transition-all duration-200 ease-in-out hover:bg-primary/15 hover:text-primary"
+              aria-label="Close sidebar"
+            >
+              <FontAwesomeIcon icon={faXmark} className="text-[12px]" />
+            </button>
+          </>
+        )}
       </header>
 
       <div className="mx-4 mb-3">
@@ -129,7 +201,7 @@ const Sidebar = () => {
                 <Link
                   to={nav.path}
                   className={`group relative flex items-center gap-3 overflow-hidden rounded-md text-[12px] font-light leading-tight transition-all duration-200 ease-in-out
-                    ${sidebarOpen ? 'px-3 py-3' : 'justify-center p-3'}
+                    ${sidebarExpanded ? 'px-3 py-3' : 'justify-center p-3'}
                     ${
                       isActive
                         ? 'bg-primary/10 text-primary'
@@ -139,16 +211,20 @@ const Sidebar = () => {
                   onClick={(e) => {
                     if (hasSubcategories) {
                       e.preventDefault();
-                      if (!sidebarOpen) {
-                        dispatch(setSidebarOpen(true));
+                      if (isDesktopViewport && !desktopExpanded) {
+                        dispatch(setDesktopSidebarExpanded(true));
                         return;
                       }
                       toggleCategory(nav.title);
                       return;
                     }
 
-                    if (!sidebarOpen) {
-                      dispatch(setSidebarOpen(true));
+                    if (isDesktopViewport && !desktopExpanded) {
+                      dispatch(setDesktopSidebarExpanded(true));
+                    }
+
+                    if (!isDesktopViewport) {
+                      dispatch(closeMobileSidebar());
                     }
                   }}
                   title={nav.title}
@@ -162,7 +238,7 @@ const Sidebar = () => {
                     }`}
                   />
 
-                  {sidebarOpen && (
+                  {sidebarExpanded && (
                     <motion.span
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
@@ -173,7 +249,7 @@ const Sidebar = () => {
                     </motion.span>
                   )}
 
-                  {hasSubcategories && sidebarOpen && (
+                  {hasSubcategories && sidebarExpanded && (
                     <FontAwesomeIcon
                       icon={faChevronDown}
                       className={`ml-auto text-[10px] text-secondary/60 transition-transform duration-300 ease-in-out ${
@@ -184,7 +260,7 @@ const Sidebar = () => {
                 </Link>
 
                 <AnimatePresence>
-                  {hasSubcategories && isSubcategoriesOpen && sidebarOpen && (
+                  {hasSubcategories && isSubcategoriesOpen && sidebarExpanded && (
                     <motion.div
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: 'auto' }}
@@ -206,6 +282,11 @@ const Sidebar = () => {
                                     ? 'bg-primary/10 text-primary'
                                     : 'text-secondary hover:bg-primary/5 hover:text-primary'
                                 }`}
+                                onClick={() => {
+                                  if (!isDesktopViewport) {
+                                    dispatch(closeMobileSidebar());
+                                  }
+                                }}
                               >
                                 <FontAwesomeIcon
                                   icon={subCategory.icon}
@@ -239,7 +320,7 @@ const Sidebar = () => {
 
       <footer className="mt-auto px-4 py-6">
         <div className="mb-3 h-px bg-primary/10" />
-        {sidebarOpen ? (
+        {sidebarExpanded ? (
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

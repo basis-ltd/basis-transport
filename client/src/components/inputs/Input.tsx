@@ -103,16 +103,17 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ) => {
     if (['checkbox', 'radio'].includes(type)) {
       if (['checkbox'].includes(type)) {
-          return (
+        return (
+          <div className="flex w-fit flex-col gap-1.5">
             <label className="flex w-fit items-center gap-1.5 text-[11px] lg:text-[12px] font-light leading-tight">
               <Checkbox
                 onCheckedChange={
                   onChange as ((checked: CheckedState) => void) | undefined
                 }
-              name={name}
-              value={value}
-              checked={checked || !!value}
-              defaultChecked={defaultChecked || !!value}
+                name={name}
+                value={value}
+                checked={checked || !!value}
+                defaultChecked={defaultChecked || !!value}
                 className={`${
                   value || defaultChecked || checked
                     ? 'data-[state=checked]:bg-primary text-white'
@@ -120,28 +121,37 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
                 } w-4 h-4 border-[1.5px] cursor-pointer border-secondary outline-none focus:outline-none ease-in-out duration-50`}
               />
               <p
-              className={`${
-                label ? 'flex' : 'hidden'
-              } text-secondary text-[11px] lg:text-[12px] font-light leading-tight`}
+                className={`${
+                  label ? 'flex' : 'hidden'
+                } text-secondary text-[11px] lg:text-[12px] font-light leading-tight`}
+              >
+                {label}
+              </p>
+            </label>
+            <InputErrorMessage message={errorMessage} />
+          </div>
+        );
+      }
+      return (
+        <div className="flex w-fit flex-col gap-1.5">
+          <label className="flex items-center gap-1.5 text-[11px] lg:text-[12px] font-light leading-tight">
+            <input
+              type={type}
+              name={name}
+              value={value}
+              defaultChecked={defaultChecked as boolean}
+              checked={checked as boolean}
+              onChange={onChange}
+              className={`w-4 h-4 border-[1.5px] rounded-xl cursor-pointer border-secondary outline-none focus:outline-none accent-primary focus:border-[1.6px] focus:border-primary ease-in-out duration-50 ${className}`}
+            />
+            <p
+              className={`${label ? 'flex' : 'hidden'} text-[11px] lg:text-[12px] font-light leading-tight`}
             >
               {label}
             </p>
           </label>
-        );
-      }
-      return (
-        <label className="flex items-center gap-1.5 text-[11px] lg:text-[12px] font-light leading-tight">
-          <input
-            type={type}
-            name={name}
-            value={value}
-            defaultChecked={defaultChecked as boolean}
-            checked={checked as boolean}
-            onChange={onChange}
-            className={`w-4 h-4 border-[1.5px] rounded-xl cursor-pointer border-secondary outline-none focus:outline-none accent-primary focus:border-[1.6px] focus:border-primary ease-in-out duration-50 ${className}`}
-          />
-          <p className={`${label ? 'flex' : 'hidden'} text-[11px] lg:text-[12px] font-light leading-tight`}>{label}</p>
-        </label>
+          <InputErrorMessage message={errorMessage} />
+        </div>
       );
     }
 
@@ -246,7 +256,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
               `}
             />
           )}
-          {errorMessage && <InputErrorMessage message={errorMessage} />}
+          <InputErrorMessage message={errorMessage} />
         </article>
       </label>
     );

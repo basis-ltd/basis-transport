@@ -77,7 +77,7 @@ const TextArea: FC<TextAreaProps> = ({
         onBlur={onBlur}
         defaultValue={defaultValue}
       />
-      {errorMessage && <InputErrorMessage message={errorMessage} />}
+      <InputErrorMessage message={errorMessage} />
     </label>
   );
 };

@@ -1,5 +1,6 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+  faBars,
   faUser,
   faUserCircle,
   faRightFromBracket,
@@ -7,11 +8,11 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { useRef, useState, useEffect, useMemo } from "react";
 import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
-import { useDispatch } from "react-redux";
-import { setLogout } from "@/states/slices/authSlice";
-import { useAppSelector } from "@/states/hooks";
+import { openMobileSidebar } from "@/states/slices/sidebarSlice";
+import { useAppDispatch, useAppSelector } from "@/states/hooks";
 import { publicColors } from "@/containers/public/publicTheme";
 import basisTransportLogo from "/logo.svg";
+import { useLogout } from "@/usecases/auth/auth.hooks";
 
 type UserMenuItem = {
   id: string;
@@ -26,10 +27,12 @@ const Navbar = () => {
   /**
    * STATE VARIABLES
    */
-  const dispatch = useDispatch();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLUListElement>(null);
+  const dispatch = useAppDispatch();
   const { token } = useAppSelector((state) => state.auth);
+  const { mobileOpen } = useAppSelector((state) => state.sidebar);
+  const logout = useLogout();
 
   /**
    * NAVIGATION
@@ -56,13 +59,12 @@ const Navbar = () => {
         to: "#",
         variant: "danger",
         action: () => {
-          dispatch(setLogout());
-          window.location.href = "/auth/login";
+          void logout();
           setDropdownOpen(false);
         },
       },
     ],
-    [dispatch, navigate]
+    [logout, navigate]
   );
 
   // Close dropdown on outside click
@@ -94,8 +96,20 @@ const Navbar = () => {
         className="mx-auto px-6 lg:px-8"
         aria-label="Main navigation"
       >
-        <section className="flex justify-between items-center h-[55px]">
+        <section className="flex justify-between items-center h-[var(--navbar-height)]">
           <ul className="flex items-center gap-4 list-none p-0 m-0">
+            <button
+              type="button"
+              className="flex h-9 w-9 items-center justify-center rounded-md bg-primary/10 text-primary transition-colors duration-200 ease-in-out hover:bg-primary/15 md:hidden"
+              onClick={() => {
+                dispatch(openMobileSidebar());
+              }}
+              aria-label="Open sidebar"
+              aria-controls="app-sidebar"
+              aria-expanded={mobileOpen}
+            >
+              <FontAwesomeIcon icon={faBars} className="text-[12px]" />
+            </button>
             <Link
               to={token ? "/dashboard" : "/"}
               onClick={() => {

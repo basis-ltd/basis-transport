@@ -26,12 +26,12 @@ import moment from 'moment';
 import { useEffect, useMemo, useState } from 'react';
 import { Seo } from '@/components/seo';
 import { TripAvailableCapacity } from '@/components/trips/TripAvailableCapacity';
+import { Trip } from '@/types/trip.type';
 
 const UserDashboard = () => {
   /**
    * STATE VARIABLES
    */
-  const { tripsList } = useAppSelector((state) => state.trip);
   const { user } = useAppSelector((state) => state.auth);
 
   /**
@@ -165,12 +165,7 @@ const UserDashboard = () => {
    * TRIPS HOOKS
    */
 
-  const { tripsIsFetching, fetchTrips } = useFetchTrips();
-
-  // FETCH TRIPS
-  useEffect(() => {
-    fetchTrips({ page: 0, size: 5 });
-  }, [fetchTrips]);
+  const { tripsIsFetching, tripsList } = useFetchTrips();
 
   // TRIPS COLUMNS
   const { tripsColumns } = useTripColumns();
@@ -225,7 +220,7 @@ const UserDashboard = () => {
               />
             </section>
             <section className="grid grid-cols-1 gap-4">
-              {tripsList?.map((trip) => (
+              {tripsList?.map((trip: Trip) => (
                 <article
                   key={trip.id}
                   className="rounded-2xl border border-primary/10 bg-white p-4 shadow-sm"

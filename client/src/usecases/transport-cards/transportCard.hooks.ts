@@ -14,6 +14,8 @@ import { usePagination } from "../common/pagination.hooks";
  * FETCH TRANSPORT CARDS
  */
 export const useFetchTransportCards = () => {
+
+  // STATE VARIABLES
   const dispatch = useAppDispatch();
 
   const {
@@ -21,38 +23,15 @@ export const useFetchTransportCards = () => {
     size,
     setPage,
     setSize,
-    setTotalCount,
-    setTotalPages,
-    totalCount,
-    totalPages,
   } = usePagination();
 
-  // MUTATION
-  const [
-    fetchTransportCards,
-    {
-      data,
-      isFetching,
-      error,
-      isSuccess,
-    },
-  ] = useLazyFetchTransportCardsQuery();
+  const [fetchTransportCards, { data, isFetching, error, isSuccess }] = useLazyFetchTransportCardsQuery();
 
   useEffect(() => {
     if (isSuccess) {
       dispatch(setTransportCardsList(data?.data?.rows));
-      setTotalCount(data?.data?.totalCount);
-      setTotalPages(data?.data?.totalPages);
     }
-  }, [
-    dispatch,
-    setTotalCount,
-    setTotalPages,
-    isSuccess,
-    data?.data?.rows,
-    data?.data?.totalCount,
-    data?.data?.totalPages,
-  ]);
+  }, [dispatch, isSuccess, data?.data?.rows]);
 
   return {
     fetchTransportCards,
@@ -63,8 +42,8 @@ export const useFetchTransportCards = () => {
     size,
     setPage,
     setSize,
-    totalCount,
-    totalPages,
+    totalCount: data?.data?.totalCount ?? 0,
+    totalPages: data?.data?.totalPages ?? 0,
   };
 };
 

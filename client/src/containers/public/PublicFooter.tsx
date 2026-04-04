@@ -1,33 +1,33 @@
-import type { CSSProperties } from 'react';
-import { Link } from 'react-router-dom';
-import { publicColors } from './publicTheme';
-import basisTransportLogo from '/logo.svg';
+import type { CSSProperties } from "react";
+import { Link } from "react-router-dom";
+import { publicColors } from "./publicTheme";
+import basisTransportLogo from "/logo.svg";
 
 type FooterLink = { to: string; label: string };
 
 const footerSections: { title: string; links: FooterLink[] }[] = [
   {
-    title: 'Product',
+    title: "Product",
     links: [
-      { to: '/#how-it-works', label: 'How it works' },
-      { to: '#', label: 'Supported cities' },
-      { to: '#', label: 'About us' },
+      { to: "/#how-it-works", label: "How it works" },
+      { to: "#", label: "Supported cities" },
+      { to: "#", label: "About us" },
     ],
   },
   {
-    title: 'Support',
+    title: "Support",
     links: [
-      { to: '#', label: 'Help center' },
-      { to: '#', label: 'Contact us' },
-      { to: '#', label: 'Privacy' },
+      { to: "#", label: "Help center" },
+      { to: "#", label: "Contact us" },
+      { to: "#", label: "Privacy" },
     ],
   },
 ];
 
 const legalLinks: FooterLink[] = [
-  { to: '#', label: 'Privacy Policy' },
-  { to: '#', label: 'Terms of Service' },
-  { to: '#', label: 'Cookies' },
+  { to: "#", label: "Privacy Policy" },
+  { to: "#", label: "Terms of Service" },
+  { to: "#", label: "Cookies" },
 ];
 
 function FooterNavLink({
@@ -37,12 +37,12 @@ function FooterNavLink({
   link: FooterLink;
   style?: CSSProperties;
 }) {
-  const isPlaceholder = link.to === '#';
+  const isPlaceholder = link.to === "#";
   return (
     <Link
-      to={isPlaceholder ? '/' : link.to}
+      to={isPlaceholder ? "/" : link.to}
       onClick={isPlaceholder ? (e) => e.preventDefault() : undefined}
-      className="hover:opacity-70 text-[12px] transition-opacity"
+      className="hover:underline underline-offset-2 text-[12px] transition-opacity"
       style={style}
     >
       {link.label}
@@ -107,14 +107,13 @@ const PublicFooter = () => {
           style={{ borderColor: `${publicColors.primary}15` }}
         >
           <p
-            className="text-sm leading-relaxed mb-4"
+            className="text-[11px] leading-relaxed mb-4"
             style={{ color: publicColors.neutralLight }}
           >
-            <span className="text-[12px] font-medium">
-              This service is free to use and supported by advertisements.
-            </span>{' '}
-            We will always be free for everyday commuters. Our goal is to help
-            you travel with confidence, not to charge you for it.
+            <span className="text-[11px] font-medium">
+              Enjoy your daily journeys with us, always free and always accessible for everyone.
+            </span>{" "}
+            At Basis Transport, we are dedicated to making your commute stress-free and easy, without any cost to you. Thanks to support from advertisements, we make it possible for every traveler to get where they need to go with confidence and peace of mind.
           </p>
           <div
             className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pt-4 border-t"

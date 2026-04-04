@@ -1,19 +1,34 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-  isOpen: true,
+  desktopExpanded: true,
+  mobileOpen: false,
 };
 
 const sidebarSlice = createSlice({
   name: 'sidebar',
   initialState,
   reducers: {
-    setSidebarOpen: (state, action) => {
-      state.isOpen = action.payload;
+    setDesktopSidebarExpanded: (state, action) => {
+      state.desktopExpanded = action.payload;
+    },
+    toggleDesktopSidebar: (state) => {
+      state.desktopExpanded = !state.desktopExpanded;
+    },
+    openMobileSidebar: (state) => {
+      state.mobileOpen = true;
+    },
+    closeMobileSidebar: (state) => {
+      state.mobileOpen = false;
     },
   },
 });
 
-export const { setSidebarOpen } = sidebarSlice.actions;
+export const {
+  setDesktopSidebarExpanded,
+  toggleDesktopSidebar,
+  openMobileSidebar,
+  closeMobileSidebar,
+} = sidebarSlice.actions;
 
 export default sidebarSlice.reducer;

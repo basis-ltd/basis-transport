@@ -1,10 +1,14 @@
 import { useLoginMutation } from '@/api/mutations/apiSlice';
 import { useAppDispatch } from '@/states/hooks';
-import { setToken, setUser } from '@/states/slices/authSlice';
+import { setLogout, setToken, setUser } from '@/states/slices/authSlice';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useSignupMutation } from '@/api/mutations/apiSlice';
+import {
+  clearPersistedAuthSession,
+  persistAuthSession,
+} from '@/states/authSession';
 
 /**
  * LOGIN
@@ -31,8 +35,11 @@ export const useLogin = () => {
   useEffect(() => {
     if (loginIsSuccess) {
       toast.success('Login successful');
-      dispatch(setToken(loginData?.data.token));
-      dispatch(setUser(loginData?.data.user));
+      const token = loginData?.data.token;
+      const user = loginData?.data.user;
+      void persistAuthSession({ user, token });
+      dispatch(setToken(token));
+      dispatch(setUser(user));
       navigate('/dashboard');
     } else if (loginIsError) {
       toast.error(
@@ -70,8 +77,11 @@ export const useSignup = () => {
   useEffect(() => {
     if (signupIsSuccess) {
       toast.success('Signup successful');
-      dispatch(setToken(signupData?.data.token));
-      dispatch(setUser(signupData?.data.user));
+      const token = signupData?.data.token;
+      const user = signupData?.data.user;
+      void persistAuthSession({ user, token });
+      dispatch(setToken(token));
+      dispatch(setUser(user));
       navigate('/dashboard');
     } else if (signupIsError) {
       toast.error(
@@ -87,4 +97,15 @@ export const useSignup = () => {
   }, [dispatch, signupData, signupIsSuccess, signupIsError, signupError, navigate]);
 
   return { signup, signupIsLoading, signupIsError, signupIsSuccess, signupError };
+};
+
+export const useLogout = () => {
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+
+  return async () => {
+    await clearPersistedAuthSession();
+    dispatch(setLogout());
+    navigate('/auth/login');
+  };
 };

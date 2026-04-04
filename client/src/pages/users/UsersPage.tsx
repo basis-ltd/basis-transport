@@ -2,22 +2,16 @@ import Button from '@/components/inputs/Button';
 import { Heading } from '@/components/inputs/TextInputs';
 import Table from '@/components/table/Table';
 import AppLayout from '@/containers/navigation/AppLayout';
-import { useAppSelector } from '@/states/hooks';
 import { useUserColumns } from '@/usecases/users/columns.user';
 import { useFetchUsers } from '@/usecases/users/user.hooks';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
-import { useEffect } from 'react';
 
 const UsersPage = () => {
-  /**
-   * STATE VARIABLES
-   */
-  const { usersList } = useAppSelector((state) => state.user);
-
   /**
    * FETCH USERS
    */
   const {
+    usersList,
     usersIsFetching,
     page,
     size,
@@ -25,13 +19,7 @@ const UsersPage = () => {
     totalPages,
     setPage,
     setSize,
-    fetchUsers,
   } = useFetchUsers();
-
-  // FETCH USERS
-  useEffect(() => {
-    fetchUsers({ page, size });
-  }, [fetchUsers, page, size]);
 
   // USERS COLUMNS
   const { userColumns } = useUserColumns({ page, size });

@@ -9,8 +9,8 @@ import userTripSlice from './slices/userTripSlice';
 import userSlice from './slices/userSlice';
 import transportCardSlice from './slices/transportCardSlice';
 import roleSlice from './slices/roleSlice';
-import { localStorageAdapter } from '@/adapters/storage/localStorage.adapter';
-import { setToken, setUser } from './slices/authSlice';
+import { restoreSession } from './slices/authSlice';
+import { loadPersistedAuthSession } from './authSession';
 
 export const store = configureStore({
   reducer: {
@@ -34,14 +34,8 @@ export const store = configureStore({
 });
 
 const hydrateAuthState = async () => {
-  const user = await localStorageAdapter.getItem('user');
-  const token = await localStorageAdapter.getItem('token');
-  if (user) {
-    store.dispatch(setUser(user));
-  }
-  if (token) {
-    store.dispatch(setToken(token));
-  }
+  const session = await loadPersistedAuthSession();
+  store.dispatch(restoreSession(session));
 };
 
 void hydrateAuthState();

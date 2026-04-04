@@ -1,22 +1,28 @@
-import Modal from '@/components/cards/Modal';
-import { useAppDispatch, useAppSelector } from '@/states/hooks';
-import { setCreateTransportCard } from '@/states/slices/transportCardSlice';
-import { useCallback } from 'react';
-import { useCreateTransportCardMutation } from '@/api/queries/apiQuerySlice';
-import Input from '@/components/inputs/Input';
-import Button from '@/components/inputs/Button';
-import { Controller, useForm } from 'react-hook-form';
-import { InputErrorMessage } from '@/components/inputs/ErrorLabels';
+import Modal from "@/components/cards/Modal";
+import { useAppDispatch, useAppSelector } from "@/states/hooks";
+import { setCreateTransportCard } from "@/states/slices/transportCardSlice";
+import { useCallback } from "react";
+import { useCreateTransportCardMutation } from "@/api/queries/apiQuerySlice";
+import Input from "@/components/inputs/Input";
+import Button from "@/components/inputs/Button";
+import { Controller, useForm } from "react-hook-form";
 
 const CreateTransportCard = () => {
   const dispatch = useAppDispatch();
-  const { createTransportCard } = useAppSelector((state) => state.transportCard);
+  const { createTransportCard } = useAppSelector(
+    (state) => state.transportCard,
+  );
 
   // TRANSPORT CARD HOOKS
-  const [createTransportCardMutation, { isLoading }] = useCreateTransportCardMutation();
+  const [createTransportCardMutation, { isLoading }] =
+    useCreateTransportCardMutation();
 
-    // REACT HOOK FORM
-    const { control, handleSubmit, formState: { errors } } = useForm();
+  // REACT HOOK FORM
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
 
   const closeModal = useCallback(() => {
     dispatch(setCreateTransportCard(false));
@@ -44,15 +50,13 @@ const CreateTransportCard = () => {
             rules={{ required: "Card number is required" }}
             render={({ field }) => {
               return (
-                <ul>
-                  <Input
-                    {...field}
-                    label="Card number"
-                    placeholder="Enter card number"
-                    required
-                  />
-                  <InputErrorMessage message={errors.cardNumber?.message as string} />
-                </ul>
+                <Input
+                  {...field}
+                  label="Card number"
+                  placeholder="Enter card number"
+                  required
+                  errorMessage={errors.cardNumber?.message as string}
+                />
               );
             }}
           />
@@ -60,26 +64,24 @@ const CreateTransportCard = () => {
             name="name"
             control={control}
             render={({ field }) => (
-              <ul>
-                <Input {...field} label="Name" placeholder="Enter name" />
-                <InputErrorMessage message={errors.name?.message as string} />
-              </ul>
+              <Input
+                {...field}
+                label="Name"
+                placeholder="Enter name"
+                errorMessage={errors.name?.message as string}
+              />
             )}
           />
         </fieldset>
-        <menu className="flex gap-2 justify-end pt-2">
-          <Button submit type="button" onClick={closeModal}>
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            primary
-            disabled={isLoading}
-            isLoading={isLoading}
-          >
-            Create
-          </Button>
-        </menu>
+        <Button
+          type="submit"
+          className="self-end"
+          primary
+          disabled={isLoading}
+          isLoading={isLoading}
+        >
+          Create
+        </Button>
       </form>
     </Modal>
   );

@@ -11,13 +11,13 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import moment from 'moment';
 import { useEffect } from 'react';
 import { TripAvailableCapacity } from '@/components/trips/TripAvailableCapacity';
+import { Trip } from '@/types/trip.type';
 
 const TripsPage = () => {
   /**
    * STATE VARIABLES
    */
   const dispatch = useAppDispatch();
-  const { tripsList } = useAppSelector((state) => state.trip);
   const { user } = useAppSelector((state) => state.auth);
 
   /**
@@ -25,19 +25,14 @@ const TripsPage = () => {
    */
   const {
     tripsIsFetching,
+    tripsList,
     page,
     size,
     totalCount,
     totalPages,
     setPage,
     setSize,
-    fetchTrips,
   } = useFetchTrips();
-
-  // FETCH TRIPS
-  useEffect(() => {
-    fetchTrips({ page, size });
-  }, [fetchTrips, page, size]);
 
   // TRIPS COLUMNS
   const { tripsColumns } = useTripColumns();
@@ -77,7 +72,7 @@ const TripsPage = () => {
               setSize={setSize}
             />
           <section className="grid grid-cols-1 gap-4 md:hidden">
-            {tripsList?.map((trip) => (
+            {tripsList?.map((trip: Trip) => (
               <article
                 key={trip.id}
                 className="rounded-2xl border border-primary/10 bg-white p-5 shadow-sm"

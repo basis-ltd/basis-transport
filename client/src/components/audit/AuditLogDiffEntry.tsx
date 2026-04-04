@@ -23,9 +23,9 @@ export function AuditLogDiffEntry({
 }: AuditLogDiffEntryProps) {
   return (
     <article
-      className={`w-full flex flex-col gap-2 rounded-md shadow-sm border-[.5px] border-gray-200 bg-white p-3 ${className}`}
+      className={`w-full flex flex-col gap-2 rounded-md shadow-xs border-[.5px] border-gray-200 bg-white p-3 ${className}`}
     >
-      <header className="flex flex-col gap-1 text-[12px] sm:text-sm">
+      <header className="flex flex-col gap-1 text-[11px] sm:text-sm">
         <p className="font-normal text-[11px] text-primary">
           ACTION: {log.action}
           {log?.entityType && showEntityType ? (
@@ -47,22 +47,22 @@ export function AuditLogDiffEntry({
       >
         {changes.map((c) => (
           <li key={c.key} className="break-words">
-            <span className="font-sans font-normal text-[12px] text-secondary">
+            <span className="font-sans font-normal text-[11px] text-secondary">
               {capitalizeString(c?.key)}
             </span>
-            <span className="font-sans font-normal text-[12px] text-gray-500">
+            <span className="font-sans font-normal text-[11px] text-gray-500">
               :{" "}
             </span>
             {c.oldFormatted !== null && c.newFormatted !== null ? (
               <>
-                <span className="text-red-700 line-through text-[12px]">
+                <span className="text-red-700 line-through text-[11px]">
                   {c?.oldFormatted}
                 </span>
-                <span className="font-sans font-normal text-[12px] text-gray-400">
+                <span className="font-sans font-normal text-[11px] text-gray-400">
                   {" "}
                   →{" "}
                 </span>
-                <span className="text-green-700 text-[12px]">
+                <span className="text-green-700 text-[11px]">
                   {c?.newFormatted}
                 </span>
               </>
