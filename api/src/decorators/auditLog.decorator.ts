@@ -1,17 +1,17 @@
-import { AuditLogService } from '../services/auditLog.service';
+import { auditLogServiceSingleton } from '../services/auditLog.service';
 import { UUID } from '../types';
-import { AuditContext } from '../middlewares/auditContext.middleware';
+import { getAuditContext } from '../middlewares/requestContext.middleware';
+
+/**
+ * Entity-level audit decorators (optional). Prefer {@link httpAuditMiddleware} for baseline
+ * HTTP mutation logging; use these only when you need structured old/new snapshots per entity.
+ */
 
 interface AuditOptions {
   entityType: string;
   getUserId?: (args: any[]) => UUID | undefined;
   getEntityId: (args: any[]) => UUID;
   getEntity?: (args: any[]) => any;
-}
-
-// Define an interface for services that have a getEntityById method
-interface ServiceWithGetById {
-  getEntityById: (id: UUID) => Promise<any>;
 }
 
 /**
@@ -27,17 +27,13 @@ export function AuditUpdate(options: AuditOptions) {
 
     descriptor.value = async function (...args: any[]) {
       try {
-        // Initialize audit log service
-        const auditLogService = new AuditLogService();
         const entityId = options.getEntityId(args);
 
-        // Get userId from arguments or context
         let userId = options.getUserId ? options.getUserId(args) : undefined;
         if (!userId) {
-          userId = AuditContext.getCurrentUserId();
+          userId = getAuditContext()?.userId;
         }
 
-        // Get entity before update
         let oldValues = {};
         try {
           const service = this as any;
@@ -51,16 +47,14 @@ export function AuditUpdate(options: AuditOptions) {
           console.error('Failed to get entity for audit log:', error);
         }
 
-        // Execute original method
         const result = await originalMethod.apply(this, args);
 
-        // Create audit log after operation completes
         try {
-          await auditLogService.logUpdate(
+          await auditLogServiceSingleton.logUpdate(
             options.entityType,
             entityId,
             oldValues,
-            { ...(result || {}) },
+            result || {},
             userId
           );
         } catch (error) {
@@ -91,20 +85,16 @@ export function AuditDelete(options: AuditOptions) {
 
     descriptor.value = async function (...args: any[]) {
       try {
-        // Initialize audit log service
-        const auditLogService = new AuditLogService();
         const entityId = options.getEntityId(args);
 
-        // Get userId from arguments or context
         let userId = options.getUserId ? options.getUserId(args) : undefined;
         if (!userId) {
-          userId = AuditContext.getCurrentUserId();
+          userId = getAuditContext()?.userId;
         }
 
-        // Get entity before deletion
         let oldValues = {};
         if (options.getEntity) {
-          oldValues = options.getEntity(args);
+          oldValues = { ...options.getEntity(args) };
         } else {
           try {
             const service = this as any;
@@ -119,9 +109,8 @@ export function AuditDelete(options: AuditOptions) {
           }
         }
 
-        // Create audit log before deletion
         try {
-          await auditLogService.logDelete(
+          await auditLogServiceSingleton.logDelete(
             options.entityType,
             entityId,
             oldValues,
@@ -134,7 +123,6 @@ export function AuditDelete(options: AuditOptions) {
           );
         }
 
-        // Execute original method
         const result = await originalMethod.apply(this, args);
 
         return result;

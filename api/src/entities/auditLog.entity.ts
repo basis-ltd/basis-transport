@@ -1,7 +1,6 @@
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { Column, Entity } from 'typeorm';
 import { AbstractEntity } from './index';
 import { UUID } from '../types';
-import { User } from './user.entity';
 
 export enum AuditAction {
   CREATE = 'CREATE',
@@ -46,20 +45,4 @@ export class AuditLog extends AbstractEntity {
     nullable: true,
   })
   newValues: Record<string, any>;
-
-  @Column({
-    type: 'uuid',
-    name: 'created_by_id',
-    nullable: true,
-  })
-  createdById?: UUID;
-
-  // USER RELATION
-  @ManyToOne(() => User, (user) => user.id, {
-    onDelete: 'SET NULL',
-    onUpdate: 'CASCADE',
-    nullable: true,
-  })
-  @JoinColumn({ name: 'created_by_id' })
-  createdBy: User;
 }

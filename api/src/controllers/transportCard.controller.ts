@@ -4,9 +4,19 @@ import { AuthenticatedRequest } from '../types/auth.types';
 import { UUID } from '../types';
 import { FindOptionsWhere, ILike } from 'typeorm';
 import { TransportCard } from '../entities/transportCard.entity';
+import { isAdminLike, isOwnerOrAdmin } from '../helpers/auth.helper';
+import { ForbiddenError } from '../helpers/errors.helper';
 
-// INITIALIZE SERVICES
 const transportCardService = new TransportCardService();
+
+function assertCanAccessTransportCard(
+  user: AuthenticatedRequest['user'],
+  card: TransportCard
+): void {
+  if (!isOwnerOrAdmin(user, card.createdById as UUID)) {
+    throw new ForbiddenError('You cannot access this transport card');
+  }
+}
 
 export class TransportCardController {
   /**
@@ -37,13 +47,14 @@ export class TransportCardController {
       const { id } = req.params;
       const { user } = req as AuthenticatedRequest;
 
+      const card = await transportCardService.getTransportCardById(id as UUID);
+      assertCanAccessTransportCard(user, card);
+
       await transportCardService.deleteTransportCard(id as UUID, {
         createdById: user.id,
       });
 
-      return res.status(204).json({
-        message: 'Transport card deleted successfully',
-      });
+      return res.status(204).send();
     } catch (error) {
       next(error);
     }
@@ -55,10 +66,15 @@ export class TransportCardController {
   async updateTransportCard(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
+      const { user } = req as AuthenticatedRequest;
+
+      const existing = await transportCardService.getTransportCardById(id as UUID);
+      assertCanAccessTransportCard(user, existing);
 
       const transportCard = await transportCardService.updateTransportCard(
         id as UUID,
-        req.body
+        req.body,
+        { createdById: user.id }
       );
 
       return res.status(200).json({
@@ -78,35 +94,24 @@ export class TransportCardController {
       const { user } = req as AuthenticatedRequest;
       const { page = 0, size = 10, name, cardNumber, createdById } = req.query;
 
-      // BUILD CONDITION
-      let condition:
-        | FindOptionsWhere<TransportCard>
-        | FindOptionsWhere<TransportCard>[] = {};
+      const condition: FindOptionsWhere<TransportCard> = {};
 
-      // USER ID
-      if (createdById) {
-        condition.createdById = createdById as UUID;
+      if (isAdminLike(user)) {
+        if (createdById) {
+          condition.createdById = createdById as UUID;
+        }
+      } else {
+        condition.createdById = user.id;
       }
 
-      // NAME
       if (name) {
-        condition = [
-          {
-            name: ILike(`%${name}%`),
-          },
-        ];
+        condition.name = ILike(`%${String(name)}%`);
       }
 
-      // CARD NUMBER
       if (cardNumber) {
-        condition = [
-          {
-            cardNumber: ILike(`%${cardNumber}%`),
-          },
-        ];
+        condition.cardNumber = ILike(`%${String(cardNumber)}%`);
       }
 
-      // FETCH TRANSPORT CARDS
       const transportCards = await transportCardService.fetchTransportCards({
         page: Number(page),
         size: Number(size),
@@ -128,10 +133,12 @@ export class TransportCardController {
   async getTransportCardById(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
+      const { user } = req as AuthenticatedRequest;
 
       const transportCard = await transportCardService.getTransportCardById(
         id as UUID
       );
+      assertCanAccessTransportCard(user, transportCard);
 
       return res.status(200).json({
         message: 'Transport card fetched successfully',

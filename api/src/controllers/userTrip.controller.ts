@@ -10,26 +10,148 @@ import {
 } from 'typeorm';
 import { UserTripStatus } from '../constants/userTrip.constants';
 import { UserTrip } from '../entities/userTrip.entity';
+import {
+  canManageUserTrip,
+  isAdminLike,
+} from '../helpers/auth.helper';
+import { ForbiddenError, ValidationError } from '../helpers/errors.helper';
 
-// LOAD USER TRIP SERVICE
 const userTripService = new UserTripService();
+
+function buildStartTimeEndTimeCondition(
+  startTime: string | undefined,
+  endTime: string | undefined
+): Pick<FindOptionsWhere<UserTrip>, 'startTime' | 'endTime'> {
+  if (startTime && endTime) {
+    const start = new Date(startTime);
+    const end = new Date(endTime);
+    return { startTime: Between(start, end) };
+  }
+  if (startTime) {
+    return { startTime: MoreThanOrEqual(new Date(startTime)) };
+  }
+  if (endTime) {
+    return { endTime: LessThanOrEqual(new Date(endTime)) };
+  }
+  return {};
+}
 
 export class UserTripController {
   /**
-   * CREATE USER TRIP
+   * CREATE USER TRIP (entrance)
    */
   async createUserTrip(req: Request, res: Response, next: NextFunction) {
     try {
       const { user } = req as AuthenticatedRequest;
 
+      const resolvedUserId =
+        isAdminLike(user) && req.body.userId
+          ? (req.body.userId as UUID)
+          : user.id;
+
       const newUserTrip = await userTripService.createUserTrip({
         ...req.body,
-        createdById: user?.id,
+        userId: resolvedUserId,
+        createdById: user.id,
       });
 
       return res.status(201).json({
         message: 'User trip created successfully',
         data: newUserTrip,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * POST /user-trips/entrance — same semantics as POST / with explicit resource name
+   */
+  async recordEntranceFromBody(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { user } = req as AuthenticatedRequest;
+
+      const resolvedUserId =
+        isAdminLike(user) && req.body.userId
+          ? (req.body.userId as UUID)
+          : user.id;
+
+      const newUserTrip = await userTripService.createUserTrip({
+        ...req.body,
+        userId: resolvedUserId,
+        createdById: user.id,
+      });
+
+      return res.status(201).json({
+        message: 'Entrance recorded successfully',
+        data: newUserTrip,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * POST /trips/:tripId/entrance — entrance for the authenticated passenger
+   */
+  async recordEntranceForTrip(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { tripId } = req.params;
+      const { user } = req as AuthenticatedRequest;
+
+      const resolvedUserId =
+        isAdminLike(user) && req.body.userId
+          ? (req.body.userId as UUID)
+          : user.id;
+
+      const newUserTrip = await userTripService.createUserTrip({
+        ...req.body,
+        tripId: tripId as UUID,
+        userId: resolvedUserId,
+        createdById: user.id,
+      });
+
+      return res.status(201).json({
+        message: 'Entrance recorded successfully',
+        data: newUserTrip,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * POST /user-trips/:id/exit — record exit / completion for this boarding record
+   */
+  async recordExit(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+      const { user } = req as AuthenticatedRequest;
+
+      if (!req.body?.exitLocation) {
+        throw new ValidationError('exitLocation is required');
+      }
+
+      const existing = await userTripService.getUserTripById(id as UUID);
+      if (!canManageUserTrip(user, existing.userId)) {
+        throw new ForbiddenError('You cannot modify this user trip');
+      }
+
+      const updatedUserTrip = await userTripService.updateUserTrip(
+        id as UUID,
+        {
+          status: UserTripStatus.COMPLETED,
+          exitLocation: req.body.exitLocation,
+          endTime: req.body.endTime
+            ? new Date(req.body.endTime)
+            : new Date(),
+          createdById: user.id,
+        }
+      );
+
+      return res.status(200).json({
+        message: 'Exit recorded successfully',
+        data: updatedUserTrip,
       });
     } catch (error) {
       next(error);
@@ -45,9 +167,14 @@ export class UserTripController {
 
       const { user } = req as AuthenticatedRequest;
 
+      const existing = await userTripService.getUserTripById(id as UUID);
+      if (!canManageUserTrip(user, existing.userId)) {
+        throw new ForbiddenError('You cannot modify this user trip');
+      }
+
       const updatedUserTrip = await userTripService.updateUserTrip(id as UUID, {
         ...req.body,
-        createdById: user?.id,
+        createdById: user.id,
       });
 
       return res.status(200).json({
@@ -66,8 +193,12 @@ export class UserTripController {
     try {
       const { id } = req.params;
 
-      // LOAD USER
       const { user } = req as AuthenticatedRequest;
+
+      const existing = await userTripService.getUserTripById(id as UUID);
+      if (!canManageUserTrip(user, existing.userId)) {
+        throw new ForbiddenError('You cannot delete this user trip');
+      }
 
       await userTripService.deleteUserTrip(id as UUID, {
         createdById: user?.id,
@@ -88,7 +219,13 @@ export class UserTripController {
     try {
       const { id } = req.params;
 
+      const { user } = req as AuthenticatedRequest;
+
       const userTrip = await userTripService.getUserTripById(id as UUID);
+
+      if (!canManageUserTrip(user, userTrip.userId)) {
+        throw new ForbiddenError('You cannot view this user trip');
+      }
 
       return res.status(200).json({
         message: 'User trip fetched successfully',
@@ -114,43 +251,38 @@ export class UserTripController {
         endTime,
       } = req.query;
 
-      /**
-       * INITIALIZE CONDITION
-       */
-      let condition: FindOptionsWhere<UserTrip> | FindOptionsWhere<UserTrip>[] =
-        {};
+      const { user } = req as AuthenticatedRequest;
+
+      const condition: FindOptionsWhere<UserTrip> = {};
 
       if (status) {
         condition.status = status as UserTripStatus;
       }
 
-      if (userId) {
-        condition.userId = userId as UUID;
+      if (isAdminLike(user)) {
+        if (userId) {
+          condition.userId = userId as UUID;
+        }
+      } else {
+        condition.userId = user.id;
       }
 
       if (tripId) {
         condition.tripId = tripId as UUID;
       }
 
-      if (startTime) {
-        condition.startTime = MoreThanOrEqual(new Date(startTime as string));
-      }
-
-      if (endTime) {
-        condition.endTime = LessThanOrEqual(new Date(endTime as string));
-      }
-
-      if (startTime && endTime) {
-        condition.startTime = Between(
-          new Date(startTime as string),
-          new Date(endTime as string)
-        );
-      }
+      Object.assign(
+        condition,
+        buildStartTimeEndTimeCondition(
+          startTime as string | undefined,
+          endTime as string | undefined
+        )
+      );
 
       const userTrips = await userTripService.fetchUserTrips({
         page: Number(page as string),
         size: Number(size as string),
-        condition: condition as FindOptionsWhere<UserTrip>,
+        condition,
       });
 
       return res.status(200).json({

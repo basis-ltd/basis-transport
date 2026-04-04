@@ -1,21 +1,21 @@
-import { useLazyFetchTransportCardsQuery } from '@/api/queries/apiQuerySlice';
-import { useAppDispatch } from '@/states/hooks';
-import { setTransportCardsList } from '@/states/slices/transportCardSlice';
-import { useEffect } from 'react';
-import { usePagination } from '../common/pagination.hooks';
+import {
+  useLazyFetchTransportCardsQuery,
+  useLazyGetTransportCardByIdQuery,
+} from "@/api/queries/apiQuerySlice";
+import { useAppDispatch } from "@/states/hooks";
+import {
+  setTransportCard,
+  setTransportCardsList,
+} from "@/states/slices/transportCardSlice";
+import { useEffect } from "react";
+import { usePagination } from "../common/pagination.hooks";
 
 /**
  * FETCH TRANSPORT CARDS
  */
 export const useFetchTransportCards = () => {
-  /**
-   * STATE VARIABLES
-   */
   const dispatch = useAppDispatch();
 
-  /**
-   * PAGINATION
-   */
   const {
     page,
     size,
@@ -27,33 +27,74 @@ export const useFetchTransportCards = () => {
     totalPages,
   } = usePagination();
 
+  // MUTATION
   const [
     fetchTransportCards,
     {
-      data: transportCardsData,
-      isFetching: transportCardsIsFetching,
-      error: transportCardsError,
+      data,
+      isFetching,
+      error,
+      isSuccess,
     },
   ] = useLazyFetchTransportCardsQuery();
 
   useEffect(() => {
-    if (transportCardsData) {
-      dispatch(setTransportCardsList(transportCardsData?.data?.rows));
-      setTotalCount(transportCardsData?.data?.totalCount);
-      setTotalPages(transportCardsData?.data?.totalPages);
+    if (isSuccess) {
+      dispatch(setTransportCardsList(data?.data?.rows));
+      setTotalCount(data?.data?.totalCount);
+      setTotalPages(data?.data?.totalPages);
     }
-  }, [dispatch, setTotalCount, setTotalPages, transportCardsData]);
+  }, [
+    dispatch,
+    setTotalCount,
+    setTotalPages,
+    isSuccess,
+    data?.data?.rows,
+    data?.data?.totalCount,
+    data?.data?.totalPages,
+  ]);
 
   return {
     fetchTransportCards,
-    transportCardsData,
-    transportCardsIsFetching,
-    transportCardsError,
+    data,
+    isFetching,
+    error,
     page,
     size,
     setPage,
     setSize,
     totalCount,
     totalPages,
+  };
+};
+
+/**
+ * FETCH TRANSPORT CARD BY ID
+ */
+export const useFetchTransportCardById = () => {
+  const dispatch = useAppDispatch();
+
+  const [
+    fetchTransportCardById,
+    {
+      data,
+      isFetching,
+      error,
+      isSuccess,
+    },
+  ] = useLazyGetTransportCardByIdQuery();
+
+  useEffect(() => {
+    if (isSuccess) {
+      dispatch(setTransportCard(data?.data));
+    }
+  }, [dispatch, isSuccess, data?.data]);
+
+  return {
+    fetchTransportCardById,
+    data,
+    isFetching,
+    error,
+    isSuccess,
   };
 };

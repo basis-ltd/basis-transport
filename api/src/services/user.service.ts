@@ -3,7 +3,6 @@ import { User } from '../entities/user.entity';
 import { AppDataSource } from '../data-source';
 import { ConflictError, NotFoundError } from '../helpers/errors.helper';
 import { LogReferenceTypes } from '../constants/logs.constants';
-import { AuditDelete } from '../decorators/auditLog.decorator';
 import { UUID } from '../types';
 import { getPagingData } from '../helpers/pagination.helper';
 import { getPagination, Pagination } from '../helpers/pagination.helper';
@@ -30,11 +29,6 @@ export class UserService {
    * @param id
    * @returns
    */
-  @AuditDelete({
-    entityType: 'User',
-    getEntityId: (args) => args[0],
-    getUserId: (args) => args[1]?.createdById,
-  })
   async deleteUser(id: UUID, metadata?: { createdById?: UUID }): Promise<void> {
     // CHECK IF USER EXISTS
     const existingUser = await this.userRepository.findOne({

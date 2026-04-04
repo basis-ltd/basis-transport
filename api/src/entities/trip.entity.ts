@@ -2,7 +2,6 @@ import { Column, Entity, Geometry, JoinColumn, ManyToOne } from 'typeorm';
 import { AbstractEntity } from '.';
 import { UUID } from '../types';
 import { Location } from './location.entity';
-import { User } from './user.entity';
 import { TripStatus } from '../constants/trip.constants';
 
 @Entity('trips')
@@ -31,10 +30,6 @@ export class Trip extends AbstractEntity {
   // LOCATION TO ID
   @Column({ name: 'location_to_id', type: 'uuid', nullable: true })
   locationToId: UUID;
-
-  // CREATED BY ID
-  @Column({ name: 'created_by_id', type: 'uuid', nullable: false })
-  createdById: UUID;
 
   // STATUS
   @Column({
@@ -76,9 +71,4 @@ export class Trip extends AbstractEntity {
   })
   @JoinColumn({ name: 'location_to_id' })
   locationTo: Location;
-
-  // CREATED BY
-  @ManyToOne(() => User, (user) => user.id)
-  @JoinColumn({ name: 'created_by_id' })
-  createdBy: User;
 }

@@ -41,10 +41,6 @@ export class UserTrip extends AbstractEntity {
   @Column({ name: 'end_time', type: 'timestamptz', nullable: true })
   endTime: Date;
 
-  // CREATED BY ID
-  @Column({ name: 'created_by_id', type: 'uuid', nullable: false })
-  createdById: UUID;
-
   /**
    * RELATIONS
    */
@@ -58,9 +54,4 @@ export class UserTrip extends AbstractEntity {
   @ManyToOne(() => Trip, (trip) => trip.id)
   @JoinColumn({ name: 'trip_id' })
   trip: Trip;
-
-  // CREATED BY
-  @ManyToOne(() => User, (user) => user.id)
-  @JoinColumn({ name: 'created_by_id' })
-  createdBy: User;
 }

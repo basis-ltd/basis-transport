@@ -13,7 +13,6 @@ import {
 } from '../helpers/pagination.helper';
 import { UUID } from '../types';
 import { LogReferenceTypes } from '../constants/logs.constants';
-import { AuditDelete, AuditUpdate } from '../decorators/auditLog.decorator';
 
 export class LocationService {
   private readonly locationRepository: Repository<Location>;
@@ -110,11 +109,6 @@ export class LocationService {
   /**
    * DELETE LOCATION
    */
-  @AuditDelete({
-    entityType: 'Location',
-    getEntityId: (args) => args[0],
-    getUserId: (args) => args[1]?.createdById
-  })
   async deleteLocation(id: UUID, metadata?: { createdById?: UUID }): Promise<void> {
     const location = await this.getLocationById(id);
     await this.locationRepository.delete(location?.id);
@@ -123,11 +117,6 @@ export class LocationService {
   /**
    * UPDATE LOCATION
    */
-  @AuditUpdate({
-    entityType: 'Location',
-    getEntityId: (args) => args[0],
-    getUserId: (args) => args[1]?.createdById
-  })
   async updateLocation(
     id: UUID,
     location: Partial<Location>

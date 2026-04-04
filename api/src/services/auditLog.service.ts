@@ -1,22 +1,52 @@
-import { Repository } from 'typeorm';
+import { Repository, FindOptionsWhere, FindManyOptions } from 'typeorm';
 import { AppDataSource } from '../data-source';
 import { AuditLog, AuditAction } from '../entities/auditLog.entity';
-import { Between, FindOptionsWhere } from 'typeorm';
 import { UUID } from '../types';
 import {
   getPagination,
   getPagingData,
   Pagination,
 } from '../helpers/pagination.helper';
+import { serializeEntityForAudit } from '../helpers/auditSerialize.helper';
 
 /**
- * AUDIT LOG SERVICE
+ * AUDIT LOG SERVICE (entity-level diffs). Shared singleton for decorators / direct use.
  */
 export class AuditLogService {
   private auditLogRepository: Repository<AuditLog>;
 
   constructor() {
     this.auditLogRepository = AppDataSource.getRepository(AuditLog);
+  }
+
+  private async findPage(
+    options: {
+      page: number;
+      size: number;
+      condition: FindOptionsWhere<AuditLog> | FindOptionsWhere<AuditLog>[];
+      order: FindManyOptions<AuditLog>['order'];
+    }
+  ): Promise<Pagination<AuditLog>> {
+    const { skip, take } = getPagination({
+      page: options.page,
+      size: options.size,
+    });
+
+    const auditLogs = await this.auditLogRepository.findAndCount({
+      where: options.condition,
+      skip,
+      take,
+      relations: {
+        createdBy: true,
+      },
+      order: options.order,
+    });
+
+    return getPagingData({
+      data: auditLogs,
+      page: options.page,
+      size: options.size,
+    });
   }
 
   /**
@@ -26,19 +56,38 @@ export class AuditLogService {
     action: AuditAction,
     entityType: string,
     entityId: UUID,
-    oldValues: any,
-    newValues: any,
+    oldValues: unknown,
+    newValues: unknown,
     createdById?: UUID
   ): Promise<AuditLog> {
     const auditLog = new AuditLog();
     auditLog.action = action;
     auditLog.entityType = entityType;
     auditLog.entityId = entityId;
-    auditLog.oldValues = oldValues;
-    auditLog.newValues = newValues;
+    auditLog.oldValues = serializeEntityForAudit(oldValues);
+    auditLog.newValues = serializeEntityForAudit(newValues);
     auditLog.createdById = createdById;
 
     return this.auditLogRepository.save(auditLog);
+  }
+
+  /**
+   * LOG CREATE
+   */
+  async logCreate(
+    entityType: string,
+    entityId: UUID,
+    newValues: unknown,
+    createdById?: UUID
+  ): Promise<AuditLog> {
+    return this.createAuditLog(
+      AuditAction.CREATE,
+      entityType,
+      entityId,
+      {},
+      newValues,
+      createdById
+    );
   }
 
   /**
@@ -47,8 +96,8 @@ export class AuditLogService {
   async logUpdate(
     entityType: string,
     entityId: UUID,
-    oldValues: any,
-    newValues: any,
+    oldValues: unknown,
+    newValues: unknown,
     createdById?: UUID
   ): Promise<AuditLog> {
     return this.createAuditLog(
@@ -67,7 +116,7 @@ export class AuditLogService {
   async logDelete(
     entityType: string,
     entityId: UUID,
-    oldValues: any,
+    oldValues: unknown,
     createdById?: UUID
   ): Promise<AuditLog> {
     return this.createAuditLog(
@@ -92,25 +141,11 @@ export class AuditLogService {
     size: number;
     condition: FindOptionsWhere<AuditLog> | FindOptionsWhere<AuditLog>[];
   }): Promise<Pagination<AuditLog>> {
-    // GET PAGINATION
-    const { skip, take } = getPagination({ page, size });
-
-    const auditLogs = await this.auditLogRepository.findAndCount({
-      where: condition,
-      skip,
-      take,
-      relations: {
-        createdBy: true,
-      },
-      order: {
-        updatedAt: 'DESC',
-      },
-    });
-
-    return getPagingData({
-      data: auditLogs,
+    return this.findPage({
       page,
       size,
+      condition,
+      order: { updatedAt: 'DESC' },
     });
   }
 
@@ -126,25 +161,13 @@ export class AuditLogService {
     size: number;
     condition: FindOptionsWhere<AuditLog> | FindOptionsWhere<AuditLog>[];
   }): Promise<Pagination<AuditLog>> {
-    // GET PAGINATION
-    const { skip, take } = getPagination({ page, size });
-
-    const auditLogs = await this.auditLogRepository.findAndCount({
-      where: condition,
-      skip,
-      take,
-      relations: {
-        createdBy: true,
-      },
-      order: {
-        createdAt: 'DESC',
-      },
-    });
-
-    return getPagingData({
-      data: auditLogs,
+    return this.findPage({
       page,
       size,
+      condition,
+      order: { createdAt: 'DESC' },
     });
   }
 }
+
+export const auditLogServiceSingleton = new AuditLogService();

@@ -5,12 +5,18 @@ interface TransportCardState {
   transportCardsList: TransportCard[];
   transportCard?: TransportCard;
   selectedTransportCard?: TransportCard;
+  deleteTransportCard: boolean;
+  updateTransportCard: boolean;
+  createTransportCard: boolean;
 }
 
 const initialState: TransportCardState = {
   transportCardsList: [],
   transportCard: undefined,
   selectedTransportCard: undefined,
+  deleteTransportCard: false,
+  updateTransportCard: false,
+  createTransportCard: false,
 };
 
 const transportCardSlice = createSlice({
@@ -26,9 +32,14 @@ const transportCardSlice = createSlice({
     setSelectedTransportCard: (state, action) => {
       state.selectedTransportCard = action.payload;
     },
-    resetTransportCard: (state) => {
-      state.transportCard = undefined;
-      state.selectedTransportCard = undefined;
+    setDeleteTransportCard: (state, action) => {
+      state.deleteTransportCard = action.payload;
+    },
+    setUpdateTransportCard: (state, action) => {
+      state.updateTransportCard = action.payload;
+    },
+    setCreateTransportCard: (state, action) => {
+      state.createTransportCard = action.payload;
     },
   },
 });
@@ -37,7 +48,9 @@ export const {
   setTransportCardsList,
   setTransportCard,
   setSelectedTransportCard,
-  resetTransportCard,
+  setDeleteTransportCard,
+  setUpdateTransportCard,
+  setCreateTransportCard,
 } = transportCardSlice.actions;
 
 export default transportCardSlice.reducer;

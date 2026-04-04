@@ -1,5 +1,6 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { baseQuery } from '../rootApi';
+import { UUID } from '@/types';
 
 export const apiQuerySlice = createApi({
   reducerPath: 'apiQuery',
@@ -156,7 +157,17 @@ export const apiQuerySlice = createApi({
      * TRANSPORT CARDS
      */
     fetchTransportCards: builder.query({
-      query: ({ page, size, name, createdById }) => {
+      query: ({
+        page,
+        size,
+        name,
+        createdById,
+      }: {
+        page: number;
+        size: number;
+        name?: string;
+        createdById?: UUID;
+      }) => {
         return {
           url: '/transport-cards',
           params: {
@@ -166,20 +177,77 @@ export const apiQuerySlice = createApi({
             createdById,
           },
           method: 'GET',
-          tag: ['TransportCards'],
         };
       },
+      providesTags: ['TransportCards'],
     }),
 
     // GET TRANSPORT CARD BY ID
     getTransportCardById: builder.query({
-      query: (id) => {
+      query: (id: UUID) => {
         return {
           url: `/transport-cards/${id}`,
           method: 'GET',
-          tag: ['TransportCards'],
         };
       },
+      providesTags: (_result, _error, id) => [{ type: 'TransportCards', id }],
+    }),
+
+    // FETCH AUDIT LOGS BY ENTITY ID
+    fetchAuditLogsByEntityId: builder.query({
+      query: ({
+        entityType,
+        entityId,
+        page = 0,
+        size = 20,
+      }: {
+        entityType: string;
+        entityId: UUID;
+        page?: number;
+        size?: number;
+      }) => ({
+        url: `/audit-logs/entity/${entityType}/${entityId}`,
+        params: { page, size },
+        method: 'GET',
+      }),
+    }),
+
+    createTransportCard: builder.mutation<
+      unknown,
+      { name?: string; cardNumber: string }
+    >({
+      query: (body) => ({
+        url: '/transport-cards',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['TransportCards'],
+    }),
+
+    updateTransportCard: builder.mutation<
+      unknown,
+      { id: UUID; body: Partial<{ name: string; cardNumber: string }> }
+    >({
+      query: ({ id, body }) => ({
+        url: `/transport-cards/${id}`,
+        method: 'PATCH',
+        body,
+      }),
+      invalidatesTags: (_r, _e, { id }) => [
+        'TransportCards',
+        { type: 'TransportCards', id },
+      ],
+    }),
+
+    deleteTransportCard: builder.mutation<unknown, UUID>({
+      query: (id) => ({
+        url: `/transport-cards/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: (_r, _e, id) => [
+        'TransportCards',
+        { type: 'TransportCards', id },
+      ],
     }),
 
     /**
@@ -269,6 +337,10 @@ export const {
   useLazyGetUserByIdQuery,
   useLazyFetchTransportCardsQuery,
   useLazyGetTransportCardByIdQuery,
+  useLazyFetchAuditLogsByEntityIdQuery,
+  useCreateTransportCardMutation,
+  useUpdateTransportCardMutation,
+  useDeleteTransportCardMutation,
   useLazyCountUserTripsQuery,
   useLazyCountTransportCardsQuery,
   useLazyCountUsersQuery,

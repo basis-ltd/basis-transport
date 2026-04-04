@@ -11,7 +11,6 @@ import { Location } from '../entities/location.entity';
 import { User } from '../entities/user.entity';
 import { LogReferenceTypes } from '../constants/logs.constants';
 import { generateReferenceId } from '../helpers/string.helper';
-import { AuditDelete, AuditUpdate } from '../decorators/auditLog.decorator';
 import { UUID } from '../types';
 import { getPagingData } from '../helpers/pagination.helper';
 import { getPagination, Pagination } from '../helpers/pagination.helper';
@@ -111,11 +110,6 @@ export class TripService {
    * @param trip
    * @returns
    */
-  @AuditUpdate({
-    entityType: 'Trip',
-    getEntityId: (args) => args[0],
-    getUserId: (args) => args[1]?.createdById,
-  })
   async updateTrip(
     id: UUID,
     trip: Partial<Trip>,
@@ -171,11 +165,6 @@ export class TripService {
    * @param id
    * @returns
    */
-  @AuditDelete({
-    entityType: 'Trip',
-    getEntityId: (args) => args[0],
-    getUserId: (args) => args[1]?.createdById,
-  })
   async deleteTrip(id: UUID, metadata?: { createdById?: UUID }): Promise<void> {
     // CHECK IF TRIP EXISTS
     const existingTrip = await this.tripRepository.findOne({
@@ -316,11 +305,6 @@ export class TripService {
   /**
    * START TRIP
    */
-  @AuditUpdate({
-    entityType: 'Trip',
-    getEntityId: (args) => args[0],
-    getUserId: (args) => args[1]?.createdById,
-  })
   async startTrip(id: UUID, metadata?: { createdById?: UUID }): Promise<Trip> {
     const trip = await this.tripRepository.findOne({
       where: { id: id as UUID },
@@ -356,11 +340,6 @@ export class TripService {
   /**
    * COMPLETE TRIP
    */
-  @AuditUpdate({
-    entityType: 'Trip',
-    getEntityId: (args) => args[0],
-    getUserId: (args) => args[1]?.createdById,
-  })
   async completeTrip(id: UUID, metadata?: { createdById?: UUID }): Promise<Trip> {
     const trip = await this.tripRepository.findOne({
       where: { id: id as UUID },
@@ -414,11 +393,6 @@ export class TripService {
   /**
    * CANCEL TRIP
    */
-  @AuditUpdate({
-    entityType: 'Trip',
-    getEntityId: (args) => args[0],
-    getUserId: (args) => args[1]?.createdById,
-  })
   async cancelTrip(id: UUID, metadata?: { createdById?: UUID }): Promise<Trip> {
     const trip = await this.tripRepository.findOne({
       where: { id: id as UUID },

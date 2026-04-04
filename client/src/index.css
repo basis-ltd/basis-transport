@@ -151,4 +151,17 @@
     background-color: var(--selection-background);
     color: var(--selection-foreground);
   }
+
+  /* Form fields: no themed selection (global ::selection uses --selection-*); keeps Input.tsx readable */
+  input::selection,
+  textarea::selection {
+    background-color: transparent;
+    color: inherit;
+  }
+
+  input::-moz-selection,
+  textarea::-moz-selection {
+    background-color: transparent;
+    color: inherit;
+  }
 }

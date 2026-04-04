@@ -5,6 +5,10 @@ import { AbstractEntity } from '.';
 
 import { User } from './user.type';
 
+export enum AuditLogEntityType {
+  TRANSPORT_CARD = 'TransportCard',
+}
+
 export interface AuditLog extends AbstractEntity {
   action: AuditAction;
   entityType: string;

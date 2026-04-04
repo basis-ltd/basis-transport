@@ -1,13 +1,43 @@
 import { NextFunction, Request, Response } from 'express';
-import { JwtPayload } from 'jsonwebtoken';
 import jwt from 'jsonwebtoken';
+import { AppDataSource } from '../data-source';
 import { User } from '../entities/user.entity';
+import { AuthenticatedRequest, AuthenticatedUser } from '../types/auth.types';
+import { UUID } from '../types';
+import { setAuditUserId } from './requestContext.middleware';
 
-interface AuthenticationRequest extends Request {
-  user: User | JwtPayload | undefined;
+interface JwtIdPayload {
+  id: UUID;
 }
 
-export const authMiddleware = (
+async function loadAuthenticatedUser(userId: UUID): Promise<AuthenticatedUser | null> {
+  const userRepository = AppDataSource.getRepository(User);
+  const dbUser = await userRepository.findOne({
+    where: { id: userId },
+    relations: {
+      userRoles: {
+        role: true,
+      },
+    },
+  });
+
+  if (!dbUser) {
+    return null;
+  }
+
+  const roleNames =
+    dbUser.userRoles
+      ?.map((ur) => ur.role?.name)
+      .filter((n): n is string => Boolean(n)) ?? [];
+
+  return {
+    id: dbUser.id,
+    email: dbUser.email ?? undefined,
+    roleNames,
+  };
+}
+
+export const authMiddleware = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -19,19 +49,29 @@ export const authMiddleware = (
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET as string
+    ) as JwtIdPayload;
 
-    (req as AuthenticationRequest).user = decoded as
-      | User
-      | JwtPayload
-      | undefined;
+    if (!decoded?.id) {
+      return res.status(401).json({ message: 'Invalid token' });
+    }
+
+    const user = await loadAuthenticatedUser(decoded.id);
+    if (!user) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+    (req as AuthenticatedRequest).user = user;
+    setAuditUserId(user.id);
     next();
-  } catch (error) {
+  } catch {
     return res.status(401).json({ message: 'Invalid token' });
   }
 };
 
-export const optionalAuthMiddleware = (
+export const optionalAuthMiddleware = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -39,18 +79,25 @@ export const optionalAuthMiddleware = (
   try {
     const token = req?.headers?.authorization?.split(' ')[1];
     if (!token) {
-      (req as AuthenticationRequest).user = undefined;
       return next();
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
-    (req as AuthenticationRequest).user = decoded as
-      | User
-      | JwtPayload
-      | undefined;
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET as string
+    ) as JwtIdPayload;
+
+    if (!decoded?.id) {
+      return next();
+    }
+
+    const user = await loadAuthenticatedUser(decoded.id);
+    if (user) {
+      (req as AuthenticatedRequest).user = user;
+      setAuditUserId(user.id);
+    }
     next();
-  } catch (error) {
-    (req as AuthenticationRequest).user = undefined;
+  } catch {
     next();
   }
 };

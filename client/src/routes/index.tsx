@@ -19,6 +19,7 @@ import LocationsPage from '@/pages/locations/LocationsPage';
 import LocationDetailsPage from '@/pages/locations/LocationDetailsPage';
 import CreateLocationPage from '@/pages/locations/CreateLocationPage';
 import CreateUserPage from '@/pages/users/CreateUserPage';
+import TransportCardDetailsPage from '@/pages/profile/TransportCardDetailsPage';
 
 const Router = () => {
   return (
@@ -88,6 +89,7 @@ const Router = () => {
         <Route path="/account">
           <Route path="profile" element={<UserProfilePage />} />
           <Route path="transport-cards" element={<TransportCardsPage />} />
+          <Route path="transport-cards/:id" element={<TransportCardDetailsPage />} />
         </Route>
       </Route>
     </Routes>

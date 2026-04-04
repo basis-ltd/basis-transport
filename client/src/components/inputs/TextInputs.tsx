@@ -10,49 +10,49 @@ interface HeadingProps {
 export const Heading = ({
   children,
   className,
-  type = 'h1',
+  type = 'h3',
   isLoading,
 }: HeadingProps) => {
   switch (type) {
     case 'h1':
       return (
-        <h1 className={`text-xl md:text-2xl font-medium text-primary ${className}`}>
+        <h1 className={`text-[18px] md:text-[18px] font-medium text-primary ${className}`}>
           {isLoading ? <SkeletonLoader type="text" width="20vw" /> : children}
         </h1>
       );
     case 'h2':
       return (
-        <h2 className={`text-lg md:text-xl font-medium text-primary ${className}`}>
+        <h2 className={`text-[18px] md:text-[18px] font-medium text-primary ${className}`}>
           {isLoading ? <SkeletonLoader type="text" width="15vw" /> : children}
         </h2>
       );
     case 'h3':
       return (
-        <h3 className={`text-lg font-medium text-primary ${className}`}>
+        <h3 className={`text-[15px] font-medium text-primary ${className}`}>
           {isLoading ? <SkeletonLoader type="text" width="15vw" /> : children}
         </h3>
       );
     case 'h4':
       return (
-        <h4 className={`text-sm font-medium text-primary ${className}`}>
+        <h4 className={`text-[14px] font-medium text-primary ${className}`}>
           {isLoading ? <SkeletonLoader type="text" width="15vw" /> : children}
         </h4>
       );
     case 'h5':
       return (
-        <h5 className={`text-sm font-medium text-primary ${className}`}>
+        <h5 className={`text-[14px] font-medium text-primary ${className}`}>
           {isLoading ? <SkeletonLoader type="text" width="15vw" /> : children}
         </h5>
       );
     case 'h6':
       return (
-        <h6 className={`text-sm font-medium text-primary ${className}`}>
+        <h6 className={`text-[14px] font-medium text-primary ${className}`}>
           {isLoading ? <SkeletonLoader type="text" width="15vw" /> : children}
         </h6>
       );
     default:
       return (
-        <h1 className={`text-xl md:text-2xl font-medium text-primary ${className}`}>
+        <h1 className={`text-[18px] md:text-[18px] font-medium text-primary ${className}`}>
           {isLoading ? <SkeletonLoader type="text" width="20vw" /> : children}
         </h1>
       );

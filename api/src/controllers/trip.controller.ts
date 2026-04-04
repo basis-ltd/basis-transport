@@ -117,19 +117,15 @@ export class TripController {
         condition.createdById = createdById as UUID;
       }
 
-      if (startTime) {
-        condition.startTime = MoreThanOrEqual(new Date(startTime as string));
-      }
-
-      if (endTime) {
-        condition.endTime = LessThanOrEqual(new Date(endTime as string));
-      }
-
       if (startTime && endTime) {
         condition.startTime = Between(
           new Date(startTime as string),
           new Date(endTime as string)
         );
+      } else if (startTime) {
+        condition.startTime = MoreThanOrEqual(new Date(startTime as string));
+      } else if (endTime) {
+        condition.endTime = LessThanOrEqual(new Date(endTime as string));
       }
 
       const trips = await tripService.fetchTrips({

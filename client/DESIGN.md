@@ -33,6 +33,15 @@ These rules override older examples elsewhere in this document when they conflic
 - **`div` / `span` are allowed only** for **presentational grouping** with no document role—e.g. a single flex/grid row inside an already-semantic parent, or a hook for layout where no HTML element fits. Keep such wrappers **minimal**; do not nest long chains of anonymous `div`s where one semantic container suffices.
 - **Never use `div` (or `span`) as a clickable control**—use `button` or `a` with appropriate styles. Do not fake headings with styled `div`s; use `h1`–`h6` and match visual caps via classes in §2.
 
+### Forms (react-hook-form)
+
+- **Every form** in the client must use **[react-hook-form](https://react-hook-form.com/)** in the same pattern as **`client/src/pages/auth/Login.tsx`**, **`ForgotPassword.tsx`**, and **`Signup.tsx`**.
+- **`useForm`** — destructure `control`, `handleSubmit`, `formState: { errors }`, and optionally `reset` (e.g. clear after a successful mutation). Prefer **`useForm<YourFormType>()`** when the field shape is known.
+- **Fields** — wrap each **`Input`**, **`Select`**, **`TextArea`**, or other controlled field in **`Controller`** from `react-hook-form`: pass **`control`**, **`name`**, and **`rules`** (`required`, **`validate`** using **`validateInputs`** from `@/helpers/validations.helper` where appropriate, same as auth).
+- **`render`** — spread **`field`** into the input component (`{...field}`); pass **`errorMessage={errors.<fieldName>?.message}`** so validation surfaces in the shared input UI.
+- **Submit** — `const onSubmit = handleSubmit((data) => { ... });` on the **`<form onSubmit={onSubmit}`**; primary action **`Button type="submit"`** (not `onClick` that bypasses validation unless intentionally separate).
+- **Do not** implement new screens with ad hoc **`useState`** for each field and manual validation as the primary pattern; extend the auth pattern for modals, profile, CRUD, filters, etc.
+
 ---
 
 ## 1. Color System
@@ -436,7 +445,9 @@ Items: `flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-primary/10 hove
 
 ---
 
-## 8. Auth Forms (`Login.tsx`, `Signup.tsx`)
+## 8. Auth Forms (`Login.tsx`, `ForgotPassword.tsx`, `Signup.tsx`)
+
+**Stack (mandatory for all forms, not only auth):** react-hook-form — **`useForm`**, **`Controller`**, **`handleSubmit`**, **`errors`** → **`errorMessage` on `Input`**. See **§0 — Forms (react-hook-form)** and the auth files above.
 
 **Card container (no outer border):**
 ```
@@ -545,7 +556,7 @@ client/src/
 ├── containers/navigation/
 │   └── Navbar.tsx
 ├── pages/
-│   ├── auth/              # Login.tsx, Signup.tsx
+│   ├── auth/              # Login, ForgotPassword, Signup — react-hook-form reference
 │   └── common/            # LandingPage.tsx
 ├── index.css              # Theme tokens, CSS variables
 └── lib/utils.ts           # cn() utility (clsx + twMerge)
@@ -569,3 +580,4 @@ When generating UI for this project:
 10. **Focus pattern:** `focus-visible:ring-2 focus-visible:ring-primary/20` — never `outline`
 11. **Use `cn()` from `@/lib/utils`** for conditional class merging
 12. **Semantic HTML:** restrict `div` / `span`—use `main`, `section`, `header`, `footer`, `nav`, `article`, `aside`, `p`, lists, headings, `button`, `a`, etc.; see §0
+13. **Forms:** **react-hook-form** — `useForm`, `Controller`, `handleSubmit`, `errors` → `errorMessage`; match `pages/auth/Login.tsx` / `ForgotPassword.tsx` / `Signup.tsx`; see §0

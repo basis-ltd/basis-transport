@@ -1,19 +1,22 @@
-import CustomPopover from '@/components/custom/CustomPopover';
-import Button from '@/components/inputs/Button';
-import { ellipsisHClassName, tableActionClassName } from '@/constants/input.constants';
-import { Gender, getGenderLabel } from '@/constants/user.constants';
-import AppLayout from '@/containers/navigation/AppLayout';
-import { publicColors } from '@/containers/public/publicTheme';
-import { capitalizeString } from '@/helpers/strings.helper';
-import { useAppSelector } from '@/states/hooks';
-import { faPenToSquare } from '@fortawesome/free-regular-svg-icons';
-import { faEllipsisH, faKey } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Link, useNavigate } from 'react-router-dom';
+import CustomPopover from "@/components/custom/CustomPopover";
+import Button from "@/components/inputs/Button";
+import {
+  ellipsisHClassName,
+  tableActionClassName,
+} from "@/constants/input.constants";
+import { Gender, getGenderLabel } from "@/constants/user.constants";
+import AppLayout from "@/containers/navigation/AppLayout";
+import { publicColors } from "@/containers/public/publicTheme";
+import { capitalizeString } from "@/helpers/strings.helper";
+import { useAppSelector } from "@/states/hooks";
+import { faPenToSquare } from "@fortawesome/free-regular-svg-icons";
+import { faEllipsisH, faKey } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Link, useNavigate } from "react-router-dom";
 
 /** DESIGN.md §0: rounded-md max, shadow-sm max, no section borders */
 const surfaceCard =
-  'rounded-md bg-white/90 shadow-sm p-6 md:p-8 flex flex-col gap-5';
+  "rounded-md bg-white/90 shadow-sm p-6 md:p-8 flex flex-col gap-5";
 
 const UserProfilePage = () => {
   const { user } = useAppSelector((state) => state.auth);
@@ -65,19 +68,30 @@ const UserProfilePage = () => {
               Manage your personal information and preferences
             </p>
           </div>
-          <CustomPopover trigger={
-            <FontAwesomeIcon icon={faEllipsisH} className={ellipsisHClassName} />
-          }>
-          <menu className="w-full flex flex-col gap-1">
-            <Link to={'/account/profile/edit'} className={tableActionClassName}>
-            <FontAwesomeIcon icon={faPenToSquare} />
-            Edit profile
-            </Link>
-            <Link to={'/account/profile/change-password'} className={tableActionClassName}>
-            <FontAwesomeIcon icon={faKey} />
-            Change password
-            </Link>
-          </menu>
+          <CustomPopover
+            trigger={
+              <FontAwesomeIcon
+                icon={faEllipsisH}
+                className={ellipsisHClassName}
+              />
+            }
+          >
+            <menu className="w-full flex flex-col gap-1">
+              <Link
+                to={"/account/profile/edit"}
+                className={tableActionClassName}
+              >
+                <FontAwesomeIcon icon={faPenToSquare} />
+                Edit profile
+              </Link>
+              <Link
+                to={"/account/profile/change-password"}
+                className={tableActionClassName}
+              >
+                <FontAwesomeIcon icon={faKey} />
+                Change password
+              </Link>
+            </menu>
           </CustomPopover>
         </header>
 
@@ -86,7 +100,7 @@ const UserProfilePage = () => {
             <header className="flex flex-col md:flex-row md:items-center gap-6">
               <figure className="relative shrink-0 flex justify-center md:justify-start">
                 <img
-                  src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user.name ?? '')}&background=283618&color=fff&size=120`}
+                  src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user.name ?? "")}&background=283618&color=fff&size=120`}
                   alt={user.name}
                   className="w-24 h-24 rounded-md object-cover shadow-sm"
                 />
@@ -110,12 +124,12 @@ const UserProfilePage = () => {
                 {user.status ? (
                   <span
                     className={`inline-flex self-center md:self-start items-center px-3 py-1 rounded-md text-[12px] font-normal shadow-sm ${
-                      user.status === 'ACTIVE'
-                        ? 'bg-green-50 text-green-800'
-                        : 'text-secondary'
+                      user.status === "ACTIVE"
+                        ? "bg-green-50 text-green-800"
+                        : "text-secondary"
                     }`}
                     style={
-                      user.status !== 'ACTIVE'
+                      user.status !== "ACTIVE"
                         ? { backgroundColor: `${publicColors.bgAlt}` }
                         : undefined
                     }
@@ -146,14 +160,14 @@ const UserProfilePage = () => {
             <dl className="flex flex-col gap-5 pt-1">
               {(
                 [
-                  ['Phone number', user.phoneNumber || 'Not provided'],
-                  ['Gender', getGenderLabel(user.gender || Gender.MALE)],
-                  ['Nationality', user.nationality || 'Not provided'],
+                  ["Phone number", user.phoneNumber || "Not provided"],
+                  ["Gender", getGenderLabel(user.gender || Gender.MALE)],
+                  ["Nationality", user.nationality || "Not provided"],
                   [
-                    'Account created',
+                    "Account created",
                     user.createdAt
                       ? new Date(user.createdAt).toLocaleDateString()
-                      : 'Not available',
+                      : "Not available",
                   ],
                 ] as const
               ).map(([label, value]) => (

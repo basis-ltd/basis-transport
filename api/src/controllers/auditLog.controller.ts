@@ -1,16 +1,43 @@
 import { Request, Response, NextFunction } from 'express';
-import { AuditLogService } from '../services/auditLog.service';
+import { auditLogServiceSingleton } from '../services/auditLog.service';
 import { UUID } from '../types';
-import { Between, FindOptionsWhere, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
+import {
+  Between,
+  FindOptionsWhere,
+  LessThanOrEqual,
+  MoreThanOrEqual,
+} from 'typeorm';
 import { AuditAction, AuditLog } from '../entities/auditLog.entity';
+import { AuthenticatedRequest } from '../types/auth.types';
+import { isOwnerOrAdmin } from '../helpers/auth.helper';
+import { ForbiddenError } from '../helpers/errors.helper';
+import { TransportCardService } from '../services/transportCard.service';
+
+const auditLogService = auditLogServiceSingleton;
+const transportCardService = new TransportCardService();
+
+function buildUpdatedAtDateCondition(
+  startDate: string | undefined,
+  endDate: string | undefined
+): Pick<FindOptionsWhere<AuditLog>, 'updatedAt'> {
+  if (startDate && endDate) {
+    return {
+      updatedAt: Between(
+        new Date(startDate),
+        new Date(endDate)
+      ),
+    };
+  }
+  if (startDate) {
+    return { updatedAt: MoreThanOrEqual(new Date(startDate)) };
+  }
+  if (endDate) {
+    return { updatedAt: LessThanOrEqual(new Date(endDate)) };
+  }
+  return {};
+}
 
 export class AuditController {
-  private auditLogService: AuditLogService;
-
-  constructor() {
-    this.auditLogService = new AuditLogService();
-  }
-
   /**
    * FETCH AUDIT LOGS
    */
@@ -26,7 +53,6 @@ export class AuditController {
         startDate,
         endDate,
       } = req.query;
-      // BUILD CONDITION
       const condition:
         | FindOptionsWhere<AuditLog>
         | FindOptionsWhere<AuditLog>[] = {};
@@ -43,20 +69,16 @@ export class AuditController {
       if (createdById) {
         condition.createdById = createdById as UUID;
       }
-      if (startDate) {
-        condition.updatedAt = MoreThanOrEqual(new Date(startDate as string));
-      }
-      if (endDate) {
-        condition.updatedAt = LessThanOrEqual(new Date(endDate as string));
-      }
-      if (startDate && endDate) {
-        condition.createdAt = Between(
-          new Date(startDate as string),
-          new Date(endDate as string)
-        );
-      }
 
-      const result = await this.auditLogService.fetchAuditLogs({
+      Object.assign(
+        condition,
+        buildUpdatedAtDateCondition(
+          startDate as string | undefined,
+          endDate as string | undefined
+        )
+      );
+
+      const result = await auditLogService.fetchAuditLogs({
         page: Number(page),
         size: Number(size),
         condition,
@@ -81,9 +103,27 @@ export class AuditController {
   ) => {
     try {
       const { entityType, entityId } = req.params;
-      const { page = 0, size = 10, action, createdById, startDate, endDate } = req.query;
+      const { user } = req as AuthenticatedRequest;
+      const {
+        page = 0,
+        size = 10,
+        action,
+        createdById,
+        startDate,
+        endDate,
+      } = req.query;
 
-      // BUILD CONDITION
+      if (entityType === 'TransportCard') {
+        const card = await transportCardService.getTransportCardById(
+          entityId as UUID
+        );
+        if (!isOwnerOrAdmin(user, card.createdById as UUID)) {
+          throw new ForbiddenError(
+            'You cannot view audit history for this transport card'
+          );
+        }
+      }
+
       const condition:
         | FindOptionsWhere<AuditLog>
         | FindOptionsWhere<AuditLog>[] = {};
@@ -101,21 +141,15 @@ export class AuditController {
         condition.createdById = createdById as UUID;
       }
 
-      if (startDate) {
-        condition.updatedAt = MoreThanOrEqual(new Date(startDate as string));
-      }
-      if (endDate) {
-        condition.updatedAt = LessThanOrEqual(new Date(endDate as string));
-      }
+      Object.assign(
+        condition,
+        buildUpdatedAtDateCondition(
+          startDate as string | undefined,
+          endDate as string | undefined
+        )
+      );
 
-      if (startDate && endDate) {
-        condition.updatedAt = Between(
-          new Date(startDate as string),
-          new Date(endDate as string)
-        );
-      }
-
-      const auditLogs = await this.auditLogService.fetchEntityHistory({
+      const auditLogs = await auditLogService.fetchEntityHistory({
         page: Number(page),
         size: Number(size),
         condition,

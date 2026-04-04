@@ -2,7 +2,8 @@ import { Router } from 'express';
 import authRoutes from './auth.routes';
 import transportCardRoutes from './transportCard.routes';
 import auditRoutes from './auditLog.routes';
-import { auditContextMiddleware } from '../middlewares/auditContext.middleware';
+import { requestContextMiddleware } from '../middlewares/requestContext.middleware';
+import { httpAuditMiddleware } from '../middlewares/httpAudit.middleware';
 import locationRoutes from './location.routes';
 import tripRoutes from './trip.routes';
 import userTripRoutes from './userTrip.routes';
@@ -13,16 +14,16 @@ import roleRoutes from './role.routes';
 const router = Router();
 
 /**
+ * Request-scoped AsyncLocalStorage (must run first for /api).
+ * HTTP mutation audit (runs for all methods POST/PUT/PATCH/DELETE including /auth).
+ */
+router.use(requestContextMiddleware);
+router.use(httpAuditMiddleware);
+
+/**
  * AUTH ROUTES
  */
 router.use('/auth', authRoutes);
-
-// AUDIT CONTEXT MIDDLEWARE
-router.use(auditContextMiddleware);
-
-/**
- * ALL ROUTES BELOW HAVE AUDIT CONTEXT AVAILABLE
- */
 
 // DASHBOARD ROUTES
 router.use('/dashboard', dashboardRoutes);

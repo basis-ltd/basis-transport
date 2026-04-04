@@ -10,7 +10,6 @@ import { User } from '../entities/user.entity';
 import { Trip } from '../entities/trip.entity';
 import { LogReferenceTypes } from '../constants/logs.constants';
 import { UUID } from '../types';
-import { AuditDelete, AuditUpdate } from '../decorators/auditLog.decorator';
 import {
   getPagination,
   getPagingData,
@@ -88,29 +87,23 @@ export class UserTripService {
     });
 
     if (userTripExists) {
-      // UPDATE USER TRIP
+      // Re-boarding on the same (user, trip): reset exit from a prior completed leg
       userTripExists.status = UserTripStatus.IN_PROGRESS;
       userTripExists.entranceLocation = value?.entranceLocation;
       userTripExists.startTime = value?.startTime || new Date();
+      userTripExists.exitLocation = null as unknown as UserTrip['exitLocation'];
+      userTripExists.endTime = null as unknown as UserTrip['endTime'];
 
-      // SAVE USER TRIP
-      const updatedUserTrip = await this.userTripRepository.save(
-        userTripExists
-      );
-
-      return updatedUserTrip;
+      return await this.userTripRepository.save(userTripExists);
     }
 
-    // CREATE USER TRIP
-    const newUserTrip = this.userTripRepository.save({
+    return await this.userTripRepository.save({
       ...value,
       startTime: value?.startTime || new Date(),
       user: userExists,
       trip: tripExists,
       createdBy: createdByIdExists,
     });
-
-    return newUserTrip;
   }
 
   /**
@@ -119,11 +112,6 @@ export class UserTripService {
    * @param userTrip
    * @returns
    */
-  @AuditUpdate({
-    entityType: 'UserTrip',
-    getEntityId: (args) => args[0],
-    getUserId: (args) => args[1]?.createdById,
-  })
   async updateUserTrip(
     id: UUID,
     userTrip: Partial<UserTrip>
@@ -147,23 +135,15 @@ export class UserTripService {
       });
     }
 
-    // UPDATE USER TRIP
-    const updatedUserTrip = this.userTripRepository.save({
+    return await this.userTripRepository.save({
       ...userTripExists,
       ...value,
     });
-
-    return updatedUserTrip;
   }
 
   /**
    * DELETE USER TRIP
    */
-  @AuditDelete({
-    entityType: 'UserTrip',
-    getEntityId: (args) => args[0],
-    getUserId: (args) => args[1]?.createdById,
-  })
   async deleteUserTrip(
     id: UUID,
     metadata?: { createdById?: UUID }

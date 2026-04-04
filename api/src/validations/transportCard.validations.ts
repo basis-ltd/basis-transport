@@ -6,9 +6,9 @@ export const validateCreateTransportCard = (
   transportCard: Partial<TransportCard>
 ) => {
   const schema = Joi.object({
-    name: Joi.string().optional(),
+    name: Joi.string().optional().allow('', null),
     cardNumber: Joi.string().required(),
-    userId: Joi.string().uuid().required(),
+    createdById: Joi.string().uuid().required(),
   });
 
   return schema.validate(transportCard);
@@ -19,7 +19,7 @@ export const validateUpdateTransportCard = (
   transportCard: Partial<TransportCard>
 ) => {
   const schema = Joi.object({
-    name: Joi.string().optional(),
+    name: Joi.string().optional().allow('', null),
     cardNumber: Joi.string().optional(),
   });
 

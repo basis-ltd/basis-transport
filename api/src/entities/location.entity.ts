@@ -16,21 +16,4 @@ export class Location extends AbstractEntity {
   // ADDRESS
   @Column({ type: 'geometry', nullable: true, name: 'address' })
   address?: Geometry;
-
-  // CREATED BY ID
-  @Column({ type: 'uuid', nullable: true, name: 'created_by_id' })
-  createdById?: UUID;
-
-  /**
-   * RELATIONS
-   */
-
-  // CREATED BY
-  @ManyToOne(() => User, (user) => user.id, {
-    onDelete: 'SET NULL',
-    onUpdate: 'CASCADE',
-    nullable: true,
-  })
-  @JoinColumn({ name: 'created_by_id' })
-  createdBy?: User;
 }

@@ -18,12 +18,21 @@ import {
   Pagination,
 } from '../helpers/pagination.helper';
 import { AuditDelete, AuditUpdate } from '../decorators/auditLog.decorator';
+import { auditLogServiceSingleton } from './auditLog.service';
 
 export class TransportCardService {
   private readonly transportCardRepository: Repository<TransportCard>;
 
   constructor() {
     this.transportCardRepository = AppDataSource.getRepository(TransportCard);
+  }
+
+  /** Used by @AuditUpdate / @AuditDelete for loading prior state. */
+  async getEntityById(id: UUID): Promise<TransportCard | null> {
+    return this.transportCardRepository.findOne({
+      where: { id },
+      relations: { createdBy: true },
+    });
   }
 
   /**
@@ -50,6 +59,17 @@ export class TransportCardService {
 
     const newTransportCard = await this.transportCardRepository.save(value);
 
+    try {
+      await auditLogServiceSingleton.logCreate(
+        'TransportCard',
+        newTransportCard.id,
+        newTransportCard,
+        newTransportCard.createdById
+      );
+    } catch (err) {
+      console.error('TransportCard create audit (non-blocking):', err);
+    }
+
     return newTransportCard;
   }
 
@@ -67,7 +87,6 @@ export class TransportCardService {
       | FindOptionsWhere<TransportCard>
       | FindOptionsWhere<TransportCard>[];
   }): Promise<Pagination<TransportCard>> {
-    // GET PAGINATION
     const { skip, take } = getPagination({ page, size });
 
     const transportCards = await this.transportCardRepository.findAndCount({
@@ -119,17 +138,9 @@ export class TransportCardService {
     id: UUID,
     metadata?: { createdById?: UUID }
   ): Promise<void> {
-    try {
-      const transportCard = await this.getTransportCardById(id);
+    const transportCard = await this.getTransportCardById(id);
 
-      if (!transportCard) {
-        throw new NotFoundError('Transport card not found');
-      }
-
-      await this.transportCardRepository.delete(transportCard.id);
-    } catch (error) {
-      throw error;
-    }
+    await this.transportCardRepository.delete(transportCard.id);
   }
 
   /**
@@ -138,35 +149,24 @@ export class TransportCardService {
   @AuditUpdate({
     entityType: 'TransportCard',
     getEntityId: (args) => args[0],
-    getUserId: (args) => args[1]?.createdById,
+    getUserId: (args) => args[2]?.createdById,
   })
   async updateTransportCard(
     id: UUID,
-    transportCard: Partial<TransportCard>
+    transportCard: Partial<TransportCard>,
+    metadata?: { createdById?: UUID }
   ): Promise<TransportCard> {
-    try {
-      const { error, value } = validateUpdateTransportCard(transportCard);
+    const { error, value } = validateUpdateTransportCard(transportCard);
 
-      if (error) {
-        throw new ValidationError(error.message);
-      }
-
-      // CHECK IF TRANSPORT CARD EXISTS
-      const existingTransportCard = await this.getTransportCardById(id);
-
-      if (!existingTransportCard) {
-        throw new NotFoundError('Transport card not found');
-      }
-
-      // UPDATE TRANSPORT CARD
-      const updatedTransportCard = await this.transportCardRepository.save({
-        ...existingTransportCard,
-        ...value,
-      });
-
-      return updatedTransportCard;
-    } catch (error) {
-      throw error;
+    if (error) {
+      throw new ValidationError(error.message);
     }
+
+    const existingTransportCard = await this.getTransportCardById(id);
+
+    return await this.transportCardRepository.save({
+      ...existingTransportCard,
+      ...value,
+    });
   }
 }
