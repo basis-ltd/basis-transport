@@ -35,11 +35,8 @@ const Button: FC<ButtonProps> = ({
   isLoading = false,
   children,
 }) => {
-  const baseStyles = `py-[10px] flex items-center gap-2 justify-center text-center border border-primary/20 px-5 rounded-lg text-[14px] text-primary bg-white hover:bg-primary/10 hover:text-primary cursor-pointer ease-in-out duration-200 hover:scale-[1.01] shadow-sm
-    sm:text-[13px] md:text-[14px] lg:text-[14px]
-    sm:py-[8px] md:py-[10px]
-    sm:px-4 md:px-5 lg:px-6
-    sm:gap-1 md:gap-2 lg:gap-2
+  const baseStyles = `py-[1px] h-10 px-4 font-light leading-tight flex items-center gap-1.5 justify-center text-center border border-[1px] border-primary rounded-md text-[11px] sm:text-[11px] md:text-[11px] lg:text-[12px] text-primary bg-white hover:bg-primary hover:text-white cursor-pointer ease-in-out duration-200 hover:scale-[1.01]
+    sm:gap-1 md:gap-1.5 lg:gap-1.5
     ${
       !styled &&
       'bg-transparent! shadow-none! text-primary! hover:scale-[1.01]! py-0! px-0! border-none! hover:bg-transparent! hover:text-primary!'
@@ -73,7 +70,7 @@ const Button: FC<ButtonProps> = ({
             {icon && (
               <FontAwesomeIcon
                 icon={icon}
-                className="sm:text-[11px] md:text-[12px] lg:text-[13px]"
+                className="text-[9px] sm:text-[10px] md:text-[10px] lg:text-[11px]"
               />
             )}
             {children || value}
@@ -104,7 +101,7 @@ const Button: FC<ButtonProps> = ({
           {icon && (
             <FontAwesomeIcon
               icon={icon}
-              className="sm:text-[11px] md:text-[12px] lg:text-[13px]"
+              className="text-[9px] sm:text-[10px] md:text-[10px] lg:text-[11px]"
             />
           )}
           {children || value}

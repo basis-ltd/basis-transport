@@ -57,7 +57,7 @@ const DashboardCard = ({
                     ? 'text-green-600'
                     : isNegative
                     ? 'text-red-600'
-                    : 'text-gray-500'
+                    : 'text-muted-foreground'
                 }`}
               >
                 <FontAwesomeIcon icon={isPositive ? faArrowUp : faArrowDown} />
@@ -66,7 +66,7 @@ const DashboardCard = ({
               </span>
             )}
           </header>
-          <p className="text-xs text-secondary/70">{description}</p>
+          <p className="text-xs font-light text-secondary/70">{description}</p>
         </menu>
         <figure className="p-3 rounded-2xl flex items-center justify-center bg-primary/10 text-primary shadow-sm">
           <FontAwesomeIcon

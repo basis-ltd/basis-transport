@@ -25,6 +25,37 @@ export const validateLogin = (user: Partial<User>) => {
   return schema.validate(user);
 };
 
+const PASSWORD_PATTERN =
+  /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[^\w\s]).{8,}$/;
+
+// VALIDATE FORGOT PASSWORD
+export const validateForgotPassword = (body: { email?: string }) => {
+  const schema = Joi.object({
+    email: Joi.string().email().required(),
+  });
+
+  return schema.validate(body);
+};
+
+// VALIDATE RESET PASSWORD
+export const validateResetPassword = (body: {
+  token?: string;
+  password?: string;
+}) => {
+  const schema = Joi.object({
+    token: Joi.string().required(),
+    password: Joi.string()
+      .pattern(PASSWORD_PATTERN)
+      .required()
+      .messages({
+        'string.pattern.base':
+          'Password must be at least 8 characters and include uppercase, lowercase, number, and special character',
+      }),
+  });
+
+  return schema.validate(body);
+};
+
 // FORMAT LOCAL PHONE NUMBER
 export const formatLocalPhoneNumber = (phoneNumber: string) => {
   const cleanedNumber = phoneNumber.replace(/\D/g, '');

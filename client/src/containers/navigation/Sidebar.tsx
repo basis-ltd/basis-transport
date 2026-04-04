@@ -59,15 +59,15 @@ const Sidebar = () => {
 
   return (
     <motion.aside
-      className={`fixed top-[9vh] shadow-md left-0 h-[91vh] flex flex-col 
+      className={`fixed top-[9vh] left-0 h-[91vh] flex flex-col border-r border-transparent md:border-primary/10
                  bg-background/95 backdrop-blur transition-all duration-300 ease-in-out 
                  ${isOpen ? 'z-[999]' : 'z-10'}
                  ${
                    isOpen
-                      ? 'w-[75vw] sm:w-[40vw] md:w-[20vw] shadow-xl p-4'
-                      : 'w-[15vw] md:w-[5vw] p-2 shadow-lg'
+                      ? 'w-[75vw] sm:w-[40vw] md:w-[20vw] shadow-xl md:shadow-sm p-4'
+                      : 'w-[15vw] md:w-[5vw] p-2 shadow-lg md:shadow-sm'
                   } 
-                  md:p-4 md:shadow-none md:z-auto`}
+                  md:p-4 md:z-auto`}
     >
       <header
         className={`flex items-center w-full mb-4 
@@ -80,7 +80,7 @@ const Sidebar = () => {
             e.preventDefault();
             dispatch(setSidebarOpen(!isOpen));
           }}
-          className={`cursor-pointer p-1 px-[8.2px] rounded-full bg-primary text-white hover:bg-primary/80 transition-colors duration-200 focus:outline-none focus:ring-opacity-50 ${
+          className={`cursor-pointer p-1 px-[8.2px] rounded-full bg-primary text-white hover:bg-primary/80 transition-colors duration-200 outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
             !isOpen ? 'mx-auto' : ''
           }`}
           aria-label={isOpen ? 'Close sidebar' : 'Open sidebar'}
@@ -113,13 +113,13 @@ const Sidebar = () => {
             <li key={index} className="w-full flex flex-col items-start">
               <Link
                 to={nav.path}
-                className={`flex w-full items-center gap-4 font-medium text-[13px] ease-in-out duration-200 rounded-xl 
+                className={`flex w-full items-center gap-4 text-[13px] ease-in-out duration-200 rounded-xl 
                             ${isOpen ? 'px-4 py-3' : 'p-3 justify-center'}
                             hover:bg-primary/10 hover:text-primary
                             ${
                               isLinkActive
                                 ? 'bg-primary/15 text-primary font-semibold'
-                                : 'text-gray-700'
+                                : 'text-secondary font-light'
                             }`}
                 onClick={(e) => {
                   if (nav.subcategories) {
@@ -141,20 +141,20 @@ const Sidebar = () => {
                   icon={nav.icon}
                   className={`text-xl flex items-center 
                               ${
-                                isLinkActive ? 'text-primary' : 'text-gray-600'
+                                isLinkActive ? 'text-primary' : 'text-secondary'
                               }`}
                 />
                 <motion.span
                   initial={{ opacity: 0 }}
                   animate={isOpen ? controlText : { opacity: 0 }}
-                  className="font-medium whitespace-nowrap"
+                  className="whitespace-nowrap"
                 >
                   {nav.title}
                 </motion.span>
                 {nav.subcategories && isOpen && (
                   <FontAwesomeIcon
                     icon={subcategoriesIsOpen ? faChevronUp : faChevronDown}
-                    className="ml-auto text-base text-gray-400"
+                    className="ml-auto text-base text-secondary/60"
                   />
                 )}
               </Link>
@@ -172,23 +172,23 @@ const Sidebar = () => {
                       <li key={subIndex}>
                         <Link
                           to={sub.path}
-                          className={`flex items-center w-full gap-3 px-4 py-3 font-medium text-xs ease-in-out duration-200 rounded-lg 
+                          className={`flex items-center w-full gap-3 px-4 py-3 text-xs ease-in-out duration-200 rounded-lg 
                                       hover:bg-primary/10 hover:text-primary
                                       ${
                                         isSubLinkActive
                                           ? 'bg-primary/15 text-primary font-semibold'
-                                          : 'text-gray-600'
+                                          : 'text-secondary font-light'
                                       }`}
                         >
                           <FontAwesomeIcon
                             icon={sub?.icon}
                             className={`text-base ${
-                              isSubLinkActive ? 'text-primary' : 'text-gray-500'
+                              isSubLinkActive ? 'text-primary' : 'text-secondary'
                             }`}
                           />
                           <motion.span
                             animate={isOpen ? controlText : { opacity: 0 }}
-                            className="font-medium whitespace-nowrap"
+                            className="whitespace-nowrap"
                           >
                             {sub.title}
                           </motion.span>

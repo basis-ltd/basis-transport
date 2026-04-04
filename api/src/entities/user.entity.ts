@@ -81,6 +81,23 @@ export class User extends AbstractEntity {
   })
   passwordHash?: string;
 
+  // PASSWORD RESET (token stored as SHA-256 hex of raw token)
+  @Column({
+    name: 'password_reset_token_hash',
+    type: 'varchar',
+    length: 64,
+    nullable: true,
+    select: false,
+  })
+  passwordResetTokenHash?: string;
+
+  @Column({
+    name: 'password_reset_expires',
+    type: 'timestamp',
+    nullable: true,
+  })
+  passwordResetExpires?: Date;
+
   /**
    * RELATIONS
    */

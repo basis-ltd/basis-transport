@@ -1,10 +1,13 @@
+import { createHash, randomBytes } from 'crypto';
 import { Repository } from 'typeorm';
 import { AppDataSource } from '../data-source';
 import jwt from 'jsonwebtoken';
 import { User } from '../entities/user.entity';
 import {
   formatLocalPhoneNumber,
+  validateForgotPassword,
   validateLogin,
+  validateResetPassword,
   validateSignUp,
 } from '../validations/user.validations';
 import { ValidationError } from '../helpers/errors.helper';
@@ -12,9 +15,27 @@ import { comparePasswords, hashPassword } from '../helpers/encryptions.helper';
 import { RoleTypes } from '../constants/role.constants';
 import { UserRoleService } from './userRole.service';
 import { RoleService } from './role.service';
+import { sendEmail } from '../helpers/emails.helper';
+import { renderPasswordResetHtml } from '../emails/renderEmails';
 
 // LOAD ENV
-const { JWT_SECRET } = process.env;
+const { JWT_SECRET, CLIENT_APP_URL } = process.env;
+
+const FORGOT_PASSWORD_RESPONSE = {
+  message:
+    'If an account exists for this email, we sent password reset instructions.',
+};
+
+const RESET_TOKEN_TTL_MS = 60 * 60 * 1000;
+
+function hashResetToken(token: string): string {
+  return createHash('sha256').update(token, 'utf8').digest('hex');
+}
+
+function getPublicAppUrl(): string {
+  const base = CLIENT_APP_URL || 'http://localhost:5173';
+  return base.replace(/\/$/, '');
+}
 
 export class AuthService {
   private readonly userRepository: Repository<User>;
@@ -167,5 +188,96 @@ export class AuthService {
       },
       token: jwtToken,
     };
+  }
+
+  /**
+   * REQUEST PASSWORD RESET — always returns the same public message.
+   */
+  async requestPasswordReset(
+    body: { email?: string }
+  ): Promise<{ message: string }> {
+    const { error, value } = validateForgotPassword(body);
+
+    if (error) {
+      throw new ValidationError(error?.message);
+    }
+
+    const user = await this.userRepository.findOne({
+      where: { email: value.email },
+    });
+
+    if (!user) {
+      return FORGOT_PASSWORD_RESPONSE;
+    }
+
+    const rawToken = randomBytes(32).toString('hex');
+    const tokenHash = hashResetToken(rawToken);
+    const expiresAt = new Date(Date.now() + RESET_TOKEN_TTL_MS);
+
+    await this.userRepository.update(
+      { id: user.id },
+      {
+        passwordResetTokenHash: tokenHash,
+        passwordResetExpires: expiresAt,
+      }
+    );
+
+    const resetUrl = `${getPublicAppUrl()}/auth/reset-password?token=${encodeURIComponent(
+      rawToken
+    )}`;
+
+    const htmlContent = await renderPasswordResetHtml({
+      userName: user.name,
+      resetUrl,
+    });
+
+    await sendEmail({
+      toEmail: value.email,
+      subject: 'Reset your Basis Transport password',
+      htmlContent,
+    });
+
+    return FORGOT_PASSWORD_RESPONSE;
+  }
+
+  /**
+   * RESET PASSWORD with one-time token
+   */
+  async resetPassword(body: {
+    token?: string;
+    password?: string;
+  }): Promise<{ message: string }> {
+    const { error, value } = validateResetPassword(body);
+
+    if (error) {
+      throw new ValidationError(error?.message);
+    }
+
+    const tokenHash = hashResetToken(value.token);
+
+    const user = await this.userRepository
+      .createQueryBuilder('user')
+      .where('user.passwordResetTokenHash = :hash', { hash: tokenHash })
+      .andWhere('user.passwordResetExpires > :now', { now: new Date() })
+      .getOne();
+
+    if (!user) {
+      throw new ValidationError('Invalid or expired reset link');
+    }
+
+    const newPasswordHash = await hashPassword(value.password);
+
+    await this.userRepository
+      .createQueryBuilder()
+      .update(User)
+      .set({
+        passwordHash: newPasswordHash,
+        passwordResetTokenHash: null,
+        passwordResetExpires: null,
+      } as any)
+      .where('id = :id', { id: user.id })
+      .execute();
+
+    return { message: 'Your password has been updated. You can sign in now.' };
   }
 }

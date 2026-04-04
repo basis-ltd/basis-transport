@@ -96,41 +96,41 @@ const UserTripsPage = () => {
               >
                 <header className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-[11px] uppercase tracking-wide text-secondary/70">
+                    <p className="text-[11px] font-light uppercase tracking-wide text-secondary/70">
                       Trip {userTrip.trip?.referenceId ?? '--'}
                     </p>
-                    <h3 className="text-lg font-semibold text-primary">
+                    <h3 className="text-lg font-medium text-primary">
                       {userTrip.trip?.locationFrom?.name ?? 'Start'} → {userTrip.trip?.locationTo?.name ?? 'Destination'}
                     </h3>
-                    <p className="text-[12px] text-secondary/80 mt-1 flex items-center gap-1">
+                    <p className="text-[12px] font-light text-secondary/80 mt-1 flex items-center gap-1">
                       <FontAwesomeIcon icon={faLocationDot} className="text-primary/70" />
                       {userTrip.startTime
                         ? moment(userTrip.startTime).format('MMM D, HH:mm')
                         : 'Start time pending'}
                     </p>
                   </div>
-                  <span className="px-3 py-1 rounded-full text-[11px] font-medium bg-primary/10 text-primary">
+                  <span className="px-3 py-1 rounded-full text-[11px] font-light bg-primary/10 text-primary">
                     {userTrip.status
                       ? userTrip.status.replace(/_/g, ' ')
                       : 'Unknown'}
                   </span>
                 </header>
-                <section className="flex items-center gap-2 text-[12px] text-secondary/70 mt-4">
+                <section className="flex items-center gap-2 text-[12px] font-light text-secondary/70 mt-4">
                   <FontAwesomeIcon icon={faRoute} className="text-primary" />
                   {userTrip.user?.name ?? 'Passenger'}
                 </section>
                 <section className="grid grid-cols-2 gap-3 mt-4">
                   <article className="p-3 rounded-xl bg-background-secondary/70">
-                    <p className="text-[11px] text-secondary/70">Started</p>
-                    <p className="text-base font-semibold text-primary">
+                    <p className="text-[11px] font-light text-secondary/70">Started</p>
+                    <p className="text-base font-medium text-primary">
                       {userTrip.startTime
                         ? moment(userTrip.startTime).fromNow()
                         : 'N/A'}
                     </p>
                   </article>
                   <article className="p-3 rounded-xl bg-background-secondary/70">
-                    <p className="text-[11px] text-secondary/70">Duration</p>
-                    <p className="text-base font-semibold text-primary">
+                    <p className="text-[11px] font-light text-secondary/70">Duration</p>
+                    <p className="text-base font-medium text-primary">
                       {userTrip.startTime && userTrip.endTime
                         ? `${moment(userTrip.endTime).diff(
                             moment(userTrip.startTime),

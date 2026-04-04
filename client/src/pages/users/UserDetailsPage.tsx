@@ -39,10 +39,10 @@ const UserDetailsPage = () => {
       <AppLayout>
         <main className="w-full min-h-screen flex items-center justify-center">
           <section className="text-center space-y-4">
-            <h1 className="text-2xl font-semibold text-secondary">
+            <h1 className="text-2xl font-semibold text-primary">
               Loading user details...
             </h1>
-            <p className="text-secondary/70">
+            <p className="font-light text-secondary/70">
               Please wait while we fetch the user information.
             </p>
           </section>
@@ -56,10 +56,10 @@ const UserDetailsPage = () => {
       <AppLayout>
         <main className="w-full min-h-screen flex items-center justify-center">
           <section className="text-center space-y-4">
-            <h1 className="text-2xl font-semibold text-secondary">
+            <h1 className="text-2xl font-semibold text-primary">
               User Not Found
             </h1>
-            <p className="text-secondary/70">
+            <p className="font-light text-secondary/70">
               We couldn't locate this user's information.
             </p>
           </section>
@@ -76,7 +76,7 @@ const UserDetailsPage = () => {
             <Heading className="text-3xl font-semibold text-primary mb-2">
               User Details
             </Heading>
-            <p className="text-secondary/80">
+            <p className="font-light text-secondary/80">
               View detailed information about {user.name}
             </p>
           </section>
@@ -102,10 +102,10 @@ const UserDetailsPage = () => {
                 </h1>
                 <p className="text-md text-secondary/80 mb-1">{user?.email}</p>
                 <mark
-                  className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium ${
+                  className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-light ${
                     user?.status === 'ACTIVE'
                       ? 'bg-green-100 text-green-800 border border-green-200'
-                      : 'bg-gray-100 text-gray-800 border border-gray-200'
+                      : 'bg-background-secondary text-secondary border border-primary/10'
                   }`}
                 >
                   {user?.status}
@@ -120,12 +120,12 @@ const UserDetailsPage = () => {
               <Heading type="h2" className="text-2xl font-semibold text-primary mb-2">
                 Personal Information
               </Heading>
-              <p className="text-secondary/80">Basic profile details</p>
+              <p className="font-light text-secondary/80">Basic profile details</p>
             </header>
 
             <dl className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <section className="space-y-3 p-6 bg-background-secondary/60 rounded-xl border border-primary/10">
-                <dt className="text-sm font-semibold text-secondary uppercase tracking-wide">
+                <dt className="text-sm font-medium text-secondary uppercase tracking-wide">
                   Phone Number
                 </dt>
                 <dd className="text-[14px] font-medium text-primary">
@@ -134,7 +134,7 @@ const UserDetailsPage = () => {
               </section>
 
               <section className="space-y-3 p-6 bg-background-secondary/60 rounded-xl border border-primary/10">
-                <dt className="text-sm font-semibold text-secondary uppercase tracking-wide">
+                <dt className="text-sm font-medium text-secondary uppercase tracking-wide">
                   Gender
                 </dt>
                 <dd className="text-[14px] font-medium text-primary">
@@ -143,7 +143,7 @@ const UserDetailsPage = () => {
               </section>
 
               <section className="space-y-3 p-6 bg-background-secondary/60 rounded-xl border border-primary/10">
-                <dt className="text-sm font-semibold text-secondary uppercase tracking-wide">
+                <dt className="text-sm font-medium text-secondary uppercase tracking-wide">
                   Nationality
                 </dt>
                 <dd className="text-[14px] font-medium text-primary">
@@ -152,7 +152,7 @@ const UserDetailsPage = () => {
               </section>
 
               <section className="space-y-3 p-6 bg-background-secondary/60 rounded-xl border border-primary/10">
-                <dt className="text-sm font-semibold text-secondary uppercase tracking-wide">
+                <dt className="text-sm font-medium text-secondary uppercase tracking-wide">
                   Account Created
                 </dt>
                 <dd className="text-[14px] font-medium text-primary">
@@ -170,7 +170,7 @@ const UserDetailsPage = () => {
               <Heading type="h2" className="text-2xl font-semibold text-primary mb-2">
                 Roles & Permissions
               </Heading>
-              <p className="text-secondary/80">
+              <p className="font-light text-secondary/80">
                 Assigned roles and access levels
               </p>
             </header>
@@ -179,7 +179,7 @@ const UserDetailsPage = () => {
                 {user?.userRoles.map((userRole, index) => (
                   <li
                     key={index}
-                    className="px-6 py-3 bg-primary/10 text-primary transition-all duration-200 rounded-xl text-sm font-semibold border border-primary/20 shadow-sm"
+                    className="px-6 py-3 bg-primary/10 text-primary transition-all duration-200 rounded-xl text-sm font-medium border border-primary/20 shadow-sm"
                   >
                     {capitalizeString(userRole?.role?.name)}
                   </li>
@@ -187,8 +187,8 @@ const UserDetailsPage = () => {
               </ul>
             ) : (
               <section className="text-center py-8">
-                <p className="text-secondary/70 text-lg">No roles assigned</p>
-                <p className="text-secondary/60 text-sm mt-2">
+                <p className="font-light text-secondary/70 text-lg">No roles assigned</p>
+                <p className="font-light text-secondary/60 text-sm mt-2">
                   This user has no roles assigned
                 </p>
               </section>
@@ -206,7 +206,7 @@ const UserDetailsPage = () => {
             >
               Back
             </Button>
-            <p className="text-sm text-secondary/70">
+            <p className="text-sm font-light text-secondary/70">
               Last updated: {new Date().toLocaleDateString()}
             </p>
           </menu>

@@ -83,29 +83,29 @@ export const TransportCardDetails = ({
 
   if (!transportCard) {
     return (
-      <article className="w-full p-4 text-center text-secondary bg-white rounded-2xl shadow-sm border border-primary/10">
+      <article className="w-full p-4 text-center text-secondary font-light bg-white rounded-2xl shadow-sm border border-primary/10">
         <p>No transport card found</p>
       </article>
     );
   }
 
   return (
-    <article className="bg-white rounded-2xl border border-primary/10 shadow-sm hover:shadow-md transition-shadow duration-200 p-5">
+    <article className="bg-white rounded-2xl border border-primary/10 shadow-sm hover:shadow-sm transition-shadow duration-200 p-5">
       <header className="flex justify-between items-start mb-4">
         <section>
           <h1
             className={`${
               !transportCard?.name
                 ? 'text-secondary/60 invisible'
-                : 'text-lg font-semibold text-primary mb-1'
+                : 'text-lg font-medium text-primary mb-1'
             }`}
           >
             {transportCard?.name || 'Unnamed Card'}
           </h1>
-          <p className="text-secondary/80 text-sm font-medium">
+          <p className="text-secondary/80 text-sm font-light">
             Card: {transportCard?.cardNumber}
           </p>
-          <time className="text-xs text-secondary/60 block mt-1">
+          <time className="text-xs font-light text-secondary/60 block mt-1">
             Date added:{' '}
             {new Date(transportCard?.createdAt).toLocaleDateString()}
           </time>
@@ -145,14 +145,14 @@ export const TransportCardDetails = ({
         <h2 className="text-sm font-medium text-primary mb-2">Card Details</h2>
         <section className="grid grid-cols-2 gap-2">
           <article className="p-3 bg-white rounded-lg shadow-sm border border-primary/10">
-            <p className="text-xs text-secondary/70">Created By</p>
-            <p className="text-sm text-primary truncate">
+            <p className="text-xs font-light text-secondary/70">Created By</p>
+            <p className="text-sm font-medium text-primary truncate">
               {transportCard?.createdBy?.name || 'Unknown'}
             </p>
           </article>
           <article className="p-3 bg-white rounded-lg shadow-sm border border-primary/10">
-            <p className="text-xs text-secondary/70">Status</p>
-            <p className="text-sm text-primary">Active</p>
+            <p className="text-xs font-light text-secondary/70">Status</p>
+            <p className="text-sm font-medium text-primary">Active</p>
           </article>
         </section>
       </footer>

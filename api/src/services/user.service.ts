@@ -11,8 +11,8 @@ import { Role } from '../entities/role.entity';
 import { generateRandomString } from '../helpers/string.helper';
 import { hashPassword } from '../helpers/encryptions.helper';
 import { UserRole } from '../entities/userRole.entity';
-import { userCreatedTemplate } from '../templates/user.template';
 import { sendEmail } from '../helpers/emails.helper';
+import { renderUserWelcomeHtml } from '../emails/renderEmails';
 
 export class UserService {
   private readonly userRepository: Repository<User>;
@@ -176,11 +176,21 @@ export class UserService {
       })
     );
 
-    // SEND EMAIL
+    const clientUrl = (
+      process.env.CLIENT_APP_URL || 'http://localhost:5173'
+    ).replace(/\/$/, '');
+
+    const htmlContent = await renderUserWelcomeHtml({
+      userName: newUser.name,
+      password,
+      loginUrl: `${clientUrl}/auth/login`,
+      year: new Date().getFullYear(),
+    });
+
     await sendEmail({
       toEmail: newUser.email as string,
-      subject: 'Welcome to the platform',
-      htmlContent: userCreatedTemplate({ user: newUser, password }),
+      subject: 'Welcome to Basis Transport',
+      htmlContent,
     });
 
     // RETURN NEW USER

@@ -74,13 +74,13 @@ export function DataTablePagination<TData>({
     <footer className="flex flex-wrap items-center justify-between gap-4 px-2 my-4">
       <article className="flex flex-col gap-1">
         {table.getFilteredSelectedRowModel().rows.length > 0 && (
-          <p className="text-[12px] text-muted-foreground">
+          <p className="text-[13px] font-light text-muted-foreground">
             {table.getFilteredSelectedRowModel().rows.length} of{' '}
             {table.getFilteredRowModel().rows.length} row(s) selected.
           </p>
         )}
         {totalCount > 0 && (
-          <p className="text-[12px] text-muted-foreground">
+          <p className="text-[13px] font-light text-muted-foreground">
             Total records: {totalCount}
           </p>
         )}
@@ -88,7 +88,7 @@ export function DataTablePagination<TData>({
 
       <menu className="flex flex-wrap items-center gap-2 sm:gap-6 lg:space-x-8">
         <section className="flex items-center space-x-2">
-          <p className="hidden text-[13px] font-medium text-secondary sm:block">Rows per page</p>
+          <p className="hidden text-[13px] font-light text-secondary sm:block">Rows per page</p>
           <Select
             value={`${size}`}
             onValueChange={(value) => {
@@ -98,7 +98,7 @@ export function DataTablePagination<TData>({
               }
             }}
           >
-            <SelectTrigger className="h-9 w-[70px]">
+            <SelectTrigger className="h-9 w-[70px] font-light text-[13px] text-primary border-primary/20">
               <SelectValue placeholder={size} />
             </SelectTrigger>
             <SelectContent side="top">
@@ -115,7 +115,7 @@ export function DataTablePagination<TData>({
           </Select>
         </section>
 
-        <section className="flex items-center text-sm font-medium">
+        <section className="flex items-center text-sm font-light">
           <p className="text-[13px] text-secondary">
             Page {page + 1} of {totalPages || 1}
           </p>
@@ -126,7 +126,7 @@ export function DataTablePagination<TData>({
             type="number"
             min={1}
             max={totalPages}
-            className="w-12 text-center placeholder:text-[13px] text-[13px] py-1 px-2 border border-primary/20 rounded-lg bg-white"
+            className="w-12 text-center placeholder:text-[13px] text-[13px] font-light py-1 px-2 border border-primary/20 rounded-lg bg-white outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary"
             onChange={(e) => {
               e.preventDefault();
               const value = Number(e.target.value);
@@ -144,7 +144,7 @@ export function DataTablePagination<TData>({
         <section className="flex items-center space-x-1 lg:space-x-2">
           <Button
             variant="outline"
-            className="w-8 h-8 p-0"
+            className="w-8 h-8 p-0 focus-visible:ring-primary/20"
             onClick={() => {
               table.setPageIndex(0);
               if (setPage && page > 0) setPage(1);
@@ -156,7 +156,7 @@ export function DataTablePagination<TData>({
           </Button>
           <Button
             variant="outline"
-            className="w-8 h-8 p-0"
+            className="w-8 h-8 p-0 focus-visible:ring-primary/20"
             onClick={() => {
               table.previousPage();
               if (setPage && page > 0) setPage(page - 1);
@@ -168,7 +168,7 @@ export function DataTablePagination<TData>({
           </Button>
           <Button
             variant="outline"
-            className="w-8 h-8 p-0"
+            className="w-8 h-8 p-0 focus-visible:ring-primary/20"
             onClick={() => {
               table.nextPage();
               if (setPage && page + 1 < totalPages) setPage(page + 1);
@@ -180,7 +180,7 @@ export function DataTablePagination<TData>({
           </Button>
           <Button
             variant="outline"
-            className="w-8 h-8 p-0"
+            className="w-8 h-8 p-0 focus-visible:ring-primary/20"
             onClick={() => {
               table.setPageIndex(totalPages - 1);
               if (setPage && page + 1 < totalPages) setPage(totalPages);

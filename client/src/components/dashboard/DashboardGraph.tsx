@@ -39,9 +39,13 @@ const DashboardGraph = ({
   width = '100%',
   type = 'natural',
   vertical = false,
-  fill = '#e6ede5',
+  fill = 'rgba(40, 54, 24, 0.12)',
   strokeWidth = 2,
 }: DashboardGraphProps) => {
+  const primaryStroke = '#283618';
+  const axisMuted = '#4a6741';
+  const gridLine = '#e4e4dd';
+
   return (
     <ResponsiveContainer height={height} width={width}>
       <ComposedChart compact data={data}>
@@ -50,21 +54,21 @@ const DashboardGraph = ({
           dataKey="value"
           fill={fill}
           stackId={1}
-          fillOpacity={0.8}
+          fillOpacity={0.85}
           strokeWidth={strokeWidth}
-          stroke="#283618"
+          stroke={primaryStroke}
           type={type || 'natural'}
           name="Trips"
         />
         <XAxis
           dataKey={dataKey}
-          tick={{ fontSize: 12, fill: '#666' }}
-          axisLine={{ stroke: '#ddd' }}
-          tickLine={{ stroke: '#ddd' }}
+          tick={{ fontSize: 12, fill: axisMuted }}
+          axisLine={{ stroke: gridLine }}
+          tickLine={{ stroke: gridLine }}
           padding={{ left: 10, right: 10 }}
           style={{
             fontSize: '12px',
-            fontFamily: 'system-ui, -apple-system, sans-serif',
+            fontFamily: 'Work Sans, system-ui, sans-serif',
           }}
         />
         <Legend />
@@ -72,19 +76,24 @@ const DashboardGraph = ({
           allowDataOverflow
           tickSize={10}
           tickMargin={20}
+          tick={{ fontSize: 12, fill: axisMuted }}
+          axisLine={{ stroke: gridLine }}
+          tickLine={{ stroke: gridLine }}
           className="text-[12px]!"
           style={{
             fontSize: '12px',
+            fontFamily: 'Work Sans, system-ui, sans-serif',
           }}
         />
         <Tooltip
           contentStyle={{
             backgroundColor: 'rgba(255, 255, 255, 0.95)',
-            border: 'none',
+            border: '1px solid #e4e4dd',
             borderRadius: '8px',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+            boxShadow: '0 1px 2px rgba(40, 54, 24, 0.08)',
             fontSize: '12px',
-            fontFamily: 'system-ui, -apple-system, sans-serif',
+            fontFamily: 'Work Sans, system-ui, sans-serif',
+            color: primaryStroke,
           }}
           formatter={(value: number) => [`${value} Trips`, '']}
           labelFormatter={(label) => `Month: ${label}`}
@@ -93,7 +102,7 @@ const DashboardGraph = ({
           strokeDasharray={'5 5'}
           y={0}
           vertical={vertical}
-          stroke="#eee"
+          stroke={gridLine}
         />
       </ComposedChart>
     </ResponsiveContainer>

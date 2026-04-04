@@ -66,7 +66,7 @@ export const SkeletonLoader = ({
     width:
       width ||
       `${type === `text` ? `${Math.random() * (70 - 50) + 50}%` : '100%'}`,
-    height: height || `${type === 'input' ? '2.3rem' : '1.8rem'}`,
+    height: height || `${type === 'input' ? '2.5rem' : '1.8rem'}`,
     animationDuration: '1.2s',
     minWidth: '10vw',
   };
@@ -77,10 +77,10 @@ export const SkeletonLoader = ({
       style.height = height || `1.3rem`;
       break;
     case 'input':
-      style.height = height || '2.3rem';
+      style.height = height || '2.5rem';
       break;
     case 'button':
-      style.height = height || '2.3rem';
+      style.height = height || '2.5rem';
       break;
     case 'card':
       style.height = height || '13rem';
@@ -104,7 +104,7 @@ export const FormSkeletonLoader = () => {
       {Array.from({ length: 10 }).map((_, index) => (
         <label className="w-full flex flex-col gap-2" key={index}>
           <SkeletonLoader type="text" />
-          <SkeletonLoader type="input" height="2rem" />
+          <SkeletonLoader type="input" height="2.5rem" />
         </label>
       ))}
     </fieldset>

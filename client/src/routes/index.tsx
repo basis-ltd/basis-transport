@@ -1,4 +1,6 @@
 import Login from '@/pages/auth/Login';
+import ForgotPassword from '@/pages/auth/ForgotPassword';
+import ResetPassword from '@/pages/auth/ResetPassword';
 import LandingPage from '@/pages/common/LandingPage';
 import UserDashboard from '@/pages/dashboard/UserDashboard';
 import TripsPage from '@/pages/trips/TripsPage';
@@ -30,6 +32,8 @@ const Router = () => {
       <Route path="/auth">
         <Route path="login" element={<Login />} />
         <Route path="register" element={<Signup />} />
+        <Route path="forgot-password" element={<ForgotPassword />} />
+        <Route path="reset-password" element={<ResetPassword />} />
       </Route>
 
       {/**

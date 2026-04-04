@@ -3,11 +3,17 @@
     // Specifies the ECMAScript target version for the compiled JavaScript
     "target": "es2018",
 
+    // JSX for React Email templates
+    "jsx": "react-jsx",
+
     // Specifies which library files to include in the compilation
     // es5: Basic JavaScript features
     // es6: ES2015 features like classes, modules, etc.
     // ES2018: Latest JavaScript features
-    "lib": ["es5", "es6", "ES2018"],
+    "lib": ["es5", "es6", "ES2018", "DOM"],
+
+    // Skip type-checking .d.ts in dependencies (React Email, Resend, etc.)
+    "skipLibCheck": true,
 
     // Enables experimental support for decorators
     // Used for features like @Component, @Injectable, etc.

@@ -24,7 +24,7 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import moment from 'moment';
 import { useEffect, useMemo, useState } from 'react';
-import { Helmet } from 'react-helmet';
+import { Seo } from '@/components/seo';
 import { TripAvailableCapacity } from '@/components/trips/TripAvailableCapacity';
 
 const UserDashboard = () => {
@@ -177,19 +177,12 @@ const UserDashboard = () => {
 
   return (
     <>
-      <Helmet>
-        <title>User Dashboard | Basis Transport</title>
-        <meta name="description" content="View your personalized dashboard with real-time bus tracking, trip metrics, and transport analytics. Optimize your commute and monitor your public transport activity with Basis Transport." />
-        <meta name="robots" content="index, follow" />
-        <meta name="author" content="Basis Transport Team" />
-        <meta property="og:title" content="User Dashboard | Basis Transport" />
-        <meta property="og:description" content="View your personalized dashboard with real-time bus tracking, trip metrics, and transport analytics." />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://transport.basis.rw/dashboard" />
-        <meta property="og:image" content="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%F0%9F%9A%8C%3C/text%3E%3C/svg%3E" />
-        <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%F0%9F%9A%8C%3C/text%3E%3C/svg%3E" />
-        <link rel="canonical" href="https://transport.basis.rw/dashboard" />
-      </Helmet>
+      <Seo
+        title="User Dashboard | Basis Transport"
+        description="View your personalized dashboard with real-time bus tracking, trip metrics, and transport analytics. Optimize your commute and monitor your public transport activity with Basis Transport."
+        canonicalPath="/dashboard"
+        ogDescription="View your personalized dashboard with real-time bus tracking, trip metrics, and transport analytics."
+      />
       <AppLayout>
         <main className="h-full w-full flex flex-col gap-4">
           <nav className="w-full flex flex-col gap-4">
@@ -210,9 +203,7 @@ const UserDashboard = () => {
 
           <section className="w-full bg-white/90 rounded-2xl border border-primary/10 shadow-sm p-6 flex flex-col gap-4">
             <header>
-              <Heading type="h3" className="text-primary">
-                Monthly Trips Trend
-              </Heading>
+              <Heading type="h3">Monthly Trips Trend</Heading>
             </header>
             <figure className="w-full h-[300px]">
               <DashboardGraph data={graphData} dataKey="month" />
@@ -241,20 +232,20 @@ const UserDashboard = () => {
                 >
                   <header className="flex items-start justify-between gap-3">
                     <div>
-                      <p className="text-[11px] uppercase tracking-wide text-secondary/70">
+                      <p className="text-[11px] font-light uppercase tracking-wide text-secondary/70">
                         Trip {trip.referenceId}
                       </p>
-                      <h3 className="text-lg font-semibold text-primary">
+                      <h3 className="text-lg font-medium text-primary">
                         {trip.locationFrom?.name} → {trip.locationTo?.name}
                       </h3>
-                      <p className="text-[12px] text-secondary/80 mt-1 flex items-center gap-1">
+                      <p className="text-[12px] font-light text-secondary/80 mt-1 flex items-center gap-1">
                         <FontAwesomeIcon icon={faLocationDot} className="text-primary/70" />
                         {trip.startTime
                           ? moment(trip.startTime).format('MMM D, HH:mm')
                           : 'Start time pending'}
                       </p>
                     </div>
-                    <span className="px-3 py-1 rounded-full text-[11px] font-medium bg-primary/10 text-primary">
+                    <span className="px-3 py-1 rounded-full text-[11px] font-light bg-primary/10 text-primary">
                       {trip.status
                         ? trip.status.replace(/_/g, ' ')
                         : 'Unknown'}
@@ -262,14 +253,14 @@ const UserDashboard = () => {
                   </header>
                   <section className="grid grid-cols-2 gap-3 mt-4">
                     <article className="p-3 rounded-xl bg-background-secondary/70">
-                      <p className="text-[11px] text-secondary/70">Available seats</p>
+                      <p className="text-[11px] font-light text-secondary/70">Available seats</p>
                       <div className="mt-2">
                         <TripAvailableCapacity tripId={trip.id} />
                       </div>
                     </article>
                     <article className="p-3 rounded-xl bg-background-secondary/70">
-                      <p className="text-[11px] text-secondary/70">ETA</p>
-                      <p className="text-base font-semibold text-primary">
+                      <p className="text-[11px] font-light text-secondary/70">ETA</p>
+                      <p className="text-base font-medium text-primary">
                         {trip.startTime
                           ? moment(trip.startTime).add(15, 'minutes').fromNow()
                           : 'TBD'}
