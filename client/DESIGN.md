@@ -4,6 +4,37 @@
 
 ---
 
+## 0. Global constraints (mandatory)
+
+These rules override older examples elsewhere in this document when they conflict.
+
+### Border radius
+
+- **Maximum radius for any UI surface is `rounded-md`.** Use `rounded-md` for cards, panels, tables, popovers, auth shells, inputs, and buttons.
+- **Do not use** `rounded-lg`, `rounded-xl`, `rounded-2xl`, or `rounded-full` in new work. (Legacy pages may still contain them until migrated.)
+- **Skeleton loaders** may use `rounded-[4px]` (smaller than `rounded-md`, acceptable).
+
+### Typography
+
+- **Default size** for body copy, labels, buttons, table cells, and most UI text: **`text-[12px]`** (12px).
+- **Maximum** size for any UI or body text: **`text-[13px]`** (13px)—use sparingly for page titles, one emphasis line, or error messages.
+- **Do not use** `text-xs` / `text-sm` / `text-base` / `text-lg` / `text-xl` / `text-2xl` and larger utilities for new screens; use **12px / 13px only** and differentiate hierarchy with **weight** (`font-light`, `font-medium`, `font-semibold`).
+
+### Sections, cards, and elevation
+
+- **Do not use borders** to define page sections, cards, tables, auth panels, or major layout regions (`border`, `border-b` on sections, `border-primary/10` wrappers, etc.).
+- **Use `shadow-sm` only** for separation and depth on those surfaces. **Do not use** `shadow-md`, `shadow-lg`, or heavier shadows for new work.
+- **Exceptions (borders allowed):** true **form controls** (input outline, checkbox/radio stroke), **focus / invalid** rings, and **1px hairlines** inside a component where required for accessibility (e.g. separator between two inputs)—not around whole sections.
+
+### Semantic HTML (restrict `div` / `span`)
+
+- **Do not default to `div` or `span` for structure.** Use elements that describe purpose: `main`, `section`, `article`, `header`, `footer`, `nav`, `aside`, `ul` / `ol` / `li`, `p`, `h1`–`h6`, `button`, `a`, `label`, `figure` / `figcaption`, `time`, `address`, `dialog`, `fieldset` / `legend`, and table markup (`table`, `thead`, `tbody`, `tr`, `th`, `td`) where content matches.
+- **Replace generic wrappers** when the region has meaning: page shell → `main`; titled blocks → `section` with a heading; intro copy above a section → `header`; link groups → `nav`; supplementary content → `aside`; body copy → `p` (not `div` with text).
+- **`div` / `span` are allowed only** for **presentational grouping** with no document role—e.g. a single flex/grid row inside an already-semantic parent, or a hook for layout where no HTML element fits. Keep such wrappers **minimal**; do not nest long chains of anonymous `div`s where one semantic container suffices.
+- **Never use `div` (or `span`) as a clickable control**—use `button` or `a` with appropriate styles. Do not fake headings with styled `div`s; use `h1`–`h6` and match visual caps via classes in §2.
+
+---
+
 ## 1. Color System
 
 ### Brand Colors (CSS Variables — `client/src/index.css`)
@@ -48,10 +79,10 @@ Used with Tailwind's `/` opacity syntax on `primary`:
 
 | Pattern             | Usage                             |
 | ------------------- | --------------------------------- |
-| `primary/5`         | Card gradient overlay             |
-| `primary/10`        | Subtle borders, card borders, hover bg |
+| `primary/5`         | Subtle fills, hover wash, overlays |
+| `primary/10`        | Hover backgrounds, tinted chips    |
 | `primary/15`        | Border hints (inline `${Colors.primary}15`) |
-| `primary/20`        | Input borders, outline button bg hover |
+| `primary/20`        | Input borders, outline control chrome |
 | `primary/30`        | Focus ring                        |
 | `primary/40`        | Focus border                      |
 | `primary/90`        | Primary button hover              |
@@ -64,47 +95,57 @@ Used with Tailwind's `/` opacity syntax on `primary`:
 
 - **Family:** `Work Sans` (Google Fonts, weights 100–900 + italics)
 - **Fallback:** `sans-serif`
-- **Base size:** 14px (browser default)
+- **Default UI size:** **12px** — `text-[12px]`
+- **Largest UI size:** **13px** — `text-[13px]` (titles, errors, rare emphasis)
 
 ### Weight Scale
 
 | Weight        | Tailwind Class  | Usage                                    |
 | ------------- | --------------- | ---------------------------------------- |
-| 300 (Light)   | `font-light`    | **Default body text**, inputs, buttons, landing headings |
-| 500 (Medium)  | `font-medium`   | Emphasis, nav brand, card titles, feature headings |
-| 600 (Semibold)| `font-semibold` | Dashboard headings (h1–h6 via `Heading` component) |
+| 300 (Light)   | `font-light`    | **Default body text**, inputs, buttons   |
+| 500 (Medium)  | `font-medium`   | Emphasis, nav brand, card titles         |
+| 600 (Semibold)| `font-semibold` | Strongest headings (still `text-[12px]` or `text-[13px]`) |
 
 ### Text Size Scale
 
-**Form elements** (inputs, buttons, labels, checkboxes):
+**Default (most UI):**
 ```
-text-[11px] lg:text-[12px]
-```
-
-**Icons** (FontAwesome in inputs/buttons):
-```
-text-[9px] sm:text-[10px] md:text-[10px] lg:text-[11px]
+text-[12px] font-light leading-tight
 ```
 
-**Heading component** (`TextInputs.tsx`):
-| Level | Classes                                     |
-| ----- | ------------------------------------------- |
-| h1    | `text-2xl md:text-3xl font-semibold text-primary` |
-| h2    | `text-xl md:text-2xl font-semibold text-primary`  |
-| h3    | `text-lg font-semibold text-primary`               |
-| h4    | `text-base font-semibold text-primary`             |
-| h5/h6 | `text-sm font-semibold text-primary`              |
+**Strong title / single headline line (max size):**
+```
+text-[13px] font-semibold text-primary leading-tight
+```
 
-**Landing page headings:**
-| Element    | Classes                                            |
-| ---------- | -------------------------------------------------- |
-| Hero h1    | `text-5xl lg:text-6xl leading-tight font-light`   |
-| Section h2 | `text-4xl lg:text-5xl leading-tight font-light`   |
-| Sub h2     | `text-3xl lg:text-4xl leading-tight font-light`   |
-| Card h3    | `text-xl font-medium`                              |
-| Feature h3 | `text-lg font-medium`                              |
-| Body       | `text-base leading-relaxed` or `text-lg leading-relaxed` |
-| Small      | `text-sm` or `text-xs`                             |
+**Form elements** (inputs, buttons, labels, checkboxes)—**12px**:
+```
+text-[12px]
+```
+(If space is tight, `text-[11px]` is allowed only inside dense tables; prefer 12px.)
+
+**Icons** (FontAwesome in inputs/buttons)—keep icon glyph visually smaller than label text, e.g.:
+```
+text-[9px] sm:text-[10px] md:text-[10px] max-lg:text-[11px]
+```
+
+**Heading component** (`TextInputs.tsx`) — sizes should be aligned to tokens in code; **target spec:**
+
+| Level | Target classes (conceptual)                          |
+| ----- | ---------------------------------------------------- |
+| h1    | `text-[13px] font-semibold text-primary leading-tight` |
+| h2    | `text-[13px] font-semibold text-primary leading-tight` |
+| h3–h6 | `text-[12px] font-semibold text-primary leading-tight` |
+
+**Landing page headings** — same caps (hierarchy via weight, not pixel jumps):
+
+| Element    | Classes                                              |
+| ---------- | ---------------------------------------------------- |
+| Hero title | `text-[13px] font-semibold leading-tight` (or `font-light` if a softer hero line is desired—still 13px max) |
+| Section title | `text-[13px] font-medium leading-tight`         |
+| Card title | `text-[12px] font-medium leading-tight`              |
+| Body       | `text-[12px] leading-relaxed font-light`             |
+| Muted / small | `text-[12px] font-light` with muted color      |
 
 ---
 
@@ -119,7 +160,7 @@ A `<Link>` by default, renders `<button>` when `submit` or `type="submit"`.
 py-[1px] h-10 px-4 font-light leading-tight
 flex items-center gap-1.5 justify-center text-center
 border border-[1px] border-primary rounded-md
-text-[11px] sm:text-[11px] md:text-[11px] lg:text-[12px]
+text-[12px]
 text-primary bg-white
 hover:bg-primary hover:text-white
 cursor-pointer ease-in-out duration-200 hover:scale-[1.01]
@@ -151,7 +192,7 @@ Uses `class-variance-authority`. Variants:
 | `ghost`     | `hover:bg-primary/10 hover:text-primary`                       |
 | `link`      | `text-primary underline-offset-4 hover:underline`              |
 
-Sizes: `default` (h-10 px-5), `sm` (h-9 px-3), `lg` (h-11 px-6), `icon` (size-9)
+Sizes: `default` (h-10 px-5), `sm` (h-9 px-3), `lg` (h-11 px-6), `icon` (size-9) — prefer **`text-[12px]`** on label content where you control text.
 
 ### Input (`client/src/components/inputs/Input.tsx`)
 
@@ -165,7 +206,7 @@ Wraps shadcn `<UIInput>` with label, error message, prefix/suffix icon support, 
 </label>
 ```
 
-**Label text:** `pl-1 flex items-center gap-1.5 text-[11px] lg:text-[12px] font-light leading-tight text-secondary`
+**Label text:** `pl-1 flex items-center gap-1.5 text-[12px] font-light leading-tight text-secondary`
 
 **Required indicator:** Red `*` with tooltip: `text-red-600`, tooltip bg `bg-red-600`
 
@@ -173,8 +214,8 @@ Wraps shadcn `<UIInput>` with label, error message, prefix/suffix icon support, 
 ```
 !h-10 min-h-10 !py-0 px-3
 font-light leading-tight
-placeholder:!font-light placeholder:text-[11px] lg:placeholder:text-[12px]
-text-[11px] lg:text-[12px]
+placeholder:!font-light placeholder:text-[12px]
+text-[12px]
 flex items-center w-full
 rounded-md border border-[1px] border-primary/20
 outline-none focus:outline-none
@@ -183,8 +224,8 @@ focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20
 ease-in-out duration-200 bg-white shadow-sm
 ```
 
-**Prefix icon area:** `absolute inset-y-0 start-0 ps-3` — adds `ps-10` to input
-**Suffix icon area:** `absolute inset-y-0 end-0 pe-3` — adds `pe-10` to input
+**Prefix icon area:** `absolute inset-y-0 start-0 ps-3` — adds `ps-10` to input  
+**Suffix icon area:** `absolute inset-y-0 end-0 pe-3` — adds `pe-10` to input  
 **Read-only:** `!border-[.1px] !border-background hover:cursor-default focus:!border-background`
 
 **Checkbox variant** (type="checkbox"):
@@ -192,15 +233,15 @@ ease-in-out duration-200 bg-white shadow-sm
 w-4 h-4 border-[1.5px] cursor-pointer border-secondary
 data-[state=checked]:bg-primary text-white
 ```
-Label: `text-[11px] lg:text-[12px] font-light leading-tight`
+Label: `text-[12px] font-light leading-tight`
 
 **Radio variant** (type="radio"):
 ```
-w-4 h-4 border-[1.5px] rounded-xl cursor-pointer border-secondary
+w-4 h-4 border-[1.5px] rounded-md cursor-pointer border-secondary
 accent-primary focus:border-primary
 ```
 
-**Error message:** `text-red-500 text-[13px]` (via `InputErrorMessage`)
+**Error message:** `text-red-500 text-[13px]` (via `InputErrorMessage`) — **only** exception for routine copy at 13px.
 
 ### Loader (`client/src/components/inputs/Loader.tsx`)
 
@@ -219,25 +260,25 @@ accent-primary focus:border-primary
 
 All use shadcn/ui base from `client/src/components/ui/` with custom wrappers in `client/src/components/inputs/` and `client/src/components/custom/`.
 
-**TextArea:** `min-h-16 rounded-lg bg-white px-4 py-3 shadow-sm field-sizing-content`
-**Custom Tooltip:** `text-[12px] bg-primary text-white rounded-lg shadow-sm`, delay 100ms
-**Custom Popover:** `bg-white mt-4 w-full p-2 rounded-xl border border-primary/10 shadow-lg`
+**TextArea:** `min-h-16 rounded-md bg-white px-4 py-3 shadow-sm field-sizing-content text-[12px]`
+**Custom Tooltip:** `text-[12px] bg-primary text-white rounded-md shadow-sm`, delay 100ms  
+**Custom Popover:** `bg-white mt-4 w-full p-2 rounded-md shadow-sm` (no section border; rely on shadow)
 
 ### Dashboard Card (`client/src/components/dashboard/DashboardCard.tsx`)
 
 ```
-bg-white shadow-sm rounded-2xl p-5 gap-4
-border border-primary/10
+bg-white shadow-sm rounded-md p-5 gap-4
+(no outer border — depth from shadow-sm only)
 hover:scale-[1.02] transition-transform duration-200
 ```
-Gradient overlay: `bg-gradient-to-tr from-primary/5 via-transparent to-background/40 opacity-80`
-Icon container: `p-3 rounded-2xl bg-primary/10 text-primary shadow-sm`
+Optional subtle overlay (if used): keep very light; prefer no overlay.  
+Icon container: `p-3 rounded-md bg-primary/10 text-primary shadow-sm`
 
 ### Table (`client/src/components/table/Table.tsx`)
 
-Container: `rounded-xl border border-primary/10 w-full bg-white/90`
-Header cells: `p-4 text-[13px] text-secondary`
-Body cells: `p-4 text-[13px]`
+Container: `rounded-md w-full bg-white/90 shadow-sm` (no outer section border)  
+Header cells: `p-4 text-[12px] text-secondary` (or `text-[13px]` only if spec requires)  
+Body cells: `p-4 text-[12px]`  
 Row hover: `hover:bg-background`
 
 ---
@@ -257,7 +298,7 @@ Row hover: `hover:bg-background`
 
 ### Section Spacing
 
-Landing page sections: `py-24` between sections, `py-16` for footer.
+Landing page sections: `py-24` between sections, `py-16` for footer. Separate **sections** with **background alternation** or **spacing**, not bordered boxes.
 
 ### Grid Patterns
 
@@ -279,37 +320,34 @@ Landing page sections: `py-24` between sections, `py-16` for footer.
 
 ## 5. Visual Effects
 
-### Border Radius
+### Border radius
 
 | Usage              | Class          |
 | ------------------ | -------------- |
-| Buttons, inputs    | `rounded-md`   |
-| Cards, dropdowns   | `rounded-lg`   |
-| Tables, popovers   | `rounded-xl`   |
-| Dashboard cards    | `rounded-2xl`  |
-| Avatars, pills     | `rounded-full` |
+| **Default (cap)**  | `rounded-md`   |
 | Skeleton loaders   | `rounded-[4px]`|
 
-CSS variable scale: `--radius: 0.625rem`, `--radius-sm` (6px), `--radius-md` (8px), `--radius-lg` (10px), `--radius-xl` (14px)
+Do **not** use larger radii than `rounded-md` for new UI. Prefer theme token `--radius` alignment with `rounded-md` only.
 
 ### Borders
 
+**Sections and cards:** avoid outer borders; use **`shadow-sm`** instead.
+
 | Pattern                | Usage                        |
 | ---------------------- | ---------------------------- |
-| `border border-primary/10` | Cards, tables, subtle containers |
-| `border border-primary/20` | Inputs (default state)       |
+| `border border-primary/20` | Inputs, outline buttons (controls only) |
 | `border-[1.5px] border-secondary` | Checkboxes, radios  |
 | `border-[.1px] border-background` | Read-only inputs     |
-| `border-gray-200`     | Dropdown menus               |
+| `border-gray-200`     | Dropdown menus (legacy; prefer shadow-sm separation) |
 
 ### Shadows
+
+**Maximum elevation for surfaces: `shadow-sm`.** Do not use `shadow-md` or `shadow-lg` on new section/card/auth/table chrome.
 
 | Class        | Usage                              |
 | ------------ | ---------------------------------- |
 | `shadow-xs`  | Destructive buttons, checkboxes    |
-| `shadow-sm`  | Default (buttons, inputs, cards, navbar) |
-| `shadow-md`  | Popovers                          |
-| `shadow-lg`  | Dropdowns, modals, auth forms      |
+| `shadow-sm`  | **Default and maximum** for cards, inputs, navbar, popovers, dropdowns, auth panels |
 
 ### Transitions & Animations
 
@@ -372,37 +410,45 @@ Outline removed via `outline-none focus:outline-none` — focus is indicated by 
 - Decorative elements: `aria-hidden="true"` (Three.js canvas, SVG icons)
 - Semantic roles: `role="menu"`, `role="menuitem"` in dropdowns
 
+### Semantic structure
+
+Follow **§0 — Semantic HTML**: prefer landmarks and text-level semantics over `div` / `span`; use ARIA roles only when a native element cannot represent the pattern (e.g. some composite widgets).
+
 ---
 
 ## 7. Navbar (`client/src/containers/navigation/Navbar.tsx`)
 
+Prefer **shadow-sm** for separation from content; **avoid** a full-width bottom border on the bar if you are standardizing on borderless sections—use `shadow-sm` only.
+
 ```
 fixed top-0 left-0 w-full h-[9vh]
 bg-background/90 backdrop-blur
-border-b border-primary/10 shadow-sm
+shadow-sm
 z-[1000] transition-all duration-300
 ```
 
-**Brand:** `flex items-center gap-2 text-xl font-semibold text-primary`, logo `w-10 h-10`
+**Brand:** `flex items-center gap-2 text-[13px] font-semibold text-primary`, logo `w-10 h-10`
 
-**User menu button:** `p-2 px-[11px] rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-white`
+**User menu button:** `p-2 px-[11px] rounded-md bg-primary/10 text-primary hover:bg-primary hover:text-white`
 
-**Dropdown:** `absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-lg shadow-lg py-2 z-50`
-Items: `flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-primary/10 hover:text-primary font-medium rounded-md`
+**Dropdown:** `absolute right-0 mt-2 w-40 bg-white rounded-md shadow-sm py-2 z-50` (no border; separation via shadow)  
+Items: `flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-primary/10 hover:text-primary font-medium rounded-md text-[12px]`
 
 ---
 
 ## 8. Auth Forms (`Login.tsx`, `Signup.tsx`)
 
-**Card container:**
+**Card container (no outer border):**
 ```
-w-full max-w-[420px] shadow-lg rounded-2xl
-bg-white/90 border border-primary/10 p-8
+w-full max-w-[420px] shadow-sm rounded-md
+bg-white/90 p-8
 ```
 
 **Form layout:** `flex flex-col gap-4` (fields), `gap-5` (fieldset)
 
-**Footer:** `flex flex-col items-center gap-2`, links as `text-primary hover:underline transition-colors`
+**Footer:** `flex flex-col items-center gap-2`, links as `text-primary text-[12px] hover:underline transition-colors`
+
+**Title / subtitle:** `text-[13px]` (or `font-light` / `font-semibold` as needed) for title; `text-[12px] leading-relaxed` for subtitle—respect global caps.
 
 ---
 
@@ -410,12 +456,12 @@ bg-white/90 border border-primary/10 p-8
 
 ### Section Anatomy
 
-Each section follows this pattern:
+Each section follows this pattern (background alternation, not bordered panels):
 ```html
 <section class="py-24" style={{ backgroundColor: Colors.white | Colors.bgAlt }}>
   <article class="max-w-4xl mx-auto px-6 lg:px-8">
     <header class="text-center mb-16 animate-on-scroll">
-      <!-- h2 + optional subtitle -->
+      <!-- h2 + optional subtitle — text-[13px] / text-[12px] -->
     </header>
     <!-- Content grid -->
   </article>
@@ -436,18 +482,18 @@ Primary + secondary button side by side:
 
 ### Feature Icons (landing page)
 
-Container: `w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0` with `backgroundColor: Colors.primary`
+Container: `w-12 h-12 rounded-md flex items-center justify-center flex-shrink-0` with `backgroundColor: Colors.primary`  
 SVG: `width="24" height="24"` with `stroke={Colors.white} strokeWidth="2"`
 
 ### Step Numbers
 
-Container: `w-16 h-16 mx-auto mb-6 rounded-lg flex items-center justify-center font-light text-xl` with primary bg + white text
+Container: `w-16 h-16 mx-auto mb-6 rounded-md flex items-center justify-center font-light text-[13px]` with primary bg + white text
 
 ### Testimonials
 
-Card: `rounded-xl p-8` with white bg
-Quote text: `text-lg leading-relaxed mb-6`
-Attribution: `not-italic font-medium` in primary color, prefixed with `—`
+Card: `rounded-md p-8` with white bg and **`shadow-sm`** (no border)  
+Quote text: `text-[12px] leading-relaxed mb-6`  
+Attribution: `not-italic font-medium text-[12px]` in primary color, prefixed with `—`
 
 ---
 
@@ -512,12 +558,14 @@ client/src/
 When generating UI for this project:
 
 1. **Always import from `components/inputs/`** (Button, Input, Select, TextArea) — not directly from `components/ui/`
-2. **Default text weight is `font-light`** — use `font-medium` for emphasis only
-3. **Form element text size:** `text-[11px] lg:text-[12px]`
+2. **Default text weight is `font-light`** — use `font-medium` / `font-semibold` for emphasis; **do not** jump font size for hierarchy beyond 12px → 13px
+3. **Default text size is `text-[12px]`**; **max** is `text-[13px]` (titles, errors)
 4. **Primary color is forest green** (`#283618`) — not blue, not indigo
-5. **Borders are subtle:** `border-primary/10` for containers, `border-primary/20` for inputs
-6. **Height standard:** `h-10` for inputs and buttons
-7. **Use `shadow-sm`** as default shadow — reserve `shadow-lg` for overlays
-8. **Transitions:** `ease-in-out duration-200` for all interactive elements
-9. **Focus pattern:** `focus-visible:ring-2 focus-visible:ring-primary/20` — never `outline`
-10. **Use `cn()` from `@/lib/utils`** for conditional class merging
+5. **Section/card chrome:** **no borders** — use **`shadow-sm` only** (no heavier shadows)
+6. **Controls only:** `border-primary/20` on inputs and similar; not around whole sections
+7. **Border radius:** **`rounded-md` maximum** for surfaces (skeletons may use `rounded-[4px]`)
+8. **Height standard:** `h-10` for inputs and buttons
+9. **Transitions:** `ease-in-out duration-200` for all interactive elements
+10. **Focus pattern:** `focus-visible:ring-2 focus-visible:ring-primary/20` — never `outline`
+11. **Use `cn()` from `@/lib/utils`** for conditional class merging
+12. **Semantic HTML:** restrict `div` / `span`—use `main`, `section`, `header`, `footer`, `nav`, `article`, `aside`, `p`, lists, headings, `button`, `a`, etc.; see §0

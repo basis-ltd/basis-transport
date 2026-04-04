@@ -114,7 +114,7 @@ const button = {
   padding: '12px 28px',
   borderRadius: '6px',
   fontSize: '14px',
-  fontWeight: 500,
+  fontWeight: 400,
   textDecoration: 'none',
   display: 'inline-block',
 };

@@ -17,12 +17,12 @@ const AppLayout: FC<AppLayoutProps> = ({ children }) => {
   const dispatch: AppDispatch = useDispatch();
 
   const sectionClasses = [
-    'absolute top-[9vh] left-0',
-    'max-h-[89.5vh] overflow-y-auto',
-    'px-6 md:px-12 py-6 mt-2 rounded-2xl',
-    'transition-all duration-300 ease-in-out bg-white/90 backdrop-blur border border-primary/10 shadow-sm',
+    'absolute top-[55px] left-0',
+    'max-h-[91.5vh] overflow-y-auto',
+    'px-6 md:px-12 py-6 mt-2 rounded-md',
+    'transition-all duration-300 ease-in-out bg-white shadow-sm',
     isSidebarOpen
-      ? 'ml-0 md:ml-[20vw] w-full md:w-[calc(100vw-20.5vw)]'
+      ? 'ml-0 md:ml-[18vw] w-full md:w-[calc(100vw-18.5vw)]'
       : 'ml-0 md:ml-[5vw] w-full md:w-[calc(100vw-5.5vw)]',
   ].join(' ');
 

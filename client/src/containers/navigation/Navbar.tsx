@@ -5,11 +5,22 @@ import {
   faRightFromBracket,
 } from "@fortawesome/free-solid-svg-icons";
 import { Link, useNavigate } from "react-router-dom";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useMemo } from "react";
+import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import { useDispatch } from "react-redux";
 import { setLogout } from "@/states/slices/authSlice";
 import { useAppSelector } from "@/states/hooks";
+import { publicColors } from "@/containers/public/publicTheme";
 import basisTransportLogo from "/logo.svg";
+
+type UserMenuItem = {
+  id: string;
+  label: string;
+  icon: IconDefinition;
+  to: string;
+  variant: "default" | "danger";
+  action: () => void;
+};
 
 const Navbar = () => {
   /**
@@ -24,6 +35,35 @@ const Navbar = () => {
    * NAVIGATION
    */
   const navigate = useNavigate();
+
+  const userMenuItems = useMemo<UserMenuItem[]>(
+    () => [
+      {
+        id: "profile",
+        label: "Profile",
+        icon: faUserCircle,
+        to: "/account/profile",
+        variant: "default",
+        action: () => {
+          navigate("/account/profile");
+          setDropdownOpen(false);
+        },
+      },
+      {
+        id: "logout",
+        label: "Logout",
+        icon: faRightFromBracket,
+        to: "#",
+        variant: "danger",
+        action: () => {
+          dispatch(setLogout());
+          window.location.href = "/auth/login";
+          setDropdownOpen(false);
+        },
+      },
+    ],
+    [dispatch, navigate]
+  );
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -46,96 +86,96 @@ const Navbar = () => {
   }, [dropdownOpen]);
 
   return (
-    <header className="fixed top-0 left-0 w-full h-[9vh] bg-background/90 backdrop-blur border-b border-primary/10 shadow-sm z-[1000] transition-all duration-300 flex items-center">
+    <header
+      className="fixed top-0 left-0 right-0 z-[1000] w-full border-b backdrop-blur-sm transition-all duration-300 bg-background/80"
+      style={{ borderColor: `${publicColors.primary}15` }}
+    >
       <nav
-        className="w-full flex items-center justify-between px-6 md:px-12"
+        className="mx-auto px-6 lg:px-8"
         aria-label="Main navigation"
       >
-        <ul className="flex items-center gap-4 list-none p-0 m-0">
-          <Link
-            to={token ? "/dashboard" : "/"}
-            onClick={() => {
-              if (token) {
-                navigate("/dashboard");
-              } else {
-                navigate("/");
-              }
-            }}
-            className="flex items-center gap-2 text-xl font-semibold text-primary tracking-wide select-none hover:text-primary/80 transition-colors duration-200 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-          >
-            <img
-              src={basisTransportLogo}
-              alt="Basis Transport Logo"
-              className="w-10 h-10"
-            />
-            <span>Basis Transport</span>
-          </Link>
-        </ul>
-        <ul className="flex items-center gap-4 list-none p-0 m-0">
-          <li className="relative">
+        <section className="flex justify-between items-center h-[55px]">
+          <ul className="flex items-center gap-4 list-none p-0 m-0">
             <Link
-              to="#"
-              className="p-2 px-[11px] rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-white transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-              aria-label="User profile"
-              aria-haspopup="true"
-              aria-expanded={dropdownOpen}
-              onClick={(e) => {
-                e.preventDefault();
-                setDropdownOpen((open) => !open);
+              to={token ? "/dashboard" : "/"}
+              onClick={() => {
+                if (token) {
+                  navigate("/dashboard");
+                } else {
+                  navigate("/");
+                }
               }}
-              tabIndex={0}
-              role="button"
+              className="flex items-center gap-2 group rounded-md outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-2 focus-visible:ring-offset-background select-none"
             >
-              <FontAwesomeIcon icon={faUser} size="sm" />
-            </Link>
-            {dropdownOpen && (
-              <ul
-                ref={dropdownRef}
-                className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-lg shadow-lg py-2 z-50 animate-fade-in"
-                role="menu"
-                aria-label="User menu"
+              <img
+                src={basisTransportLogo}
+                alt="Basis Transport Logo"
+                className="w-6 h-6 text-[12px]"
+              />
+              <span
+                className="text-base font-normal"
+                style={{ color: publicColors.primary }}
               >
-                <li>
-                  <Link
-                    to="/account/profile"
-                    className="flex items-center gap-2 px-4 py-2 text-foreground font-light hover:bg-primary/10 hover:text-primary transition-colors rounded-md group"
-                    role="menuitem"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      navigate("/account/profile");
-                      setDropdownOpen(false);
-                    }}
-                  >
-                    <FontAwesomeIcon
-                      icon={faUserCircle}
-                      className="text-primary/70 group-hover:text-primary"
-                    />
-                    <span className="font-medium text-foreground">Profile</span>
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="#"
-                    className="flex items-center gap-2 px-4 py-2 text-foreground font-light hover:bg-destructive/10 hover:text-destructive transition-colors rounded-md group"
-                    role="menuitem"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      dispatch(setLogout());
-                      window.location.href = "/auth/login";
-                      setDropdownOpen(false);
-                    }}
-                  >
-                    <FontAwesomeIcon
-                      icon={faRightFromBracket}
-                      className="text-destructive/70 group-hover:text-destructive"
-                    />
-                    <span className="font-medium">Logout</span>
-                  </Link>
-                </li>
-              </ul>
-            )}
-          </li>
-        </ul>
+                Basis
+              </span>
+            </Link>
+          </ul>
+          <ul className="flex items-center gap-4 list-none p-0 m-0">
+            <li className="relative">
+              <Link
+                to="#"
+                className="py-[6px] px-[10px] rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-white transition-colors duration-200 ease-in-out outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                aria-label="User profile"
+                aria-haspopup="true"
+                aria-expanded={dropdownOpen}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setDropdownOpen((open) => !open);
+                }}
+                tabIndex={0}
+                role="button"
+              >
+                <FontAwesomeIcon icon={faUser} className="text-[10px] lg:text-[11px]" />
+              </Link>
+              {dropdownOpen && (
+                <ul
+                  ref={dropdownRef}
+                  className="absolute right-0 mt-2 w-40 bg-white border border-primary/10 rounded-lg shadow-lg py-2 z-50 animate-fade-in"
+                  role="menu"
+                  aria-label="User menu"
+                >
+                  {userMenuItems.map((item) => (
+                    <li key={item.id}>
+                      <Link
+                        to={item.to}
+                        className={`flex items-center gap-2 text-[13px] px-4 py-2 text-foreground font-light transition-colors duration-200 ease-in-out rounded-md group ${
+                          item.variant === "danger"
+                            ? "hover:bg-destructive/10 hover:text-destructive"
+                            : "hover:bg-primary/10 hover:text-primary"
+                        }`}
+                        role="menuitem"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          item.action();
+                        }}
+                      >
+                        <FontAwesomeIcon
+                          icon={item.icon}
+                          className={
+                            item.variant === "danger"
+                              ? "text-destructive/70 group-hover:text-destructive"
+                              : "text-primary/70 group-hover:text-primary"
+                          }
+                        />
+                        {item.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </li>
+          </ul>
+        </section>
       </nav>
     </header>
   );

@@ -65,7 +65,6 @@ const TripsPage = () => {
           </ul>
         </nav>
         <section className="w-full flex flex-col gap-4">
-          <section className="hidden md:block">
             <Table
               columns={tripsColumns}
               data={tripsList}
@@ -77,7 +76,6 @@ const TripsPage = () => {
               setPage={setPage}
               setSize={setSize}
             />
-          </section>
           <section className="grid grid-cols-1 gap-4 md:hidden">
             {tripsList?.map((trip) => (
               <article

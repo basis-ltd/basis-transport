@@ -6,11 +6,11 @@ import {
   IconDefinition,
 } from '@fortawesome/free-solid-svg-icons';
 
-interface NavigationItem {
+export interface NavigationItem {
   title: string;
   path: string;
   icon: IconDefinition;
-  subcategories?: NavigationItem[];
+  subCategories?: NavigationItem[];
   roles?: string[];
 }
 
@@ -40,3 +40,36 @@ export const SIDEBAR_NAV_ITEMS: NavigationItem[] = [
     roles: ['ADMIN', 'SUPER_ADMIN'],
   },
 ];
+
+const filterNavigationItemsByRoles = (
+  items: NavigationItem[],
+  roleNames: string[],
+): NavigationItem[] => {
+  return items.flatMap((item) => {
+    const isAllowed =
+      !item.roles?.length || roleNames.some((roleName) => item.roles?.includes(roleName));
+
+    if (!isAllowed) {
+      return [];
+    }
+
+    return [
+      {
+        ...item,
+        subCategories: item.subCategories
+          ? filterNavigationItemsByRoles(item.subCategories, roleNames)
+          : undefined,
+      },
+    ];
+  });
+};
+
+export const getSidebarNavigationForUser = (
+  roleNames: string[] = [],
+): NavigationItem[] => {
+  if (!roleNames.length) {
+    return SIDEBAR_NAV_ITEMS;
+  }
+
+  return filterNavigationItemsByRoles(SIDEBAR_NAV_ITEMS, roleNames);
+};

@@ -178,7 +178,7 @@ const LocationDetailsPage = () => {
               <p className="font-light text-secondary/80">Geographical location</p>
             </header>
             {position ? (
-              <section className="h-[50vh] w-full rounded-lg overflow-hidden">
+              <section className="h-[50vh] w-full rounded-xl overflow-hidden">
                 <APIProvider apiKey={environment.googleMapsApiKey}>
                   <Map
                     defaultCenter={position}
@@ -191,7 +191,7 @@ const LocationDetailsPage = () => {
                 </APIProvider>
               </section>
             ) : (
-              <section className="h-[50vh] w-full flex items-center justify-center bg-background-secondary/60 rounded-lg border border-primary/10">
+              <section className="h-[50vh] w-full flex items-center justify-center bg-background-secondary/60 rounded-xl border border-primary/10">
                 <p className="font-light text-secondary/80">Address is not available.</p>
               </section>
             )}

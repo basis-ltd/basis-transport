@@ -45,7 +45,7 @@ export const useUserColumns = ({
       {
         header: 'Gender',
         accessorKey: 'gender',
-        cell: ({ row }) => getGenderLabel(row?.original?.gender || Gender.MALE),
+        cell: ({ row }) => capitalizeString(getGenderLabel(row?.original?.gender || Gender.MALE)),
       },
       {
         header: 'Status',
@@ -91,6 +91,7 @@ export const useUserColumns = ({
       {
         header: 'Nationality',
         accessorKey: 'nationality',
+        cell: ({ row }) => capitalizeString(row?.original?.nationality || 'N/A'),
       },
       {
         header: 'Actions',

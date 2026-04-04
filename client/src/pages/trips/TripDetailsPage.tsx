@@ -215,7 +215,7 @@ const TripDetailsPage = () => {
         case TripStatus.IN_PROGRESS:
           return 'text-primary bg-primary/10';
         case TripStatus.COMPLETED:
-          return 'text-green-700 bg-green-50';
+          return 'text-green-700 bg-green-700/10';
         case TripStatus.CANCELLED:
           return 'text-destructive bg-destructive/10';
         default:

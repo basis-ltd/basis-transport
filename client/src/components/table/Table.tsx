@@ -22,9 +22,10 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
-import { DataTablePagination } from '@/components/table/TablePagination';
-import { useState } from 'react';
+import { DataTablePagination } from './TablePagination';
+import { ReactNode, useEffect, useMemo, useState } from 'react';
 import { UnknownAction } from '@reduxjs/toolkit';
+import { SkeletonLoader } from '../inputs/Loader';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -40,6 +41,13 @@ interface DataTableProps<TData, TValue> {
   setPage?: (page: number) => UnknownAction;
   setSize?: (size: number) => UnknownAction;
   isLoading?: boolean;
+  noDataMessage?: string | ReactNode;
+  rowClassName?: string | ((row: TData) => string);
+  manualPagination?: boolean;
+  containerClassName?: string;
+  tableClassName?: string;
+  headerCellClassName?: string;
+  cellClassName?: string;
 }
 
 export default function Table<TData, TValue>({
@@ -47,18 +55,47 @@ export default function Table<TData, TValue>({
   data = [],
   rowClickHandler = undefined,
   showPagination = true,
-  page = 1,
+  page = 0,
   size = 10,
   totalCount = 0,
   totalPages = 1,
   setPage,
   setSize,
   isLoading = false,
+  noDataMessage = 'No results.',
+  rowClassName = '',
+  manualPagination,
+  containerClassName = '',
+  tableClassName = '',
+  headerCellClassName = '',
+  cellClassName = '',
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = useState({});
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [pagination, setPagination] = useState({
+    pageIndex: Math.max(0, page),
+    pageSize: size,
+  });
+
+  const resolvedManualPagination =
+    manualPagination ?? Boolean(setPage || setSize);
+
+  useEffect(() => {
+    setPagination({
+      pageIndex: Math.max(0, page),
+      pageSize: size,
+    });
+  }, [page, size]);
+
+  const paginationState = useMemo(
+    () => ({
+      pageIndex: pagination.pageIndex,
+      pageSize: pagination.pageSize,
+    }),
+    [pagination.pageIndex, pagination.pageSize]
+  );
 
   const table = useReactTable({
     data,
@@ -68,46 +105,55 @@ export default function Table<TData, TValue>({
       columnVisibility,
       rowSelection,
       columnFilters,
-      pagination: {
-        pageIndex: page - 1,
-        pageSize: size,
-      },
+      pagination: paginationState,
     },
-    pageCount: totalPages,
-    manualPagination: true,
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
+    onPaginationChange: (updater) => {
+      const nextPagination =
+        typeof updater === 'function' ? updater(paginationState) : updater;
+      setPagination(nextPagination);
+      if (setPage) {
+        setPage(nextPagination.pageIndex);
+      }
+      if (setSize) {
+        setSize(nextPagination.pageSize);
+      }
+    },
+    manualPagination: resolvedManualPagination,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
+    getPaginationRowModel: resolvedManualPagination
+      ? undefined
+      : getPaginationRowModel(),
   });
 
   return (
     <>
-      <section className="rounded-xl border border-primary/10 w-full bg-white/90">
-        <DataTable className="min-w-[720px]">
+      <section className={`w-full border rounded-md ${containerClassName}`}>
+        <DataTable className={tableClassName}>
           <TableHeader className="px-0">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
                     <TableHead
-                      className="text-[13px] text-secondary p-4"
+                      className={`text-[12px] text-black font-normal p-4 ${headerCellClassName}`}
                       key={header.id}
                       colSpan={header.colSpan}
                     >
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
                     </TableHead>
                   );
                 })}
@@ -120,14 +166,7 @@ export default function Table<TData, TValue>({
                 <TableRow key={`skeleton-row-${rowIdx}`}>
                   {columns.map((_, cellIdx) => (
                     <TableCell key={`skeleton-cell-${cellIdx}`} className="p-4">
-                      <figure
-                        className={`animate-pulse bg-gray-200 rounded-[4px]`}
-                        style={{
-                          width: `${Math.random() * (70 - 50) + 50}%`,
-                          height: '0.85rem',
-                          animationDuration: '1.2s',
-                        }}
-                      />
+                      <SkeletonLoader type="text" height='0.8rem' />
                     </TableCell>
                   ))}
                 </TableRow>
@@ -137,9 +176,11 @@ export default function Table<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && 'selected'}
-                  className={`p-2 ${
-                    rowClickHandler ? 'cursor-pointer' : ''
-                  } hover:bg-background`}
+                  className={`p-2 ${rowClickHandler ? 'cursor-pointer' : ''
+                    } hover:bg-background ${typeof rowClassName === 'function'
+                      ? rowClassName(row.original)
+                      : rowClassName
+                    }`}
                   onClick={(e) => {
                     e.preventDefault();
                   }}
@@ -152,14 +193,13 @@ export default function Table<TData, TValue>({
                       'actions',
                     ].includes(
                       cell.column.id ||
-                        (cell as unknown as { column: { accessorKey: string } })
-                          ?.column?.accessorKey
+                      (cell as unknown as { column: { accessorKey: string } })
+                        ?.column?.accessorKey
                     );
                     return (
                       <TableCell
-                        className={`${
-                          preventAction ? '!cursor-auto' : ''
-                        } text-[13px] p-4`}
+                        className={`${preventAction ? '!cursor-auto' : ''
+                          } text-[12px] text-black p-4 ${cellClassName}`}
                         key={cell.id}
                         onClick={(e) => {
                           if (preventAction) {
@@ -181,9 +221,11 @@ export default function Table<TData, TValue>({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="h-24 text-center text-[13px] font-light text-secondary"
+                  className="h-24 text-center"
                 >
-                  No results.
+                  <span className="text-gray-500 font-light text-[12px]">
+                    {noDataMessage}
+                  </span>
                 </TableCell>
               </TableRow>
             )}

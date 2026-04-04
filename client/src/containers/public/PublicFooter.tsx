@@ -1,31 +1,54 @@
+import type { CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
 import { publicColors } from './publicTheme';
 import basisTransportLogo from '/logo.svg';
 
-const footerSections = [
+type FooterLink = { to: string; label: string };
+
+const footerSections: { title: string; links: FooterLink[] }[] = [
   {
     title: 'Product',
     links: [
-      { href: '/#how-it-works', label: 'How it works' },
-      { href: '#', label: 'Supported cities' },
-      { href: '#', label: 'About us' },
+      { to: '/#how-it-works', label: 'How it works' },
+      { to: '#', label: 'Supported cities' },
+      { to: '#', label: 'About us' },
     ],
   },
   {
     title: 'Support',
     links: [
-      { href: '#', label: 'Help center' },
-      { href: '#', label: 'Contact us' },
-      { href: '#', label: 'Privacy' },
+      { to: '#', label: 'Help center' },
+      { to: '#', label: 'Contact us' },
+      { to: '#', label: 'Privacy' },
     ],
   },
 ];
 
-const legalLinks = [
-  { href: '#', label: 'Privacy Policy' },
-  { href: '#', label: 'Terms of Service' },
-  { href: '#', label: 'Cookies' },
+const legalLinks: FooterLink[] = [
+  { to: '#', label: 'Privacy Policy' },
+  { to: '#', label: 'Terms of Service' },
+  { to: '#', label: 'Cookies' },
 ];
+
+function FooterNavLink({
+  link,
+  style,
+}: {
+  link: FooterLink;
+  style?: CSSProperties;
+}) {
+  const isPlaceholder = link.to === '#';
+  return (
+    <Link
+      to={isPlaceholder ? '/' : link.to}
+      onClick={isPlaceholder ? (e) => e.preventDefault() : undefined}
+      className="hover:opacity-70 text-[12px] transition-opacity"
+      style={style}
+    >
+      {link.label}
+    </Link>
+  );
+}
 
 const PublicFooter = () => {
   return (
@@ -71,12 +94,7 @@ const PublicFooter = () => {
               >
                 {section.links.map((link) => (
                   <li key={link.label}>
-                    <a
-                      href={link.href}
-                      className="hover:opacity-70 text-[12px] transition-opacity"
-                    >
-                      {link.label}
-                    </a>
+                    <FooterNavLink link={link} />
                   </li>
                 ))}
               </ul>
@@ -107,14 +125,11 @@ const PublicFooter = () => {
             </p>
             <nav className="flex gap-6 text-xs" aria-label="Legal">
               {legalLinks.map((link) => (
-                <a
+                <FooterNavLink
                   key={link.label}
-                  href={link.href}
-                  className="hover:opacity-70 text-[12px] transition-opacity"
+                  link={link}
                   style={{ color: publicColors.neutralLight }}
-                >
-                  {link.label}
-                </a>
+                />
               ))}
             </nav>
           </div>

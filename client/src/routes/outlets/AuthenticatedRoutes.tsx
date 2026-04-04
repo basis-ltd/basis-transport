@@ -16,7 +16,6 @@ const AuthenticatedRoutes = () => {
   useEffect(() => {
     if (!user || !token) {
       dispatch(setLogout());
-      window.location.href = "/auth/login";
     }
   }, [user, token, dispatch]);
 

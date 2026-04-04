@@ -47,7 +47,13 @@ const Select = ({
 }: SelectProps) => {
   return (
     <label className={`flex flex-col gap-2 w-full ${labelClassName}`}>
-      <p className={label ? 'flex items-center gap-1 text-[14px] text-secondary' : 'hidden'}>
+      <p
+        className={
+          label
+            ? 'pl-1 flex items-center gap-1.5 text-[11px] lg:text-[12px] font-light leading-tight text-secondary'
+            : 'hidden'
+        }
+      >
         {label} <span className={required ? `text-red-600` : 'hidden'}>*</span>
       </p>
       <SelectComponent
@@ -57,12 +63,14 @@ const Select = ({
         name={name}
       >
         <SelectTrigger
-          className={`w-full focus:ring-transparent cursor-pointer ring-0 h-11 ${className}`}
+          className={`w-full cursor-pointer !h-10 min-h-10 text-[11px] lg:text-[12px] font-light border border-primary/20 focus:border-primary focus-visible:ring-2 focus-visible:ring-primary/20 bg-white shadow-sm rounded-md ${className}`}
         >
           <SelectValue
-            className="text-[13px]"
+            className="text-[11px] lg:text-[12px] font-light"
             placeholder={
-              <p className="text-[13px] text-secondary/70">{placeholder}</p>
+              <p className="text-[11px] lg:text-[12px] font-light text-secondary/70">
+                {placeholder}
+              </p>
             }
           />
         </SelectTrigger>
@@ -74,9 +82,11 @@ const Select = ({
                   key={index}
                   value={option.value}
                   disabled={readOnly}
-                  className="cursor-pointer text-[13px] py-1 hover:bg-background"
+                  className="cursor-pointer text-[11px] lg:text-[12px] font-light py-1 hover:bg-background"
                 >
-                  <p className="text-[13px] py-[3px]">{option.label}</p>
+                  <p className="text-[11px] lg:text-[12px] font-light py-[3px]">
+                    {option.label}
+                  </p>
                 </SelectItem>
               );
             })}

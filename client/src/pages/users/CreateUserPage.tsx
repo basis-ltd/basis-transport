@@ -171,7 +171,7 @@ const CreateUserPage = () => {
                   .map((role) => (
                     <label
                       key={role.id}
-                      className="w-full flex items-center gap-3 p-3 rounded-lg border border-secondary border-opacity-30 bg-background hover:border-primary hover:border-opacity-50 transition-all duration-200 cursor-pointer text-[13px] hover:text-foreground"
+                      className="w-full flex items-center gap-3 p-3 rounded-lg border border-primary/10 bg-background hover:border-primary/30 hover:bg-primary/5 transition-all duration-200 cursor-pointer text-[13px] hover:text-foreground"
                     >
                       <Input
                         type="checkbox"
@@ -184,7 +184,7 @@ const CreateUserPage = () => {
                           );
                         }}
                       />
-                      <span className="text-secondary font-medium transition-all duration-200">
+                      <span className="text-secondary font-light transition-all duration-200">
                         {capitalizeString(role.name)}
                       </span>
                     </label>

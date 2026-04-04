@@ -201,7 +201,7 @@ const UserDashboard = () => {
             ))}
           </section>
 
-          <section className="w-full bg-white/90 rounded-2xl border border-primary/10 shadow-sm p-6 flex flex-col gap-4">
+          <section className="w-full bg-white/90 rounded-md border shadow-md p-6 flex flex-col gap-4">
             <header>
               <Heading type="h3">Monthly Trips Trend</Heading>
             </header>
@@ -211,7 +211,7 @@ const UserDashboard = () => {
           </section>
           <section className="w-full flex flex-col gap-3 my-4">
             <ul className="w-full flex items-center gap-3 justify-between">
-              <Heading>Trips near you</Heading>
+              <Heading type='h3'>Trips near you</Heading>
               <Button icon={faFileLines} route="/trips">
                 View all
               </Button>
@@ -224,7 +224,7 @@ const UserDashboard = () => {
                 showPagination={false}
               />
             </section>
-            <section className="grid grid-cols-1 gap-4 md:hidden">
+            <section className="grid grid-cols-1 gap-4">
               {tripsList?.map((trip) => (
                 <article
                   key={trip.id}

@@ -1,20 +1,12 @@
-import {
-  ChevronLeftIcon,
-  DoubleArrowLeftIcon,
-  DoubleArrowRightIcon,
-} from '@radix-ui/react-icons';
-import { ChevronRightIcon } from '@radix-ui/react-icons';
-import { Button } from '../ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '../ui/select';
-import { UnknownAction } from '@reduxjs/toolkit';
-import { Table } from '@tanstack/react-table';
-import { useMemo } from 'react';
+import { ChevronLeftIcon, DoubleArrowLeftIcon, DoubleArrowRightIcon } from "@radix-ui/react-icons";
+import { ChevronRightIcon } from "@radix-ui/react-icons";
+import { Button } from "../ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import { UnknownAction } from "@reduxjs/toolkit";
+import { Table } from "@tanstack/react-table";
+import { useMemo } from "react";
+import { formatNumbers } from "@/helpers/strings.helper";
+
 interface DataTablePaginationProps<TData> {
   table: Table<TData>;
   page?: number;
@@ -28,67 +20,60 @@ interface DataTablePaginationProps<TData> {
 export function DataTablePagination<TData>({
   table,
   page = 0,
-  size = 5,
+  size = 10,
   totalCount = 0,
   totalPages = 0,
   setPage,
   setSize,
 }: DataTablePaginationProps<TData>) {
-  // STATE VARIABLES
 
-  const pageSizes = useMemo(() => {
-    const pageSizes = [
-      {
-        label: '5',
-        value: 5,
-      },
-      {
-        label: '10',
-        value: 10,
-      },
-      {
-        label: '20',
-        value: 20,
-      },
-      {
-        label: '50',
-        value: 50,
-      },
-    ];
+  const pageSizeOptions = useMemo(() => {
+    const options = [{
+      label: '5',
+      value: 5,
+    }, {
+      label: '10',
+      value: 10,
+    }, {
+      label: '20',
+      value: 20,
+    }, {
+      label: '50',
+      value: 50,
+    }];
 
-    if (pageSizes?.find((size) => size.value === totalCount)) {
-      pageSizes.splice(pageSizes.findIndex(size => size.value === totalCount), 1);
-    }
-      
-    if (totalCount > 0) {
-      pageSizes.push({
+    if (totalCount > 50) {
+      options.push({
         label: 'All',
         value: totalCount,
       });
     }
 
-    return pageSizes;
+    return options;
   }, [totalCount]);
 
   return (
-    <footer className="flex flex-wrap items-center justify-between gap-4 px-2 my-4">
-      <article className="flex flex-col gap-1">
+    <footer className="flex flex-col items-center gap-4 px-2 mt-4 
+                   md:flex-row md:justify-between">
+      <article className="flex flex-col gap-1 w-full text-center 
+                      md:w-auto md:text-left">
         {table.getFilteredSelectedRowModel().rows.length > 0 && (
-          <p className="text-[13px] font-light text-muted-foreground">
+          <span className="text-xs text-muted-foreground">
             {table.getFilteredSelectedRowModel().rows.length} of{' '}
             {table.getFilteredRowModel().rows.length} row(s) selected.
-          </p>
+          </span>
         )}
         {totalCount > 0 && (
-          <p className="text-[13px] font-light text-muted-foreground">
-            Total records: {totalCount}
-          </p>
+          <span className="text-xs">
+            Total records: {formatNumbers(totalCount)}
+          </span>
         )}
       </article>
 
-      <menu className="flex flex-wrap items-center gap-2 sm:gap-6 lg:space-x-8">
+      <menu className="flex flex-wrap items-center justify-center gap-x-4 gap-y-3 
+                     md:justify-end md:gap-x-6">
         <section className="flex items-center space-x-2">
-          <p className="hidden text-[13px] font-light text-secondary sm:block">Rows per page</p>
+          <span className="hidden text-[11px] font-normal sm:block">Rows per page</span>
           <Select
             value={`${size}`}
             onValueChange={(value) => {
@@ -98,56 +83,63 @@ export function DataTablePagination<TData>({
               }
             }}
           >
-            <SelectTrigger className="h-9 w-[70px] font-light text-[13px] text-primary border-primary/20">
+            <SelectTrigger className="h-8 w-[70px] cursor-pointer">
               <SelectValue placeholder={size} />
             </SelectTrigger>
             <SelectContent side="top">
-              {pageSizes.map((pageSize) => (
+              {pageSizeOptions.map((option) => (
                 <SelectItem
-                  value={`${pageSize.value}`}
-                  key={pageSize.value}
-                  className="cursor-pointer hover:bg-background"
+                  value={`${option.value}`}
+                  key={option.value}
+                  className="cursor-pointer hover:bg-background text-[11px] font-normal"
                 >
-                  {pageSize?.label}
+                  {option?.label}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </section>
 
-        <section className="flex items-center text-sm font-light">
-          <p className="text-[13px] text-secondary">
-            Page {page + 1} of {totalPages || 1}
-          </p>
-        </section>
-
         <section className="flex items-center gap-2">
+          <span className="text-[11px] font-normal whitespace-nowrap">
+            Page {page + 1} of {formatNumbers(totalPages || 1)}
+          </span>
           <input
             type="number"
             min={1}
-            max={totalPages}
-            className="w-12 text-center placeholder:text-[13px] text-[13px] font-light py-1 px-2 border border-primary/20 rounded-lg bg-white outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary"
+            max={totalPages || 1}
+            defaultValue={page + 1}
+            className="w-12 text-center placeholder:text-[11px] text-[11px] py-1 px-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
             onChange={(e) => {
-              e.preventDefault();
-              const value = Number(e.target.value);
-              if (value > 0 && value <= totalPages) {
-                table.setPageIndex(value - 1);
+              const targetPage = e.target.value ? Number(e.target.value) : 0;
+              if (targetPage >= 1 && targetPage <= (totalPages || 1)) {
+                table.setPageIndex(targetPage - 1);
                 if (setPage) {
-                  setPage(value);
+                  setPage(targetPage);
                 }
+              } else if (targetPage === 0) {
+                // Allow clearing or handle as needed
+              } else {
+                // Optional: Reset to current page if invalid
+                e.target.value = String(page + 1);
               }
             }}
-            placeholder={`${page}`}
+            onBlur={(e) => {
+              if (!e.target.value || Number(e.target.value) < 1 || Number(e.target.value) > (totalPages || 1)) {
+                e.target.value = String(page + 1);
+              }
+            }}
+            aria-label="Go to page number"
           />
         </section>
 
-        <section className="flex items-center space-x-1 lg:space-x-2">
+        <section className="flex items-center space-x-1">
           <Button
             variant="outline"
-            className="w-8 h-8 p-0 focus-visible:ring-primary/20"
+            className="w-8 h-8 p-0 cursor-pointer"
             onClick={() => {
               table.setPageIndex(0);
-              if (setPage && page > 0) setPage(1);
+              if (setPage) setPage(0);
             }}
             disabled={page === 0}
           >
@@ -156,10 +148,10 @@ export function DataTablePagination<TData>({
           </Button>
           <Button
             variant="outline"
-            className="w-8 h-8 p-0 focus-visible:ring-primary/20"
+            className="w-8 h-8 p-0 cursor-pointer"
             onClick={() => {
               table.previousPage();
-              if (setPage && page > 0) setPage(page - 1);
+              if (setPage) setPage((page - 1) as unknown as number);
             }}
             disabled={page === 0}
           >
@@ -168,24 +160,24 @@ export function DataTablePagination<TData>({
           </Button>
           <Button
             variant="outline"
-            className="w-8 h-8 p-0 focus-visible:ring-primary/20"
+            className="w-8 h-8 p-0 cursor-pointer"
             onClick={() => {
               table.nextPage();
-              if (setPage && page + 1 < totalPages) setPage(page + 1);
+              if (setPage) setPage((page + 1) as unknown as number);
             }}
-            disabled={page + 1 === (totalPages || 1)}
+            disabled={totalPages === 0 || page >= (totalPages - 1)}
           >
             <span className="sr-only">Go to next page</span>
             <ChevronRightIcon className="w-4 h-4" />
           </Button>
           <Button
             variant="outline"
-            className="w-8 h-8 p-0 focus-visible:ring-primary/20"
+            className="w-8 h-8 p-0 cursor-pointer"
             onClick={() => {
-              table.setPageIndex(totalPages - 1);
-              if (setPage && page + 1 < totalPages) setPage(totalPages);
+              table.setPageIndex((totalPages - 1) || 0);
+              if (setPage) setPage((totalPages - 1) || 0 as unknown as number);
             }}
-            disabled={page + 1 === (totalPages || 1)}
+            disabled={totalPages === 0 || page >= (totalPages - 1)}
           >
             <span className="sr-only">Go to last page</span>
             <DoubleArrowRightIcon className="w-4 h-4" />

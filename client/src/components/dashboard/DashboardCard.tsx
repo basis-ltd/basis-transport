@@ -1,11 +1,12 @@
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faArrowRight,
   faArrowUp,
   faArrowDown,
+  faArrowRight,
 } from '@fortawesome/free-solid-svg-icons';
 import { Link } from 'react-router-dom';
+import { publicColors } from '@/containers/public/publicTheme';
 import { Heading } from '../inputs/TextInputs';
 
 interface DashboardCardProps {
@@ -33,56 +34,68 @@ const DashboardCard = ({
 
   return (
     <article
-      className="relative flex flex-col items-start cursor-pointer justify-between w-full h-full bg-white shadow-sm rounded-2xl p-5 gap-4 overflow-hidden transition-transform duration-200 ease-in-out hover:scale-[1.02] border border-primary/10"
+      className="relative flex flex-col items-start cursor-pointer justify-between w-full h-full shadow-lg rounded-2xl bg-white/90 border border-primary/10 p-6 gap-4 overflow-hidden transition-shadow duration-200 ease-in-out hover:shadow-xl"
       tabIndex={0}
       aria-label={title}
     >
-      <span
-        aria-hidden
-        className="absolute inset-0 bg-gradient-to-tr from-primary/5 via-transparent to-background/40 opacity-80 pointer-events-none rounded-2xl"
-      />
-      <section className="flex items-start justify-between w-full gap-3 z-10">
-        <menu className="flex items-start flex-col gap-2">
-          <Heading isLoading={isLoading} type="h3" className="text-secondary font-medium text-[14px]">
+      <section className="flex items-start justify-between w-full gap-4 z-10">
+        <menu className="flex items-start flex-col gap-2 min-w-0 flex-1">
+          <Heading
+            isLoading={isLoading}
+            type="h3"
+            className="!font-normal !text-base !leading-snug text-balance !text-primary"
+          >
             {title}
           </Heading>
           <header className="flex flex-wrap items-end gap-2">
-            <Heading isLoading={isLoading} type="h1" className="font-semibold text-[1.8rem] text-primary">
+            <Heading
+              isLoading={isLoading}
+              type="h1"
+              className="!leading-tight !text-primary"
+            >
               {Number(value).toLocaleString()}
             </Heading>
             {change !== undefined && (
               <span
-                className={`flex items-center gap-1 text-[12px] font-medium ${
+                className={`flex items-center gap-1 text-xs font-medium ${
                   isPositive
                     ? 'text-green-600'
                     : isNegative
-                    ? 'text-red-600'
-                    : 'text-muted-foreground'
+                      ? 'text-red-600'
+                      : 'text-muted-foreground'
                 }`}
               >
-                <FontAwesomeIcon icon={isPositive ? faArrowUp : faArrowDown} />
+                <FontAwesomeIcon
+                  className="text-[9px] sm:text-[10px] lg:text-[11px]"
+                  icon={isPositive ? faArrowUp : faArrowDown}
+                />
                 {isPositive && '+'}
                 {change}%
               </span>
             )}
           </header>
-          <p className="text-xs font-light text-secondary/70">{description}</p>
+          <p
+            className="text-[11px] leading-relaxed text-balance"
+            style={{ color: publicColors.neutralLight }}
+          >
+            {description}
+          </p>
         </menu>
-        <figure className="p-3 rounded-2xl flex items-center justify-center bg-primary/10 text-primary shadow-sm">
-          <FontAwesomeIcon
-            className="text-primary text-[22px] drop-shadow"
-            icon={icon}
-          />
+        <figure
+          className="shrink-0 p-3 rounded-2xl flex items-center justify-center bg-primary/5 border border-primary/10 text-primary"
+          style={{ color: publicColors.primary }}
+        >
+          <FontAwesomeIcon className="text-lg lg:text-xl" icon={icon} />
         </figure>
       </section>
       <Link
         to={route ?? '#'}
-        className="flex w-full mt-1 text-[13px] z-10 text-secondary hover:text-primary transition-colors duration-200"
+        className="flex w-full mt-1 z-10 text-primary font-light text-[11px] lg:text-[12px] leading-tight hover:underline transition-colors duration-200 ease-in-out"
       >
-        <menu className="flex items-center gap-2 text-[12px] ease-in-out hover:gap-3 duration-300 hover:underline hover:underline-offset-4">
+        <span className="inline-flex items-center gap-1.5 text-primary font-light text-[11px] lg:text-[12px] leading-tight">
           View more
-          <FontAwesomeIcon icon={faArrowRight} className="text-[11px]" />
-        </menu>
+          <FontAwesomeIcon icon={faArrowRight} className="text-primary text-[10px]" aria-hidden />
+        </span>
       </Link>
     </article>
   );

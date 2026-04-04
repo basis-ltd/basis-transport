@@ -2,12 +2,16 @@ import Button from "@/components/inputs/Button";
 import { Link } from "react-router-dom";
 import { publicColors } from "./publicTheme";
 import basisTransportLogo from "/logo.svg";
+import { useAppSelector } from "@/states/hooks";
 
 export interface PublicNavbarProps {
   variant?: "default" | "auth";
 }
 
 const PublicNavbar = ({ variant = "default" }: PublicNavbarProps) => {
+  // STATE VARIABLES
+  const { token } = useAppSelector((state) => state.auth);
+
   return (
     <header
       className="fixed top-0 left-0 right-0 z-50 border-b backdrop-blur-sm"
@@ -20,7 +24,7 @@ const PublicNavbar = ({ variant = "default" }: PublicNavbarProps) => {
         className="max-w-6xl mx-auto px-6 lg:px-8"
         aria-label="Public navigation"
       >
-        <section className="flex justify-between items-center h-20">
+        <section className="flex justify-between items-center h-[55px]">
           <Link to="/" className="flex items-center gap-2 group">
             <img
               src={basisTransportLogo}
@@ -36,7 +40,7 @@ const PublicNavbar = ({ variant = "default" }: PublicNavbarProps) => {
           </Link>
 
           {!["auth"].includes(variant) && (
-            <Button primary route="/dashboard">
+            <Button primary route={token ? "/dashboard" : "/auth/login"}>
               Open App
             </Button>
           )}

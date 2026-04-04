@@ -1,33 +1,23 @@
 import Button from '@/components/inputs/Button';
-import { Heading } from '@/components/inputs/TextInputs';
 import { Gender, getGenderLabel } from '@/constants/user.constants';
 import AppLayout from '@/containers/navigation/AppLayout';
+import { publicColors } from '@/containers/public/publicTheme';
 import { capitalizeString } from '@/helpers/strings.helper';
 import { useAppSelector } from '@/states/hooks';
 import { useGetUserById } from '@/usecases/users/user.hooks';
 import { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
-const UserDetailsPage = () => {
-  /**
-   * STATE VARIABLES
-   */
-  const { user } = useAppSelector((state) => state.user);
+/** DESIGN.md §0: rounded-md max, shadow-sm max, no section borders */
+const surfaceCard =
+  'rounded-md bg-white/90 shadow-sm p-6 md:p-8 flex flex-col gap-5';
 
-  /**
-   * NAVIGATION
-   */
+const UserDetailsPage = () => {
+  const { user } = useAppSelector((state) => state.user);
   const { id } = useParams();
   const navigate = useNavigate();
-
-  /**
-   * FETCH USER
-   */
   const { getUserById, userIsFetching } = useGetUserById();
 
-  /**
-   * EFFECTS
-   */
   useEffect(() => {
     if (id) {
       getUserById(id);
@@ -37,12 +27,20 @@ const UserDetailsPage = () => {
   if (userIsFetching) {
     return (
       <AppLayout>
-        <main className="w-full min-h-screen flex items-center justify-center">
-          <section className="text-center space-y-4">
-            <h1 className="text-2xl font-semibold text-primary">
-              Loading user details...
+        <main className="w-full min-h-[60vh] flex items-center justify-center px-6 lg:px-8 py-16">
+          <section
+            className={`${surfaceCard} max-w-md w-full text-center gap-4 animate-fade-in-up`}
+          >
+            <h1
+              className="text-[13px] font-semibold leading-tight"
+              style={{ color: publicColors.primary }}
+            >
+              Loading user details…
             </h1>
-            <p className="font-light text-secondary/70">
+            <p
+              className="text-[12px] leading-relaxed font-normal"
+              style={{ color: publicColors.neutralLight }}
+            >
               Please wait while we fetch the user information.
             </p>
           </section>
@@ -54,13 +52,21 @@ const UserDetailsPage = () => {
   if (!user) {
     return (
       <AppLayout>
-        <main className="w-full min-h-screen flex items-center justify-center">
-          <section className="text-center space-y-4">
-            <h1 className="text-2xl font-semibold text-primary">
-              User Not Found
+        <main className="w-full min-h-[60vh] flex items-center justify-center px-6 lg:px-8 py-16">
+          <section
+            className={`${surfaceCard} max-w-md w-full text-center gap-4 animate-fade-in-up`}
+          >
+            <h1
+              className="text-[13px] font-semibold leading-tight"
+              style={{ color: publicColors.primary }}
+            >
+              User not found
             </h1>
-            <p className="font-light text-secondary/70">
-              We couldn't locate this user's information.
+            <p
+              className="text-[12px] leading-relaxed font-normal"
+              style={{ color: publicColors.neutralLight }}
+            >
+              We couldn&apos;t locate this user&apos;s information.
             </p>
           </section>
         </main>
@@ -70,146 +76,177 @@ const UserDetailsPage = () => {
 
   return (
     <AppLayout>
-      <main className="w-full max-w-6xl mx-auto px-4 py-8 space-y-8">
-        <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6 border-b border-primary/10">
-          <section>
-            <Heading className="text-3xl font-semibold text-primary mb-2">
-              User Details
-            </Heading>
-            <p className="font-light text-secondary/80">
-              View detailed information about {user.name}
-            </p>
-          </section>
+      <main
+        className="w-full flex flex-col gap-10"
+        style={{ color: publicColors.neutral }}
+      >
+        <header className="flex flex-col gap-2 animate-fade-in-up">
+          <h1
+            className="text-[13px] font-semibold leading-tight text-balance tracking-tight"
+            style={{ color: publicColors.primary }}
+          >
+            User details
+          </h1>
+          <p
+            className="text-[12px] leading-relaxed font-normal max-w-lg"
+            style={{ color: publicColors.neutralLight }}
+          >
+            View detailed information about {user.name}
+          </p>
         </header>
 
-        <article className="space-y-8">
-          {/* Profile Overview Card */}
-          <section className="bg-gradient-to-br from-primary/10 to-background rounded-2xl p-8 shadow-sm border border-primary/10">
-            <header className="flex flex-col md:flex-row md:items-center gap-6 mb-8">
-              <figure className="relative flex-shrink-0">
+        <article className="flex flex-col gap-6">
+          <section className={`${surfaceCard} animate-fade-in-up`}>
+            <header className="flex flex-col md:flex-row md:items-center gap-6">
+              <figure className="relative shrink-0 flex justify-center md:justify-start">
                 <img
-                  src={`https://ui-avatars.com/api/?name=${user?.name}&background=283618&color=fff&size=120`}
-                  alt={user?.name}
-                  className="w-28 h-28 rounded-full object-cover border-4 border-white shadow-md ring-4 ring-primary/10"
+                  src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user.name ?? '')}&background=283618&color=fff&size=120`}
+                  alt={user.name}
+                  className="w-24 h-24 rounded-md object-cover shadow-sm"
                 />
                 <figcaption className="sr-only">
-                  {user?.name} profile picture
+                  {user.name} profile picture
                 </figcaption>
               </figure>
-              <hgroup className="text-center md:text-left">
-                <h1 className="text-2xl font-semibold text-primary mb-2">
-                  {user?.name}
-                </h1>
-                <p className="text-md text-secondary/80 mb-1">{user?.email}</p>
-                <mark
-                  className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-light ${
-                    user?.status === 'ACTIVE'
-                      ? 'bg-green-100 text-green-800 border border-green-200'
-                      : 'bg-background-secondary text-secondary border border-primary/10'
-                  }`}
+              <div className="text-center md:text-left flex flex-col gap-2 min-w-0">
+                <p
+                  className="text-[13px] font-semibold leading-tight"
+                  style={{ color: publicColors.primary }}
                 >
-                  {user?.status}
-                </mark>
-              </hgroup>
+                  {user.name}
+                </p>
+                <p
+                  className="text-[12px] leading-relaxed font-normal break-all"
+                  style={{ color: publicColors.neutralLight }}
+                >
+                  {user.email}
+                </p>
+                <span
+                  className={`inline-flex self-center md:self-start items-center px-3 py-1 rounded-md text-[12px] font-normal shadow-sm ${
+                    user.status === 'ACTIVE'
+                      ? 'bg-green-50 text-green-800'
+                      : 'text-secondary'
+                  }`}
+                  style={
+                    user.status !== 'ACTIVE'
+                      ? { backgroundColor: `${publicColors.bgAlt}` }
+                      : undefined
+                  }
+                >
+                  {user.status}
+                </span>
+              </div>
             </header>
           </section>
 
-          {/* Personal Information Card */}
-          <section className="bg-white rounded-2xl p-8 shadow-sm border border-primary/10">
-            <header className="mb-8">
-              <Heading type="h2" className="text-2xl font-semibold text-primary mb-2">
-                Personal Information
-              </Heading>
-              <p className="font-light text-secondary/80">Basic profile details</p>
+          <section className={surfaceCard}>
+            <header className="flex flex-col gap-1.5">
+              <h2
+                className="text-[13px] font-semibold leading-tight"
+                style={{ color: publicColors.primary }}
+              >
+                Personal information
+              </h2>
+              <p
+                className="text-[12px] leading-relaxed font-normal"
+                style={{ color: publicColors.neutralLight }}
+              >
+                Basic profile details
+              </p>
             </header>
 
-            <dl className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <section className="space-y-3 p-6 bg-background-secondary/60 rounded-xl border border-primary/10">
-                <dt className="text-sm font-medium text-secondary uppercase tracking-wide">
-                  Phone Number
-                </dt>
-                <dd className="text-[14px] font-medium text-primary">
-                  {user?.phoneNumber || 'Not provided'}
-                </dd>
-              </section>
-
-              <section className="space-y-3 p-6 bg-background-secondary/60 rounded-xl border border-primary/10">
-                <dt className="text-sm font-medium text-secondary uppercase tracking-wide">
-                  Gender
-                </dt>
-                <dd className="text-[14px] font-medium text-primary">
-                  {getGenderLabel(user?.gender || Gender.MALE)}
-                </dd>
-              </section>
-
-              <section className="space-y-3 p-6 bg-background-secondary/60 rounded-xl border border-primary/10">
-                <dt className="text-sm font-medium text-secondary uppercase tracking-wide">
-                  Nationality
-                </dt>
-                <dd className="text-[14px] font-medium text-primary">
-                  {user?.nationality || 'Not provided'}
-                </dd>
-              </section>
-
-              <section className="space-y-3 p-6 bg-background-secondary/60 rounded-xl border border-primary/10">
-                <dt className="text-sm font-medium text-secondary uppercase tracking-wide">
-                  Account Created
-                </dt>
-                <dd className="text-[14px] font-medium text-primary">
-                  {user?.createdAt
-                    ? new Date(user.createdAt).toLocaleDateString()
-                    : 'Not available'}
-                </dd>
-              </section>
+            <dl className="flex flex-col gap-5 pt-1">
+              {(
+                [
+                  ['Phone number', user.phoneNumber || 'Not provided'],
+                  ['Gender', getGenderLabel(user.gender || Gender.MALE)],
+                  ['Nationality', user.nationality || 'Not provided'],
+                  [
+                    'Account created',
+                    user.createdAt
+                      ? new Date(user.createdAt).toLocaleDateString()
+                      : 'Not available',
+                  ],
+                ] as const
+              ).map(([label, value]) => (
+                <div key={label} className="flex flex-col gap-1">
+                  <dt
+                    className="text-[12px] font-normal leading-tight"
+                    style={{ color: publicColors.neutralLight }}
+                  >
+                    {label}
+                  </dt>
+                  <dd
+                    className="text-[12px] font-normal leading-relaxed"
+                    style={{ color: publicColors.primary }}
+                  >
+                    {value}
+                  </dd>
+                </div>
+              ))}
             </dl>
           </section>
 
-          {/* Roles & Permissions Card */}
-          <section className="bg-white rounded-2xl p-8 shadow-sm border border-primary/10">
-            <header className="mb-8">
-              <Heading type="h2" className="text-2xl font-semibold text-primary mb-2">
-                Roles & Permissions
-              </Heading>
-              <p className="font-light text-secondary/80">
+          <section className={surfaceCard}>
+            <header className="flex flex-col gap-1.5">
+              <h2
+                className="text-[13px] font-semibold leading-tight"
+                style={{ color: publicColors.primary }}
+              >
+                Roles & permissions
+              </h2>
+              <p
+                className="text-[12px] leading-relaxed font-normal"
+                style={{ color: publicColors.neutralLight }}
+              >
                 Assigned roles and access levels
               </p>
             </header>
-            {user?.userRoles && user?.userRoles.length > 0 ? (
-              <ul className="flex flex-wrap gap-4">
-                {user?.userRoles.map((userRole, index) => (
+            {user.userRoles && user.userRoles.length > 0 ? (
+              <ul className="flex flex-wrap gap-2 pt-1">
+                {user.userRoles.map((userRole, index) => (
                   <li
                     key={index}
-                    className="px-6 py-3 bg-primary/10 text-primary transition-all duration-200 rounded-xl text-sm font-medium border border-primary/20 shadow-sm"
+                    className="px-3 py-1.5 rounded-md text-[12px] font-normal bg-primary/5 text-primary shadow-sm"
                   >
                     {capitalizeString(userRole?.role?.name)}
                   </li>
                 ))}
               </ul>
             ) : (
-              <section className="text-center py-8">
-                <p className="font-light text-secondary/70 text-lg">No roles assigned</p>
-                <p className="font-light text-secondary/60 text-sm mt-2">
+              <div className="flex flex-col gap-2 text-center py-2 pt-1">
+                <p
+                  className="text-[12px] font-normal leading-relaxed"
+                  style={{ color: publicColors.neutralLight }}
+                >
+                  No roles assigned
+                </p>
+                <p
+                  className="text-[12px] font-normal leading-relaxed"
+                  style={{ color: publicColors.neutralLighter }}
+                >
                   This user has no roles assigned
                 </p>
-              </section>
+              </div>
             )}
           </section>
         </article>
 
-        <footer className="pt-8 border-t border-primary/10">
-          <menu className="flex items-center justify-between">
-            <Button
-              onClick={(e) => {
-                e.preventDefault();
-                navigate(-1);
-              }}
-            >
-              Back
-            </Button>
-            <p className="text-sm font-light text-secondary/70">
-              Last updated: {new Date().toLocaleDateString()}
-            </p>
-          </menu>
+        <footer className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-4 pt-4">
+          <Button
+            onClick={(e) => {
+              e.preventDefault();
+              navigate(-1);
+            }}
+          >
+            Back
+          </Button>
+          <p
+            className="text-[12px] font-normal"
+            style={{ color: publicColors.neutralLight }}
+          >
+            Last updated: {new Date().toLocaleDateString()}
+          </p>
         </footer>
       </main>
     </AppLayout>

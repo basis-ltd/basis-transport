@@ -62,12 +62,12 @@ const DashboardGraph = ({
         />
         <XAxis
           dataKey={dataKey}
-          tick={{ fontSize: 12, fill: axisMuted }}
+          tick={{ fontSize: 10, fill: axisMuted }}
           axisLine={{ stroke: gridLine }}
           tickLine={{ stroke: gridLine }}
           padding={{ left: 10, right: 10 }}
           style={{
-            fontSize: '12px',
+            fontSize: '10px',
             fontFamily: 'Work Sans, system-ui, sans-serif',
           }}
         />
@@ -76,12 +76,12 @@ const DashboardGraph = ({
           allowDataOverflow
           tickSize={10}
           tickMargin={20}
-          tick={{ fontSize: 12, fill: axisMuted }}
+          tick={{ fontSize: 10, fill: axisMuted }}
           axisLine={{ stroke: gridLine }}
           tickLine={{ stroke: gridLine }}
           className="text-[12px]!"
           style={{
-            fontSize: '12px',
+            fontSize: '10px',
             fontFamily: 'Work Sans, system-ui, sans-serif',
           }}
         />
@@ -91,7 +91,7 @@ const DashboardGraph = ({
             border: '1px solid #e4e4dd',
             borderRadius: '8px',
             boxShadow: '0 1px 2px rgba(40, 54, 24, 0.08)',
-            fontSize: '12px',
+            fontSize: '10px',
             fontFamily: 'Work Sans, system-ui, sans-serif',
             color: primaryStroke,
           }}
