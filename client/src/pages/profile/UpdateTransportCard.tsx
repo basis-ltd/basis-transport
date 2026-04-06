@@ -10,6 +10,10 @@ import Input from "@/components/inputs/Input";
 import Button from "@/components/inputs/Button";
 import { UUID } from "@/types";
 import { Controller, useForm } from "react-hook-form";
+import Select from "@/components/inputs/Select";
+import { TransportCardProvider } from "@/constants/transportCard.constants";
+
+const NONE_PROVIDER_VALUE = "__NONE__";
 
 const UpdateTransportCard = () => {
   // STATE
@@ -38,13 +42,20 @@ const UpdateTransportCard = () => {
     if (updateTransportCard && selectedTransportCard) {
       setValue("name", selectedTransportCard.name ?? "");
       setValue("cardNumber", selectedTransportCard.cardNumber ?? "");
+      setValue("provider", selectedTransportCard.provider ?? NONE_PROVIDER_VALUE);
     }
   }, [updateTransportCard, selectedTransportCard, setValue]);
 
   const onSubmit = handleSubmit(async (data) => {
     await updateMutation({
       id: selectedTransportCard?.id as UUID,
-      body: data,
+      body: {
+        ...data,
+        provider:
+          data.provider && data.provider !== NONE_PROVIDER_VALUE
+            ? data.provider
+            : undefined,
+      },
     }).unwrap();
     closeModal();
   });
@@ -87,6 +98,28 @@ const UpdateTransportCard = () => {
                 />
               );
             }}
+          />
+          <Controller
+            name="provider"
+            control={control}
+            defaultValue={NONE_PROVIDER_VALUE}
+            render={({ field }) => (
+              <Select
+                {...field}
+                label="Provider"
+                placeholder="Select provider"
+                options={[
+                  { label: "Not specified", value: NONE_PROVIDER_VALUE },
+                  ...Object.entries(TransportCardProvider).map(
+                    ([key, value]) => ({
+                      label: key,
+                      value,
+                    }),
+                  ),
+                ]}
+                errorMessage={errors.provider?.message as string}
+              />
+            )}
           />
         </fieldset>
         <Button

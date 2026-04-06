@@ -1,9 +1,10 @@
 import CustomPopover from "@/components/custom/CustomPopover";
+import { ReferenceIdInput } from "@/components/table/TableInputs";
 import {
   ellipsisHClassName,
   tableActionClassName,
 } from "@/constants/input.constants";
-import { formatDate } from "@/helpers/strings.helper";
+import { capitalizeString, formatDate } from "@/helpers/strings.helper";
 import { useAppDispatch } from "@/states/hooks";
 import {
   setDeleteTransportCard,
@@ -31,10 +32,16 @@ export const useTransportCardColumns = () => {
       {
         header: "Card Number",
         accessorKey: "cardNumber",
+        cell: ({ row }) => <ReferenceIdInput label={row?.original?.cardNumber} />,
       },
       {
         header: "Name",
         accessorKey: "name",
+      },
+      {
+        header: "Provider",
+        accessorKey: "provider",
+        cell: ({ row }) => capitalizeString(row?.original?.provider) || "-",
       },
       {
         header: `Date added`,

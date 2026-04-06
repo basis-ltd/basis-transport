@@ -90,7 +90,7 @@ const DashboardCard = ({
       </section>
       <Link
         to={route ?? '#'}
-        className="flex w-full mt-1 z-10 text-primary font-light text-[11px] lg:text-[12px] leading-tight hover:underline transition-colors duration-200 ease-in-out"
+        className="flex w-full mt-1 z-10 text-primary font-light text-[11px] lg:text-[12px] leading-tight hover:underline underline-offset-2 transition-colors duration-200 ease-in-out"
       >
         <span className="inline-flex items-center gap-1.5 text-primary font-light text-[11px] lg:text-[12px] leading-tight">
           View more

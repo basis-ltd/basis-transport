@@ -6,6 +6,7 @@ import { FindOptionsWhere, ILike } from 'typeorm';
 import { TransportCard } from '../entities/transportCard.entity';
 import { isAdminLike, isOwnerOrAdmin } from '../helpers/auth.helper';
 import { ForbiddenError } from '../helpers/errors.helper';
+import { TransportCardProvider } from '../constants/transportCard.constants';
 
 const transportCardService = new TransportCardService();
 
@@ -92,7 +93,14 @@ export class TransportCardController {
   async fetchTransportCards(req: Request, res: Response, next: NextFunction) {
     try {
       const { user } = req as AuthenticatedRequest;
-      const { page = 0, size = 10, name, cardNumber, createdById } = req.query;
+      const {
+        page = 0,
+        size = 10,
+        name,
+        cardNumber,
+        createdById,
+        provider,
+      } = req.query;
 
       const condition: FindOptionsWhere<TransportCard> = {};
 
@@ -110,6 +118,15 @@ export class TransportCardController {
 
       if (cardNumber) {
         condition.cardNumber = ILike(`%${String(cardNumber)}%`);
+      }
+
+      if (
+        provider &&
+        Object.values(TransportCardProvider).includes(
+          provider as TransportCardProvider
+        )
+      ) {
+        condition.provider = provider as TransportCardProvider;
       }
 
       const transportCards = await transportCardService.fetchTransportCards({

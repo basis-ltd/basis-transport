@@ -6,6 +6,10 @@ import { useCreateTransportCardMutation } from "@/api/queries/apiQuerySlice";
 import Input from "@/components/inputs/Input";
 import Button from "@/components/inputs/Button";
 import { Controller, useForm } from "react-hook-form";
+import Select from "@/components/inputs/Select";
+import { TransportCardProvider } from "@/constants/transportCard.constants";
+
+const NONE_PROVIDER_VALUE = "__NONE__";
 
 const CreateTransportCard = () => {
   const dispatch = useAppDispatch();
@@ -32,6 +36,10 @@ const CreateTransportCard = () => {
     await createTransportCardMutation({
       name: data.name?.trim() || undefined,
       cardNumber: data.cardNumber?.trim(),
+      provider:
+        data.provider && data.provider !== NONE_PROVIDER_VALUE
+          ? data.provider
+          : undefined,
     }).unwrap();
     closeModal();
   });
@@ -69,6 +77,28 @@ const CreateTransportCard = () => {
                 label="Name"
                 placeholder="Enter name"
                 errorMessage={errors.name?.message as string}
+              />
+            )}
+          />
+          <Controller
+            name="provider"
+            control={control}
+            defaultValue={NONE_PROVIDER_VALUE}
+            render={({ field }) => (
+              <Select
+                {...field}
+                label="Provider"
+                placeholder="Select provider"
+                options={[
+                  { label: "Not specified", value: NONE_PROVIDER_VALUE },
+                  ...Object.entries(TransportCardProvider).map(
+                    ([key, value]) => ({
+                      label: key,
+                      value,
+                    }),
+                  ),
+                ]}
+                errorMessage={errors.provider?.message as string}
               />
             )}
           />

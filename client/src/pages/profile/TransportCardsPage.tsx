@@ -3,7 +3,7 @@ import AppLayout from "@/containers/navigation/AppLayout";
 import { useAppDispatch, useAppSelector } from "@/states/hooks";
 import { useFetchTransportCards } from "@/usecases/transport-cards/transportCard.hooks";
 import Button from "@/components/inputs/Button";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import DeleteTransportCard from "./DeleteTransportCard";
 import UpdateTransportCard from "./UpdateTransportCard";
 import CreateTransportCard from "./CreateTransportCard";
@@ -13,6 +13,7 @@ import {
 import Table from "@/components/table/Table";
 import { useTransportCardColumns } from "@/usecases/transport-cards/columns.transportCard";
 import { useEffect } from "react";
+import { TransportCardProvider } from "@/constants/transportCard.constants";
 
 const TransportCardsPage = () => {
   // STATE VARIABLES
@@ -22,6 +23,15 @@ const TransportCardsPage = () => {
 
   // NAVIGATION
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const providerQuery = searchParams.get("provider");
+  const provider =
+    providerQuery &&
+    Object.values(TransportCardProvider).includes(
+      providerQuery as TransportCardProvider,
+    )
+      ? (providerQuery as TransportCardProvider)
+      : undefined;
 
   const { transportCardColumns } = useTransportCardColumns();
 
@@ -38,9 +48,9 @@ const TransportCardsPage = () => {
 
   useEffect(() => {
     if (user) {
-      fetchTransportCards({ page, size, createdById: user?.id });
+      fetchTransportCards({ page, size, createdById: user?.id, provider });
     }
-  }, [user, fetchTransportCards, page, size, user?.id]);
+  }, [user, fetchTransportCards, page, size, user?.id, provider]);
 
   return (
     <AppLayout>

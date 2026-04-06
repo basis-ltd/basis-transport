@@ -1,6 +1,7 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { baseQuery } from '../rootApi';
 import { UUID } from '@/types';
+import { TransportCardProvider } from '@/constants/transportCard.constants';
 
 export const apiQuerySlice = createApi({
   reducerPath: 'apiQuery',
@@ -162,11 +163,13 @@ export const apiQuerySlice = createApi({
         size,
         name,
         createdById,
+        provider,
       }: {
         page: number;
         size: number;
         name?: string;
         createdById?: UUID;
+        provider?: TransportCardProvider;
       }) => {
         return {
           url: '/transport-cards',
@@ -175,6 +178,7 @@ export const apiQuerySlice = createApi({
             size,
             name,
             createdById,
+            provider,
           },
           method: 'GET',
         };
@@ -214,7 +218,7 @@ export const apiQuerySlice = createApi({
 
     createTransportCard: builder.mutation<
       unknown,
-      { name?: string; cardNumber: string }
+      { name?: string; cardNumber: string; provider?: TransportCardProvider }
     >({
       query: (body) => ({
         url: '/transport-cards',
@@ -226,7 +230,14 @@ export const apiQuerySlice = createApi({
 
     updateTransportCard: builder.mutation<
       unknown,
-      { id: UUID; body: Partial<{ name: string; cardNumber: string }> }
+      {
+        id: UUID;
+        body: Partial<{
+          name: string;
+          cardNumber: string;
+          provider: TransportCardProvider;
+        }>;
+      }
     >({
       query: ({ id, body }) => ({
         url: `/transport-cards/${id}`,
