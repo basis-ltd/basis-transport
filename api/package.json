@@ -6,7 +6,11 @@
   "scripts": {
     "build": "tsc",
     "dev": "nodemon --exec ts-node ./src/server.ts",
-    "start": "npm i && tsc && node ./dist/server.js"
+    "start": "npm i && tsc && node ./dist/server.js",
+    "seed:permissions": "ts-node ./src/seeds/permissions.seed.ts",
+    "seed:roles": "ts-node ./src/seeds/roles.seed.ts",
+    "seed:super-admin": "ts-node ./src/seeds/super-admin.seed.ts",
+    "seed": "npm run seed:permissions && npm run seed:roles && npm run seed:super-admin"
   },
   "repository": {
     "type": "git",

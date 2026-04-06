@@ -17,6 +17,7 @@ import { Link } from 'react-router-dom';
 import { TripAvailableCapacity } from '@/components/trips/TripAvailableCapacity';
 import moment from 'moment';
 import TableStatusLabel from '@/components/custom/TableStatusLabel';
+import { ReferenceIdInput } from '@/components/table/TableInputs';
 
 export const useTripColumns = () => {
   const tripsColumns: ColumnDef<Trip>[] = useMemo(
@@ -24,6 +25,7 @@ export const useTripColumns = () => {
       {
         header: 'Reference ID',
         accessorKey: 'referenceId',
+        cell: ({ row }) => <ReferenceIdInput label={row?.original?.referenceId} />,
       },
       {
         header: 'Depart',
