@@ -7,7 +7,7 @@ import { LogReferenceTypes } from '../constants/logs.constants';
 export const validateSignUp = (user: Partial<User>) => {
   const schema = Joi.object({
     name: Joi.string().required(),
-    email: Joi.string().email().required(),
+    email: Joi.string().email().optional().allow(null, ''),
     password: Joi.string().required(),
     phoneNumber: Joi.string().required(),
   });
@@ -18,7 +18,7 @@ export const validateSignUp = (user: Partial<User>) => {
 // VALIDATE LOGIN
 export const validateLogin = (user: Partial<User>) => {
   const schema = Joi.object({
-    email: Joi.string().email().required(),
+    username: Joi.string().trim().required(),
     password: Joi.string().required(),
   });
 
@@ -44,6 +44,58 @@ export const validateResetPassword = (body: {
 }) => {
   const schema = Joi.object({
     token: Joi.string().required(),
+    password: Joi.string()
+      .pattern(PASSWORD_PATTERN)
+      .required()
+      .messages({
+        'string.pattern.base':
+          'Password must be at least 8 characters and include uppercase, lowercase, number, and special character',
+      }),
+  });
+
+  return schema.validate(body);
+};
+
+// VALIDATE PHONE LOGIN PRECHECK
+export const validatePhoneLoginPrecheck = (body: { phoneNumber?: string }) => {
+  const schema = Joi.object({
+    phoneNumber: Joi.string().required(),
+  });
+
+  return schema.validate(body);
+};
+
+// VALIDATE SEND PHONE OTP
+export const validateSendPhoneOtp = (body: { phoneNumber?: string }) => {
+  const schema = Joi.object({
+    phoneNumber: Joi.string().required(),
+  });
+
+  return schema.validate(body);
+};
+
+// VALIDATE VERIFY PHONE OTP
+export const validateVerifyPhoneOtp = (body: {
+  phoneNumber?: string;
+  otp?: string;
+}) => {
+  const schema = Joi.object({
+    phoneNumber: Joi.string().required(),
+    otp: Joi.string().pattern(/^\d{6}$/).required().messages({
+      'string.pattern.base': 'OTP must be a 6 digit code',
+    }),
+  });
+
+  return schema.validate(body);
+};
+
+// VALIDATE COMPLETE REGISTRATION
+export const validateCompleteRegistration = (body: {
+  email?: string;
+  password?: string;
+}) => {
+  const schema = Joi.object({
+    email: Joi.string().email().optional().allow(null, ''),
     password: Joi.string()
       .pattern(PASSWORD_PATTERN)
       .required()

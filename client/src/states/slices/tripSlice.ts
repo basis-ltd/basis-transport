@@ -4,11 +4,15 @@ import { Trip } from '@/types/trip.type';
 interface TripState {
   tripsList: Trip[];
   trip?: Trip;
+  selectedTrip?: Trip;
+  startTripModal: boolean;
 }
 
 const initialState: TripState = {
   tripsList: [],
   trip: undefined,
+  selectedTrip: undefined,
+  startTripModal: false,
 };
 
 const tripSlice = createSlice({
@@ -21,8 +25,14 @@ const tripSlice = createSlice({
     setTrip: (state, action) => {
       state.trip = action.payload;
     },
+    setSelectedTrip: (state, action) => {
+      state.selectedTrip = action.payload;
+    },
+    setStartTripModal: (state, action) => {
+      state.startTripModal = action.payload;
+    },
   },
 });
-export const { setTripsList, setTrip } = tripSlice.actions;
+export const { setTripsList, setTrip, setSelectedTrip, setStartTripModal } = tripSlice.actions;
 
 export default tripSlice.reducer;

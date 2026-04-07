@@ -727,6 +727,7 @@ export class TripService {
         user = await this.userRepository.save({
           phoneNumber: formattedPhoneNumber,
           passwordHash: randomPasswordHash,
+          hasSetPassword: false,
           status: UserStatus.ACTIVE,
           isProfileComplete: false,
         });
@@ -784,7 +785,13 @@ export class TripService {
 
     return {
       user: resolvedUser,
-      token: jwt.sign({ id: user.id }, String(JWT_SECRET)),
+      token: jwt.sign(
+        {
+          id: user.id,
+          mustCompleteRegistration: !resolvedUser?.isProfileComplete,
+        },
+        String(JWT_SECRET)
+      ),
       userTrip: savedUserTrip,
     };
   }

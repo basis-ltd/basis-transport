@@ -54,42 +54,30 @@ export const formatDate = (
   return moment(date).format(format);
 };
 
+/** Shared layout for status chips (DESIGN: rounded-md, text-[11px], font-light). */
+const statusBadgeBase =
+  'text-center px-3 py-1 rounded-sm text-[11px] font-light leading-tight text-white';
+
 /**
- * Get the background color for a status.
- * @param status - The status to get the background color for.
- * @returns The background color.
+ * Muted status styles: light tints + dark text so states stay distinct without saturated fills.
  */
 export const getStatusBackgroundColor = (status?: string) => {
-  let bgColor =
-    'bg-gray-700 text-center px-4 py-1 text-white text-normal rounded-md text-[11px] lg:text-[12px]';
   switch (status) {
     case 'OPEN':
-      bgColor =
-        'bg-primary text-center px-4 py-1 text-white text-normal rounded-md text-[11px] lg:text-[12px]';
-      break;
+      return `${statusBadgeBase} bg-primary text-primary`;
     case 'COMPLETED':
     case 'ACTIVE':
-      bgColor =
-        'bg-green-700 text-center px-4 py-1 text-white text-normal rounded-md text-[11px] lg:text-[12px]';
-      break;
+      return `${statusBadgeBase} bg-green-800 text-green-950`;
     case 'REJECTED':
     case 'CLOSED':
     case 'CANCELLED':
-      bgColor =
-        'bg-red-700 text-center px-4 py-1 text-white text-normal rounded-md text-[11px] lg:text-[12px]';
-      break;
+      return `${statusBadgeBase} bg-red-800 text-red-950`;
     case 'IN_PROGRESS':
-      bgColor =
-        'bg-orange-700 text-center px-4 py-1 text-white text-normal rounded-md text-[11px] lg:text-[12px]';
-      break;
+      return `${statusBadgeBase} bg-sky-800 text-sky-950`;
     case 'REOPENED':
     case 'PENDING':
-      bgColor =
-        'bg-yellow-700 text-center px-4 py-1 text-white text-normal rounded-md text-[11px] lg:text-[12px]';
-      break;
+      return `${statusBadgeBase} bg-amber-800 text-amber-950`;
     default:
-      bgColor =
-        'bg-gray-700 text-center px-4 py-1 text-white text-normal rounded-md text-[11px] lg:text-[12px]';
+      return `${statusBadgeBase} bg-muted text-muted-foreground`;
   }
-  return bgColor;
 };

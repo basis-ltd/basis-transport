@@ -14,6 +14,9 @@ export interface User extends AbstractEntity {
   status: UserStatus;
   nationality?: string;
   passwordHash?: string;
+  hasSetPassword?: boolean;
+  isProfileComplete?: boolean;
+  mustCompleteRegistration?: boolean;
   userRoles?: UserRole[];
   transportCards?: TransportCard[];
 }

@@ -4,10 +4,13 @@ import {
   ellipsisHClassName,
   tableActionClassName,
 } from '@/constants/input.constants';
+import { TripStatus } from '@/constants/trip.constants';
+import { useAppDispatch, useAppSelector } from '@/states/hooks';
 import { Trip } from '@/types/trip.type';
 import {
   faCircleInfo,
   faEllipsisH,
+  faPlay,
   faUsers,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -18,8 +21,19 @@ import { TripAvailableCapacity } from '@/components/trips/TripAvailableCapacity'
 import moment from 'moment';
 import TableStatusLabel from '@/components/custom/TableStatusLabel';
 import { ReferenceIdInput } from '@/components/table/TableInputs';
+import { setSelectedTrip, setStartTripModal } from '@/states/slices/tripSlice';
+
+const TRIP_OPERATOR_ROLES = ['DRIVER', 'ADMIN', 'SUPER_ADMIN'];
 
 export const useTripColumns = () => {
+
+  const dispatch = useAppDispatch();
+  const { user } = useAppSelector((state) => state.auth);
+
+  const canOperateTrips = user?.userRoles?.some((role) =>
+    TRIP_OPERATOR_ROLES.includes(role.role?.name ?? '')
+  );
+
   const tripsColumns: ColumnDef<Trip>[] = useMemo(
     () => [
       {
@@ -97,20 +111,37 @@ export const useTripColumns = () => {
                   <FontAwesomeIcon icon={faCircleInfo} />
                   View details
                 </Link>
-                <Link
-                  to={`/user-trips?tripId=${row?.original?.id}`}
-                  className={tableActionClassName}
-                >
-                  <FontAwesomeIcon icon={faUsers} />
-                  Passengers
-                </Link>
+                {canOperateTrips && (
+                  <Link
+                    to={`/user-trips?tripId=${row?.original?.id}`}
+                    className={tableActionClassName}
+                  >
+                    <FontAwesomeIcon icon={faUsers} />
+                    Passengers
+                  </Link>
+                )}
+                {canOperateTrips &&
+                  row.original.status === TripStatus.PENDING && (
+                    <Link
+                      to="#"
+                      className={tableActionClassName}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        dispatch(setSelectedTrip(row.original));
+                        dispatch(setStartTripModal(true));
+                      }}
+                    >
+                      <FontAwesomeIcon icon={faPlay} />
+                      Start trip
+                    </Link>
+                  )}
               </menu>
             </CustomPopover>
           );
         },
       },
     ],
-    []
+    [canOperateTrips, dispatch]
   );
 
   return { tripsColumns };

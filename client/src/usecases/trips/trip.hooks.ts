@@ -1,13 +1,13 @@
 import {
   useLazyFetchNearbyTripsQuery,
   useLazyCountAvailableCapacityQuery,
-  useFetchTripsQuery,
   useLazyGetTripByIdQuery,
+  useLazyFetchTripsQuery,
 } from '@/api/queries/apiQuerySlice';
-import { useAppDispatch, useAppSelector } from '@/states/hooks';
+import { useAppDispatch } from '@/states/hooks';
 import { useEffect, useState } from 'react';
 import { usePagination } from '../common/pagination.hooks';
-import { setTrip } from '@/states/slices/tripSlice';
+import { setTrip, setTripsList } from '@/states/slices/tripSlice';
 import { Trip } from '@/types/trip.type';
 import {
   useCancelTripMutation,
@@ -25,34 +25,53 @@ import { UUID } from '@/types';
 
 // FETCH TRIPS
 export const useFetchTrips = () => {
+  
   // STATE VARIABLES
+  const dispatch = useAppDispatch();
+
+  // PAGINATION
   const {
     page,
     size,
     setPage,
     setSize,
+    setTotalCount,
+    setTotalPages,
+    totalCount,
+    totalPages,
   } = usePagination();
-  const { isHydrated, token } = useAppSelector((state) => state.auth);
-  const {
-    data: tripsData,
-    isFetching: tripsIsFetching,
-    isError: tripsIsError,
-  } = useFetchTripsQuery(
-    { page, size },
-    { skip: !isHydrated || !token }
-  );
+
+  // QUERY
+  const [
+    fetchTrips,
+    {
+      data,
+      isFetching,
+      isError,
+      isSuccess
+    },
+  ] = useLazyFetchTripsQuery();
+
+  useEffect(() => {
+    if (isSuccess) {
+      dispatch(setTripsList(data?.data?.rows));
+      setTotalCount(data?.data?.totalCount);
+      setTotalPages(data?.data?.totalPages);
+    }
+  }, [dispatch, data?.data?.rows, isSuccess, setTotalCount, setTotalPages, data?.data?.totalCount, data?.data?.totalPages]);
 
   return {
-    tripsList: tripsData?.data?.rows ?? [],
-    tripsData,
-    tripsIsFetching,
-    tripsIsError,
+    fetchTrips,
+    data,
+    isFetching,
+    isError,
+    isSuccess,
     page,
     size,
-    totalCount: tripsData?.data?.totalCount ?? 0,
-    totalPages: tripsData?.data?.totalPages ?? 0,
     setPage,
     setSize,
+    totalCount,
+    totalPages,
   };
 };
 
@@ -282,32 +301,29 @@ export const useStartTrip = () => {
    */
   const dispatch = useAppDispatch();
 
-  // GET TRIP BY ID
-  const { getTripById } = useGetTripById();
-
   // MUTATION
   const [
     startTrip,
     {
-      isLoading: startTripIsLoading,
-      isSuccess: startTripIsSuccess,
-      reset: startTripReset,
-      data: startTripData,
+      isLoading,
+      isSuccess,
+      reset,
+      data,
     },
   ] = useStartTripMutation();
 
   useEffect(() => {
-    if (startTripIsSuccess) {
-      dispatch(setTrip(startTripData?.data));
-      startTripReset();
-      getTripById(startTripData?.data?.id);
+    if (isSuccess) {
+      dispatch(setTrip(data?.data));
     }
-  }, [dispatch, startTripData?.data, startTripIsSuccess, startTripReset, getTripById]);
+  }, [dispatch, data?.data, isSuccess]);
 
   return {
     startTrip,
-    startTripIsLoading,
-    startTripIsSuccess,
+    isLoading,
+    isSuccess,
+    reset,
+    data,
   };
 };
 

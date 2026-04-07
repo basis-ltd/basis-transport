@@ -242,7 +242,7 @@ const UserDetailsPage = () => {
             Back
           </Button>
           <p
-            className="text-[12px] font-normal"
+            className="text-[11px] font-normal"
             style={{ color: publicColors.neutralLight }}
           >
             Last updated: {new Date().toLocaleDateString()}

@@ -9,6 +9,7 @@ import AuthenticatedRoutes from './outlets/AuthenticatedRoutes';
 import TripDetailsPage from '@/pages/trips/TripDetailsPage';
 import CreateTripPage from '@/pages/trips/CreateTripPage';
 import Signup from '@/pages/auth/Signup';
+import CompleteRegistration from '@/pages/auth/CompleteRegistration';
 import UsersPage from '@/pages/users/UsersPage';
 import UserDetailsPage from '@/pages/users/UserDetailsPage';
 import UserProfilePage from '@/pages/profile/UserProfilePage';
@@ -35,6 +36,7 @@ const Router = () => {
         <Route path="register" element={<Signup />} />
         <Route path="forgot-password" element={<ForgotPassword />} />
         <Route path="reset-password" element={<ResetPassword />} />
+        <Route path="complete-registration" element={<CompleteRegistration />} />
       </Route>
 
       {/**

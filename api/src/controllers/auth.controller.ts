@@ -36,6 +36,67 @@ export class AuthController {
   }
 
   /**
+   * PHONE LOGIN PRECHECK
+   */
+  async phoneLoginPrecheck(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = await authService.phoneLoginPrecheck(req.body);
+      return res.status(200).json({
+        message: 'Phone login precheck completed',
+        data,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * SEND PHONE OTP
+   */
+  async sendPhoneOtp(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = await authService.sendPhoneOtp(req.body);
+      return res.status(200).json({
+        message: 'OTP sent successfully',
+        data,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * VERIFY PHONE OTP
+   */
+  async verifyPhoneOtp(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { user, token, mustCompleteRegistration } =
+        await authService.verifyPhoneOtp(req.body);
+      return res.status(200).json({
+        message: 'OTP verified successfully',
+        data: { user, token, mustCompleteRegistration },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * COMPLETE REGISTRATION
+   */
+  async completeRegistration(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { user, token } = await authService.completeRegistration(req.body, req);
+      return res.status(200).json({
+        message: 'Registration completed successfully',
+        data: { user, token },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
    * FORGOT PASSWORD
    */
   async forgotPassword(req: Request, res: Response, next: NextFunction) {

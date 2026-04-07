@@ -6,7 +6,6 @@ import {
   faArrowRight,
 } from '@fortawesome/free-solid-svg-icons';
 import { Link } from 'react-router-dom';
-import { publicColors } from '@/containers/public/publicTheme';
 import { Heading } from '../inputs/TextInputs';
 
 interface DashboardCardProps {
@@ -31,33 +30,35 @@ const DashboardCard = ({
   // STATE VARIABLES
   const isPositive = Number(change) > 0;
   const isNegative = Number(change) < 0;
+  const hasChange = change !== undefined && Number.isFinite(Number(change));
 
   return (
     <article
-      className="relative flex flex-col items-start cursor-pointer justify-between w-full h-full shadow-lg rounded-2xl bg-white/90 border border-primary/10 p-6 gap-4 overflow-hidden transition-shadow duration-200 ease-in-out hover:shadow-xl"
+      className="surface-card relative flex h-full w-full cursor-pointer flex-col justify-between gap-4 overflow-hidden p-5 transition-all duration-200 ease-in-out hover:scale-[1.02]"
       tabIndex={0}
       aria-label={title}
     >
-      <section className="flex items-start justify-between w-full gap-4 z-10">
-        <menu className="flex items-start flex-col gap-2 min-w-0 flex-1">
+      <section className="surface-tint pointer-events-none absolute inset-0" />
+      <section className="relative z-10 flex w-full items-start justify-between gap-3">
+        <header className="flex min-w-0 flex-1 flex-col gap-2">
           <Heading
             isLoading={isLoading}
             type="h3"
-            className="!font-normal !text-base !leading-snug text-balance !text-primary"
+            className="!text-[12px] !font-medium !leading-tight !text-secondary"
           >
             {title}
           </Heading>
-          <header className="flex flex-wrap items-end gap-2">
+          <section className="flex flex-wrap items-end gap-2">
             <Heading
               isLoading={isLoading}
               type="h1"
-              className="!leading-tight !text-primary"
+              className="!text-[13px] !font-semibold !leading-tight !text-primary"
             >
               {Number(value).toLocaleString()}
             </Heading>
-            {change !== undefined && (
-              <span
-                className={`flex items-center gap-1 text-xs font-medium ${
+            {hasChange && (
+              <p
+                className={`flex items-center gap-1 text-[12px] font-light ${
                   isPositive
                     ? 'text-green-600'
                     : isNegative
@@ -66,36 +67,30 @@ const DashboardCard = ({
                 }`}
               >
                 <FontAwesomeIcon
-                  className="text-[9px] sm:text-[10px] lg:text-[11px]"
-                  icon={isPositive ? faArrowUp : faArrowDown}
+                  className="text-[9px] sm:text-[10px] md:text-[10px] lg:text-[11px]"
+                  icon={isPositive ? faArrowUp : isNegative ? faArrowDown : faArrowRight}
                 />
                 {isPositive && '+'}
                 {change}%
-              </span>
+              </p>
             )}
-          </header>
-          <p
-            className="text-[11px] leading-relaxed text-balance"
-            style={{ color: publicColors.neutralLight }}
-          >
+          </section>
+          <p className="text-[12px] font-light leading-relaxed text-secondary">
             {description}
           </p>
-        </menu>
+        </header>
         <figure
-          className="shrink-0 p-3 rounded-2xl flex items-center justify-center bg-primary/5 border border-primary/10 text-primary"
-          style={{ color: publicColors.primary }}
+          className="flex shrink-0 items-center justify-center rounded-md bg-primary/10 p-3 text-primary shadow-sm"
         >
-          <FontAwesomeIcon className="text-lg lg:text-xl" icon={icon} />
+          <FontAwesomeIcon className="text-[12px] md:text-[13px]" icon={icon} />
         </figure>
       </section>
       <Link
         to={route ?? '#'}
-        className="flex w-full mt-1 z-10 text-primary font-light text-[11px] lg:text-[12px] leading-tight hover:underline underline-offset-2 transition-colors duration-200 ease-in-out"
+        className="relative z-10 mt-1 flex w-fit items-center gap-1.5 text-[12px] font-light leading-tight text-primary transition-colors duration-200 ease-in-out hover:underline"
       >
-        <span className="inline-flex items-center gap-1.5 text-primary font-light text-[11px] lg:text-[12px] leading-tight">
-          View more
-          <FontAwesomeIcon icon={faArrowRight} className="text-primary text-[10px]" aria-hidden />
-        </span>
+        View details
+        <FontAwesomeIcon icon={faArrowRight} className="text-[10px]" aria-hidden />
       </Link>
     </article>
   );

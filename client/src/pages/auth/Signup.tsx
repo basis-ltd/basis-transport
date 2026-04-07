@@ -83,8 +83,8 @@ const Signup = () => {
                 control={control}
                 name="email"
                 rules={{
-                  required: `Please enter your email address`,
                   validate: (value) =>
+                    !value ||
                     validateInputs(value, 'email') ||
                     'Please enter a valid email address',
                 }}
@@ -92,10 +92,9 @@ const Signup = () => {
                   <Input
                     {...field}
                     errorMessage={errors.email?.message}
-                    placeholder="Enter email address"
-                    label="Email"
+                    placeholder="Enter email address (optional)"
+                    label="Email (Optional)"
                     autoComplete="email"
-                    required
                   />
                 )}
               />

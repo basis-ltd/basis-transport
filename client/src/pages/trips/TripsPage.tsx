@@ -12,6 +12,7 @@ import moment from 'moment';
 import { useEffect } from 'react';
 import { TripAvailableCapacity } from '@/components/trips/TripAvailableCapacity';
 import { Trip } from '@/types/trip.type';
+import StartTrip from './StartTrip';
 
 const TripsPage = () => {
   /**
@@ -19,20 +20,27 @@ const TripsPage = () => {
    */
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
+  const { tripsList, startTripModal } = useAppSelector((state) => state.trip);
 
   /**
    * FETCH TRIPS
    */
   const {
-    tripsIsFetching,
-    tripsList,
+    isFetching,
     page,
     size,
-    totalCount,
-    totalPages,
     setPage,
     setSize,
+    totalCount,
+    totalPages,
+    fetchTrips,
   } = useFetchTrips();
+
+  useEffect(() => {
+    if (!startTripModal) {
+      fetchTrips({ page, size });
+    }
+  }, [fetchTrips, page, size, startTripModal]);
 
   // TRIPS COLUMNS
   const { tripsColumns } = useTripColumns();
@@ -63,7 +71,7 @@ const TripsPage = () => {
             <Table
               columns={tripsColumns}
               data={tripsList}
-              isLoading={tripsIsFetching}
+              isLoading={isFetching}
               page={page}
               size={size}
               totalCount={totalCount}
@@ -130,6 +138,7 @@ const TripsPage = () => {
           </section>
         </section>
       </main>
+      <StartTrip />
     </AppLayout>
   );
 };

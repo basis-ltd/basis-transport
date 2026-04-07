@@ -1,22 +1,30 @@
 import { createHash, randomBytes } from 'crypto';
+import { Request } from 'express';
 import { Repository } from 'typeorm';
 import { AppDataSource } from '../data-source';
 import jwt from 'jsonwebtoken';
 import { User } from '../entities/user.entity';
 import {
+  validateCompleteRegistration,
   formatLocalPhoneNumber,
   validateForgotPassword,
   validateLogin,
+  validatePhoneLoginPrecheck,
   validateResetPassword,
+  validateSendPhoneOtp,
   validateSignUp,
+  validateVerifyPhoneOtp,
 } from '../validations/user.validations';
-import { ValidationError } from '../helpers/errors.helper';
+import { UnauthorizedError, ValidationError } from '../helpers/errors.helper';
 import { comparePasswords, hashPassword } from '../helpers/encryptions.helper';
 import { RoleTypes } from '../constants/role.constants';
 import { UserRoleService } from './userRole.service';
 import { RoleService } from './role.service';
 import { sendEmail } from '../helpers/emails.helper';
 import { renderPasswordResetHtml } from '../emails/renderEmails';
+import { SMSService } from '../integrations/sms/sms.service';
+import { buildPhoneOtpMessage } from '../integrations/sms/sms.messages';
+import { AuthenticatedRequest } from '../types/auth.types';
 
 // LOAD ENV
 const { JWT_SECRET, CLIENT_APP_URL } = process.env;
@@ -27,6 +35,10 @@ const FORGOT_PASSWORD_RESPONSE = {
 };
 
 const RESET_TOKEN_TTL_MS = 60 * 60 * 1000;
+const PHONE_OTP_TTL_MS = 10 * 60 * 1000;
+const PHONE_OTP_RESEND_COOLDOWN_MS = 60 * 1000;
+const PHONE_OTP_MAX_ATTEMPTS = 5;
+const TEMP_AUTH_TTL_MS = 15 * 60 * 1000;
 
 function hashResetToken(token: string): string {
   return createHash('sha256').update(token, 'utf8').digest('hex');
@@ -41,11 +53,13 @@ export class AuthService {
   private readonly userRepository: Repository<User>;
   private readonly userRoleService: UserRoleService;
   private readonly roleService: RoleService;
+  private readonly smsService: SMSService;
 
   constructor() {
     this.userRepository = AppDataSource.getRepository(User);
     this.userRoleService = new UserRoleService();
     this.roleService = new RoleService();
+    this.smsService = new SMSService();
   }
 
   /**
@@ -61,15 +75,19 @@ export class AuthService {
       throw new ValidationError(error?.message);
     }
 
+    const normalizedEmail = value.email ? value.email.toLowerCase().trim() : undefined;
+
     // CHECK IF USER EXISTS
-    const userExists = await this.userRepository.findOne({
-      where: { email: value.email },
-      relations: {
-        userRoles: {
-          role: true,
-        },
-      },
-    });
+    const userExists = normalizedEmail
+      ? await this.userRepository.findOne({
+          where: { email: normalizedEmail },
+          relations: {
+            userRoles: {
+              role: true,
+            },
+          },
+        })
+      : null;
 
     // HANDLE USER EXISTENCE
     if (userExists) {
@@ -91,8 +109,10 @@ export class AuthService {
     // CREATE USER
     const newUser = await this.userRepository.save({
       ...value,
+      email: normalizedEmail,
       passwordHash: hashedPassword,
       phoneNumber,
+      hasSetPassword: true,
     });
 
     // GET USER ROLES
@@ -158,16 +178,35 @@ export class AuthService {
       throw new ValidationError(error?.message);
     }
 
-    const userExists = await this.userRepository
+    const username = String(value.username || '').trim();
+    const normalizedEmail = username.toLowerCase();
+    const normalizedPhone = this.tryNormalizePhoneNumber(username);
+
+    const queryBuilder = this.userRepository
       .createQueryBuilder('user')
-      .where('user.email = :email', { email: value.email })
       .leftJoinAndSelect('user.userRoles', 'userRoles')
       .leftJoinAndSelect('userRoles.role', 'role')
-      .addSelect('user.passwordHash')
-      .getOne();
+      .addSelect('user.passwordHash');
+
+    if (normalizedPhone) {
+      queryBuilder.where('LOWER(user.email) = :email', { email: normalizedEmail }).orWhere(
+        'user.phone_number = :phoneNumber',
+        { phoneNumber: normalizedPhone }
+      );
+    } else {
+      queryBuilder.where('LOWER(user.email) = :email', { email: normalizedEmail });
+    }
+
+    const userExists = await queryBuilder.getOne();
 
     if (!userExists) {
-      throw new ValidationError('Invalid email or password');
+      throw new ValidationError('Invalid username or password');
+    }
+
+    if (!userExists.hasSetPassword) {
+      throw new ValidationError(
+        'This account does not have a password yet. Continue with phone verification.',
+      );
     }
 
     const isPasswordValid = await comparePasswords(
@@ -176,17 +215,258 @@ export class AuthService {
     );
 
     if (!isPasswordValid) {
-      throw new ValidationError('Invalid email or password');
+      throw new ValidationError('Invalid username or password');
     }
 
-    const jwtToken = jwt.sign({ id: userExists.id }, String(JWT_SECRET));
+    const jwtToken = this.signAuthToken(userExists.id);
 
     return {
       user: {
         ...userExists,
         passwordHash: undefined,
+        mustCompleteRegistration: !userExists.isProfileComplete,
       },
       token: jwtToken,
+    };
+  }
+
+  /**
+   * PHONE LOGIN PRECHECK
+   */
+  async phoneLoginPrecheck(body: { phoneNumber?: string }): Promise<{
+    hasPassword: boolean;
+  }> {
+    const { error, value } = validatePhoneLoginPrecheck(body);
+    if (error) {
+      throw new ValidationError(error.message);
+    }
+
+    const phoneNumber = formatLocalPhoneNumber(value.phoneNumber);
+    const user = await this.userRepository.findOne({
+      where: { phoneNumber },
+    });
+
+    if (!user) {
+      throw new ValidationError('Invalid phone number or password');
+    }
+
+    return {
+      hasPassword: Boolean(user.hasSetPassword),
+    };
+  }
+
+  /**
+   * SEND PHONE OTP
+   */
+  async sendPhoneOtp(body: { phoneNumber?: string }): Promise<{
+    otpSent: boolean;
+    cooldownSeconds: number;
+  }> {
+    const { error, value } = validateSendPhoneOtp(body);
+    if (error) {
+      throw new ValidationError(error.message);
+    }
+
+    const phoneNumber = formatLocalPhoneNumber(value.phoneNumber);
+    const user = await this.userRepository.findOne({
+      where: { phoneNumber },
+    });
+
+    if (!user) {
+      throw new ValidationError('Unable to send verification code');
+    }
+
+    if (user.hasSetPassword) {
+      throw new ValidationError('This account already has a password. Use phone + password login.');
+    }
+
+    const now = Date.now();
+    const lastSentAt = user.phoneOtpLastSentAt?.getTime();
+    if (lastSentAt && now - lastSentAt < PHONE_OTP_RESEND_COOLDOWN_MS) {
+      throw new ValidationError('Please wait before requesting another verification code.');
+    }
+
+    const otp = this.generatePhoneOtp();
+    const otpHash = this.hashOtp(otp);
+    const otpExpiresAt = new Date(now + PHONE_OTP_TTL_MS);
+
+    await this.userRepository.update(
+      { id: user.id },
+      {
+        phoneOtpHash: otpHash,
+        phoneOtpExpiresAt: otpExpiresAt,
+        phoneOtpAttempts: 0,
+        phoneOtpLastSentAt: new Date(now),
+      }
+    );
+
+    const smsResult = await this.smsService.send({
+      to: phoneNumber,
+      text: buildPhoneOtpMessage(otp),
+    });
+
+    if (!smsResult) {
+      throw new ValidationError('Unable to send verification code. Please try again.');
+    }
+
+    return {
+      otpSent: true,
+      cooldownSeconds: Math.floor(PHONE_OTP_RESEND_COOLDOWN_MS / 1000),
+    };
+  }
+
+  /**
+   * VERIFY PHONE OTP
+   */
+  async verifyPhoneOtp(body: { phoneNumber?: string; otp?: string }): Promise<{
+    user: Partial<User>;
+    token: string;
+    mustCompleteRegistration: true;
+  }> {
+    const { error, value } = validateVerifyPhoneOtp(body);
+    if (error) {
+      throw new ValidationError(error.message);
+    }
+
+    const phoneNumber = formatLocalPhoneNumber(value.phoneNumber);
+    const user = await this.userRepository
+      .createQueryBuilder('user')
+      .where('user.phone_number = :phoneNumber', { phoneNumber })
+      .leftJoinAndSelect('user.userRoles', 'userRoles')
+      .leftJoinAndSelect('userRoles.role', 'role')
+      .addSelect('user.phoneOtpHash')
+      .getOne();
+
+    if (!user || user.hasSetPassword) {
+      throw new ValidationError('Invalid or expired verification code');
+    }
+
+    const now = Date.now();
+    if (
+      !user.phoneOtpHash ||
+      !user.phoneOtpExpiresAt ||
+      user.phoneOtpExpiresAt.getTime() < now
+    ) {
+      throw new ValidationError('Invalid or expired verification code');
+    }
+
+    if (user.phoneOtpAttempts >= PHONE_OTP_MAX_ATTEMPTS) {
+      throw new ValidationError('Maximum OTP attempts reached. Request a new code.');
+    }
+
+    const otpHash = this.hashOtp(value.otp);
+    if (otpHash !== user.phoneOtpHash) {
+      const nextAttempts = user.phoneOtpAttempts + 1;
+      await this.userRepository.update(
+        { id: user.id },
+        {
+          phoneOtpAttempts: nextAttempts,
+          ...(nextAttempts >= PHONE_OTP_MAX_ATTEMPTS
+            ? {
+                phoneOtpHash: null,
+                phoneOtpExpiresAt: null,
+                phoneOtpLastSentAt: null,
+              }
+            : {}),
+        }
+      );
+      throw new ValidationError('Invalid or expired verification code');
+    }
+
+    const temporaryAuthExpiresAt = new Date(now + TEMP_AUTH_TTL_MS);
+    await this.userRepository.update(
+      { id: user.id },
+      {
+        phoneOtpHash: null,
+        phoneOtpExpiresAt: null,
+        phoneOtpAttempts: 0,
+        temporaryAuthExpiresAt,
+        isProfileComplete: false,
+      }
+    );
+
+    const refreshedUser = await this.findUserWithRoles(user.id);
+    const token = this.signAuthToken(user.id, true);
+
+    return {
+      user: {
+        ...(refreshedUser as User),
+        passwordHash: undefined,
+        mustCompleteRegistration: true,
+      },
+      token,
+      mustCompleteRegistration: true,
+    };
+  }
+
+  /**
+   * COMPLETE REGISTRATION
+   */
+  async completeRegistration(
+    body: { email?: string; password?: string },
+    req: Request
+  ): Promise<{ user: User; token: string }> {
+    const { error, value } = validateCompleteRegistration(body);
+    if (error) {
+      throw new ValidationError(error.message);
+    }
+
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user?.id) {
+      throw new UnauthorizedError('Unauthorized');
+    }
+
+    const user = await this.userRepository.findOne({
+      where: { id: authReq.user.id },
+      relations: {
+        userRoles: {
+          role: true,
+        },
+      },
+    });
+
+    if (!user) {
+      throw new UnauthorizedError('Unauthorized');
+    }
+
+    if (
+      !user.temporaryAuthExpiresAt ||
+      user.temporaryAuthExpiresAt.getTime() < Date.now()
+    ) {
+      throw new UnauthorizedError('Your verification session has expired. Please login again.');
+    }
+
+    const normalizedEmail = value.email ? value.email.toLowerCase().trim() : undefined;
+
+    if (normalizedEmail) {
+      const emailOwner = await this.userRepository.findOne({
+        where: { email: normalizedEmail },
+      });
+
+      if (emailOwner && emailOwner.id !== user.id) {
+        throw new ValidationError('Email is already in use');
+      }
+    }
+
+    const passwordHash = await hashPassword(value.password);
+
+    await this.userRepository.update(
+      { id: user.id },
+      {
+        passwordHash,
+        hasSetPassword: true,
+        email: normalizedEmail,
+        isProfileComplete: true,
+        temporaryAuthExpiresAt: null,
+      }
+    );
+
+    const updatedUser = await this.findUserWithRoles(user.id);
+    const token = this.signAuthToken(user.id);
+
+    return {
+      user: updatedUser as User,
+      token,
     };
   }
 
@@ -279,5 +559,48 @@ export class AuthService {
       .execute();
 
     return { message: 'Your password has been updated. You can sign in now.' };
+  }
+
+  private signAuthToken(
+    userId: User['id'],
+    mustCompleteRegistration: boolean = false
+  ): string {
+    return jwt.sign(
+      {
+        id: userId,
+        mustCompleteRegistration,
+      },
+      String(JWT_SECRET)
+    );
+  }
+
+  private async findUserWithRoles(userId: User['id']): Promise<User | null> {
+    return this.userRepository.findOne({
+      where: { id: userId },
+      relations: {
+        userRoles: {
+          role: true,
+        },
+      },
+      order: {
+        updatedAt: 'DESC',
+      },
+    });
+  }
+
+  private tryNormalizePhoneNumber(value: string): string | null {
+    try {
+      return formatLocalPhoneNumber(value);
+    } catch {
+      return null;
+    }
+  }
+
+  private generatePhoneOtp(): string {
+    return String(Math.floor(100000 + Math.random() * 900000));
+  }
+
+  private hashOtp(otp: string): string {
+    return createHash('sha256').update(otp, 'utf8').digest('hex');
   }
 }

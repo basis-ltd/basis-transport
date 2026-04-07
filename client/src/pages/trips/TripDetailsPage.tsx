@@ -1,33 +1,35 @@
-import Button from '@/components/inputs/Button';
-import { Heading } from '@/components/inputs/TextInputs';
-import Table from '@/components/table/Table';
-import { UserTripStatus } from '@/constants/userTrip.constants';
-import AppLayout from '@/containers/navigation/AppLayout';
-import TripMap from '@/containers/trips/TripMap';
-import { useAppDispatch, useAppSelector } from '@/states/hooks';
-import { setCurrentUserTrip } from '@/states/slices/userTripSlice';
-import { UserTrip } from '@/types/userTrip.type';
-import { useBrowseLocations } from '@/usecases/locations/location.hooks';
+import Button from "@/components/inputs/Button";
+import { Heading } from "@/components/inputs/TextInputs";
+import Table from "@/components/table/Table";
+import { UserTripStatus } from "@/constants/userTrip.constants";
+import AppLayout from "@/containers/navigation/AppLayout";
+import TripMap from "@/containers/trips/TripMap";
+import { useAppDispatch, useAppSelector } from "@/states/hooks";
+import { setCurrentUserTrip } from "@/states/slices/userTripSlice";
+import { UserTrip } from "@/types/userTrip.type";
+import { useBrowseLocations } from "@/usecases/locations/location.hooks";
 import {
   useCancelTrip,
   useCompleteTrip,
   useCountAvailableCapacity,
   useGetTripById,
   useStartTrip,
-} from '@/usecases/trips/trip.hooks';
-import { useUserTripColumns } from '@/usecases/user-trip/columns.userTrip';
+} from "@/usecases/trips/trip.hooks";
+import { useUserTripColumns } from "@/usecases/user-trip/columns.userTrip";
 import {
   useCreateUserTrip,
   useFetchUserTrips,
   useUpdateUserTrip,
-} from '@/usecases/user-trip/userTrip.hooks';
-import { faFileLines } from '@fortawesome/free-regular-svg-icons';
-import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import moment from 'moment';
-import Loader from '@/components/inputs/Loader';
-import { TripStatus } from '@/constants/trip.constants';
-import { capitalizeString } from '@/helpers/strings.helper';
+} from "@/usecases/user-trip/userTrip.hooks";
+import { faFileLines } from "@fortawesome/free-regular-svg-icons";
+import { useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import moment from "moment";
+import Loader from "@/components/inputs/Loader";
+import { TripStatus } from "@/constants/trip.constants";
+import { capitalizeString } from "@/helpers/strings.helper";
+
+const TRIP_OPERATOR_ROLES = ["DRIVER", "ADMIN", "SUPER_ADMIN"];
 
 const TripDetailsPage = () => {
   /**
@@ -36,46 +38,19 @@ const TripDetailsPage = () => {
   const dispatch = useAppDispatch();
   const { trip } = useAppSelector((state) => state.trip);
   const { userTripsList, currentUserTrip } = useAppSelector(
-    (state) => state.userTrip
+    (state) => state.userTrip,
   );
   const { user } = useAppSelector((state) => state.auth);
 
-  /**
-   * TRIP STATES
-   */
-  const [showStartTrip, setShowStartTrip] = useState(false);
-  const [showCompleteTrip, setShowCompleteTrip] = useState(false);
-  const [showCancelTrip, setShowCancelTrip] = useState(false);
-
-  // SHOW START TRIP
-  useEffect(() => {
-    if (
-      trip?.status === TripStatus.PENDING &&
-      user?.userRoles?.flatMap((role) => role.role?.name ?? '').includes('DRIVER')
-    ) {
-      setShowStartTrip(true);
-    }
-  }, [trip?.status, user?.userRoles, trip]);
-
-  // SHOW COMPLETE TRIP
-  useEffect(() => {
-    if (
-      trip?.status === TripStatus.IN_PROGRESS &&
-      user?.userRoles?.flatMap((role) => role.role?.name ?? '').includes('DRIVER')
-    ) {
-      setShowCompleteTrip(true);
-    }
-  }, [trip?.status, user?.userRoles, trip]);
-
-  // SHOW CANCEL TRIP
-  useEffect(() => {
-    if (
-      trip?.status === TripStatus.PENDING &&
-      user?.userRoles?.flatMap((role) => role.role?.name ?? '').includes('DRIVER')
-    ) {
-      setShowCancelTrip(true);
-    }
-  }, [trip?.status, user?.userRoles, trip]);
+  const canOperateTrip = user?.userRoles?.some((role) =>
+    TRIP_OPERATOR_ROLES.includes(role.role?.name ?? ""),
+  );
+  const showStartTrip =
+    Boolean(canOperateTrip) && trip?.status === TripStatus.PENDING;
+  const showCompleteTrip =
+    Boolean(canOperateTrip) && trip?.status === TripStatus.IN_PROGRESS;
+  const showCancelTrip =
+    Boolean(canOperateTrip) && [TripStatus.PENDING, TripStatus.IN_PROGRESS].includes(trip?.status as TripStatus);
 
   /**
    * NAVIGATION
@@ -100,7 +75,14 @@ const TripDetailsPage = () => {
   const { getTripById } = useGetTripById();
 
   // START TRIP
-  const { startTrip, startTripIsLoading } = useStartTrip();
+  const { startTrip, isLoading, reset, isSuccess } = useStartTrip();
+
+  useEffect(() => {
+    if (isSuccess) {
+      getTripById(trip?.id);
+      reset();
+    }
+  }, [isSuccess, navigate, trip?.id, reset, getTripById]);
 
   // COMPLETE TRIP
   const { completeTrip, completeTripIsLoading } = useCompleteTrip();
@@ -168,7 +150,7 @@ const TripDetailsPage = () => {
       userTrip = userTripsList?.find(
         (userTrip) =>
           userTrip?.userId === user?.id &&
-          userTrip?.status === UserTripStatus.IN_PROGRESS
+          userTrip?.status === UserTripStatus.IN_PROGRESS,
       );
     }
 
@@ -209,19 +191,19 @@ const TripDetailsPage = () => {
     if (id) getTripById(id);
   }, [getTripById, id, updateUserTripIsSuccess]);
 
-    // Helper function to get status color
-    const getStatusColor = (status: TripStatus) => {
-      switch (status) {
-        case TripStatus.IN_PROGRESS:
-          return 'text-primary bg-primary/10';
-        case TripStatus.COMPLETED:
-          return 'text-green-700 bg-green-700/10';
-        case TripStatus.CANCELLED:
-          return 'text-destructive bg-destructive/10';
-        default:
-          return 'text-secondary bg-background-secondary/60';
-      }
-    };
+  // Helper function to get status color
+  const getStatusColor = (status: TripStatus) => {
+    switch (status) {
+      case TripStatus.IN_PROGRESS:
+        return "text-primary bg-primary/10";
+      case TripStatus.COMPLETED:
+        return "text-green-700 bg-green-700/10";
+      case TripStatus.CANCELLED:
+        return "text-destructive bg-destructive/10";
+      default:
+        return "text-secondary bg-background-secondary/60";
+    }
+  };
 
   return (
     <AppLayout>
@@ -234,7 +216,7 @@ const TripDetailsPage = () => {
               {/* JOIN/EXIT TRIP */}
               {user?.userRoles?.flatMap(
                 (role) =>
-                  ['USER'].includes(role.role?.name ?? '') && (
+                  ["USER"].includes(role.role?.name ?? "") && (
                     <Button
                       primary={!currentUserTrip}
                       danger={!!currentUserTrip}
@@ -246,7 +228,7 @@ const TripDetailsPage = () => {
                             userTrip: {
                               status: UserTripStatus.COMPLETED,
                               exitLocation: {
-                                type: 'Point',
+                                type: "Point",
                                 coordinates: [
                                   browserLocation.lat,
                                   browserLocation.lng,
@@ -260,7 +242,7 @@ const TripDetailsPage = () => {
                             tripId: trip?.id,
                             userId: user?.id,
                             entranceLocation: {
-                              type: 'Point',
+                              type: "Point",
                               coordinates: [
                                 browserLocation.lat,
                                 browserLocation.lng,
@@ -278,9 +260,9 @@ const TripDetailsPage = () => {
                         createUserTripIsLoading || updateUserTripIsLoading
                       }
                     >
-                      {currentUserTrip ? 'Exit Trip' : 'Join Trip'}
+                      {currentUserTrip ? "Exit Trip" : "Join Trip"}
                     </Button>
-                  )
+                  ),
               )}
 
               {/* START/END/CANCEL TRIP */}
@@ -293,7 +275,7 @@ const TripDetailsPage = () => {
                       startTrip(trip?.id);
                     }
                   }}
-                  isLoading={startTripIsLoading}
+                  isLoading={isLoading}
                 >
                   Start Trip
                 </Button>
@@ -339,10 +321,10 @@ const TripDetailsPage = () => {
               </h3>
               <p
                 className={`${getStatusColor(
-                  trip?.status as TripStatus
+                  trip?.status as TripStatus,
                 )} inline-block px-4 py-1 rounded-full text-sm font-light`}
               >
-                {capitalizeString(trip?.status) || 'N/A'}
+                {capitalizeString(trip?.status) || "N/A"}
               </p>
             </article>
 
@@ -354,26 +336,26 @@ const TripDetailsPage = () => {
               <section className="space-y-1">
                 <ul className="w-full flex items-center gap-2 justify-between py-2">
                   <p className="text-sm font-light text-secondary/80">
-                    Start:{' '}
+                    Start:{" "}
                     {trip?.startTime
-                      ? moment(new Date(trip.startTime)).format('HH:mm')
-                      : 'Not started'}
+                      ? moment(new Date(trip.startTime)).format("HH:mm")
+                      : "Not started"}
                   </p>
                   <p className="text-sm font-light text-secondary/80">
-                    End:{' '}
+                    End:{" "}
                     {trip?.endTime
-                      ? moment(new Date(trip.endTime)).format('HH:mm')
-                      : 'Not completed'}
+                      ? moment(new Date(trip.endTime)).format("HH:mm")
+                      : "Not completed"}
                   </p>
                 </ul>
                 <p className="text-sm font-light text-secondary/80 underline">
-                  Duration:{' '}
+                  Duration:{" "}
                   {trip?.startTime && trip?.endTime
                     ? moment(new Date(trip.endTime)).diff(
                         moment(new Date(trip.startTime)),
-                        'minutes'
+                        "minutes",
                       )
-                    : 'N/A'}{' '}
+                    : "N/A"}{" "}
                   minutes
                 </p>
               </section>
@@ -386,10 +368,10 @@ const TripDetailsPage = () => {
               </h3>
               <section className="space-y-1">
                 <p className="text-sm font-light text-secondary/80">
-                  From: {trip?.locationFrom?.name || 'N/A'}
+                  From: {trip?.locationFrom?.name || "N/A"}
                 </p>
                 <p className="text-sm font-light text-secondary/80">
-                  To: {trip?.locationTo?.name || 'N/A'}
+                  To: {trip?.locationTo?.name || "N/A"}
                 </p>
               </section>
             </article>
@@ -403,7 +385,7 @@ const TripDetailsPage = () => {
                 {tripAvailableCapacityIsFetching ? (
                   <Loader className="text-primary" />
                 ) : (
-                  availableCapacity?.availableCapacity ?? 0
+                  (availableCapacity?.availableCapacity ?? 0)
                 )}
               </p>
             </article>

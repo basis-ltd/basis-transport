@@ -17,8 +17,46 @@ export const apiSlice = createApi({
 
     // LOGIN
     login: builder.mutation({
-      query: ({ email, password }) => ({
+      query: ({ username, password }) => ({
         url: '/auth/login',
+        method: 'POST',
+        body: { username, password },
+      }),
+    }),
+
+    phoneLoginPrecheck: builder.mutation({
+      query: ({ phoneNumber }: { phoneNumber: string }) => ({
+        url: '/auth/phone/precheck',
+        method: 'POST',
+        body: { phoneNumber },
+      }),
+    }),
+
+    sendPhoneOtp: builder.mutation({
+      query: ({ phoneNumber }: { phoneNumber: string }) => ({
+        url: '/auth/phone/send-otp',
+        method: 'POST',
+        body: { phoneNumber },
+      }),
+    }),
+
+    verifyPhoneOtp: builder.mutation({
+      query: ({ phoneNumber, otp }: { phoneNumber: string; otp: string }) => ({
+        url: '/auth/phone/verify-otp',
+        method: 'POST',
+        body: { phoneNumber, otp },
+      }),
+    }),
+
+    completeRegistration: builder.mutation({
+      query: ({
+        email,
+        password,
+      }: {
+        email?: string;
+        password: string;
+      }) => ({
+        url: '/auth/complete-registration',
         method: 'POST',
         body: { email, password },
       }),
@@ -167,6 +205,10 @@ export const apiSlice = createApi({
 export const {
   useLoginMutation,
   useSignupMutation,
+  usePhoneLoginPrecheckMutation,
+  useSendPhoneOtpMutation,
+  useVerifyPhoneOtpMutation,
+  useCompleteRegistrationMutation,
   useForgotPasswordMutation,
   useResetPasswordMutation,
   useCreateLocationMutation,

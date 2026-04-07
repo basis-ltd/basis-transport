@@ -15,6 +15,10 @@ const AuthenticatedRoutes = () => {
     return <Navigate to="/auth/login" />;
   }
 
+  if (user?.mustCompleteRegistration) {
+    return <Navigate to="/auth/complete-registration" />;
+  }
+
   return <Outlet />;
 };
 

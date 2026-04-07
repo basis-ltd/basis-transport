@@ -5,6 +5,8 @@ import { UUID } from './index';
 export interface AuthenticatedUser {
   id: UUID;
   email?: string;
+  phoneNumber?: string;
+  mustCompleteRegistration?: boolean;
   roleNames: string[];
 }
 

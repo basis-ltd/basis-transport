@@ -1,4 +1,6 @@
 const isEmail = (value: string) => /\S+@\S+\.\S+/.test(value);
+const isPhone = (value: string) => /^(\+?\d{9,15})$/.test(value.replace(/\s+/g, ''));
+const isEmailOrPhone = (value: string) => isEmail(value) || isPhone(value);
 const isPassword = (value: string) =>
   value.length >= 6 &&
   /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[^\w\s]).{8,}$/.test(value);
@@ -15,6 +17,10 @@ const validateInputs = (value: string, type: string) => {
   switch (type) {
     case 'email':
       return isEmail(value);
+    case 'phone':
+      return isPhone(value);
+    case 'username':
+      return isEmailOrPhone(value);
     case 'password':
       return isPassword(value);
     case 'number':

@@ -86,10 +86,61 @@ export class User extends AbstractEntity {
     name: 'password_hash',
     type: 'varchar',
     length: 255,
-    nullable: false,
+    nullable: true,
     select: false,
   })
   passwordHash?: string;
+
+  // HAS SET PASSWORD
+  @Column({
+    name: 'has_set_password',
+    type: 'boolean',
+    nullable: false,
+    default: true,
+  })
+  hasSetPassword: boolean;
+
+  // PHONE OTP (stored as SHA-256 hash of OTP)
+  @Column({
+    name: 'phone_otp_hash',
+    type: 'varchar',
+    length: 64,
+    nullable: true,
+    select: false,
+  })
+  phoneOtpHash?: string | null;
+
+  @Column({
+    name: 'phone_otp_expires_at',
+    type: 'timestamp',
+    nullable: true,
+  })
+  phoneOtpExpiresAt?: Date | null;
+
+  @Column({
+    name: 'phone_otp_attempts',
+    type: 'int',
+    nullable: false,
+    default: 0,
+  })
+  phoneOtpAttempts: number;
+
+  @Column({
+    name: 'phone_otp_last_sent_at',
+    type: 'timestamp',
+    nullable: true,
+  })
+  phoneOtpLastSentAt?: Date | null;
+
+  @Column({
+    name: 'temporary_auth_expires_at',
+    type: 'timestamp',
+    nullable: true,
+  })
+  temporaryAuthExpiresAt?: Date | null;
+
+  // TRANSIENT AUTH FLAG (API RESPONSE ONLY)
+  mustCompleteRegistration?: boolean;
 
   // PASSWORD RESET (token stored as SHA-256 hex of raw token)
   @Column({
