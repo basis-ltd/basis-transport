@@ -10,6 +10,7 @@ import LandingFeaturesSection from './components/landing/LandingFeaturesSection'
 import LandingFinalCtaSection from './components/landing/LandingFinalCtaSection';
 import LandingHeroSection from './components/landing/LandingHeroSection';
 import LandingHowItWorksSection from './components/landing/LandingHowItWorksSection';
+import LandingNearbyTripsSection from './components/landing/LandingNearbyTripsSection';
 import LandingProblemReliefSection from './components/landing/LandingProblemReliefSection';
 import LandingProductPreviewSection from './components/landing/LandingProductPreviewSection';
 import LandingTestimonialsSection from './components/landing/LandingTestimonialsSection';
@@ -103,6 +104,7 @@ const LandingPage = () => {
             commutesValue={commutesValue}
             usersValue={usersValue}
           />
+          <LandingNearbyTripsSection />
           <LandingProblemReliefSection />
           <LandingBenefitsSection />
           <LandingFeaturesSection />

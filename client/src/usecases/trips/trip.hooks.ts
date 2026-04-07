@@ -1,4 +1,5 @@
 import {
+  useLazyFetchNearbyTripsQuery,
   useLazyCountAvailableCapacityQuery,
   useFetchTripsQuery,
   useLazyGetTripByIdQuery,
@@ -12,8 +13,15 @@ import {
   useCancelTripMutation,
   useCompleteTripMutation,
   useCreateTripMutation,
+  useQuickJoinTripMutation,
   useStartTripMutation,
 } from '@/api/mutations/apiSlice';
+import { useBrowseLocations } from '../locations/location.hooks';
+import { persistAuthSession } from '@/states/authSession';
+import { setToken, setUser } from '@/states/slices/authSlice';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
+import { UUID } from '@/types';
 
 // FETCH TRIPS
 export const useFetchTrips = () => {
@@ -380,5 +388,106 @@ export const useCancelTrip = () => {
     cancelTripIsSuccess,
     cancelTripData,
     cancelTripReset,
+  };
+};
+
+/**
+ * FETCH NEARBY TRIPS
+ */
+export const useFetchNearbyTrips = () => {
+  const { browserLocation, browserLocationIsLoading } = useBrowseLocations();
+  const [fetchNearbyTrips, { data, isFetching }] = useLazyFetchNearbyTripsQuery();
+
+  useEffect(() => {
+    if (browserLocationIsLoading) {
+      return;
+    }
+
+    const hasCoordinates = Boolean(browserLocation.lat && browserLocation.lng);
+
+    if (hasCoordinates) {
+      fetchNearbyTrips({
+        lat: browserLocation.lat,
+        lng: browserLocation.lng,
+        limit: 5,
+      });
+      return;
+    }
+
+    fetchNearbyTrips({ limit: 5 });
+  }, [
+    browserLocation.lat,
+    browserLocation.lng,
+    browserLocationIsLoading,
+    fetchNearbyTrips,
+  ]);
+
+  return {
+    nearbyTrips: data?.data ?? [],
+    isLoading: browserLocationIsLoading || isFetching,
+    browserLocation,
+    locationSource: browserLocation.source,
+  };
+};
+
+/**
+ * QUICK JOIN TRIP
+ */
+export const useQuickJoinTrip = () => {
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+
+  const [
+    quickJoinTripMutation,
+    { isLoading: quickJoinTripIsLoading, isSuccess: quickJoinTripIsSuccess },
+  ] = useQuickJoinTripMutation();
+
+  const quickJoinTrip = async ({
+    tripId,
+    phoneNumber,
+    entranceLocation,
+  }: {
+    tripId: UUID;
+    phoneNumber: string;
+    entranceLocation: { type: 'Point'; coordinates: [number, number] };
+  }) => {
+    try {
+      const response = await quickJoinTripMutation({
+        tripId,
+        phoneNumber,
+        entranceLocation,
+      }).unwrap();
+
+      const token = response?.data?.token;
+      const user = response?.data?.user;
+
+      if (token && user) {
+        await persistAuthSession({ user, token });
+        dispatch(setToken(token));
+        dispatch(setUser(user));
+      }
+
+      const destinationTripId = response?.data?.userTrip?.tripId || tripId;
+      navigate(`/trips/${destinationTripId}`);
+
+      return response;
+    } catch (error) {
+      toast.error(
+        (
+          error as {
+            data?: {
+              message?: string;
+            };
+          }
+        )?.data?.message ?? 'Unable to join trip'
+      );
+      throw error;
+    }
+  };
+
+  return {
+    quickJoinTrip,
+    quickJoinTripIsLoading,
+    quickJoinTripIsSuccess,
   };
 };

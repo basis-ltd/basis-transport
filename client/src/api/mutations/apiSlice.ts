@@ -107,6 +107,23 @@ export const apiSlice = createApi({
       }),
     }),
 
+    // QUICK JOIN TRIP
+    quickJoinTrip: builder.mutation({
+      query: ({
+        tripId,
+        phoneNumber,
+        entranceLocation,
+      }: {
+        tripId: UUID;
+        phoneNumber: string;
+        entranceLocation: { type: 'Point'; coordinates: [number, number] };
+      }) => ({
+        url: `/trips/${tripId}/quick-join`,
+        method: 'POST',
+        body: { phoneNumber, entranceLocation },
+      }),
+    }),
+
     /**
      * USER TRIPS
      */
@@ -160,4 +177,5 @@ export const {
   useStartTripMutation,
   useCompleteTripMutation,
   useCancelTripMutation,
+  useQuickJoinTripMutation,
 } = apiSlice;

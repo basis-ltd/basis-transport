@@ -30,8 +30,18 @@ export class User extends AbstractEntity {
     type: 'varchar',
     length: 255,
     nullable: true,
+    unique: true,
   })
   phoneNumber?: string;
+
+  // PROFILE COMPLETION
+  @Column({
+    name: 'is_profile_complete',
+    type: 'boolean',
+    nullable: false,
+    default: true,
+  })
+  isProfileComplete: boolean;
 
   // GENDER
   @Column({

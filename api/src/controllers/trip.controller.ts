@@ -10,6 +10,7 @@ import {
   MoreThanOrEqual,
 } from 'typeorm';
 import { TripStatus } from '../constants/trip.constants';
+import { ValidationError } from '../helpers/errors.helper';
 
 // INITIALIZE SERVICES
 const tripService = new TripService();
@@ -265,6 +266,64 @@ export class TripController {
       return res.status(200).json({
         message: 'Trip cancelled successfully',
         data: trip,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * FETCH NEARBY TRIPS
+   */
+  async fetchNearbyTrips(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { lat, lng, limit = 5 } = req.query;
+
+      const parsedLat = lat !== undefined ? Number(lat) : undefined;
+      const parsedLng = lng !== undefined ? Number(lng) : undefined;
+      const parsedLimit = Number(limit);
+
+      if ((lat !== undefined || lng !== undefined) &&
+        (!Number.isFinite(parsedLat) || !Number.isFinite(parsedLng))) {
+        throw new ValidationError('lat and lng must be valid numbers');
+      }
+
+      if (!Number.isFinite(parsedLimit) || parsedLimit <= 0) {
+        throw new ValidationError('limit must be a positive number');
+      }
+
+      const nearbyTrips = await tripService.fetchNearbyTrips({
+        lat: parsedLat,
+        lng: parsedLng,
+        limit: Math.min(parsedLimit, 5),
+      });
+
+      return res.status(200).json({
+        message: 'Nearby trips fetched successfully',
+        data: nearbyTrips,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * QUICK JOIN TRIP
+   */
+  async quickJoinTrip(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { tripId } = req.params;
+      const { phoneNumber, entranceLocation } = req.body;
+
+      const result = await tripService.quickJoinTrip({
+        tripId: tripId as UUID,
+        phoneNumber,
+        entranceLocation,
+      });
+
+      return res.status(201).json({
+        message: 'Trip joined successfully',
+        data: result,
       });
     } catch (error) {
       next(error);

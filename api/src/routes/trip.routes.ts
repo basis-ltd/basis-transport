@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { TripController } from '../controllers/trip.controller';
 import { UserTripController } from '../controllers/userTrip.controller';
-import { authMiddleware } from '../middlewares/auth.middleware';
+import { authMiddleware, optionalAuthMiddleware } from '../middlewares/auth.middleware';
 import { requireRole } from '../middlewares/role.middleware';
 import { RoleTypes } from '../constants/role.constants';
 
@@ -15,6 +15,12 @@ const tripOperatorRoles = [
   RoleTypes.ADMIN,
   RoleTypes.SUPER_ADMIN,
 ];
+
+// FETCH NEARBY TRIPS (public)
+router.get('/nearby', optionalAuthMiddleware, tripController.fetchNearbyTrips);
+
+// QUICK JOIN TRIP (public)
+router.post('/:tripId/quick-join', tripController.quickJoinTrip);
 
 // CREATE TRIP
 router.post(

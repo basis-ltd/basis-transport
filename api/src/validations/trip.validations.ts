@@ -34,3 +34,22 @@ export const updateTripValidation = (trip: Partial<Trip>) => {
   });
   return schema.validate(trip);
 };
+
+// VALIDATE QUICK JOIN TRIP
+export const quickJoinTripValidation = (payload: {
+  phoneNumber?: string;
+  entranceLocation?: {
+    type?: string;
+    coordinates?: number[];
+  };
+}) => {
+  const schema = Joi.object({
+    phoneNumber: Joi.string().required(),
+    entranceLocation: Joi.object({
+      type: Joi.string().valid('Point').required(),
+      coordinates: Joi.array().items(Joi.number()).length(2).required(),
+    }).required(),
+  });
+
+  return schema.validate(payload);
+};

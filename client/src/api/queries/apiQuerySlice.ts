@@ -65,6 +65,19 @@ export const apiQuerySlice = createApi({
       },
     }),
 
+    // FETCH NEARBY TRIPS
+    fetchNearbyTrips: builder.query({
+      query: ({ lat, lng, limit = 5 }: { lat?: number; lng?: number; limit?: number }) => ({
+        url: '/trips/nearby',
+        params: {
+          lat,
+          lng,
+          limit,
+        },
+        method: 'GET',
+      }),
+    }),
+
     /**
      * LOCATIONS
      */
@@ -389,6 +402,8 @@ export const {
   useLazyGetRoleByIdQuery,
   useCountAvailableCapacityQuery,
   useLazyCountAvailableCapacityQuery,
+  useFetchNearbyTripsQuery,
+  useLazyFetchNearbyTripsQuery,
   useTimeSpentInTripsQuery,
   useLazyTimeSpentInTripsQuery,
 } = apiQuerySlice;
