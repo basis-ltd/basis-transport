@@ -265,6 +265,18 @@ export const apiQuerySlice = createApi({
      * DASHBOARD
      */
 
+    getPublicLandingStats: builder.query<
+      { commutes: number; users: number },
+      void
+    >({
+      query: () => ({
+        url: '/dashboard/public/landing-stats',
+      }),
+      transformResponse: (response: {
+        data: { commutes: number; users: number };
+      }) => response.data,
+    }),
+
     // COUNT USER TRIPS
     countUserTrips: builder.query({
       query: ({ userId, startDate, endDate }) => {
@@ -362,6 +374,7 @@ export const {
   useCreateTransportCardMutation,
   useUpdateTransportCardMutation,
   useDeleteTransportCardMutation,
+  useGetPublicLandingStatsQuery,
   useCountUserTripsQuery,
   useLazyCountUserTripsQuery,
   useCountTransportCardsQuery,

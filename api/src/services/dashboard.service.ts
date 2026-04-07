@@ -106,6 +106,17 @@ export class DashboardService {
   }
 
   /**
+   * PUBLIC LANDING STATS (unauthenticated aggregate counts)
+   */
+  async getPublicLandingStats(): Promise<{ commutes: number; users: number }> {
+    const [commutes, users] = await Promise.all([
+      this.countTotalUserTrips({}),
+      this.countTotalUsers({ status: UserStatus.ACTIVE }),
+    ]);
+    return { commutes, users };
+  }
+
+  /**
    * COUNT TOTAL TIME SPENT ON TRIPS
    */
   async countTotalTimeSpentOnTrips({

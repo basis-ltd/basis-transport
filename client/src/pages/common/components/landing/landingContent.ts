@@ -1,9 +1,3 @@
-export const landingHeroStats = [
-  { value: '2.3M', label: 'Daily commuters' },
-  { value: '15 mins', label: 'Avg time saved' },
-  { value: '98%', label: 'Happy users' },
-];
-
 export const landingBenefits = [
   {
     title: 'Confidence before you leave',

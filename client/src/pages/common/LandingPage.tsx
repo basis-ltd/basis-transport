@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useGetPublicLandingStatsQuery } from '@/api/queries/apiQuerySlice';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { Seo } from '@/components/seo';
 import { absoluteUrl } from '@/constants/seo.constants';
 import PublicFooter from '@/containers/public/PublicFooter';
@@ -14,6 +15,19 @@ import LandingProductPreviewSection from './components/landing/LandingProductPre
 import LandingTestimonialsSection from './components/landing/LandingTestimonialsSection';
 
 const LandingPage = () => {
+  const { data: landingStats, isLoading, isError } =
+    useGetPublicLandingStatsQuery();
+
+  const { commutesValue, usersValue } = useMemo(() => {
+    if (isLoading || isError || !landingStats) {
+      return { commutesValue: '—', usersValue: '—' };
+    }
+    return {
+      commutesValue: landingStats.commutes.toLocaleString() + '+',
+      usersValue: `${landingStats.users.toLocaleString()}+`,
+    };
+  }, [landingStats, isLoading, isError]);
+
   const observerRef = useRef<IntersectionObserver | null>(null);
 
   const scrollToHowItWorks = useCallback(() => {
@@ -84,7 +98,11 @@ const LandingPage = () => {
       <PublicLayout>
         <PublicNavbar />
         <article>
-          <LandingHeroSection onLearnMore={scrollToHowItWorks} />
+          <LandingHeroSection
+            onLearnMore={scrollToHowItWorks}
+            commutesValue={commutesValue}
+            usersValue={usersValue}
+          />
           <LandingProblemReliefSection />
           <LandingBenefitsSection />
           <LandingFeaturesSection />

@@ -1,13 +1,22 @@
 import Button from '@/components/inputs/Button';
 import { publicColors as Colors } from '@/containers/public/publicTheme';
-import { landingHeroStats } from './landingContent';
 import LandingHeroBackgroundCanvas from './LandingHeroBackgroundCanvas';
 
 interface LandingHeroSectionProps {
   onLearnMore?: () => void;
+  commutesValue: string;
+  usersValue: string;
 }
 
-const LandingHeroSection = ({ onLearnMore }: LandingHeroSectionProps) => {
+const LandingHeroSection = ({
+  onLearnMore,
+  commutesValue,
+  usersValue,
+}: LandingHeroSectionProps) => {
+  const stats = [
+    { value: commutesValue, label: 'Commutes completed' },
+    { value: usersValue, label: 'Happy users' },
+  ];
   return (
     <section className="relative min-h-screen flex items-center pt-20 overflow-hidden">
       <figure className="absolute inset-0 z-0" aria-hidden="true">
@@ -61,10 +70,10 @@ const LandingHeroSection = ({ onLearnMore }: LandingHeroSectionProps) => {
         </header>
 
         <aside
-          className="mt-20 animate-on-scroll grid grid-cols-3 gap-8 lg:gap-12"
+          className="mt-20 animate-on-scroll grid grid-cols-2 gap-8 lg:gap-12 max-w-lg mx-auto"
           style={{ animationDelay: '0.2s' }}
         >
-          {landingHeroStats.map((stat) => (
+          {stats.map((stat) => (
             <div key={stat.label} className="text-center">
               <data
                 className="block text-3xl lg:text-4xl font-light mb-2"

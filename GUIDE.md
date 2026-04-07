@@ -3,6 +3,7 @@
 This guide explains how to use the application from the screens and navigation you see in the web UI.
 
 It is written for end users first, with a compact admin setup section. Where needed, it also shows:
+
 - **Current behavior (today)**: what the app currently does
 - **Ideal behavior**: what users would usually expect
 
@@ -44,27 +45,27 @@ It is written for end users first, with a compact admin setup section. Where nee
 
 1. From the app, open your account/profile area and go to **My profile** (`/account/profile`).
 2. In **Quick actions**, click:
-   - **My cards** -> opens `/account/transport-cards`
-   - **My trips** -> opens `/user-trips`
+  - **My cards** -> opens `/account/transport-cards`
+  - **My trips** -> opens `/user-trips`
 
 ### 3) Find a Trip
 
 1. In the left sidebar, click **Trips**.
 2. In the trips table, find the trip you want.
 3. Click the trip row/action to open **Trip Details** (`/trips/:id`).
-3. Review:
-   - Trip status
-   - Start/end times
-   - From/To locations
-   - Available seats
-   - Passenger list
+4. Review:
+  - Trip status
+  - Start/end times
+  - From/To locations
+  - Available seats
+  - Passenger list
 
 ### 4) Join a Trip
 
 1. Go to **Sidebar -> Trips -> Trip Details**.
 2. In the action area, click **Join Trip**.
-2. The app uses your current location (browser location) as your entrance location.
-3. Your participation is recorded as an active trip.
+3. The app uses your current location (browser location) as your entrance location.
+4. Your participation is recorded as an active trip.
 
 ### 5) Exit a Trip
 
@@ -89,9 +90,9 @@ It is written for end users first, with a compact admin setup section. Where nee
 1. In the left sidebar, click **Locations**.
 2. Click **Create Location**.
 3. Fill:
-   - Location name
-   - Optional description
-   - Map point (click on the map)
+  - Location name
+  - Optional description
+  - Map point (click on the map)
 4. Click **Save Location**.
 
 ### 2) Create a Trip
@@ -99,9 +100,9 @@ It is written for end users first, with a compact admin setup section. Where nee
 1. In the left sidebar, click **Trips**.
 2. Click **Create Trip**.
 3. Choose:
-   - Departing location
-   - Arriving location
-   - Total capacity
+  - Departing location
+  - Arriving location
+  - Total capacity
 4. Click **Save**.
 5. You return to the trips list, where the new trip appears as pending.
 
@@ -110,9 +111,9 @@ It is written for end users first, with a compact admin setup section. Where nee
 1. Go to **Sidebar -> Trips**.
 2. Open a trip from the table to view **Trip Details**.
 3. Use lifecycle actions at the top right:
-   - **Start Trip** when pending
-   - **Complete Trip** when in progress
-   - **Cancel Trip** when pending
+  - **Start Trip** when pending
+  - **Complete Trip** when in progress
+  - **Cancel Trip** when pending
 
 ## Current Behavior vs Ideal Behavior
 
@@ -164,4 +165,3 @@ It is written for end users first, with a compact admin setup section. Where nee
 4. After riding, same page -> **Exit Trip**.
 5. My profile -> **My trips** to review activity.
 6. My profile -> **My cards** -> **Add card** (or update/delete).
-

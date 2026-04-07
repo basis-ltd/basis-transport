@@ -5,6 +5,8 @@ import { authMiddleware } from '../middlewares/auth.middleware';
 const router = Router();
 const dashboardController = new DashboardController();
 
+router.get('/public/landing-stats', dashboardController.getPublicLandingStats);
+
 router.use(authMiddleware);
 
 /**

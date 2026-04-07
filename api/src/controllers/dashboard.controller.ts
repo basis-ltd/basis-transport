@@ -77,6 +77,25 @@ export class DashboardController {
   }
 
   /**
+   * PUBLIC LANDING STATS (commutes + active users)
+   */
+  async getPublicLandingStats(
+    _req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const data = await dashboardService.getPublicLandingStats();
+      return res.status(200).json({
+        message: 'Public landing stats retrieved successfully',
+        data,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
    * COUNT TOTAL TIME SPENT ON TRIPS
    */
   async countTotalTimeSpentOnTrips(req: Request, res: Response, next: NextFunction) {
