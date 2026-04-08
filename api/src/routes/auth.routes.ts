@@ -15,6 +15,18 @@ router.post(
 router.post('/phone/send-otp', authController.sendPhoneOtp.bind(authController));
 router.post('/phone/verify-otp', authController.verifyPhoneOtp.bind(authController));
 router.post(
+  '/phone/reset/send-otp',
+  authController.sendPhoneResetOtp.bind(authController)
+);
+router.post(
+  '/phone/reset/verify-otp',
+  authController.verifyPhoneResetOtp.bind(authController)
+);
+router.post(
+  '/phone/reset-password',
+  authController.resetPasswordWithPhone.bind(authController)
+);
+router.post(
   '/complete-registration',
   authMiddleware,
   authController.completeRegistration.bind(authController)

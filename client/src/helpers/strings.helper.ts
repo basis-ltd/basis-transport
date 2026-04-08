@@ -59,24 +59,24 @@ const statusBadgeBase =
   'text-center px-3 py-1 rounded-sm text-[11px] font-light leading-tight text-white';
 
 /**
- * Muted status styles: light tints + dark text so states stay distinct without saturated fills.
+ * Muted status styles: light tints + dark text (distinct, not saturated).
  */
 export const getStatusBackgroundColor = (status?: string) => {
   switch (status) {
     case 'OPEN':
-      return `${statusBadgeBase} bg-primary text-primary`;
+      return `${statusBadgeBase} bg-primary/80`;
     case 'COMPLETED':
     case 'ACTIVE':
-      return `${statusBadgeBase} bg-green-800 text-green-950`;
+      return `${statusBadgeBase} bg-green-800`;
     case 'REJECTED':
     case 'CLOSED':
     case 'CANCELLED':
-      return `${statusBadgeBase} bg-red-800 text-red-950`;
+      return `${statusBadgeBase} bg-red-800`;
     case 'IN_PROGRESS':
-      return `${statusBadgeBase} bg-sky-800 text-sky-950`;
+      return `${statusBadgeBase} bg-sky-800/80`;
     case 'REOPENED':
     case 'PENDING':
-      return `${statusBadgeBase} bg-amber-800 text-amber-950`;
+      return `${statusBadgeBase} bg-amber-800`;
     default:
       return `${statusBadgeBase} bg-muted text-muted-foreground`;
   }

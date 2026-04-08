@@ -48,6 +48,38 @@ export const apiSlice = createApi({
       }),
     }),
 
+    sendPhoneResetOtp: builder.mutation({
+      query: ({ phoneNumber }: { phoneNumber: string }) => ({
+        url: '/auth/phone/reset/send-otp',
+        method: 'POST',
+        body: { phoneNumber },
+      }),
+    }),
+
+    verifyPhoneResetOtp: builder.mutation({
+      query: ({ phoneNumber, otp }: { phoneNumber: string; otp: string }) => ({
+        url: '/auth/phone/reset/verify-otp',
+        method: 'POST',
+        body: { phoneNumber, otp },
+      }),
+    }),
+
+    resetPasswordWithPhone: builder.mutation({
+      query: ({
+        phoneNumber,
+        resetToken,
+        password,
+      }: {
+        phoneNumber: string;
+        resetToken: string;
+        password: string;
+      }) => ({
+        url: '/auth/phone/reset-password',
+        method: 'POST',
+        body: { phoneNumber, resetToken, password },
+      }),
+    }),
+
     completeRegistration: builder.mutation({
       query: ({
         email,
@@ -208,6 +240,9 @@ export const {
   usePhoneLoginPrecheckMutation,
   useSendPhoneOtpMutation,
   useVerifyPhoneOtpMutation,
+  useSendPhoneResetOtpMutation,
+  useVerifyPhoneResetOtpMutation,
+  useResetPasswordWithPhoneMutation,
   useCompleteRegistrationMutation,
   useForgotPasswordMutation,
   useResetPasswordMutation,

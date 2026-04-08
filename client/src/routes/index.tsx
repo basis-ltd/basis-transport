@@ -1,5 +1,6 @@
 import Login from '@/pages/auth/Login';
 import ForgotPassword from '@/pages/auth/ForgotPassword';
+import PhoneResetOtp from '@/pages/auth/PhoneResetOtp';
 import ResetPassword from '@/pages/auth/ResetPassword';
 import LandingPage from '@/pages/common/LandingPage';
 import UserDashboard from '@/pages/dashboard/UserDashboard';
@@ -35,6 +36,7 @@ const Router = () => {
         <Route path="login" element={<Login />} />
         <Route path="register" element={<Signup />} />
         <Route path="forgot-password" element={<ForgotPassword />} />
+        <Route path="reset-phone-otp" element={<PhoneResetOtp />} />
         <Route path="reset-password" element={<ResetPassword />} />
         <Route path="complete-registration" element={<CompleteRegistration />} />
       </Route>

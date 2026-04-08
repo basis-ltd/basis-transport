@@ -1,7 +1,5 @@
 import Button from '@/components/inputs/Button';
-import { capitalizeString } from '@/helpers/strings.helper';
-import { faRoad, faUsers } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { capitalizeString, getStatusBackgroundColor } from '@/helpers/strings.helper';
 
 export type NearbyDashboardTrip = {
   id: string;
@@ -17,14 +15,6 @@ export type NearbyDashboardTrip = {
   };
 };
 
-/** Status chips: readable contrast; radius capped at rounded-md (DESIGN). */
-const statusClassNameByStatus: Record<string, string> = {
-  PENDING: 'bg-amber-100/90 text-amber-900',
-  IN_PROGRESS: 'bg-sky-100/90 text-sky-900',
-  COMPLETED: 'bg-primary/10 text-primary',
-  CANCELLED: 'bg-destructive/10 text-destructive',
-};
-
 interface DashboardTripCardProps {
   trip: NearbyDashboardTrip;
 }
@@ -36,57 +26,89 @@ const DashboardTripCard = ({ trip }: DashboardTripCardProps) => {
       : 'Distance unavailable';
 
   const routeLabel = `${trip.locationFrom?.name || 'Unknown'} to ${trip.locationTo?.name || 'Unknown'}`;
-
-  const statusClassName =
-    statusClassNameByStatus[trip.status] ?? 'bg-primary/10 text-primary';
+  const seatsLeft = Math.max(0, trip.availableCapacity);
 
   return (
-    <li className="surface-card w-full list-none">
-      <article className="relative flex h-full flex-col gap-4 overflow-hidden rounded-md p-5 transition-all duration-200 ease-in-out hover:scale-[1.02]">
-        <section className="surface-tint pointer-events-none absolute inset-0 rounded-md" />
-
-        <header className="relative z-10 flex items-start justify-between gap-3">
-          <section className="flex min-w-0 flex-1 flex-col gap-1">
-            <h3 className="text-[12px] font-normal leading-tight text-primary text-balance">
-              {routeLabel}
-            </h3>
-            <p className="text-[12px] font-light leading-tight text-secondary">
-              Trip #{trip.referenceId}
+    <li className="list-none h-full w-full">
+      <article className="flex h-full w-full flex-col overflow-hidden rounded-md shadow-sm bg-background">
+        <section className="flex flex-1 flex-col p-6">
+          <header className="mb-8">
+            <p className="mb-4 text-[12px] font-light leading-tight text-secondary">
+              Your next trip · #{trip.referenceId}
             </p>
+            <div className="rounded-md bg-white p-6 shadow-sm">
+              <div className="mb-4 flex items-start justify-between gap-3">
+                <div className="min-w-0 flex-1">
+                  <p className="text-[12px] font-light leading-tight text-secondary">
+                    {routeLabel}
+                  </p>
+                  <p className="mt-1 text-[13px] font-semibold leading-tight text-primary">
+                    {distanceLabel}
+                  </p>
+                </div>
+                <div className="shrink-0 text-right">
+                  <p
+                    className={`inline-block shadow-sm ${getStatusBackgroundColor(trip.status)}`}
+                  >
+                    {capitalizeString(trip.status)}
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-4">
+                <div className="min-w-0 flex-1">
+                  <p className="mb-1 text-[12px] font-light leading-tight text-secondary">
+                    Available seats
+                  </p>
+                  <p className="text-[13px] font-light leading-tight text-primary">
+                    {seatsLeft} left
+                  </p>
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="mb-1 text-[12px] font-light leading-tight text-secondary">
+                    Distance
+                  </p>
+                  <p className="mt-1 text-[12px] font-light leading-tight text-secondary">
+                    {distanceLabel}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </header>
+
+          <section>
+            <p className="mb-4 text-[12px] font-medium uppercase tracking-wide text-secondary">
+              Route
+            </p>
+            <ul className="space-y-3">
+              <li className="rounded-md bg-white p-4 shadow-sm transition-opacity hover:opacity-80">
+                <p className="text-[12px] font-medium leading-tight text-primary">
+                  {trip.locationFrom?.name || 'Unknown'}
+                </p>
+                <p className="mt-1 text-[12px] font-light leading-tight text-secondary">
+                  Pickup
+                </p>
+              </li>
+              <li className="rounded-md bg-white p-4 shadow-sm transition-opacity hover:opacity-80">
+                <p className="text-[12px] font-medium leading-tight text-primary">
+                  {trip.locationTo?.name || 'Unknown'}
+                </p>
+                <p className="mt-1 text-[12px] font-light leading-tight text-secondary">
+                  Drop-off
+                </p>
+              </li>
+            </ul>
           </section>
-          <p
-            className={`shrink-0 rounded-md px-2 py-1 text-[11px] font-light leading-tight ${statusClassName}`}
-          >
-            {capitalizeString(trip?.status)}
-          </p>
-        </header>
 
-        <section className="relative z-10 grid grid-cols-2 gap-3">
-          <article className="rounded-md bg-primary/5 p-3 shadow-sm">
-            <p className="flex items-center gap-1.5 text-[12px] font-light leading-tight text-secondary">
-              <FontAwesomeIcon icon={faUsers} className="text-[10px] text-primary" aria-hidden />
-              Seats
-            </p>
-            <p className="mt-1 text-[12px] font-normal leading-tight text-primary">
-              {Math.max(0, trip.availableCapacity)}
-            </p>
-          </article>
-          <article className="rounded-md bg-primary/5 p-3 shadow-sm">
-            <p className="flex items-center gap-1.5 text-[12px] font-light leading-tight text-secondary">
-              <FontAwesomeIcon icon={faRoad} className="text-[10px] text-primary" aria-hidden />
-              Distance
-            </p>
-            <p className="mt-1 text-[12px] font-normal leading-tight text-primary">
-              {distanceLabel}
-            </p>
-          </article>
+          <footer className="relative z-10 mt-6">
+            <Button
+              route={`/trips/${trip.id}`}
+              primary
+              className="w-full min-w-0 sm:w-auto sm:min-w-[7rem]"
+            >
+              View trip
+            </Button>
+          </footer>
         </section>
-
-        <footer className="relative z-10 mt-auto">
-          <Button route={`/trips/${trip.id}`} primary className="w-full min-w-0 sm:w-auto sm:min-w-[7rem]">
-            View trip
-          </Button>
-        </footer>
       </article>
     </li>
   );

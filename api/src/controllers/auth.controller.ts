@@ -82,6 +82,37 @@ export class AuthController {
   }
 
   /**
+   * SEND PHONE RESET OTP
+   */
+  async sendPhoneResetOtp(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = await authService.sendPhoneResetOtp(req.body);
+      return res.status(200).json({
+        message: 'If an account exists for this phone number, a reset code was sent.',
+        data,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * VERIFY PHONE RESET OTP
+   */
+  async verifyPhoneResetOtp(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = await authService.verifyPhoneResetOtp(req.body);
+      console.log(data);
+      return res.status(200).json({
+        message: 'Reset code verified successfully',
+        data,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
    * COMPLETE REGISTRATION
    */
   async completeRegistration(req: Request, res: Response, next: NextFunction) {
@@ -114,6 +145,18 @@ export class AuthController {
   async resetPassword(req: Request, res: Response, next: NextFunction) {
     try {
       const result = await authService.resetPassword(req.body);
+      return res.status(200).json(result);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * RESET PASSWORD WITH PHONE OTP SESSION
+   */
+  async resetPasswordWithPhone(req: Request, res: Response, next: NextFunction) {
+    try {
+      const result = await authService.resetPasswordWithPhone(req.body);
       return res.status(200).json(result);
     } catch (error) {
       next(error);

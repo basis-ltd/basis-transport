@@ -74,6 +74,15 @@ export const validateSendPhoneOtp = (body: { phoneNumber?: string }) => {
   return schema.validate(body);
 };
 
+// VALIDATE SEND PHONE RESET OTP
+export const validateSendPhoneResetOtp = (body: { phoneNumber?: string }) => {
+  const schema = Joi.object({
+    phoneNumber: Joi.string().required(),
+  });
+
+  return schema.validate(body);
+};
+
 // VALIDATE VERIFY PHONE OTP
 export const validateVerifyPhoneOtp = (body: {
   phoneNumber?: string;
@@ -84,6 +93,42 @@ export const validateVerifyPhoneOtp = (body: {
     otp: Joi.string().pattern(/^\d{6}$/).required().messages({
       'string.pattern.base': 'OTP must be a 6 digit code',
     }),
+  });
+
+  return schema.validate(body);
+};
+
+// VALIDATE VERIFY PHONE RESET OTP
+export const validateVerifyPhoneResetOtp = (body: {
+  phoneNumber?: string;
+  otp?: string;
+}) => {
+  const schema = Joi.object({
+    phoneNumber: Joi.string().required(),
+    otp: Joi.string().pattern(/^\d{6}$/).required().messages({
+      'string.pattern.base': 'OTP must be a 6 digit code',
+    }),
+  });
+
+  return schema.validate(body);
+};
+
+// VALIDATE PHONE PASSWORD RESET
+export const validatePhoneResetPassword = (body: {
+  phoneNumber?: string;
+  resetToken?: string;
+  password?: string;
+}) => {
+  const schema = Joi.object({
+    phoneNumber: Joi.string().required(),
+    resetToken: Joi.string().required(),
+    password: Joi.string()
+      .pattern(PASSWORD_PATTERN)
+      .required()
+      .messages({
+        'string.pattern.base':
+          'Password must be at least 8 characters and include uppercase, lowercase, number, and special character',
+      }),
   });
 
   return schema.validate(body);

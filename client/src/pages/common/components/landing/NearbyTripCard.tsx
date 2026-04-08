@@ -1,5 +1,6 @@
 import Button from '@/components/inputs/Button';
 import { publicColors as Colors } from '@/containers/public/publicTheme';
+import { capitalizeString, getStatusBackgroundColor } from '@/helpers/strings.helper';
 import { useAppSelector } from '@/states/hooks';
 import { TripStatus } from '@/types/trip.type';
 import { UUID } from '@/types';
@@ -29,13 +30,6 @@ interface NearbyTripCardProps {
   fallbackEntranceLocation: [number, number];
 }
 
-const statusClassNameByStatus: Record<TripStatus, string> = {
-  [TripStatus.PENDING]: 'bg-amber-100 text-amber-800',
-  [TripStatus.IN_PROGRESS]: 'bg-sky-100 text-sky-800',
-  [TripStatus.COMPLETED]: 'bg-green-100 text-green-800',
-  [TripStatus.CANCELLED]: 'bg-red-100 text-red-800',
-};
-
 const NearbyTripCard = ({ trip, fallbackEntranceLocation }: NearbyTripCardProps) => {
   const navigate = useNavigate();
   const { user } = useAppSelector((state) => state.auth);
@@ -53,73 +47,178 @@ const NearbyTripCard = ({ trip, fallbackEntranceLocation }: NearbyTripCardProps)
       ? `${(trip.distanceMeters / 1000).toFixed(1)} km away`
       : 'Distance unavailable';
 
+  const routeLabel = `${trip.locationFrom?.name || 'Unknown'} to ${trip.locationTo?.name || 'Unknown'}`;
+  const seatsLeft = Math.max(0, trip.availableCapacity);
+
   return (
     <>
-      <li className="shadow-sm rounded-md bg-white p-5 space-y-4">
-        <header className="flex items-start justify-between gap-3">
-          <div>
-            <h3 className="text-[13px] font-medium" style={{ color: Colors.primary }}>
-              {trip.locationFrom?.name || 'Unknown'} to {trip.locationTo?.name || 'Unknown'}
-            </h3>
-            <p className="text-[12px]" style={{ color: Colors.neutralLight }}>
-              #{trip.referenceId}
-            </p>
-          </div>
-
-          <span
-            className={`text-[11px] px-2 py-1 rounded-full ${statusClassNameByStatus[trip.status]}`}
-          >
-            {trip.status.replace('_', ' ')}
-          </span>
-        </header>
-
-        <aside className="text-[12px] space-y-1" style={{ color: Colors.neutralLight }}>
-          <p>Available seats: {Math.max(0, trip.availableCapacity)}</p>
-          <p>{distanceLabel}</p>
-        </aside>
-
-        <Button
-          primary
-          onClick={async (event) => {
-            event.preventDefault();
-
-            if (!user) {
-              setQuickJoinModalOpen(true);
-              return;
-            }
-
-            try {
-              await createUserTrip({
-                tripId: trip.id,
-                userId: user.id,
-                entranceLocation: {
-                  type: 'Point',
-                  coordinates: entranceCoordinates,
-                },
-              }).unwrap();
-
-              navigate(`/trips/${trip.id}`);
-            } catch (error) {
-              toast.error(
-                (
-                  error as {
-                    data?: {
-                      message?: string;
-                    };
-                  }
-                )?.data?.message ?? 'Unable to join trip'
-              );
-            }
-          }}
-          isLoading={createUserTripIsLoading}
-          disabled={trip.availableCapacity <= 0}
+      <li className="list-none h-full w-full">
+        <article
+          className="flex h-full w-full flex-col overflow-hidden rounded-md"
+          style={{ backgroundColor: Colors.bgAlt }}
         >
-          Join
-        </Button>
+          <section className="flex flex-1 flex-col p-6 bg-white shadow-md">
+            <header className="mb-8">
+              <p
+                className="mb-4 text-[12px] font-light leading-tight"
+                style={{ color: Colors.neutralLight }}
+              >
+                Your next trip · #{trip.referenceId}
+              </p>
+              <div
+                className="rounded-md p-6 shadow-sm"
+                style={{ backgroundColor: Colors.white }}
+              >
+                <div className="mb-4 flex items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <p
+                      className="text-[12px] font-light leading-tight"
+                      style={{ color: Colors.neutralLight }}
+                    >
+                      {routeLabel}
+                    </p>
+                    <p
+                      className="mt-1 text-[13px] font-semibold leading-tight"
+                      style={{ color: Colors.primary }}
+                    >
+                      {distanceLabel}
+                    </p>
+                  </div>
+                  <div className="shrink-0 text-right">
+                    <p
+                      className={`inline-block shadow-sm ${getStatusBackgroundColor(trip.status)}`}
+                    >
+                      {capitalizeString(trip.status)}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-4">
+                  <div className="min-w-0 flex-1">
+                    <p
+                      className="mb-1 text-[12px] font-light leading-tight"
+                      style={{ color: Colors.neutralLight }}
+                    >
+                      Available seats
+                    </p>
+                    <p
+                      className="text-[13px] font-light leading-tight"
+                      style={{ color: Colors.primary }}
+                    >
+                      {seatsLeft} left
+                    </p>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p
+                      className="mb-1 text-[12px] font-light leading-tight"
+                      style={{ color: Colors.neutralLight }}
+                    >
+                      Distance
+                    </p>
+                    <p
+                      className="mt-1 text-[12px] font-light leading-tight"
+                      style={{ color: Colors.neutralLight }}
+                    >
+                      {distanceLabel}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </header>
 
-        <p className="text-[12px] font-light text-neutral-500">
-          Joining with phone creates a temporary account you can complete later.
-        </p>
+            <section>
+              <p
+                className="mb-4 text-[12px] font-medium uppercase tracking-wide"
+                style={{ color: Colors.neutralLight }}
+              >
+                Route
+              </p>
+              <ul className="space-y-3">
+                <li
+                  className="cursor-pointer rounded-md p-4 shadow-sm transition-opacity hover:opacity-80"
+                  style={{ backgroundColor: Colors.white }}
+                >
+                  <p
+                    className="text-[12px] font-medium leading-tight"
+                    style={{ color: Colors.primary }}
+                  >
+                    {trip.locationFrom?.name || 'Unknown'}
+                  </p>
+                  <p
+                    className="mt-1 text-[12px] font-light leading-tight"
+                    style={{ color: Colors.neutralLight }}
+                  >
+                    Pickup
+                  </p>
+                </li>
+                <li
+                  className="cursor-pointer rounded-md p-4 shadow-sm transition-opacity hover:opacity-80"
+                  style={{ backgroundColor: Colors.white }}
+                >
+                  <p
+                    className="text-[12px] font-medium leading-tight"
+                    style={{ color: Colors.primary }}
+                  >
+                    {trip.locationTo?.name || 'Unknown'}
+                  </p>
+                  <p
+                    className="mt-1 text-[12px] font-light leading-tight"
+                    style={{ color: Colors.neutralLight }}
+                  >
+                    Drop-off
+                  </p>
+                </li>
+              </ul>
+            </section>
+
+            <footer className="relative z-10 mt-6 flex flex-col gap-3">
+              <Button
+                primary
+                onClick={async (event) => {
+                  event.preventDefault();
+
+                  if (!user) {
+                    setQuickJoinModalOpen(true);
+                    return;
+                  }
+
+                  try {
+                    await createUserTrip({
+                      tripId: trip.id,
+                      userId: user.id,
+                      entranceLocation: {
+                        type: 'Point',
+                        coordinates: entranceCoordinates,
+                      },
+                    }).unwrap();
+
+                    navigate(`/trips/${trip.id}`);
+                  } catch (error) {
+                    toast.error(
+                      (
+                        error as {
+                          data?: {
+                            message?: string;
+                          };
+                        }
+                      )?.data?.message ?? 'Unable to join trip'
+                    );
+                  }
+                }}
+                isLoading={createUserTripIsLoading}
+                disabled={trip.availableCapacity <= 0}
+                className="w-full min-w-0 sm:w-auto"
+              >
+                Join
+              </Button>
+              <p
+                className="text-[12px] font-light leading-relaxed"
+                style={{ color: Colors.neutralLight }}
+              >
+                Joining with phone creates a temporary account you can complete later.
+              </p>
+            </footer>
+          </section>
+        </article>
       </li>
 
       <PhoneJoinModal

@@ -2,8 +2,12 @@ import {
   useCompleteRegistrationMutation,
   useLoginMutation,
   usePhoneLoginPrecheckMutation,
+  useResetPasswordWithPhoneMutation,
+  useSendPhoneResetOtpMutation,
   useSendPhoneOtpMutation,
+  useVerifyPhoneResetOtpMutation,
   useVerifyPhoneOtpMutation,
+  useForgotPasswordMutation,
 } from '@/api/mutations/apiSlice';
 import { useAppDispatch } from '@/states/hooks';
 import { setLogout, setToken, setUser } from '@/states/slices/authSlice';
@@ -180,6 +184,82 @@ export const useVerifyPhoneOtp = () => {
   return {
     verifyPhoneOtp,
     verifyPhoneOtpIsLoading,
+  };
+};
+
+/**
+ * SEND PHONE RESET OTP
+ */
+export const useSendPhoneResetOtp = () => {
+  const [sendPhoneResetOtp, { isLoading, isSuccess, reset, data }] = useSendPhoneResetOtpMutation();
+
+  return {
+    sendPhoneResetOtp,
+    isLoading,
+    isSuccess,
+    data,
+    reset,
+  };
+};
+
+export const useForgotPassword = () => {
+  const [forgotPassword, { isLoading, isSuccess, reset, data }] = useForgotPasswordMutation();
+
+  return {
+    forgotPassword,
+    isLoading,
+    isSuccess,
+    data,
+    reset,
+  };
+};
+
+/**
+ * VERIFY PHONE RESET OTP
+ */
+export const useVerifyPhoneResetOtp = () => {
+  const [verifyOtp, { isLoading: verifyPhoneResetOtpIsLoading }] = useVerifyPhoneResetOtpMutation();
+
+  const verifyPhoneResetOtp = async ({
+    phoneNumber,
+    otp,
+  }: {
+    phoneNumber: string;
+    otp: string;
+  }) => {
+    const response = await verifyOtp({ phoneNumber, otp }).unwrap();
+    return response?.data as { resetToken: string; expiresInSeconds: number };
+  };
+
+  return {
+    verifyPhoneResetOtp,
+    verifyPhoneResetOtpIsLoading,
+  };
+};
+
+/**
+ * RESET PASSWORD WITH PHONE
+ */
+export const useResetPasswordWithPhone = () => {
+  const [reset, { isLoading: resetPasswordWithPhoneIsLoading }] =
+    useResetPasswordWithPhoneMutation();
+
+  const resetPasswordWithPhone = async ({
+    phoneNumber,
+    resetToken,
+    password,
+  }: {
+    phoneNumber: string;
+    resetToken: string;
+    password: string;
+  }) => {
+    const response = await reset({ phoneNumber, resetToken, password }).unwrap();
+    return response as { message: string };
+  };
+
+  return {
+    resetPasswordWithPhone,
+    resetPasswordWithPhoneIsLoading,
   };
 };
 
