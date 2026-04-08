@@ -113,27 +113,6 @@ export const validateVerifyPhoneResetOtp = (body: {
   return schema.validate(body);
 };
 
-// VALIDATE PHONE PASSWORD RESET
-export const validatePhoneResetPassword = (body: {
-  phoneNumber?: string;
-  resetToken?: string;
-  password?: string;
-}) => {
-  const schema = Joi.object({
-    phoneNumber: Joi.string().required(),
-    resetToken: Joi.string().required(),
-    password: Joi.string()
-      .pattern(PASSWORD_PATTERN)
-      .required()
-      .messages({
-        'string.pattern.base':
-          'Password must be at least 8 characters and include uppercase, lowercase, number, and special character',
-      }),
-  });
-
-  return schema.validate(body);
-};
-
 // VALIDATE COMPLETE REGISTRATION
 export const validateCompleteRegistration = (body: {
   email?: string;

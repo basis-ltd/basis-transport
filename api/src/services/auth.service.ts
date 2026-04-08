@@ -10,7 +10,6 @@ import {
   validateForgotPassword,
   validateLogin,
   validatePhoneLoginPrecheck,
-  validatePhoneResetPassword,
   validateResetPassword,
   validateSendPhoneResetOtp,
   validateSendPhoneOtp,
@@ -47,7 +46,6 @@ const PHONE_OTP_MAX_ATTEMPTS = 5;
 const PHONE_RESET_OTP_TTL_MS = 10 * 60 * 1000;
 const PHONE_RESET_OTP_RESEND_COOLDOWN_MS = 60 * 1000;
 const PHONE_RESET_OTP_MAX_ATTEMPTS = 5;
-const PHONE_RESET_SESSION_TTL_MS = 15 * 60 * 1000;
 const TEMP_AUTH_TTL_MS = 15 * 60 * 1000;
 
 function hashResetToken(token: string): string {
@@ -475,7 +473,7 @@ export class AuthService {
    * VERIFY PHONE RESET OTP
    */
   async verifyPhoneResetOtp(body: { phoneNumber?: string; otp?: string }): Promise<{
-    resetToken: string;
+    token: string;
     expiresInSeconds: number;
   }> {
     const { error, value } = validateVerifyPhoneResetOtp(body);
@@ -527,8 +525,8 @@ export class AuthService {
     }
 
     const rawResetToken = randomBytes(32).toString('hex');
-    const resetSessionHash = hashResetToken(rawResetToken);
-    const resetSessionExpiresAt = new Date(now + PHONE_RESET_SESSION_TTL_MS);
+    const tokenHash = hashResetToken(rawResetToken);
+    const resetExpiresAt = new Date(now + RESET_TOKEN_TTL_MS);
 
     await this.userRepository.update(
       { id: user.id },
@@ -537,67 +535,17 @@ export class AuthService {
         phoneResetOtpExpiresAt: null,
         phoneResetOtpAttempts: 0,
         phoneResetOtpLastSentAt: null,
-        phoneResetSessionHash: resetSessionHash,
-        phoneResetSessionExpiresAt: resetSessionExpiresAt,
+        phoneResetSessionHash: null,
+        phoneResetSessionExpiresAt: null,
+        passwordResetTokenHash: tokenHash,
+        passwordResetExpires: resetExpiresAt,
       }
     );
 
     return {
-      resetToken: rawResetToken,
-      expiresInSeconds: Math.floor(PHONE_RESET_SESSION_TTL_MS / 1000),
+      token: rawResetToken,
+      expiresInSeconds: Math.floor(RESET_TOKEN_TTL_MS / 1000),
     };
-  }
-
-  /**
-   * RESET PASSWORD WITH PHONE VERIFICATION
-   */
-  async resetPasswordWithPhone(body: {
-    phoneNumber?: string;
-    resetToken?: string;
-    password?: string;
-  }): Promise<{ message: string }> {
-    const { error, value } = validatePhoneResetPassword(body);
-    if (error) {
-      throw new ValidationError(error.message);
-    }
-
-    const phoneNumber = formatLocalPhoneNumber(value.phoneNumber);
-    const resetSessionHash = hashResetToken(value.resetToken);
-
-    const user = await this.userRepository
-      .createQueryBuilder('user')
-      .where('user.phone_number = :phoneNumber', { phoneNumber })
-      .andWhere('user.phone_reset_session_hash = :sessionHash', {
-        sessionHash: resetSessionHash,
-      })
-      .andWhere('user.phone_reset_session_expires_at > :now', { now: new Date() })
-      .getOne();
-
-    if (!user) {
-      throw new ValidationError('Invalid or expired reset session');
-    }
-
-    const newPasswordHash = await hashPassword(value.password);
-
-    await this.userRepository
-      .createQueryBuilder()
-      .update(User)
-      .set({
-        passwordHash: newPasswordHash,
-        hasSetPassword: true,
-        phoneResetOtpHash: null,
-        phoneResetOtpExpiresAt: null,
-        phoneResetOtpAttempts: 0,
-        phoneResetOtpLastSentAt: null,
-        phoneResetSessionHash: null,
-        phoneResetSessionExpiresAt: null,
-        passwordResetTokenHash: null,
-        passwordResetExpires: null,
-      } as any)
-      .where('id = :id', { id: user.id })
-      .execute();
-
-    return { message: 'Your password has been updated. You can sign in now.' };
   }
 
   /**
@@ -753,8 +701,15 @@ export class AuthService {
       .update(User)
       .set({
         passwordHash: newPasswordHash,
+        hasSetPassword: true,
         passwordResetTokenHash: null,
         passwordResetExpires: null,
+        phoneResetOtpHash: null,
+        phoneResetOtpExpiresAt: null,
+        phoneResetOtpAttempts: 0,
+        phoneResetOtpLastSentAt: null,
+        phoneResetSessionHash: null,
+        phoneResetSessionExpiresAt: null,
       } as any)
       .where('id = :id', { id: user.id })
       .execute();

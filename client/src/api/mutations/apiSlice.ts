@@ -64,22 +64,6 @@ export const apiSlice = createApi({
       }),
     }),
 
-    resetPasswordWithPhone: builder.mutation({
-      query: ({
-        phoneNumber,
-        resetToken,
-        password,
-      }: {
-        phoneNumber: string;
-        resetToken: string;
-        password: string;
-      }) => ({
-        url: '/auth/phone/reset-password',
-        method: 'POST',
-        body: { phoneNumber, resetToken, password },
-      }),
-    }),
-
     completeRegistration: builder.mutation({
       query: ({
         email,
@@ -242,7 +226,6 @@ export const {
   useVerifyPhoneOtpMutation,
   useSendPhoneResetOtpMutation,
   useVerifyPhoneResetOtpMutation,
-  useResetPasswordWithPhoneMutation,
   useCompleteRegistrationMutation,
   useForgotPasswordMutation,
   useResetPasswordMutation,

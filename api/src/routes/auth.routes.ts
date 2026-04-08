@@ -23,10 +23,6 @@ router.post(
   authController.verifyPhoneResetOtp.bind(authController)
 );
 router.post(
-  '/phone/reset-password',
-  authController.resetPasswordWithPhone.bind(authController)
-);
-router.post(
   '/complete-registration',
   authMiddleware,
   authController.completeRegistration.bind(authController)

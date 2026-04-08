@@ -1,5 +1,5 @@
 import { useGetPublicLandingStatsQuery } from '@/api/queries/apiQuerySlice';
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Seo } from '@/components/seo';
 import { absoluteUrl } from '@/constants/seo.constants';
 import PublicFooter from '@/containers/public/PublicFooter';
@@ -18,6 +18,11 @@ import LandingTestimonialsSection from './components/landing/LandingTestimonials
 const LandingPage = () => {
   const { data: landingStats, isLoading, isError } =
     useGetPublicLandingStatsQuery();
+  const [animatedStats, setAnimatedStats] = useState({
+    commutes: 0,
+    users: 0,
+  });
+  const hasAnimatedStatsRef = useRef(false);
 
   const { commutesValue, usersValue } = useMemo(() => {
     if (isLoading || isError || !landingStats) {
@@ -30,6 +35,62 @@ const LandingPage = () => {
   }, [landingStats, isLoading, isError]);
 
   const observerRef = useRef<IntersectionObserver | null>(null);
+
+  useEffect(() => {
+    if (!landingStats || hasAnimatedStatsRef.current) {
+      return;
+    }
+
+    hasAnimatedStatsRef.current = true;
+
+    const animationDuration = 1400;
+    const animationStart = performance.now();
+
+    let animationFrameId = 0;
+
+    const step = (currentTime: number) => {
+      const elapsedTime = currentTime - animationStart;
+      const progress = Math.min(elapsedTime / animationDuration, 1);
+      const easedProgress = 1 - Math.pow(1 - progress, 3);
+
+      setAnimatedStats({
+        commutes: Math.round(landingStats.commutes * easedProgress),
+        users: Math.round(landingStats.users * easedProgress),
+      });
+
+      if (progress < 1) {
+        animationFrameId = window.requestAnimationFrame(step);
+      }
+    };
+
+    animationFrameId = window.requestAnimationFrame(step);
+
+    return () => {
+      window.cancelAnimationFrame(animationFrameId);
+    };
+  }, [landingStats]);
+
+  const animatedCommutesValue = useMemo(() => {
+    if (isLoading || isError || !landingStats) {
+      return commutesValue;
+    }
+
+    return `${animatedStats.commutes.toLocaleString()}+`;
+  }, [
+    animatedStats.commutes,
+    commutesValue,
+    isError,
+    isLoading,
+    landingStats,
+  ]);
+
+  const animatedUsersValue = useMemo(() => {
+    if (isLoading || isError || !landingStats) {
+      return usersValue;
+    }
+
+    return `${animatedStats.users.toLocaleString()}+`;
+  }, [animatedStats.users, isError, isLoading, landingStats, usersValue]);
 
   const scrollToHowItWorks = useCallback(() => {
     document
@@ -101,8 +162,8 @@ const LandingPage = () => {
         <article>
           <LandingHeroSection
             onLearnMore={scrollToHowItWorks}
-            commutesValue={commutesValue}
-            usersValue={usersValue}
+            commutesValue={animatedCommutesValue}
+            usersValue={animatedUsersValue}
           />
           <LandingNearbyTripsSection />
           <LandingProblemReliefSection />

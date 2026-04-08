@@ -2,7 +2,6 @@ import {
   useCompleteRegistrationMutation,
   useLoginMutation,
   usePhoneLoginPrecheckMutation,
-  useResetPasswordWithPhoneMutation,
   useSendPhoneResetOtpMutation,
   useSendPhoneOtpMutation,
   useVerifyPhoneResetOtpMutation,
@@ -228,38 +227,12 @@ export const useVerifyPhoneResetOtp = () => {
     otp: string;
   }) => {
     const response = await verifyOtp({ phoneNumber, otp }).unwrap();
-    return response?.data as { resetToken: string; expiresInSeconds: number };
+    return response?.data as { token: string; expiresInSeconds: number };
   };
 
   return {
     verifyPhoneResetOtp,
     verifyPhoneResetOtpIsLoading,
-  };
-};
-
-/**
- * RESET PASSWORD WITH PHONE
- */
-export const useResetPasswordWithPhone = () => {
-  const [reset, { isLoading: resetPasswordWithPhoneIsLoading }] =
-    useResetPasswordWithPhoneMutation();
-
-  const resetPasswordWithPhone = async ({
-    phoneNumber,
-    resetToken,
-    password,
-  }: {
-    phoneNumber: string;
-    resetToken: string;
-    password: string;
-  }) => {
-    const response = await reset({ phoneNumber, resetToken, password }).unwrap();
-    return response as { message: string };
-  };
-
-  return {
-    resetPasswordWithPhone,
-    resetPasswordWithPhoneIsLoading,
   };
 };
 

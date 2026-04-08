@@ -102,7 +102,6 @@ export class AuthController {
   async verifyPhoneResetOtp(req: Request, res: Response, next: NextFunction) {
     try {
       const data = await authService.verifyPhoneResetOtp(req.body);
-      console.log(data);
       return res.status(200).json({
         message: 'Reset code verified successfully',
         data,
@@ -151,15 +150,4 @@ export class AuthController {
     }
   }
 
-  /**
-   * RESET PASSWORD WITH PHONE OTP SESSION
-   */
-  async resetPasswordWithPhone(req: Request, res: Response, next: NextFunction) {
-    try {
-      const result = await authService.resetPasswordWithPhone(req.body);
-      return res.status(200).json(result);
-    } catch (error) {
-      next(error);
-    }
-  }
 }
