@@ -15,8 +15,14 @@ import {
   LessThanOrEqual,
   MoreThanOrEqual,
 } from 'typeorm';
-import { TripService } from '../../services/trip.service';
-import { UserTripService } from '../../services/userTrip.service';
+import { TripService } from './trips.service';
+import { UserTripService } from '../user-trips/user-trips.service';
+import {
+  CreateTripDto,
+  QuickJoinTripDto,
+  RecordEntranceDto,
+  UpdateTripDto,
+} from './dto/trip.dto';
 import {
   CurrentUser,
   OptionalAuth,
@@ -26,6 +32,7 @@ import {
 import { AuthenticatedUser } from '../../common/types/auth.types';
 import { UUID } from '../../types';
 import { Trip } from '../../entities/trip.entity';
+import { UserTrip } from '../../entities/userTrip.entity';
 import { TripStatus } from '../../constants/trip.constants';
 import { ValidationError } from '../../helpers/errors.helper';
 import { RoleTypes } from '../../constants/role.constants';
@@ -83,7 +90,7 @@ export class TripsController {
   @HttpCode(201)
   async quickJoinTrip(
     @Param('tripId') tripId: string,
-    @Body() body: { phoneNumber?: string; entranceLocation?: unknown }
+    @Body() body: QuickJoinTripDto
   ) {
     const result = await this.tripService.quickJoinTrip({
       tripId: tripId as UUID,
@@ -104,11 +111,11 @@ export class TripsController {
   @Post()
   @HttpCode(201)
   async createTrip(
-    @Body() body: Record<string, unknown>,
+    @Body() body: CreateTripDto,
     @CurrentUser() user: AuthenticatedUser
   ) {
     const newTrip = await this.tripService.createTrip({
-      ...(body as unknown as Trip),
+      ...(body as Partial<Trip>),
       createdById: user.id,
     });
     return {
@@ -143,10 +150,7 @@ export class TripsController {
       condition.createdById = createdById as UUID;
     }
     if (startTime && endTime) {
-      condition.startTime = Between(
-        new Date(startTime),
-        new Date(endTime)
-      );
+      condition.startTime = Between(new Date(startTime), new Date(endTime));
     } else if (startTime) {
       condition.startTime = MoreThanOrEqual(new Date(startTime));
     } else if (endTime) {
@@ -178,16 +182,14 @@ export class TripsController {
   @HttpCode(201)
   async recordEntranceForTrip(
     @Param('tripId') tripId: string,
-    @Body() body: Record<string, unknown>,
+    @Body() body: RecordEntranceDto,
     @CurrentUser() user: AuthenticatedUser
   ) {
     const resolvedUserId =
-      isAdminLike(user) && body.userId
-        ? (body.userId as UUID)
-        : user.id;
+      isAdminLike(user) && body.userId ? (body.userId as UUID) : user.id;
 
     const newUserTrip = await this.userTripService.createUserTrip({
-      ...body,
+      ...(body as Partial<UserTrip>),
       tripId: tripId as UUID,
       userId: resolvedUserId,
       createdById: user.id,
@@ -259,11 +261,11 @@ export class TripsController {
   @Patch(':id')
   async updateTrip(
     @Param('id') id: string,
-    @Body() body: Record<string, unknown>,
+    @Body() body: UpdateTripDto,
     @CurrentUser() user: AuthenticatedUser
   ) {
     const updatedTrip = await this.tripService.updateTrip(id as UUID, {
-      ...body,
+      ...(body as Partial<Trip>),
       createdById: user.id,
     });
     return {

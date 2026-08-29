@@ -1,4 +1,8 @@
-import { createParamDecorator, ExecutionContext, SetMetadata } from '@nestjs/common';
+import {
+  createParamDecorator,
+  ExecutionContext,
+  SetMetadata,
+} from '@nestjs/common';
 import { AuthenticatedUser } from '../types/auth.types';
 import { RoleTypes } from '../../constants/role.constants';
 

@@ -2,6 +2,8 @@ import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import configuration from './config/configuration';
+import { validate } from './config/env.validation';
+import { EmailModule } from './integrations/email/email.module';
 import { DatabaseModule } from './database/database.module';
 import { AppController } from './app.controller';
 import { RequestContextMiddleware } from './common/middleware/request-context.middleware';
@@ -27,8 +29,10 @@ import { SmsModule } from './integrations/sms/sms.module';
     ConfigModule.forRoot({
       isGlobal: true,
       load: [configuration],
+      validate,
     }),
     DatabaseModule,
+    EmailModule,
     CommonModule,
     LogsModule,
     SmsModule,

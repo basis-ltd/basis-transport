@@ -2,8 +2,8 @@ import './polyfills';
 import 'reflect-metadata';
 import cluster from 'cluster';
 import os from 'os';
+import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
 import { json, urlencoded } from 'express';
 import { AppModule } from './app.module';
 import logger from './helpers/logger.helper';
@@ -24,6 +24,14 @@ async function bootstrap() {
       whitelist: true,
       transform: true,
       forbidNonWhitelisted: false,
+      exceptionFactory: (errors) => {
+        const messages = errors.flatMap((error) =>
+          Object.values(error.constraints || {})
+        );
+        return new BadRequestException({
+          message: messages[0] || 'Validation failed',
+        });
+      },
     })
   );
 
@@ -32,9 +40,10 @@ async function bootstrap() {
   logger.success(`Worker ${process.pid} started on port ${port}`);
 }
 
-const numCPUs = os.cpus().length;
+const useCluster = process.env.NODE_ENV === 'production';
 
-if (cluster.isPrimary) {
+if (useCluster && cluster.isPrimary) {
+  const numCPUs = os.cpus().length;
   logger.info(`Master ${process.pid} is running`);
 
   for (let i = 0; i < numCPUs; i++) {

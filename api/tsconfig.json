@@ -57,12 +57,19 @@
 
     // Disables strict checking of property initialization in classes
     // Useful when using dependency injection or other frameworks
-    "strictPropertyInitialization": false
+    "strictPropertyInitialization": false,
+
+    "baseUrl": "./",
+    "paths": {
+      "@/*": ["src/*"],
+      "@common/*": ["src/common/*"],
+      "@modules/*": ["src/modules/*"]
+    }
   },
 
   // Specifies which files to include in the compilation
   // **/* means all files in src directory and its subdirectories
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "test/**/*"],
 
   // Specifies which files to exclude from compilation
   "exclude": ["node_modules", "dist"],

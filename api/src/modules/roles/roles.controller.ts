@@ -9,14 +9,14 @@ import {
   Query,
 } from '@nestjs/common';
 import { FindOptionsWhere, ILike } from 'typeorm';
-import { RoleService } from '../../services/role.service';
+import { RolesService } from './roles.service';
 import { UUID } from '../../types';
 import { Role } from '../../entities/role.entity';
 import { RoleStatus } from '../../constants/role.constants';
 
 @Controller('roles')
 export class RolesController {
-  constructor(private readonly roleService: RoleService) {}
+  constructor(private readonly roleService: RolesService) {}
 
   @Get()
   async fetchRoles(

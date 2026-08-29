@@ -5,12 +5,10 @@ import { Trip } from '../../entities/trip.entity';
 import { TransportCard } from '../../entities/transportCard.entity';
 import { UserTrip } from '../../entities/userTrip.entity';
 import { DashboardController } from './dashboard.controller';
-import { DashboardService } from '../../services/dashboard.service';
+import { DashboardService } from './dashboard.service';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([User, Trip, TransportCard, UserTrip]),
-  ],
+  imports: [TypeOrmModule.forFeature([User, Trip, TransportCard, UserTrip])],
   controllers: [DashboardController],
   providers: [DashboardService],
 })

@@ -24,11 +24,7 @@ export class SMSService {
     this.senderId = process.env.PINDO_SENDER_ID || 'Peekaboo';
   }
 
-  async send({
-    to,
-    text,
-    sender,
-  }: SendSMSPayload): Promise<unknown> {
+  async send({ to, text, sender }: SendSMSPayload): Promise<unknown> {
     try {
       const response = await this.client.post('', {
         to,

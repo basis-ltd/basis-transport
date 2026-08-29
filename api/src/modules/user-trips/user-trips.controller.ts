@@ -15,16 +15,18 @@ import {
   LessThanOrEqual,
   MoreThanOrEqual,
 } from 'typeorm';
-import { UserTripService } from '../../services/userTrip.service';
+import { UserTripService } from './user-trips.service';
+import {
+  CreateUserTripDto,
+  RecordExitDto,
+  UpdateUserTripDto,
+} from './dto/user-trip.dto';
 import { CurrentUser } from '../../common/decorators/auth.decorators';
 import { AuthenticatedUser } from '../../common/types/auth.types';
 import { UUID } from '../../types';
 import { UserTrip } from '../../entities/userTrip.entity';
 import { UserTripStatus } from '../../constants/userTrip.constants';
-import {
-  canManageUserTrip,
-  isAdminLike,
-} from '../../helpers/auth.helper';
+import { canManageUserTrip, isAdminLike } from '../../helpers/auth.helper';
 import { ForbiddenError, ValidationError } from '../../helpers/errors.helper';
 
 function buildStartTimeEndTimeCondition(
@@ -50,16 +52,14 @@ export class UserTripsController {
   @Post('entrance')
   @HttpCode(201)
   async recordEntranceFromBody(
-    @Body() body: Record<string, unknown>,
+    @Body() body: CreateUserTripDto,
     @CurrentUser() user: AuthenticatedUser
   ) {
     const resolvedUserId =
-      isAdminLike(user) && body.userId
-        ? (body.userId as UUID)
-        : user.id;
+      isAdminLike(user) && body.userId ? (body.userId as UUID) : user.id;
 
     const newUserTrip = await this.userTripService.createUserTrip({
-      ...body,
+      ...(body as Partial<UserTrip>),
       userId: resolvedUserId,
       createdById: user.id,
     });
@@ -73,16 +73,14 @@ export class UserTripsController {
   @Post()
   @HttpCode(201)
   async createUserTrip(
-    @Body() body: Record<string, unknown>,
+    @Body() body: CreateUserTripDto,
     @CurrentUser() user: AuthenticatedUser
   ) {
     const resolvedUserId =
-      isAdminLike(user) && body.userId
-        ? (body.userId as UUID)
-        : user.id;
+      isAdminLike(user) && body.userId ? (body.userId as UUID) : user.id;
 
     const newUserTrip = await this.userTripService.createUserTrip({
-      ...body,
+      ...(body as Partial<UserTrip>),
       userId: resolvedUserId,
       createdById: user.id,
     });
@@ -96,13 +94,9 @@ export class UserTripsController {
   @Post(':id/exit')
   async recordExit(
     @Param('id') id: string,
-    @Body() body: Record<string, unknown>,
+    @Body() body: RecordExitDto,
     @CurrentUser() user: AuthenticatedUser
   ) {
-    if (!body?.exitLocation) {
-      throw new ValidationError('exitLocation is required');
-    }
-
     const existing = await this.userTripService.getUserTripById(id as UUID);
     if (!canManageUserTrip(user, existing.userId)) {
       throw new ForbiddenError('You cannot modify this user trip');
@@ -113,7 +107,7 @@ export class UserTripsController {
       {
         status: UserTripStatus.COMPLETED,
         exitLocation: body.exitLocation as UserTrip['exitLocation'],
-        endTime: body.endTime ? new Date(body.endTime as string) : new Date(),
+        endTime: body.endTime ? new Date(body.endTime) : new Date(),
         createdById: user.id,
       }
     );
@@ -127,7 +121,7 @@ export class UserTripsController {
   @Patch(':id')
   async updateUserTrip(
     @Param('id') id: string,
-    @Body() body: Record<string, unknown>,
+    @Body() body: UpdateUserTripDto,
     @CurrentUser() user: AuthenticatedUser
   ) {
     const existing = await this.userTripService.getUserTripById(id as UUID);
@@ -138,7 +132,7 @@ export class UserTripsController {
     const updatedUserTrip = await this.userTripService.updateUserTrip(
       id as UUID,
       {
-        ...body,
+        ...(body as Partial<UserTrip>),
         createdById: user.id,
       }
     );

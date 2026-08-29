@@ -10,7 +10,8 @@ import {
   Query,
 } from '@nestjs/common';
 import { FindOptionsWhere, ILike } from 'typeorm';
-import { LocationService } from '../../services/location.service';
+import { LocationService } from './locations.service';
+import { CreateLocationDto, UpdateLocationDto } from './dto/location.dto';
 import { CurrentUser } from '../../common/decorators/auth.decorators';
 import { AuthenticatedUser } from '../../common/types/auth.types';
 import { UUID } from '../../types';
@@ -23,11 +24,11 @@ export class LocationsController {
   @Post()
   @HttpCode(201)
   async createLocation(
-    @Body() body: Record<string, unknown>,
+    @Body() body: CreateLocationDto,
     @CurrentUser() user: AuthenticatedUser
   ) {
     const location = await this.locationService.createLocation({
-      ...body,
+      ...(body as Partial<Location>),
       createdById: user.id,
     });
     return {
@@ -92,11 +93,11 @@ export class LocationsController {
   @Patch(':id')
   async updateLocation(
     @Param('id') id: string,
-    @Body() body: Record<string, unknown>
+    @Body() body: UpdateLocationDto
   ) {
     const location = await this.locationService.updateLocation(
       id as UUID,
-      body
+      body as Partial<Location>
     );
     return {
       message: 'Location updated successfully',

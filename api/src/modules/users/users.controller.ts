@@ -9,7 +9,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { FindOptionsWhere } from 'typeorm';
-import { UserService } from '../../services/user.service';
+import { UsersService } from './users.service';
 import { CurrentUser } from '../../common/decorators/auth.decorators';
 import { AuthenticatedUser } from '../../common/types/auth.types';
 import { UUID } from '../../types';
@@ -17,7 +17,7 @@ import { User } from '../../entities/user.entity';
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UsersService) {}
 
   @Get()
   async fetchUsers(@Query('page') page = 0, @Query('size') size = 10) {
@@ -58,9 +58,7 @@ export class UsersController {
 
   @Post()
   @HttpCode(201)
-  async createUser(
-    @Body() body: { user: Partial<User>; roleIds: UUID[] }
-  ) {
+  async createUser(@Body() body: { user: Partial<User>; roleIds: UUID[] }) {
     const newUser = await this.userService.createUser(body);
     return {
       message: 'User created successfully',

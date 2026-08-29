@@ -8,7 +8,7 @@ import {
 import { Response } from 'express';
 import { AppError, CustomError } from '../../helpers/errors.helper';
 import logger from '../../helpers/logger.helper';
-import { LogsService } from '../../services/logs.service';
+import { LogsService } from '../../modules/logs/logs.service';
 import { LogReferenceTypes, LogTypes } from '../../constants/logs.constants';
 import { UUID } from '../../types';
 

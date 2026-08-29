@@ -61,7 +61,9 @@ export function redactForAudit(value: unknown, depth = 0): unknown {
 /**
  * Safe snapshot for TypeORM entities / POJOs: plain data, no circular refs, size-capped.
  */
-export function serializeEntityForAudit(entity: unknown): Record<string, unknown> {
+export function serializeEntityForAudit(
+  entity: unknown
+): Record<string, unknown> {
   const plain =
     entity && typeof entity === 'object'
       ? JSON.parse(
@@ -74,7 +76,7 @@ export function serializeEntityForAudit(entity: unknown): Record<string, unknown
         )
       : {};
   const redacted = redactForAudit(plain) as Record<string, unknown>;
-  let s = JSON.stringify(redacted);
+  const s = JSON.stringify(redacted);
   if (s.length > AUDIT_JSON_MAX_CHARS) {
     return {
       _truncated: true,

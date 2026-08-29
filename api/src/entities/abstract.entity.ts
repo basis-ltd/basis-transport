@@ -1,4 +1,4 @@
-import { UUID } from "../types";
+import { UUID } from '../types';
 import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
@@ -6,43 +6,43 @@ import {
   Column,
   ManyToOne,
   JoinColumn,
-} from "typeorm";
-import type { User } from "./user.entity";
+} from 'typeorm';
+import type { User } from './user.entity';
 
 export abstract class AbstractEntity {
   // ID
-  @PrimaryGeneratedColumn("uuid")
+  @PrimaryGeneratedColumn('uuid')
   id!: UUID;
 
   // CREATED AT
   @CreateDateColumn({
-    name: "created_at",
-    type: "timestamptz",
-    default: () => "CURRENT_TIMESTAMP",
+    name: 'created_at',
+    type: 'timestamptz',
+    default: () => 'CURRENT_TIMESTAMP',
   })
   createdAt!: Date;
 
   // UPDATED AT
   @UpdateDateColumn({
-    name: "updated_at",
-    type: "timestamptz",
-    default: () => "CURRENT_TIMESTAMP",
-    onUpdate: "CURRENT_TIMESTAMP",
+    name: 'updated_at',
+    type: 'timestamptz',
+    default: () => 'CURRENT_TIMESTAMP',
+    onUpdate: 'CURRENT_TIMESTAMP',
   })
   updatedAt!: Date;
 
   // CREATED BY ID
   @Column({
-    name: "created_by_id",
-    type: "uuid",
+    name: 'created_by_id',
+    type: 'uuid',
     nullable: true,
   })
   createdById?: UUID;
 
   // LAST UPDATED BY ID
   @Column({
-    name: "last_updated_by_id",
-    type: "uuid",
+    name: 'last_updated_by_id',
+    type: 'uuid',
     nullable: true,
   })
   lastUpdatedById?: UUID;
@@ -54,28 +54,20 @@ export abstract class AbstractEntity {
    */
 
   // CREATED BY
-  @ManyToOne(
-    () => require("./user.entity").User,
-    (user: User) => user.id,
-    {
-      onDelete: "SET NULL",
-      onUpdate: "CASCADE",
-      nullable: true,
-    }
-  )
-  @JoinColumn({ name: "created_by_id" })
+  @ManyToOne(() => require('./user.entity').User, (user: User) => user.id, {
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE',
+    nullable: true,
+  })
+  @JoinColumn({ name: 'created_by_id' })
   createdBy?: User;
 
   // LAST UPDATED BY
-  @ManyToOne(
-    () => require("./user.entity").User,
-    (user: User) => user.id,
-    {
-      onDelete: "SET NULL",
-      onUpdate: "CASCADE",
-      nullable: true,
-    }
-  )
-  @JoinColumn({ name: "last_updated_by_id" })
+  @ManyToOne(() => require('./user.entity').User, (user: User) => user.id, {
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE',
+    nullable: true,
+  })
+  @JoinColumn({ name: 'last_updated_by_id' })
   lastUpdatedBy?: User;
 }

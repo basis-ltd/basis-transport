@@ -7,8 +7,8 @@ import { RoleTypes } from '../constants/role.constants';
 import { AppModule } from '../app.module';
 import { Permission } from '../entities/permission.entity';
 import { Role } from '../entities/role.entity';
-import { RolePermissionService } from '../services/rolePermission.service';
-import { RoleService } from '../services/role.service';
+import { RolePermissionService } from '../modules/roles/role-permission.service';
+import { RolesService } from '../modules/roles/roles.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -18,7 +18,7 @@ export async function seedRoles(): Promise<void> {
   });
 
   try {
-    const roleService = app.get(RoleService);
+    const roleService = app.get(RolesService);
     const rolePermissionService = app.get(RolePermissionService);
     const roleRepository = app.get<Repository<Role>>(getRepositoryToken(Role));
     const permissionRepository = app.get<Repository<Permission>>(

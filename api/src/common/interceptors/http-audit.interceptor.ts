@@ -8,7 +8,7 @@ import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { Request, Response } from 'express';
 import { redactForAudit } from '../../helpers/auditSerialize.helper';
-import { HttpAuditService } from '../../services/httpAudit.service';
+import { HttpAuditService } from '../../modules/logs/http-audit.service';
 import logger from '../../helpers/logger.helper';
 import { AuthenticatedUser } from '../types/auth.types';
 
@@ -40,7 +40,9 @@ export class HttpAuditInterceptor implements NestInterceptor {
 
     const startedAt = Date.now();
     const bodySnapshot =
-      req.body && typeof req.body === 'object' && Object.keys(req.body).length > 0
+      req.body &&
+      typeof req.body === 'object' &&
+      Object.keys(req.body).length > 0
         ? (redactForAudit(req.body) as Record<string, unknown>)
         : null;
 
@@ -63,7 +65,10 @@ export class HttpAuditInterceptor implements NestInterceptor {
                 httpStatus: res.statusCode,
                 durationMs,
                 ip: clientIp(req)?.slice(0, 64),
-                userAgent: (req.headers['user-agent'] as string)?.slice(0, 2000),
+                userAgent: (req.headers['user-agent'] as string)?.slice(
+                  0,
+                  2000
+                ),
                 actorUserId,
                 bodySnapshot,
               })

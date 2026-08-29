@@ -1,5 +1,5 @@
 import { Controller, Get, Query } from '@nestjs/common';
-import { DashboardService } from '../../services/dashboard.service';
+import { DashboardService } from './dashboard.service';
 import { Public } from '../../common/decorators/auth.decorators';
 import { UUID } from '../../types';
 import { UserStatus } from '../../constants/user.constants';
@@ -72,13 +72,12 @@ export class DashboardController {
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string
   ) {
-    const totalTimeSpent = await this.dashboardService.countTotalTimeSpentOnTrips(
-      {
+    const totalTimeSpent =
+      await this.dashboardService.countTotalTimeSpentOnTrips({
         userId: userId as UUID,
         startDate: startDate ? new Date(startDate) : undefined,
         endDate: endDate ? new Date(endDate) : undefined,
-      }
-    );
+      });
 
     return {
       message: 'Total time spent on trips counted successfully',

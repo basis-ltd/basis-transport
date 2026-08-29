@@ -3,7 +3,7 @@ import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { PermissionNames } from '../constants/permission.constants';
 import { AppModule } from '../app.module';
-import { PermissionsService } from '../services/permissions.service';
+import { PermissionsService } from '../modules/roles/permissions.service';
 
 export async function seedPermissions(): Promise<void> {
   const app = await NestFactory.createApplicationContext(AppModule, {

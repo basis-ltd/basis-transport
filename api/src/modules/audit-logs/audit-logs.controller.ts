@@ -5,8 +5,8 @@ import {
   LessThanOrEqual,
   MoreThanOrEqual,
 } from 'typeorm';
-import { AuditLogService } from '../../services/auditLog.service';
-import { TransportCardService } from '../../services/transportCard.service';
+import { AuditLogService } from './audit-logs.service';
+import { TransportCardService } from '../transport-cards/transport-cards.service';
 import { UUID } from '../../types';
 import { AuditAction, AuditLog } from '../../entities/auditLog.entity';
 import { CurrentUser } from '../../common/decorators/auth.decorators';
@@ -65,10 +65,7 @@ export class AuditLogsController {
       condition.createdById = createdById as UUID;
     }
 
-    Object.assign(
-      condition,
-      buildUpdatedAtDateCondition(startDate, endDate)
-    );
+    Object.assign(condition, buildUpdatedAtDateCondition(startDate, endDate));
 
     const result = await this.auditLogService.fetchAuditLogs({
       page: Number(page),
@@ -120,10 +117,7 @@ export class AuditLogsController {
       condition.createdById = createdById as UUID;
     }
 
-    Object.assign(
-      condition,
-      buildUpdatedAtDateCondition(startDate, endDate)
-    );
+    Object.assign(condition, buildUpdatedAtDateCondition(startDate, endDate));
 
     const auditLogs = await this.auditLogService.fetchEntityHistory({
       page: Number(page),

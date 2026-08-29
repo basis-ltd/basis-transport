@@ -10,7 +10,11 @@ import {
   Query,
 } from '@nestjs/common';
 import { FindOptionsWhere, ILike } from 'typeorm';
-import { TransportCardService } from '../../services/transportCard.service';
+import { TransportCardService } from './transport-cards.service';
+import {
+  CreateTransportCardDto,
+  UpdateTransportCardDto,
+} from './dto/transport-card.dto';
 import { CurrentUser } from '../../common/decorators/auth.decorators';
 import { AuthenticatedUser } from '../../common/types/auth.types';
 import { UUID } from '../../types';
@@ -35,11 +39,11 @@ export class TransportCardsController {
   @Post()
   @HttpCode(201)
   async createTransportCard(
-    @Body() body: Record<string, unknown>,
+    @Body() body: CreateTransportCardDto,
     @CurrentUser() user: AuthenticatedUser
   ) {
     const transportCard = await this.transportCardService.createTransportCard({
-      ...body,
+      ...(body as Partial<TransportCard>),
       createdById: user.id,
     });
     return {
@@ -67,7 +71,7 @@ export class TransportCardsController {
   @Patch(':id')
   async updateTransportCard(
     @Param('id') id: string,
-    @Body() body: Record<string, unknown>,
+    @Body() body: UpdateTransportCardDto,
     @CurrentUser() user: AuthenticatedUser
   ) {
     const existing = await this.transportCardService.getTransportCardById(
@@ -77,7 +81,7 @@ export class TransportCardsController {
 
     const transportCard = await this.transportCardService.updateTransportCard(
       id as UUID,
-      body,
+      body as Partial<TransportCard>,
       { createdById: user.id }
     );
 

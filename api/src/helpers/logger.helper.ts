@@ -1,5 +1,5 @@
-import winston from "winston";
-import { ValidationError } from "./errors.helper";
+import winston from 'winston';
+import { ValidationError } from './errors.helper';
 
 interface LogEntry {
   message: string;
@@ -29,15 +29,15 @@ const customLevels: CustomLevels = {
 };
 
 const customColors = {
-  emerg: "red bold",
-  alert: "magenta bold",
-  crit: "red",
-  error: "red",
-  warning: "yellow",
-  notice: "cyan",
-  info: "gray",
-  debug: "blue",
-  success: "green",
+  emerg: 'red bold',
+  alert: 'magenta bold',
+  crit: 'red',
+  error: 'red',
+  warning: 'yellow',
+  notice: 'cyan',
+  info: 'gray',
+  debug: 'blue',
+  success: 'green',
 };
 
 winston.addColors(customColors);
@@ -46,39 +46,39 @@ const logger = winston.createLogger({
   levels: customLevels,
   transports: [
     new winston.transports.File({
-      filename: "logs/error.log",
-      level: "error",
+      filename: 'logs/error.log',
+      level: 'error',
       format: winston.format.combine(
         winston.format.timestamp(),
         winston.format.json()
       ),
     }),
     new winston.transports.File({
-      filename: "logs/activities.log",
-      level: "success",
+      filename: 'logs/activities.log',
+      level: 'success',
       format: winston.format.combine(
         winston.format.timestamp(),
         winston.format.json()
       ),
     }),
     new winston.transports.File({
-      filename: "logs/critical.log",
-      level: "warn",
+      filename: 'logs/critical.log',
+      level: 'warn',
       format: winston.format.combine(
         winston.format.timestamp(),
         winston.format.json()
       ),
     }),
     new winston.transports.Console({
-      level: "success",
+      level: 'success',
       format: winston.format.combine(
         winston.format.colorize(),
-        winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
+        winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
         winston.format.printf(({ timestamp, level, message, ...meta }) => {
           const getCircularReplacer = () => {
             const seen = new WeakSet();
             return (key: string, value: any) => {
-              if (typeof value === "object" && value !== null) {
+              if (typeof value === 'object' && value !== null) {
                 if (seen.has(value)) {
                   return '[Circular]';
                 }
@@ -88,11 +88,14 @@ const logger = winston.createLogger({
             };
           };
 
-          const metaString = Object.keys(meta).length ? JSON.stringify(meta, getCircularReplacer(), 2) : '';
-          const messageString = typeof message === 'object' 
-            ? JSON.stringify(message, getCircularReplacer(), 2)
-            : message;
-            
+          const metaString = Object.keys(meta).length
+            ? JSON.stringify(meta, getCircularReplacer(), 2)
+            : '';
+          const messageString =
+            typeof message === 'object'
+              ? JSON.stringify(message, getCircularReplacer(), 2)
+              : message;
+
           return `${timestamp} [${level}]: ${messageString}${metaString ? '\n' + metaString : ''}`;
         })
       ),
@@ -104,12 +107,12 @@ export default logger;
 
 export const formatLog = (entry: string): LogEntry => {
   try {
-    const cleanedEntry = entry?.replace(/\n/g, "").replace(/\s+/g, " ").trim();
+    const cleanedEntry = entry?.replace(/\n/g, '').replace(/\s+/g, ' ').trim();
 
     const obj: LogEntry = {
-      message: "",
-      level: "",
-      timestamp: "",
+      message: '',
+      level: '',
+      timestamp: '',
     };
 
     const regex = /(\w+):\s*'([^']*)'/g;

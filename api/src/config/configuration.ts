@@ -1,14 +1,16 @@
-export default () => ({
+import { AppConfig } from './config.types';
+
+export default (): AppConfig => ({
   port: parseInt(process.env.PORT || '8080', 10),
   database: {
-    host: process.env.DB_HOST,
+    host: process.env.DB_HOST as string,
     port: parseInt(process.env.DB_PORT || '5432', 10),
-    username: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    name: process.env.DB_NAME,
+    username: process.env.DB_USER as string,
+    password: process.env.DB_PASSWORD as string,
+    name: process.env.DB_NAME as string,
   },
   jwt: {
-    secret: process.env.JWT_SECRET,
+    secret: process.env.JWT_SECRET as string,
   },
   email: {
     resendApiKey: process.env.RESEND_API_KEY,
