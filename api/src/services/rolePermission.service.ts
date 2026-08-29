@@ -1,21 +1,22 @@
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { RolePermission } from '../entities/rolePermission.entity';
-import { AppDataSource } from '../data-source';
 import { Role } from '../entities/role.entity';
 import { Permission } from '../entities/permission.entity';
 import { NotFoundError } from '../helpers/errors.helper';
 import { UUID } from '../types';
 
+@Injectable()
 export class RolePermissionService {
-  private readonly rolePermissionRepository: Repository<RolePermission>;
-  private readonly roleRepository: Repository<Role>;
-  private readonly permissionRepository: Repository<Permission>;
-
-  constructor() {
-    this.rolePermissionRepository = AppDataSource.getRepository(RolePermission);
-    this.roleRepository = AppDataSource.getRepository(Role);
-    this.permissionRepository = AppDataSource.getRepository(Permission);
-  }
+  constructor(
+    @InjectRepository(RolePermission)
+    private readonly rolePermissionRepository: Repository<RolePermission>,
+    @InjectRepository(Role)
+    private readonly roleRepository: Repository<Role>,
+    @InjectRepository(Permission)
+    private readonly permissionRepository: Repository<Permission>
+  ) {}
 
   // CREATE ROLE PERMISSION
   async createRolePermission(

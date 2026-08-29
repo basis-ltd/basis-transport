@@ -1,6 +1,7 @@
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsWhere, Repository } from 'typeorm';
 import { UserTrip } from '../entities/userTrip.entity';
-import { AppDataSource } from '../data-source';
 import { NotFoundError, ValidationError } from '../helpers/errors.helper';
 import {
   createUserTripValidation,
@@ -17,16 +18,16 @@ import {
 } from '../helpers/pagination.helper';
 import { UserTripStatus } from '../constants/userTrip.constants';
 
+@Injectable()
 export class UserTripService {
-  private readonly userTripRepository: Repository<UserTrip>;
-  private readonly userRepository: Repository<User>;
-  private readonly tripRepository: Repository<Trip>;
-
-  constructor() {
-    this.userTripRepository = AppDataSource.getRepository(UserTrip);
-    this.userRepository = AppDataSource.getRepository(User);
-    this.tripRepository = AppDataSource.getRepository(Trip);
-  }
+  constructor(
+    @InjectRepository(UserTrip)
+    private readonly userTripRepository: Repository<UserTrip>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+    @InjectRepository(Trip)
+    private readonly tripRepository: Repository<Trip>
+  ) {}
 
   /**
    * CREATE USER TRIP

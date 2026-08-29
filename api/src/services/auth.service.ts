@@ -1,7 +1,8 @@
 import { createHash, randomBytes } from 'crypto';
-import { Request } from 'express';
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { ConfigService } from '@nestjs/config';
 import { Repository } from 'typeorm';
-import { AppDataSource } from '../data-source';
 import jwt from 'jsonwebtoken';
 import { User } from '../entities/user.entity';
 import {
@@ -29,10 +30,10 @@ import {
   buildPhoneOtpMessage,
   buildPhonePasswordResetOtpMessage,
 } from '../integrations/sms/sms.messages';
-import { AuthenticatedRequest } from '../types/auth.types';
+import { UUID } from '../types';
 
 // LOAD ENV
-const { JWT_SECRET, CLIENT_APP_URL } = process.env;
+const { CLIENT_APP_URL } = process.env;
 
 const FORGOT_PASSWORD_RESPONSE = {
   message:
@@ -57,18 +58,16 @@ function getPublicAppUrl(): string {
   return base.replace(/\/$/, '');
 }
 
+@Injectable()
 export class AuthService {
-  private readonly userRepository: Repository<User>;
-  private readonly userRoleService: UserRoleService;
-  private readonly roleService: RoleService;
-  private readonly smsService: SMSService;
-
-  constructor() {
-    this.userRepository = AppDataSource.getRepository(User);
-    this.userRoleService = new UserRoleService();
-    this.roleService = new RoleService();
-    this.smsService = new SMSService();
-  }
+  constructor(
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+    private readonly userRoleService: UserRoleService,
+    private readonly roleService: RoleService,
+    private readonly smsService: SMSService,
+    private readonly configService: ConfigService
+  ) {}
 
   /**
    * SIGNUP
@@ -101,7 +100,7 @@ export class AuthService {
     if (userExists) {
       return {
         user: userExists,
-        token: jwt.sign({ id: userExists.id }, String(JWT_SECRET)),
+        token: jwt.sign({ id: userExists.id }, this.getJwtSecret()),
       };
     }
 
@@ -151,7 +150,7 @@ export class AuthService {
     }
 
     // GENERATE JWT TOKEN
-    const jwtToken = jwt.sign({ id: newUser.id }, String(JWT_SECRET));
+    const jwtToken = jwt.sign({ id: newUser.id }, this.getJwtSecret());
 
     const createdUser = await this.userRepository.findOne({
       where: { id: newUser?.id },
@@ -553,20 +552,19 @@ export class AuthService {
    */
   async completeRegistration(
     body: { email?: string; password?: string },
-    req: Request
+    userId: UUID
   ): Promise<{ user: User; token: string }> {
     const { error, value } = validateCompleteRegistration(body);
     if (error) {
       throw new ValidationError(error.message);
     }
 
-    const authReq = req as AuthenticatedRequest;
-    if (!authReq.user?.id) {
+    if (!userId) {
       throw new UnauthorizedError('Unauthorized');
     }
 
     const user = await this.userRepository.findOne({
-      where: { id: authReq.user.id },
+      where: { id: userId },
       relations: {
         userRoles: {
           role: true,
@@ -726,8 +724,12 @@ export class AuthService {
         id: userId,
         mustCompleteRegistration,
       },
-      String(JWT_SECRET)
+      String(this.configService.get<string>('jwt.secret'))
     );
+  }
+
+  private getJwtSecret(): string {
+    return String(this.configService.get<string>('jwt.secret'));
   }
 
   private async findUserWithRoles(userId: User['id']): Promise<User | null> {

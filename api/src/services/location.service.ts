@@ -1,6 +1,7 @@
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsWhere, Repository } from 'typeorm';
 import { Location } from '../entities/location.entity';
-import { AppDataSource } from '../data-source';
 import { NotFoundError, ValidationError } from '../helpers/errors.helper';
 import {
   createLocationValidation,
@@ -14,12 +15,12 @@ import {
 import { UUID } from '../types';
 import { LogReferenceTypes } from '../constants/logs.constants';
 
+@Injectable()
 export class LocationService {
-  private readonly locationRepository: Repository<Location>;
-
-  constructor() {
-    this.locationRepository = AppDataSource.getRepository(Location);
-  }
+  constructor(
+    @InjectRepository(Location)
+    private readonly locationRepository: Repository<Location>
+  ) {}
 
   /**
    * CREATE LOCATION

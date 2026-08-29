@@ -1,6 +1,6 @@
-import { auditLogServiceSingleton } from '../services/auditLog.service';
+import { getAuditLogServiceInstance } from '../services/auditLog.service';
 import { UUID } from '../types';
-import { getAuditContext } from '../middlewares/requestContext.middleware';
+import { getAuditContext } from '../common/middleware/request-context.store';
 
 /**
  * Entity-level audit decorators (optional). Prefer {@link httpAuditMiddleware} for baseline
@@ -50,7 +50,7 @@ export function AuditUpdate(options: AuditOptions) {
         const result = await originalMethod.apply(this, args);
 
         try {
-          await auditLogServiceSingleton.logUpdate(
+          await getAuditLogServiceInstance().logUpdate(
             options.entityType,
             entityId,
             oldValues,
@@ -110,7 +110,7 @@ export function AuditDelete(options: AuditOptions) {
         }
 
         try {
-          await auditLogServiceSingleton.logDelete(
+          await getAuditLogServiceInstance().logDelete(
             options.entityType,
             entityId,
             oldValues,

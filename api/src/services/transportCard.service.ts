@@ -1,6 +1,7 @@
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsWhere, Repository } from 'typeorm';
 import { TransportCard } from '../entities/transportCard.entity';
-import { AppDataSource } from '../data-source';
 import {
   validateCreateTransportCard,
   validateUpdateTransportCard,
@@ -18,14 +19,14 @@ import {
   Pagination,
 } from '../helpers/pagination.helper';
 import { AuditDelete, AuditUpdate } from '../decorators/auditLog.decorator';
-import { auditLogServiceSingleton } from './auditLog.service';
+import { getAuditLogServiceInstance } from './auditLog.service';
 
+@Injectable()
 export class TransportCardService {
-  private readonly transportCardRepository: Repository<TransportCard>;
-
-  constructor() {
-    this.transportCardRepository = AppDataSource.getRepository(TransportCard);
-  }
+  constructor(
+    @InjectRepository(TransportCard)
+    private readonly transportCardRepository: Repository<TransportCard>
+  ) {}
 
   /** Used by @AuditUpdate / @AuditDelete for loading prior state. */
   async getEntityById(id: UUID): Promise<TransportCard | null> {
@@ -60,7 +61,7 @@ export class TransportCardService {
     const newTransportCard = await this.transportCardRepository.save(value);
 
     try {
-      await auditLogServiceSingleton.logCreate(
+      await getAuditLogServiceInstance().logCreate(
         'TransportCard',
         newTransportCard.id,
         newTransportCard,

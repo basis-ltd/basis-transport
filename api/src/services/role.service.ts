@@ -1,6 +1,7 @@
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsWhere, In, Repository } from 'typeorm';
 import { Role } from '../entities/role.entity';
-import { AppDataSource } from '../data-source';
 import { UUID } from '../types';
 import { NotFoundError } from '../helpers/errors.helper';
 import { RoleTypes } from '../constants/role.constants';
@@ -10,12 +11,12 @@ import {
   Pagination,
 } from '../helpers/pagination.helper';
 
+@Injectable()
 export class RoleService {
-  private readonly roleRepository: Repository<Role>;
-
-  constructor() {
-    this.roleRepository = AppDataSource.getRepository(Role);
-  }
+  constructor(
+    @InjectRepository(Role)
+    private readonly roleRepository: Repository<Role>
+  ) {}
 
   // CREATE ROLE
   async createRole(role: Partial<Role>): Promise<Role> {

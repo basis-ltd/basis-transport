@@ -1,5 +1,6 @@
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { AppDataSource } from '../data-source';
 import { HttpAuditLog } from '../entities/httpAuditLog.entity';
 import { UUID } from '../types';
 
@@ -15,12 +16,12 @@ export interface SaveHttpAuditInput {
   bodySnapshot?: Record<string, unknown> | null;
 }
 
+@Injectable()
 export class HttpAuditService {
-  private readonly repo: Repository<HttpAuditLog>;
-
-  constructor() {
-    this.repo = AppDataSource.getRepository(HttpAuditLog);
-  }
+  constructor(
+    @InjectRepository(HttpAuditLog)
+    private readonly repo: Repository<HttpAuditLog>
+  ) {}
 
   async saveHttpAudit(input: SaveHttpAuditInput): Promise<HttpAuditLog> {
     const row = new HttpAuditLog();
@@ -36,5 +37,3 @@ export class HttpAuditService {
     return this.repo.save(row);
   }
 }
-
-export const httpAuditServiceSingleton = new HttpAuditService();

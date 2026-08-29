@@ -1,6 +1,7 @@
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsWhere, In, Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
-import { AppDataSource } from '../data-source';
 import { ConflictError, NotFoundError } from '../helpers/errors.helper';
 import { LogReferenceTypes } from '../constants/logs.constants';
 import { UUID } from '../types';
@@ -13,16 +14,16 @@ import { UserRole } from '../entities/userRole.entity';
 import { sendEmail } from '../helpers/emails.helper';
 import { renderUserWelcomeHtml } from '../emails/renderEmails';
 
+@Injectable()
 export class UserService {
-  private readonly userRepository: Repository<User>;
-  private readonly roleRepository: Repository<Role>;
-  private readonly userRoleRepository: Repository<UserRole>;
-
-  constructor() {
-    this.userRepository = AppDataSource.getRepository(User);
-    this.roleRepository = AppDataSource.getRepository(Role);
-    this.userRoleRepository = AppDataSource.getRepository(UserRole);
-  }
+  constructor(
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+    @InjectRepository(Role)
+    private readonly roleRepository: Repository<Role>,
+    @InjectRepository(UserRole)
+    private readonly userRoleRepository: Repository<UserRole>
+  ) {}
 
   /**
    * DELETE USER

@@ -1,6 +1,8 @@
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { ConfigService } from '@nestjs/config';
 import { FindOptionsWhere, In, Repository } from 'typeorm';
 import { Trip } from '../entities/trip.entity';
-import { AppDataSource } from '../data-source';
 import {
   createTripValidation,
   quickJoinTripValidation,
@@ -27,8 +29,6 @@ import { RoleTypes } from '../constants/role.constants';
 import { UserStatus } from '../constants/user.constants';
 import jwt from 'jsonwebtoken';
 
-const { JWT_SECRET } = process.env;
-
 interface NearbyTripResult {
   id: UUID;
   referenceId: string;
@@ -46,22 +46,23 @@ interface NearbyTripResult {
   distanceMeters?: number;
 }
 
+@Injectable()
 export class TripService {
-  private readonly tripRepository: Repository<Trip>;
-  private readonly locationRepository: Repository<Location>;
-  private readonly userRepository: Repository<User>;
-  private readonly userTripRepository: Repository<UserTrip>;
-  private readonly roleRepository: Repository<Role>;
-  private readonly userRoleRepository: Repository<UserRole>;
-
-  constructor() {
-    this.tripRepository = AppDataSource.getRepository(Trip);
-    this.locationRepository = AppDataSource.getRepository(Location);
-    this.userRepository = AppDataSource.getRepository(User);
-    this.userTripRepository = AppDataSource.getRepository(UserTrip);
-    this.roleRepository = AppDataSource.getRepository(Role);
-    this.userRoleRepository = AppDataSource.getRepository(UserRole);
-  }
+  constructor(
+    @InjectRepository(Trip)
+    private readonly tripRepository: Repository<Trip>,
+    @InjectRepository(Location)
+    private readonly locationRepository: Repository<Location>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+    @InjectRepository(UserTrip)
+    private readonly userTripRepository: Repository<UserTrip>,
+    @InjectRepository(Role)
+    private readonly roleRepository: Repository<Role>,
+    @InjectRepository(UserRole)
+    private readonly userRoleRepository: Repository<UserRole>,
+    private readonly configService: ConfigService
+  ) {}
 
   /**
    *
@@ -790,7 +791,7 @@ export class TripService {
           id: user.id,
           mustCompleteRegistration: !resolvedUser?.isProfileComplete,
         },
-        String(JWT_SECRET)
+        String(this.configService.get<string>('jwt.secret'))
       ),
       userTrip: savedUserTrip,
     };

@@ -1,23 +1,30 @@
+import '../polyfills';
+import 'reflect-metadata';
+import { NestFactory } from '@nestjs/core';
 import { PermissionNames } from '../constants/permission.constants';
-import { AppDataSource } from '../data-source';
+import { AppModule } from '../app.module';
 import { PermissionsService } from '../services/permissions.service';
 
 export async function seedPermissions(): Promise<void> {
-  if (!AppDataSource.isInitialized) {
-    await AppDataSource.initialize();
+  const app = await NestFactory.createApplicationContext(AppModule, {
+    logger: false,
+  });
+
+  try {
+    const permissionsService = app.get(PermissionsService);
+    const permissionNames = Object.values(PermissionNames);
+
+    for (const permissionName of permissionNames) {
+      await permissionsService.createPermission({
+        name: permissionName,
+        description: `Permission for ${permissionName.toLowerCase().replace(/_/g, ' ')}`,
+      });
+    }
+
+    console.log(`Seeded ${permissionNames.length} permissions.`);
+  } finally {
+    await app.close();
   }
-
-  const permissionsService = new PermissionsService();
-  const permissionNames = Object.values(PermissionNames);
-
-  for (const permissionName of permissionNames) {
-    await permissionsService.createPermission({
-      name: permissionName,
-      description: `Permission for ${permissionName.toLowerCase().replace(/_/g, ' ')}`,
-    });
-  }
-
-  console.log(`Seeded ${permissionNames.length} permissions.`);
 }
 
 async function run(): Promise<void> {
@@ -27,10 +34,6 @@ async function run(): Promise<void> {
   } catch (error) {
     console.error('Failed to seed permissions:', error);
     process.exitCode = 1;
-  } finally {
-    if (AppDataSource.isInitialized) {
-      await AppDataSource.destroy();
-    }
   }
 }
 

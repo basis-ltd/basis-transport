@@ -1,5 +1,6 @@
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, FindOptionsWhere, FindManyOptions } from 'typeorm';
-import { AppDataSource } from '../data-source';
 import { AuditLog, AuditAction } from '../entities/auditLog.entity';
 import { UUID } from '../types';
 import {
@@ -12,12 +13,12 @@ import { serializeEntityForAudit } from '../helpers/auditSerialize.helper';
 /**
  * AUDIT LOG SERVICE (entity-level diffs). Shared singleton for decorators / direct use.
  */
+@Injectable()
 export class AuditLogService {
-  private auditLogRepository: Repository<AuditLog>;
-
-  constructor() {
-    this.auditLogRepository = AppDataSource.getRepository(AuditLog);
-  }
+  constructor(
+    @InjectRepository(AuditLog)
+    private readonly auditLogRepository: Repository<AuditLog>
+  ) {}
 
   private async findPage(
     options: {
@@ -170,4 +171,15 @@ export class AuditLogService {
   }
 }
 
-export const auditLogServiceSingleton = new AuditLogService();
+let auditLogServiceInstance: AuditLogService | null = null;
+
+export function setAuditLogServiceInstance(service: AuditLogService): void {
+  auditLogServiceInstance = service;
+}
+
+export function getAuditLogServiceInstance(): AuditLogService {
+  if (!auditLogServiceInstance) {
+    throw new Error('AuditLogService has not been initialized');
+  }
+  return auditLogServiceInstance;
+}

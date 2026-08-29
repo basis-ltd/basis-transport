@@ -1,5 +1,6 @@
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsWhere, Repository } from 'typeorm';
-import { AppDataSource } from '../data-source';
 import { Permission } from '../entities/permission.entity';
 import { NotFoundError, ValidationError } from '../helpers/errors.helper';
 import { validateCreatePermission } from '../validations/permission.validations';
@@ -7,12 +8,12 @@ import { getPagingData, Pagination } from '../helpers/pagination.helper';
 import { getPagination } from '../helpers/pagination.helper';
 import { UUID } from '../types';
 
+@Injectable()
 export class PermissionsService {
-  private readonly permissionRepository: Repository<Permission>;
-
-  constructor() {
-    this.permissionRepository = AppDataSource.getRepository(Permission);
-  }
+  constructor(
+    @InjectRepository(Permission)
+    private readonly permissionRepository: Repository<Permission>
+  ) {}
 
   /**
    * CREATE PERMISSION

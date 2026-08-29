@@ -1,10 +1,11 @@
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import {
   FindOptionsWhere,
   LessThanOrEqual,
   MoreThanOrEqual,
   Repository,
 } from 'typeorm';
-import { AppDataSource } from '../data-source';
 import { User } from '../entities/user.entity';
 import { Trip } from '../entities/trip.entity';
 import { TransportCard } from '../entities/transportCard.entity';
@@ -12,18 +13,18 @@ import { UUID } from '../types';
 import { UserStatus } from '../constants/user.constants';
 import { UserTrip } from '../entities/userTrip.entity';
 
+@Injectable()
 export class DashboardService {
-  private readonly userRepository: Repository<User>;
-  private readonly tripRepository: Repository<Trip>;
-  private readonly transportCardRepository: Repository<TransportCard>;
-  private readonly userTripRepository: Repository<UserTrip>;
-
-  constructor() {
-    this.userRepository = AppDataSource.getRepository(User);
-    this.tripRepository = AppDataSource.getRepository(Trip);
-    this.transportCardRepository = AppDataSource.getRepository(TransportCard);
-    this.userTripRepository = AppDataSource.getRepository(UserTrip);
-  }
+  constructor(
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+    @InjectRepository(Trip)
+    private readonly tripRepository: Repository<Trip>,
+    @InjectRepository(TransportCard)
+    private readonly transportCardRepository: Repository<TransportCard>,
+    @InjectRepository(UserTrip)
+    private readonly userTripRepository: Repository<UserTrip>
+  ) {}
 
   /**
    * COUNT TOTAL TRIPS

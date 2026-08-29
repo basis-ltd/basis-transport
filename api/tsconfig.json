@@ -39,6 +39,7 @@
 
     // Specifies the output directory for compiled files
     "outDir": "./dist",
+    "rootDir": "./src",
 
     // Enables compatibility with CommonJS modules
     // Makes it easier to import from CommonJS modules

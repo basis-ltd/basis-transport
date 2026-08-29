@@ -1,22 +1,22 @@
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserRole } from '../entities/userRole.entity';
-import { AppDataSource } from '../data-source';
 import { ValidationError } from '../helpers/errors.helper';
 import { RoleService } from './role.service';
 import { UUID } from '../types';
 import { RoleTypes } from '../constants/role.constants';
 import { User } from '../entities/user.entity';
 
+@Injectable()
 export class UserRoleService {
-  private readonly userRoleRepository: Repository<UserRole>;
-  private readonly roleService: RoleService;
-  private readonly userRepository: Repository<User>;
-
-  constructor() {
-    this.userRoleRepository = AppDataSource.getRepository(UserRole);
-    this.roleService = new RoleService();
-    this.userRepository = AppDataSource.getRepository(User);
-  }
+  constructor(
+    @InjectRepository(UserRole)
+    private readonly userRoleRepository: Repository<UserRole>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+    private readonly roleService: RoleService
+  ) {}
 
   // CREATE USER ROLE
   async createUserRole(userRole: Partial<UserRole>): Promise<UserRole> {
