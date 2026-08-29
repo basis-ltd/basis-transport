@@ -22,7 +22,7 @@ const CustomTooltip = ({
       <Tooltip>
         <TooltipTrigger asChild>{children}</TooltipTrigger>
         <TooltipContent
-          className={`text-[12px] bg-primary text-white z-[10000] ${labelClassName} rounded-lg shadow-sm`}
+          className={`invert-surface z-[10000] rounded-(--radius-control) px-3 py-1.5 text-sm shadow-(--shadow-menu) ${labelClassName ?? ''}`}
         >
           {label}
         </TooltipContent>

@@ -3,6 +3,7 @@ import ForgotPassword from '@/pages/auth/ForgotPassword';
 import PhoneResetOtp from '@/pages/auth/PhoneResetOtp';
 import ResetPassword from '@/pages/auth/ResetPassword';
 import LandingPage from '@/pages/common/LandingPage';
+import TravelGuidancePage from '@/pages/common/TravelGuidancePage';
 import UserDashboard from '@/pages/dashboard/UserDashboard';
 import TripsPage from '@/pages/trips/TripsPage';
 import { Routes, Route } from 'react-router-dom';
@@ -28,6 +29,7 @@ const Router = () => {
     <Routes>
       {/*Home*/}
       <Route path="/" element={<LandingPage />} />
+      <Route path="/travel" element={<TravelGuidancePage />} />
 
       {/**
        * AUTH

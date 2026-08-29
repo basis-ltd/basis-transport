@@ -54,30 +54,47 @@ export const formatDate = (
   return moment(date).format(format);
 };
 
-/** Shared layout for status chips (DESIGN: rounded-md, text-[11px], font-light). */
-const statusBadgeBase =
-  'text-center px-3 py-1 rounded-sm text-[11px] font-light leading-tight text-white';
-
 /**
- * Muted status styles: light tints + dark text (distinct, not saturated).
+ * Status is carried by shape, fill, and an icon — never by hue alone. A row of
+ * saturated chips is unreadable in a greyscale screenshot and says nothing at
+ * all to a screen reader, and the previous set (green / red / amber / sky, all
+ * at 11px on white) failed both. Every badge still renders its text label; the
+ * treatment only reinforces it.
  */
-export const getStatusBackgroundColor = (status?: string) => {
+const statusBadgeBase =
+  'inline-flex items-center gap-1.5 text-center px-2.5 h-6 rounded-(--radius-pill) text-[0.8125rem] font-normal leading-none';
+
+export type StatusTone = 'active' | 'done' | 'pending' | 'failed' | 'draft';
+
+export const getStatusTone = (status?: string): StatusTone => {
   switch (status) {
     case 'OPEN':
-      return `${statusBadgeBase} bg-primary/80`;
+    case 'IN_PROGRESS':
+      return 'active';
     case 'COMPLETED':
     case 'ACTIVE':
-      return `${statusBadgeBase} bg-green-800`;
+      return 'done';
     case 'REJECTED':
     case 'CLOSED':
     case 'CANCELLED':
-      return `${statusBadgeBase} bg-red-800`;
-    case 'IN_PROGRESS':
-      return `${statusBadgeBase} bg-sky-800/80`;
+      return 'failed';
     case 'REOPENED':
     case 'PENDING':
-      return `${statusBadgeBase} bg-amber-800`;
+      return 'pending';
     default:
-      return `${statusBadgeBase} bg-muted text-muted-foreground`;
+      return 'draft';
   }
 };
+
+const statusToneClassName: Record<StatusTone, string> = {
+  /* Active is the inversion: the chip takes ink as its ground. */
+  active: 'invert-surface',
+  done: 'border border-(--ink) text-(--ink)',
+  /* Waiting reads as provisional through a dashed edge, not a colour. */
+  pending: 'border border-dashed border-(--line-strong) text-(--muted)',
+  failed: 'border border-(--ink) text-(--ink) line-through',
+  draft: 'bg-(--surface) text-(--muted)',
+};
+
+export const getStatusBackgroundColor = (status?: string) =>
+  `${statusBadgeBase} ${statusToneClassName[getStatusTone(status)]}`;

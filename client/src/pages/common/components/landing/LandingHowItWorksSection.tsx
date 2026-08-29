@@ -1,17 +1,17 @@
-import { publicColors as Colors } from '@/containers/public/publicTheme';
+import { publicClasses, publicColors as Colors } from '@/containers/public/publicTheme';
 import { landingSteps } from './landingContent';
 
 const LandingHowItWorksSection = () => {
   return (
     <section
-      className="py-24"
+      className={publicClasses.section}
       style={{ backgroundColor: Colors.bgAlt }}
       id="how-it-works"
     >
-      <article className="max-w-4xl mx-auto px-6 lg:px-8">
+      <article className={publicClasses.container}>
         <header className="text-center mb-16 animate-on-scroll">
           <h2
-            className="text-4xl lg:text-5xl leading-tight mb-6 font-light"
+            className={`${publicClasses.landingSectionTitle} mb-6`}
             style={{ color: Colors.primary }}
           >
             Three steps to your first confident commute
@@ -27,7 +27,7 @@ const LandingHowItWorksSection = () => {
             >
               <article className="text-center">
                 <figure
-                  className="w-16 h-16 mx-auto mb-6 rounded-lg flex items-center justify-center font-light text-xl"
+                  className="w-16 h-16 mx-auto mb-6 rounded-md flex items-center justify-center font-light text-[13px]"
                   style={{
                     backgroundColor: Colors.primary,
                     color: Colors.white,
@@ -36,12 +36,17 @@ const LandingHowItWorksSection = () => {
                   {step.step}
                 </figure>
                 <h3
-                  className="text-xl font-medium mb-3"
+                  className={`${publicClasses.cardTitle} mb-3`}
                   style={{ color: Colors.primary }}
                 >
                   {step.title}
                 </h3>
-                <p style={{ color: Colors.neutralLight }}>{step.description}</p>
+                <p
+                  className={publicClasses.bodyMuted}
+                  style={{ color: Colors.neutralLight }}
+                >
+                  {step.description}
+                </p>
               </article>
             </li>
           ))}

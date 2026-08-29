@@ -1,5 +1,6 @@
+import '@/styles/landingPage.css';
 import { useGetPublicLandingStatsQuery } from '@/api/queries/apiQuerySlice';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { Seo } from '@/components/seo';
 import { absoluteUrl } from '@/constants/seo.constants';
 import PublicFooter from '@/containers/public/PublicFooter';
@@ -10,87 +11,29 @@ import LandingFeaturesSection from './components/landing/LandingFeaturesSection'
 import LandingFinalCtaSection from './components/landing/LandingFinalCtaSection';
 import LandingHeroSection from './components/landing/LandingHeroSection';
 import LandingHowItWorksSection from './components/landing/LandingHowItWorksSection';
-import LandingNearbyTripsSection from './components/landing/LandingNearbyTripsSection';
 import LandingProblemReliefSection from './components/landing/LandingProblemReliefSection';
 import LandingProductPreviewSection from './components/landing/LandingProductPreviewSection';
 import LandingTestimonialsSection from './components/landing/LandingTestimonialsSection';
 
 const LandingPage = () => {
-  const { data: landingStats, isLoading, isError } =
-    useGetPublicLandingStatsQuery();
-  const [animatedStats, setAnimatedStats] = useState({
-    commutes: 0,
-    users: 0,
-  });
-  const hasAnimatedStatsRef = useRef(false);
+  const {
+    data: landingStats,
+    isLoading,
+    isError,
+  } = useGetPublicLandingStatsQuery();
+
+  const observerRef = useRef<IntersectionObserver | null>(null);
 
   const { commutesValue, usersValue } = useMemo(() => {
     if (isLoading || isError || !landingStats) {
       return { commutesValue: '—', usersValue: '—' };
     }
+
     return {
-      commutesValue: landingStats.commutes.toLocaleString() + '+',
+      commutesValue: `${landingStats.commutes.toLocaleString()}+`,
       usersValue: `${landingStats.users.toLocaleString()}+`,
     };
   }, [landingStats, isLoading, isError]);
-
-  const observerRef = useRef<IntersectionObserver | null>(null);
-
-  useEffect(() => {
-    if (!landingStats || hasAnimatedStatsRef.current) {
-      return;
-    }
-
-    hasAnimatedStatsRef.current = true;
-
-    const animationDuration = 1400;
-    const animationStart = performance.now();
-
-    let animationFrameId = 0;
-
-    const step = (currentTime: number) => {
-      const elapsedTime = currentTime - animationStart;
-      const progress = Math.min(elapsedTime / animationDuration, 1);
-      const easedProgress = 1 - Math.pow(1 - progress, 3);
-
-      setAnimatedStats({
-        commutes: Math.round(landingStats.commutes * easedProgress),
-        users: Math.round(landingStats.users * easedProgress),
-      });
-
-      if (progress < 1) {
-        animationFrameId = window.requestAnimationFrame(step);
-      }
-    };
-
-    animationFrameId = window.requestAnimationFrame(step);
-
-    return () => {
-      window.cancelAnimationFrame(animationFrameId);
-    };
-  }, [landingStats]);
-
-  const animatedCommutesValue = useMemo(() => {
-    if (isLoading || isError || !landingStats) {
-      return commutesValue;
-    }
-
-    return `${animatedStats.commutes.toLocaleString()}+`;
-  }, [
-    animatedStats.commutes,
-    commutesValue,
-    isError,
-    isLoading,
-    landingStats,
-  ]);
-
-  const animatedUsersValue = useMemo(() => {
-    if (isLoading || isError || !landingStats) {
-      return usersValue;
-    }
-
-    return `${animatedStats.users.toLocaleString()}+`;
-  }, [animatedStats.users, isError, isLoading, landingStats, usersValue]);
 
   const scrollToHowItWorks = useCallback(() => {
     document
@@ -104,7 +47,7 @@ const LandingPage = () => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.classList.add('animate-fade-in-up');
-            entry.target.classList.remove('opacity-0', 'translate-y-8');
+            entry.target.classList.remove('animate-on-scroll');
           }
         });
       },
@@ -137,35 +80,14 @@ const LandingPage = () => {
         }}
       />
 
-      <style
-        dangerouslySetInnerHTML={{
-          __html: `
-            @keyframes fadeInUp {
-              from { opacity: 0; transform: translateY(30px); }
-              to { opacity: 1; transform: translateY(0); }
-            }
-            @keyframes subtle-float {
-              0%, 100% { transform: translateY(0); }
-              50% { transform: translateY(-6px); }
-            }
-            .animate-fade-in-up { animation: fadeInUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
-            .animate-on-scroll { opacity: 0; transform: translateY(30px); }
-            .subtle-float { animation: subtle-float 3s ease-in-out infinite; }
-            html { scroll-behavior: smooth; }
-            .text-balance { text-wrap: balance; }
-          `,
-        }}
-      />
-
       <PublicLayout>
         <PublicNavbar />
-        <article>
+        <article className="landing-page landing-paper">
           <LandingHeroSection
             onLearnMore={scrollToHowItWorks}
-            commutesValue={animatedCommutesValue}
-            usersValue={animatedUsersValue}
+            commutesValue={commutesValue}
+            usersValue={usersValue}
           />
-          <LandingNearbyTripsSection />
           <LandingProblemReliefSection />
           <LandingBenefitsSection />
           <LandingFeaturesSection />

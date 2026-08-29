@@ -1,93 +1,156 @@
-import Button from '@/components/inputs/Button';
-import { publicColors as Colors } from '@/containers/public/publicTheme';
-import LandingHeroBackgroundCanvas from './LandingHeroBackgroundCanvas';
+import { useBrowseLocations } from '@/usecases/locations/location.hooks';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
+import LandingHeroActions from './LandingHeroActions';
+import LandingHeroForm, { type LandingHeroFormValues } from './LandingHeroForm';
+import LandingHeroHeadline from './LandingHeroHeadline';
+import LandingHeroLocationStatus from './LandingHeroLocationStatus';
+import LandingHeroMapPanel from './LandingHeroMapPanel';
+import LandingHeroTrustIndicators from './LandingHeroTrustIndicators';
 
 interface LandingHeroSectionProps {
-  onLearnMore?: () => void;
   commutesValue: string;
   usersValue: string;
+  onLearnMore: () => void;
 }
 
+const CURRENT_LOCATION_LABEL = 'Current location';
+
 const LandingHeroSection = ({
-  onLearnMore,
   commutesValue,
   usersValue,
+  onLearnMore,
 }: LandingHeroSectionProps) => {
-  const stats = [
-    { value: commutesValue, label: 'Commutes completed' },
-    { value: usersValue, label: 'Happy users' },
-  ];
+  const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLocating, setIsLocating] = useState(false);
+  const [routePreview, setRoutePreview] = useState({ pickup: '', dropoff: '' });
+
+  const { browserLocation, browserLocationIsLoading } = useBrowseLocations();
+
+  const userPosition =
+    browserLocation.lat && browserLocation.lng
+      ? { lat: browserLocation.lat, lng: browserLocation.lng }
+      : null;
+
+  const isResolvingLocation = isLocating || browserLocationIsLoading;
+
+  const buildTravelSearchParams = (from: string, to: string) => {
+    const params = new URLSearchParams();
+
+    if (from) {
+      params.set('from', from);
+    }
+
+    if (to) {
+      params.set('to', to);
+    }
+
+    if (userPosition) {
+      params.set('lat', String(userPosition.lat));
+      params.set('lng', String(userPosition.lng));
+    }
+
+    return params;
+  };
+
+  const applyCurrentLocation = (setPickup?: (value: string) => void) => {
+    setPickup?.(CURRENT_LOCATION_LABEL);
+    setRoutePreview((current) => ({
+      ...current,
+      pickup: CURRENT_LOCATION_LABEL,
+    }));
+  };
+
+  const requestCurrentLocation = (setPickup?: (value: string) => void) => {
+    if (!navigator.geolocation) {
+      if (userPosition) {
+        applyCurrentLocation(setPickup);
+        return;
+      }
+      toast.error('Location is not available on this device.');
+      return;
+    }
+
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      () => {
+        setIsLocating(false);
+        applyCurrentLocation(setPickup);
+      },
+      () => {
+        setIsLocating(false);
+        if (userPosition) {
+          applyCurrentLocation(setPickup);
+          return;
+        }
+        toast.error('Unable to access your location. Enter it manually.');
+      },
+      { enableHighAccuracy: true, timeout: 8000 }
+    );
+  };
+
+  const onPlanSubmit = (data: LandingHeroFormValues) => {
+    const from = data.pickupLocation.trim();
+    const to = data.dropoffLocation.trim();
+
+    setIsSubmitting(true);
+    setRoutePreview({ pickup: from, dropoff: to });
+    navigate(`/travel?${buildTravelSearchParams(from, to).toString()}`);
+    setIsSubmitting(false);
+  };
+
+  const onSeeNearby = () => {
+    if (!userPosition) {
+      requestCurrentLocation();
+      return;
+    }
+
+    navigate(`/travel?${buildTravelSearchParams('', '').toString()}`);
+  };
+
   return (
-    <section className="relative min-h-screen flex items-center pt-20 overflow-hidden">
-      <figure className="absolute inset-0 z-0" aria-hidden="true">
-        <LandingHeroBackgroundCanvas />
-      </figure>
+    <section className="flex w-full items-center min-h-[calc(100svh-4rem)]">
+      <div className="landing-container py-10 lg:py-14">
+        <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.92fr)] lg:gap-16">
+          <div className="landing-enter flex flex-col items-start gap-6">
+            <LandingHeroLocationStatus
+              isLocating={isResolvingLocation}
+              hasCurrentLocation={Boolean(userPosition)}
+              onUseCurrentLocation={() => requestCurrentLocation()}
+            />
 
-      <aside
-        className="absolute inset-0 bg-gradient-to-b from-[#fafaf8]/95 via-transparent to-[#fafaf8]/95 z-10 pointer-events-none"
-        aria-hidden="true"
-      />
-      <aside
-        className="absolute inset-0 bg-gradient-to-r from-[#fafaf8]/85 via-transparent to-[#fafaf8]/85 z-10 pointer-events-none"
-        aria-hidden="true"
-      />
+            <LandingHeroHeadline onLearnMore={onLearnMore} />
 
-      <article className="relative z-20 max-w-4xl mx-auto px-6 lg:px-8 py-24 lg:py-32">
-        <header className="animate-on-scroll">
-          <h1
-            className="text-5xl lg:text-6xl leading-tight mb-6 font-light text-balance"
-            style={{ color: Colors.primary }}
-          >
-            Never wonder when your bus is coming.
-          </h1>
+            <LandingHeroForm
+              onSubmit={onPlanSubmit}
+              onUseCurrentLocation={requestCurrentLocation}
+              isLocating={isResolvingLocation}
+            />
 
-          <p
-            className="text-lg lg:text-xl leading-relaxed mb-10 max-w-2xl"
-            style={{ color: Colors.neutralLight }}
-          >
-            Real-time arrivals, available seats, and the confidence to leave
-            home exactly on time. It&apos;s free and takes 30 seconds to set up.
-          </p>
+            <LandingHeroActions
+              isLoading={isSubmitting}
+              onSeeNearby={onSeeNearby}
+            />
 
-          <nav className="flex flex-col sm:flex-row gap-4">
-            <Button primary route="/dashboard">
-              Create Free Account
-            </Button>
-            <Button
-              route="#how-it-works"
-              onClick={(event) => {
-                event.preventDefault();
-                onLearnMore?.();
-              }}
-            >
-              See how it works
-            </Button>
-          </nav>
+            <LandingHeroTrustIndicators
+              commutesValue={commutesValue}
+              usersValue={usersValue}
+            />
+          </div>
 
-          <p className="mt-8 text-sm" style={{ color: Colors.neutralLight }}>
-            Free to use. No credit card needed.
-          </p>
-        </header>
-
-        <aside
-          className="mt-20 animate-on-scroll grid grid-cols-2 gap-8 lg:gap-12 max-w-lg mx-auto"
-          style={{ animationDelay: '0.2s' }}
-        >
-          {stats.map((stat) => (
-            <div key={stat.label} className="text-center">
-              <data
-                className="block text-3xl lg:text-4xl font-light mb-2"
-                style={{ color: Colors.primary }}
-              >
-                {stat.value}
-              </data>
-              <span className="text-sm" style={{ color: Colors.neutralLight }}>
-                {stat.label}
-              </span>
-            </div>
-          ))}
-        </aside>
-      </article>
+          <div className="max-lg:hidden">
+            <LandingHeroMapPanel
+              userPosition={userPosition}
+              isLocating={isResolvingLocation}
+              onUseCurrentLocation={() => requestCurrentLocation()}
+              pickupLabel={routePreview.pickup}
+              dropoffLabel={routePreview.dropoff}
+            />
+          </div>
+        </div>
+      </div>
     </section>
   );
 };

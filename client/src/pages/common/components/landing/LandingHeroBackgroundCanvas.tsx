@@ -27,15 +27,18 @@ const LandingHeroBackgroundCanvas = () => {
     const nodeCount = 80;
     const positions = new Float32Array(nodeCount * 3);
     const colors = new Float32Array(nodeCount * 3);
-    const primaryColor = new THREE.Color('#283618');
-    const lightColor = new THREE.Color('#6b8563');
+    const primaryColor = new THREE.Color('#3a3a3a');
+    const lightColor = new THREE.Color('#8a8a8a');
+    const accentColor = new THREE.Color('#283618');
 
     for (let i = 0; i < nodeCount; i++) {
       positions[i * 3] = (Math.random() - 0.5) * 40;
       positions[i * 3 + 1] = (Math.random() - 0.5) * 25;
       positions[i * 3 + 2] = (Math.random() - 0.5) * 15;
 
-      const chosenColor = Math.random() < 0.6 ? primaryColor : lightColor;
+      const roll = Math.random();
+      const chosenColor =
+        roll < 0.15 ? accentColor : roll < 0.55 ? primaryColor : lightColor;
       colors[i * 3] = chosenColor.r;
       colors[i * 3 + 1] = chosenColor.g;
       colors[i * 3 + 2] = chosenColor.b;
@@ -49,7 +52,7 @@ const LandingHeroBackgroundCanvas = () => {
       size: 0.3,
       vertexColors: true,
       transparent: true,
-      opacity: 0.6,
+      opacity: 0.45,
       sizeAttenuation: true,
     });
 
@@ -59,7 +62,7 @@ const LandingHeroBackgroundCanvas = () => {
     const lineMaterial = new THREE.LineBasicMaterial({
       color: 0x283618,
       transparent: true,
-      opacity: 0.08,
+      opacity: 0.05,
     });
 
     const linePositions: number[] = [];
@@ -141,7 +144,7 @@ const LandingHeroBackgroundCanvas = () => {
         width: '100%',
         height: '100%',
         display: 'block',
-        opacity: 0.9,
+        opacity: 0.75,
       }}
       aria-hidden="true"
     />

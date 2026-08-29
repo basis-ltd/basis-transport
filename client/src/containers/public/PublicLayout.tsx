@@ -1,5 +1,4 @@
 import { ReactNode } from 'react';
-import { publicColors } from './publicTheme';
 
 interface PublicLayoutProps {
   children: ReactNode;
@@ -7,7 +6,7 @@ interface PublicLayoutProps {
 
 const PublicLayout = ({ children }: PublicLayoutProps) => {
   return (
-    <main className="min-h-screen" style={{ backgroundColor: publicColors.bg }}>
+    <main className="landing-page min-h-screen bg-white">
       {children}
     </main>
   );

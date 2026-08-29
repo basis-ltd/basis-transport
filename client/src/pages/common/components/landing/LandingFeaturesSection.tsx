@@ -1,4 +1,4 @@
-import { publicColors as Colors } from '@/containers/public/publicTheme';
+import { publicClasses, publicColors as Colors } from '@/containers/public/publicTheme';
 import { LandingFeatureIcon, landingFeatures } from './landingContent';
 
 const renderFeatureIcon = (icon: LandingFeatureIcon) => {
@@ -74,11 +74,11 @@ const renderFeatureIcon = (icon: LandingFeatureIcon) => {
 
 const LandingFeaturesSection = () => {
   return (
-    <section className="py-24" style={{ backgroundColor: Colors.white }}>
-      <article className="max-w-4xl mx-auto px-6 lg:px-8">
+    <section className={publicClasses.section} style={{ backgroundColor: Colors.white }}>
+      <article className={publicClasses.container}>
         <header className="text-center mb-16 animate-on-scroll">
           <h2
-            className="text-4xl lg:text-5xl leading-tight mb-6 font-light"
+            className={`${publicClasses.landingSectionTitle} mb-6`}
             style={{ color: Colors.primary }}
           >
             Simple tools that actually help
@@ -92,25 +92,28 @@ const LandingFeaturesSection = () => {
               className="animate-on-scroll"
               style={{ animationDelay: feature.animationDelay }}
             >
-              <div className="flex gap-5 mb-4">
-                <div
-                  className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0"
+              <article className="flex gap-5">
+                <figure
+                  className="w-12 h-12 rounded-md flex items-center justify-center flex-shrink-0"
                   style={{ backgroundColor: Colors.primary }}
                 >
                   {renderFeatureIcon(feature.icon)}
-                </div>
+                </figure>
                 <div>
                   <h3
-                    className="text-lg font-medium mb-2"
+                    className={`${publicClasses.cardTitle} mb-2`}
                     style={{ color: Colors.primary }}
                   >
                     {feature.title}
                   </h3>
-                  <p style={{ color: Colors.neutralLight }}>
+                  <p
+                    className={publicClasses.bodyMuted}
+                    style={{ color: Colors.neutralLight }}
+                  >
                     {feature.description}
                   </p>
                 </div>
-              </div>
+              </article>
             </li>
           ))}
         </ul>

@@ -9,7 +9,7 @@ import { Link } from 'react-router-dom';
 import { Seo } from '@/components/seo';
 import PublicLayout from '@/containers/public/PublicLayout';
 import PublicNavbar from '@/containers/public/PublicNavbar';
-import { publicColors } from '@/containers/public/publicTheme';
+import { publicClasses, publicColors } from '@/containers/public/publicTheme';
 
 const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -40,20 +40,20 @@ const Signup = () => {
       />
       <PublicLayout>
         <PublicNavbar variant="auth" />
-        <div className="w-full min-h-screen flex flex-col items-center justify-center gap-4 px-4 lg:px-8 pt-24 pb-12">
+        <main className="w-full min-h-screen flex flex-col items-center justify-center gap-4 px-4 lg:px-8 pt-24 pb-12">
           <form
-            className="w-full max-w-[420px] shadow-lg rounded-2xl bg-white/90 border border-primary/10 p-8 mx-auto flex flex-col gap-4 animate-fade-in-up"
+            className={publicClasses.authCard}
             onSubmit={onSubmit}
           >
             <header className="flex flex-col gap-2 items-center mb-4">
               <h1
-                className="text-3xl lg:text-4xl leading-tight font-light text-balance text-center"
+                className={`${publicClasses.pageTitle} text-center text-balance`}
                 style={{ color: publicColors.primary }}
               >
                 Create Account
               </h1>
               <p
-                className="text-base leading-relaxed text-center"
+                className={`${publicClasses.bodyMuted} text-center`}
                 style={{ color: publicColors.neutralLight }}
               >
                 Please fill in the form to create your account
@@ -150,17 +150,17 @@ const Signup = () => {
               <menu className="w-full flex flex-col items-center justify-between gap-2">
                 <Button
                   type="submit"
-                  className="w-full"
-                  isLoading={signupIsLoading}
                   primary
+                    className="w-full"
+                  isLoading={signupIsLoading}
                 >
                   Sign Up
                 </Button>
-                <p className="text-sm" style={{ color: publicColors.neutralLight }}>
+                <p className="text-[12px] font-light" style={{ color: publicColors.neutralLight }}>
                   Already have an account?{' '}
                   <Link
                     to="/auth/login"
-                    className="text-primary hover:underline transition-colors duration-200 ease-in-out text-[11px] lg:text-[12px]"
+                    className="text-primary hover:underline transition-colors duration-200 ease-in-out text-[12px]"
                   >
                     Login
                   </Link>
@@ -168,7 +168,7 @@ const Signup = () => {
               </menu>
             </footer>
           </form>
-        </div>
+        </main>
       </PublicLayout>
     </>
   );

@@ -1,13 +1,13 @@
-import { publicColors as Colors } from '@/containers/public/publicTheme';
+import { publicClasses, publicColors as Colors } from '@/containers/public/publicTheme';
 import { landingTestimonials } from './landingContent';
 
 const LandingTestimonialsSection = () => {
   return (
-    <section className="py-24" style={{ backgroundColor: Colors.bgAlt }}>
-      <article className="max-w-4xl mx-auto px-6 lg:px-8">
+    <section className={publicClasses.section} style={{ backgroundColor: Colors.bgAlt }}>
+      <article className={publicClasses.container}>
         <header className="text-center mb-16 animate-on-scroll">
           <h2
-            className="text-4xl lg:text-5xl leading-tight mb-6 font-light"
+            className={`${publicClasses.landingSectionTitle} mb-6`}
             style={{ color: Colors.primary }}
           >
             Real people. Real time saved.
@@ -18,22 +18,19 @@ const LandingTestimonialsSection = () => {
           {landingTestimonials.map((testimonial) => (
             <li
               key={testimonial.author}
-              className="animate-on-scroll rounded-xl p-8"
-              style={{
-                backgroundColor: Colors.white,
-                animationDelay: testimonial.animationDelay,
-              }}
+              className={`animate-on-scroll ${publicClasses.card}`}
+              style={{ animationDelay: testimonial.animationDelay }}
             >
               <blockquote>
                 <p
-                  className="text-lg leading-relaxed mb-6"
+                  className={`${publicClasses.bodyMuted} mb-6`}
                   style={{ color: Colors.neutral }}
                 >
                   {testimonial.quote}
                 </p>
                 <footer>
                   <cite
-                    className="not-italic font-medium"
+                    className="not-italic text-[12px] font-medium"
                     style={{ color: Colors.primary }}
                   >
                     {`— ${testimonial.author}, ${testimonial.role}`}

@@ -27,7 +27,7 @@ export const TableUserLabel = ({
         <span className="absolute inset-0 bg-primary/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
         <FontAwesomeIcon
           icon={faUser}
-          className="relative bg-primary/5 text-primary rounded-full p-1 text-xs transition-transform duration-200 group-hover:scale-105"
+          className="relative rounded-(--radius-pill) bg-(--surface) p-1 text-xs text-(--ink) transition-colors duration-200 ease-(--ease-flat) group-hover:bg-(--surface-hover)"
         />
       </figure>
       <section className="flex flex-col gap-0.5">

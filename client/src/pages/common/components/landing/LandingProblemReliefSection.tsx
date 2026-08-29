@@ -1,19 +1,19 @@
-import { publicColors as Colors } from '@/containers/public/publicTheme';
+import { publicClasses, publicColors as Colors } from '@/containers/public/publicTheme';
 
 const LandingProblemReliefSection = () => {
   return (
-    <section className="py-24" style={{ backgroundColor: Colors.white }}>
-      <article className="max-w-4xl mx-auto px-6 lg:px-8">
+    <section className={publicClasses.section} style={{ backgroundColor: Colors.white }}>
+      <article className={publicClasses.container}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-16 items-center">
           <aside className="animate-on-scroll">
             <h2
-              className="text-3xl lg:text-4xl leading-tight mb-6 font-light"
+              className={`${publicClasses.landingSectionTitle} mb-6`}
               style={{ color: Colors.primary }}
             >
               The stress of not knowing
             </h2>
             <p
-              className="text-base leading-relaxed mb-6"
+              className={`${publicClasses.bodyMuted} mb-6`}
               style={{ color: Colors.neutralLight }}
             >
               You check the time. You check the street. Is your bus here? Did
@@ -21,7 +21,7 @@ const LandingProblemReliefSection = () => {
               guessing makes you anxious.
             </p>
             <p
-              className="text-base leading-relaxed"
+              className={publicClasses.bodyMuted}
               style={{ color: Colors.neutralLight }}
             >
               You wonder if there&apos;s a seat. You stress about being packed
@@ -32,20 +32,20 @@ const LandingProblemReliefSection = () => {
 
           <aside className="animate-on-scroll" style={{ animationDelay: '0.15s' }}>
             <h2
-              className="text-3xl lg:text-4xl leading-tight mb-6 font-light"
+              className={`${publicClasses.landingSectionTitle} mb-6`}
               style={{ color: Colors.primary }}
             >
               The calm of knowing
             </h2>
             <p
-              className="text-base leading-relaxed mb-6"
+              className={`${publicClasses.bodyMuted} mb-6`}
               style={{ color: Colors.neutralLight }}
             >
               Open Basis. See your bus coming in 7 minutes. You know exactly
               when to leave. No stress. No surprises.
             </p>
             <p
-              className="text-base leading-relaxed"
+              className={publicClasses.bodyMuted}
               style={{ color: Colors.neutralLight }}
             >
               Check how many seats are open. Travel when you&apos;re ready. That

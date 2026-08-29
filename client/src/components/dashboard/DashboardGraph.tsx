@@ -42,8 +42,8 @@ const DashboardGraph = ({
   fill = 'rgba(40, 54, 24, 0.12)',
   strokeWidth = 2,
 }: DashboardGraphProps) => {
-  const primaryStroke = '#283618';
-  const axisMuted = '#4a6741';
+  const primaryStroke = 'var(--chart-1)';
+  const axisMuted = 'var(--muted)';
   const gridLine = '#e4e4dd';
 
   return (
@@ -68,7 +68,7 @@ const DashboardGraph = ({
           padding={{ left: 10, right: 10 }}
           style={{
             fontSize: '10px',
-            fontFamily: 'Work Sans, system-ui, sans-serif',
+            fontFamily: 'DM Sans, system-ui, sans-serif',
           }}
         />
         <Legend />
@@ -82,7 +82,7 @@ const DashboardGraph = ({
           className="text-[12px]!"
           style={{
             fontSize: '10px',
-            fontFamily: 'Work Sans, system-ui, sans-serif',
+            fontFamily: 'DM Sans, system-ui, sans-serif',
           }}
         />
         <Tooltip
@@ -92,7 +92,7 @@ const DashboardGraph = ({
             borderRadius: '8px',
             boxShadow: '0 1px 2px rgba(40, 54, 24, 0.08)',
             fontSize: '10px',
-            fontFamily: 'Work Sans, system-ui, sans-serif',
+            fontFamily: 'DM Sans, system-ui, sans-serif',
             color: primaryStroke,
           }}
           formatter={(value: number) => [`${value} Trips`, '']}

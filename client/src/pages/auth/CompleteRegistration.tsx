@@ -3,7 +3,7 @@ import Input from '@/components/inputs/Input';
 import { Seo } from '@/components/seo';
 import PublicLayout from '@/containers/public/PublicLayout';
 import PublicNavbar from '@/containers/public/PublicNavbar';
-import { publicColors } from '@/containers/public/publicTheme';
+import { publicClasses, publicColors } from '@/containers/public/publicTheme';
 import validateInputs from '@/helpers/validations.helper';
 import { useAppSelector } from '@/states/hooks';
 import { useCompleteRegistration } from '@/usecases/auth/auth.hooks';
@@ -82,7 +82,7 @@ const CompleteRegistration = () => {
       <PublicLayout>
         <PublicNavbar variant="auth" />
         <main className="w-full min-h-screen flex flex-col items-center justify-center gap-4 px-4 lg:px-8 pt-24 pb-12">
-          <section className="w-full max-w-[420px] shadow-sm rounded-md bg-white/90 p-8 mx-auto flex flex-col gap-4 animate-fade-in-up">
+          <section className={publicClasses.authCard}>
             <header className="flex flex-col gap-2 items-center mb-2">
               <h1
                 className="text-[13px] leading-tight font-semibold text-center"
@@ -173,9 +173,9 @@ const CompleteRegistration = () => {
 
               <Button
                 type="submit"
-                className="w-full"
-                isLoading={completeRegistrationIsLoading}
                 primary
+                    className="w-full"
+                isLoading={completeRegistrationIsLoading}
               >
                 Complete Registration
               </Button>

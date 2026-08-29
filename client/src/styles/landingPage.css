@@ -1,0 +1,274 @@
+/* The marketing surface. These are aliases, not a second palette: the values
+   live in index.css so light/dark and the app layer move together. Anything
+   new should reach for the global token directly. */
+.landing-page {
+  --landing-paper: var(--paper);
+  --landing-ink: var(--ink);
+  --landing-muted: var(--muted);
+  --landing-line: var(--line);
+  --landing-surface: var(--surface);
+  --landing-radius: var(--radius-control);
+  --landing-control: var(--control-md);
+  color: var(--landing-ink);
+}
+
+/* Painting is split from token definition on purpose. `.landing-page` lives in
+   an unlayered stylesheet, so any `background`/`color` it declares outranks
+   Tailwind's layered utilities — a `bg-[var(--landing-ink)]` on an element that
+   also carries `.landing-page` (the public navbar) would silently render white.
+   Elements that want the paper ground opt in with `.landing-paper`. */
+.landing-paper {
+  background: var(--landing-paper);
+}
+
+.landing-container {
+  width: 100%;
+  max-width: 1280px;
+  margin-inline: auto;
+  padding-inline: 20px;
+}
+
+@media (width >= 40rem) {
+  .landing-container {
+    padding-inline: 32px;
+  }
+}
+
+@media (width >= 64rem) {
+  .landing-container {
+    padding-inline: 40px;
+  }
+}
+
+.landing-display {
+  font-size: clamp(2rem, 1.5rem + 2.1vw, 2.875rem);
+  line-height: 1.08;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.landing-body {
+  font-size: 1rem;
+  line-height: 1.6;
+  font-weight: 400;
+}
+
+.landing-label {
+  font-size: 0.875rem;
+  line-height: 1.2;
+  font-weight: 500;
+}
+
+.landing-meta {
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  font-weight: 400;
+  color: var(--landing-muted);
+}
+
+.landing-field {
+  display: flex;
+  height: var(--landing-control);
+  width: 100%;
+  align-items: center;
+  border: 1px solid var(--landing-line);
+  border-radius: var(--landing-radius);
+  background: var(--landing-paper);
+  padding-inline: 14px;
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.2;
+  color: var(--landing-ink);
+  outline: none;
+  transition: box-shadow 0.2s cubic-bezier(0, 0, 1, 1);
+}
+
+.landing-field::placeholder {
+  color: var(--landing-muted);
+}
+
+.landing-field:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--landing-paper), inset 0 0 0 3px var(--landing-ink);
+}
+
+.landing-field-prefix {
+  display: flex;
+  height: var(--landing-control);
+  align-items: center;
+  border: 1px solid var(--landing-line);
+  border-right: 0;
+  border-radius: var(--landing-radius) 0 0 var(--landing-radius);
+  background: var(--landing-surface);
+  padding-inline: 12px;
+  font-size: 0.875rem;
+  color: var(--landing-ink);
+  white-space: nowrap;
+}
+
+.landing-field-with-prefix {
+  border-radius: 0 var(--landing-radius) var(--landing-radius) 0;
+  border-left: 0;
+}
+
+.landing-btn-primary {
+  display: inline-flex;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--landing-radius);
+  background: var(--landing-ink);
+  color: var(--landing-paper);
+  padding-inline: 20px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1;
+  border: 1px solid var(--landing-ink);
+  cursor: pointer;
+  transition: background-color 0.2s cubic-bezier(0, 0, 1, 1);
+}
+
+.landing-btn-primary:hover {
+  background: color-mix(in oklab, var(--landing-ink) 88%, var(--landing-paper));
+}
+
+/* Press is a full-surface inset flood, never a transform. A 999px inset
+   spread floods the control whatever its size. */
+.landing-btn-primary:active {
+  box-shadow: var(--press-on-ink) 999px 999px 0 inset;
+}
+
+.landing-btn-primary:focus-visible {
+  box-shadow:
+    var(--landing-paper) 0 0 0 2px inset,
+    var(--landing-ink) 0 0 0 2px;
+}
+
+.landing-btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.landing-link-sweep {
+  position: relative;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--landing-ink);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.landing-link-sweep::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  bottom: -0.5px;
+  height: 1px;
+  background-color: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.landing-link-sweep:hover::after,
+.landing-link-sweep:focus-visible::after {
+  transform: scaleX(1);
+}
+
+.landing-trip-option {
+  display: flex;
+  cursor: pointer;
+  align-items: flex-start;
+  gap: 10px;
+  border: 1px solid var(--landing-line);
+  border-radius: var(--landing-radius);
+  background: var(--landing-paper);
+  padding: 12px 14px;
+  text-align: left;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.landing-trip-option:has(input:checked) {
+  border-color: var(--landing-ink);
+  box-shadow: inset 0 0 0 1px var(--landing-ink);
+}
+
+.landing-trip-option input {
+  margin-top: 3px;
+  accent-color: var(--landing-ink);
+}
+
+/* Field with an inline trailing control (e.g. "use my location") */
+.landing-field-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.landing-field-group > .landing-field {
+  padding-right: 40px;
+}
+
+.landing-field-affix {
+  position: absolute;
+  right: 4px;
+  display: inline-flex;
+  height: 32px;
+  width: 32px;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: calc(var(--landing-radius) - 2px);
+  background: transparent;
+  color: var(--landing-muted);
+  cursor: pointer;
+  transition: background-color 0.2s cubic-bezier(0, 0, 1, 1),
+    color 0.2s cubic-bezier(0, 0, 1, 1);
+}
+
+.landing-field-affix:hover:not(:disabled) {
+  background: var(--landing-surface);
+  color: var(--landing-ink);
+}
+
+.landing-field-affix:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Entrance — the keyframes live in index.css as `fadeInUp`. */
+.landing-page .animate-on-scroll {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.landing-page .animate-fade-in-up,
+.landing-enter {
+  animation: fadeInUp var(--dur-state) var(--ease-glide) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-page .animate-on-scroll {
+    opacity: 1;
+    transform: none;
+  }
+
+  .landing-page .animate-fade-in-up,
+  .landing-enter,
+  .landing-field,
+  .landing-field-affix,
+  .landing-btn-primary,
+  .landing-link-sweep::after {
+    animation: none;
+    transition: none;
+  }
+}
+
+html:has(.landing-page) {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:has(.landing-page) {
+    scroll-behavior: auto;
+  }
+}

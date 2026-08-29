@@ -42,7 +42,7 @@ export function AuditLogDiffEntry({
         </p>
       </header>
       <ul
-        className="list-none m-0 p-0 grid grid-cols-1 sm:grid-cols-2 gap-1.5 font-mono text-[11px] sm:text-xs leading-relaxed rounded py-1"
+        className="list-none m-0 p-0 grid grid-cols-1 sm:grid-cols-2 gap-1.5 tabular text-xs leading-relaxed rounded py-1"
         role="log"
       >
         {changes.map((c) => (

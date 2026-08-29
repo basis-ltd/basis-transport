@@ -1,14 +1,15 @@
-@import url('https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,100..900;1,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --font-sans: var(--font-family-sans);
+  --radius-sm: var(--radius-control);
+  --radius-md: var(--radius-control);
+  --radius-lg: var(--radius-card);
+  --radius-xl: var(--radius-card);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -19,7 +20,7 @@
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
+  --color-muted: var(--surface);
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
@@ -43,105 +44,184 @@
 }
 
 :root {
-  --radius: 0.625rem;
-  /* Text highlight (::selection); switch to sage: --selection-background: var(--secondary); */
-  --selection-background: var(--primary);
-  --selection-foreground: #ffffff;
-  --background: #fafaf8;
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: #283618;
-  --primary-foreground: #344e41;
-  --secondary: #4a6741;
-  --secondary-foreground: #283618;
-  --background-secondary: #f3f3f1;
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: #e4e4dd;
-  --input: #e4e4dd;
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: #fafaf8;
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: #283618;
-  --sidebar-primary-foreground: #344e41;
-  --sidebar-accent: #344e41;
-  --sidebar-accent-foreground: #283618;
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  color-scheme: light;
+  --font-family-sans: 'DM Sans', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+
+  /* Ground and ink — these two invert in dark mode, everything follows */
+  --paper: #ffffff;
+  --ink: #000000;
+
+  /* Neutral ramp */
+  --surface: #f3f3f3;
+  --surface-hover: #e2e2e2;
+  --surface-sunken: #fafafa;
+  --line: #e2e2e2;
+  --line-strong: #afafaf;
+  --muted: #6e6e6e;
+  --muted-weak: #757575;
+  --disabled-fg: #afafaf;
+
+  /* Press overlays — chosen by the SURFACE the control sits on, not by theme */
+  --press-on-ink: rgba(255, 255, 255, 0.2);
+  --press-on-paper: rgba(0, 0, 0, 0.08);
+
+  --overlay: rgba(0, 0, 0, 0.6);
+  --shadow-menu: 0 4px 16px rgba(0, 0, 0, 0.16);
+  --shadow-modal: 0 8px 40px rgba(0, 0, 0, 0.24);
+
+  --radius-control: 8px;
+  --radius-card: 12px;
+  --radius-pill: 999px;
+
+  /* Control heights — one scale for every input, select, and button, so a
+     field and the button beside it always share an edge. */
+  --control-sm: 36px;
+  --control-md: 40px;
+  --control-lg: 44px;
+
+  --ease-flat: cubic-bezier(0, 0, 1, 1);
+  --ease-menu: cubic-bezier(0.2, 0.8, 0.4, 1);
+  --ease-glide: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-menu: 100ms;
+  --dur-state: 200ms;
+  --dur-sweep: 500ms;
+
+  /* Consequence — the only hues in the system. Structure stays black and
+     white; colour is spent only where something failed, is about to be
+     destroyed, or has resolved. Icon and label always come first. */
+  --danger: #b91c1c;
+  --danger-surface: #fef2f2;
+  --danger-line: #fecaca;
+  --approve: #15803d;
+  --approve-surface: #f0fdf4;
+  --approve-line: #bbf7d0;
+  --warning: #b45309;
+  --warning-surface: #fffbeb;
+  --warning-line: #fde68a;
+  --info: #1d4ed8;
+  --info-surface: #eff6ff;
+  --info-line: #bfdbfe;
+  --on-consequence: #ffffff;
+
+  /* Chart series carry real hue — four grey strokes are not tellable apart.
+     Multi-series charts must also vary strokeDasharray. */
+  --chart-1: #1d4ed8;
+  --chart-2: #15803d;
+  --chart-3: #b45309;
+  --chart-4: #6d28d9;
+  --chart-5: #b91c1c;
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: #283618;
-  --primary-foreground: #344e41;
-  --secondary: #344e41;
-  --secondary-foreground: #283618;
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: #283618;
-  --sidebar-primary-foreground: #344e41;
-  --sidebar-accent: #344e41;
-  --sidebar-accent-foreground: #283618;
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  color-scheme: dark;
+  --paper: #000000;
+  --ink: #ffffff;
+
+  --surface: #141414;
+  --surface-hover: #232323;
+  --surface-sunken: #0a0a0a;
+  --line: #2e2e2e;
+  --line-strong: #5e5e5e;
+  --muted: #a3a3a3;
+  --muted-weak: #8f8f8f;
+  --disabled-fg: #5e5e5e;
+
+  /* Overlays do NOT flip with theme — a black button in dark mode is a WHITE
+     button, so it still needs the dark press overlay. Surface decides. */
+  --press-on-ink: rgba(255, 255, 255, 0.2);
+  --press-on-paper: rgba(0, 0, 0, 0.08);
+
+  --overlay: rgba(0, 0, 0, 0.72);
+  --shadow-menu: 0 4px 16px rgba(0, 0, 0, 0.55);
+  --shadow-modal: 0 8px 40px rgba(0, 0, 0, 0.7);
+
+  --danger: #f87171;
+  --danger-surface: #1f1010;
+  --danger-line: #7f1d1d;
+  --approve: #4ade80;
+  --approve-surface: #0c1a10;
+  --approve-line: #14532d;
+  --warning: #fbbf24;
+  --warning-surface: #1c1408;
+  --warning-line: #78350f;
+  --info: #60a5fa;
+  --info-surface: #0c1524;
+  --info-line: #1e3a8a;
+  --on-consequence: #000000;
+
+  --chart-1: #60a5fa;
+  --chart-2: #4ade80;
+  --chart-3: #fbbf24;
+  --chart-4: #c4b5fd;
+  --chart-5: #f87171;
 }
 
+/* The shadcn layer keeps its names, redefined as aliases so there is exactly
+   one source of truth. Never write a raw hex in a component. */
+:root,
+.dark {
+  --background: var(--paper);
+  --foreground: var(--ink);
+  --card: var(--paper);
+  --card-foreground: var(--ink);
+  --popover: var(--paper);
+  --popover-foreground: var(--ink);
+  --primary: var(--ink);
+  --primary-foreground: var(--paper);
+  --secondary: var(--surface);
+  --secondary-foreground: var(--ink);
+  --muted-foreground: var(--muted);
+  --accent: var(--surface);
+  --accent-foreground: var(--ink);
+  --destructive: var(--danger);
+  --border: var(--line);
+  --input: var(--line);
+  --ring: var(--ink);
+  --selection-background: var(--ink);
+  --selection-foreground: var(--paper);
+  --background-secondary: var(--surface);
+  --sidebar: var(--paper);
+  --sidebar-foreground: var(--ink);
+  --sidebar-primary: var(--ink);
+  --sidebar-primary-foreground: var(--paper);
+  --sidebar-accent: var(--surface);
+  --sidebar-accent-foreground: var(--ink);
+  --sidebar-border: var(--line);
+  --sidebar-ring: var(--ink);
+}
+
+/* Entrance is one fade plus an 8px rise. No stagger cascades, no parallax. */
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(30px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: none;
   }
 }
 
 .animate-fade-in-up {
-  animation: fadeInUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: fadeInUp var(--dur-state) var(--ease-glide) both;
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
-    font-family: 'Work Sans', sans-serif;
-    font-size: 14px;
-  }
-  body {
-    @apply bg-background text-foreground;
-    font-family: 'Work Sans', sans-serif;
-    font-size: 14px;
   }
 
+  html {
+    font-family: var(--font-family-sans);
+    font-size: 16px;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-family-sans);
+  }
+
+  /* Selection is a swap, not a tint — the load-bearing idea of the system. */
   ::selection {
     background-color: var(--selection-background);
     color: var(--selection-foreground);
@@ -152,15 +232,24 @@
     color: var(--selection-foreground);
   }
 
+  /* Highlight = inversion. Scoped on purpose: a blanket [data-state] rule
+     repaints every open Radix node into a black rectangle. */
+  [role='tab'][aria-selected='true'],
+  [role='option'][aria-selected='true'],
+  [role='tab'][data-state='active'],
+  a[aria-current='page'],
+  button[aria-current='page'],
+  [data-selected='true'] {
+    background-color: var(--ink);
+    color: var(--paper);
+  }
+
   a {
-    @apply text-primary transition-colors duration-200 ease-in-out underline-offset-2 hover:underline-offset-2;
+    @apply transition-colors duration-200 underline-offset-2;
+    color: inherit;
   }
 
-  p {
-    @apply text-primary transition-colors duration-200 ease-in-out text-[12px];
-  }
-
-  /* Form fields: no themed selection (global ::selection uses --selection-*); keeps Input.tsx readable */
+  /* Form fields opt out of the themed selection so typed text stays readable */
   input::selection,
   textarea::selection {
     background-color: transparent;
@@ -175,16 +264,174 @@
 }
 
 @layer utilities {
-  .surface-card {
-    @apply rounded-md bg-white/95 shadow-sm;
+  /* A card is separated from the page by a surface step OR a hairline —
+     never both. A border around a --surface fill is a box around a box. */
+  .surface-card,
+  .card-framed {
+    border-radius: var(--radius-card);
+    border: 1px solid var(--line);
+    background-color: var(--paper);
   }
 
-  .surface-tint {
-    background-image: linear-gradient(
-      135deg,
-      color-mix(in oklab, var(--primary) 4%, transparent) 0%,
-      transparent 55%,
-      color-mix(in oklab, var(--primary) 7%, transparent) 100%
-    );
+  .card-quiet {
+    border-radius: var(--radius-card);
+    background-color: var(--surface);
+  }
+
+  /* Inverted regions swap the tokens locally, so children, focus rings,
+     --muted text, and ::selection all keep working inside the black area
+     without special-casing. Never hand-paint bg-(--ink) text-(--paper). */
+  .invert-surface {
+    --paper: #000000;
+    --ink: #ffffff;
+    --surface: #1a1a1a;
+    --surface-hover: #2b2b2b;
+    --line: #2e2e2e;
+    --muted: #a3a3a3;
+    background-color: var(--paper);
+    color: var(--ink);
+  }
+
+  .dark .invert-surface {
+    --paper: #ffffff;
+    --ink: #000000;
+    --surface: #f3f3f3;
+    --surface-hover: #e2e2e2;
+    --line: #e2e2e2;
+    --muted: #6e6e6e;
+  }
+
+  /* DM Sans has proportional figures. Tables, money, phone numbers, and
+     counters use this — not a monospace family. */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Uber grows this underline with background-size on a linear-gradient.
+     This system has no gradients, so the motion comes from a pseudo-element:
+     identical result, nothing smuggled past the gradient check. */
+  .link-sweep {
+    position: relative;
+    text-decoration: none;
+  }
+
+  .link-sweep::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    bottom: -2px;
+    height: 1px;
+    background-color: currentColor;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--dur-sweep) var(--ease-glide);
+  }
+
+  .link-sweep:hover::after,
+  .link-sweep:focus-visible::after {
+    transform: scaleX(1);
+  }
+
+  /* The only permitted hover transform in the system. */
+  .link-arrow [data-slot='icon'] {
+    transition: transform var(--dur-state) var(--ease-glide);
+  }
+
+  .link-arrow:hover [data-slot='icon'] {
+    transform: translateX(12px);
+  }
+}
+
+/* ── Type scale ───────────────────────────────────────────────────────────
+   Compose the utility, never the size. A component writes `type-card-title`,
+   not `text-lg font-normal`, so a scale change is one edit rather than three
+   hundred. Hierarchy comes from size, spacing, and colour — never from weight
+   jumps: 400 is the default and 500 is the ceiling. No letter-spacing
+   anywhere; DM Sans is drawn to sit correctly at every size. 12px is the
+   floor — a 10px label is not a smaller label, it is an unreadable one. */
+
+@utility type-display {
+  font-size: clamp(2rem, 1.5rem + 2.1vw, 2.875rem);
+  line-height: 1.08;
+  font-weight: 500;
+}
+
+@utility type-h2 {
+  font-size: clamp(1.5rem, 1.2rem + 1.4vw, 1.875rem);
+  line-height: 1.16;
+  font-weight: 500;
+}
+
+@utility type-h3 {
+  font-size: 1.25rem;
+  line-height: 1.3;
+  font-weight: 500;
+}
+
+@utility type-page-title {
+  font-size: 1.375rem;
+  line-height: 1.25;
+  font-weight: 500;
+}
+
+@utility type-card-title {
+  font-size: 1rem;
+  line-height: 1.4;
+  font-weight: 500;
+}
+
+@utility type-metric {
+  font-size: 1.75rem;
+  line-height: 1.1;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+@utility type-body {
+  font-size: 1rem;
+  line-height: 1.6;
+  font-weight: 400;
+}
+
+@utility type-body-sm {
+  font-size: 0.875rem;
+  line-height: 1.55;
+  font-weight: 400;
+}
+
+@utility type-label {
+  font-size: 0.875rem;
+  line-height: 1.2;
+  font-weight: 500;
+}
+
+@utility type-meta {
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+@utility type-eyebrow {
+  font-size: 0.75rem;
+  line-height: 1.4;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+@utility field-label {
+  font-size: 0.875rem;
+  line-height: 1.2;
+  font-weight: 500;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
   }
 }

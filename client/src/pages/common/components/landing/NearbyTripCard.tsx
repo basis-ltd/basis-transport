@@ -1,5 +1,7 @@
 import Button from '@/components/inputs/Button';
-import { publicColors as Colors } from '@/containers/public/publicTheme';
+import {
+  publicColors as Colors,
+} from '@/containers/public/publicTheme';
 import { capitalizeString, getStatusBackgroundColor } from '@/helpers/strings.helper';
 import { useAppSelector } from '@/states/hooks';
 import { TripStatus } from '@/types/trip.type';
@@ -57,7 +59,7 @@ const NearbyTripCard = ({ trip, fallbackEntranceLocation }: NearbyTripCardProps)
           className="flex h-full w-full flex-col overflow-hidden rounded-md"
           style={{ backgroundColor: Colors.bgAlt }}
         >
-          <section className="flex flex-1 flex-col p-6 bg-white shadow-md">
+          <section className="flex flex-1 flex-col p-6 bg-white shadow-sm">
             <header className="mb-8">
               <p
                 className="mb-4 text-[12px] font-light leading-tight"
@@ -172,7 +174,6 @@ const NearbyTripCard = ({ trip, fallbackEntranceLocation }: NearbyTripCardProps)
 
             <footer className="relative z-10 mt-6 flex flex-col gap-3">
               <Button
-                primary
                 onClick={async (event) => {
                   event.preventDefault();
 

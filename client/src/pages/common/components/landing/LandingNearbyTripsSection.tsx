@@ -1,4 +1,4 @@
-import { publicColors as Colors } from '@/containers/public/publicTheme';
+import { publicClasses, publicColors as Colors } from '@/containers/public/publicTheme';
 import { useFetchNearbyTrips } from '@/usecases/trips/trip.hooks';
 import { ComponentProps } from 'react';
 import NearbyTripCard from './NearbyTripCard';
@@ -12,16 +12,19 @@ const LandingNearbyTripsSection = () => {
       : [0, 0];
 
   return (
-    <section className="py-24" style={{ backgroundColor: Colors.bgAlt }}>
-      <article className="max-w-4xl mx-auto px-6 lg:px-8">
+    <section className={publicClasses.section} style={{ backgroundColor: Colors.bgAlt }}>
+      <article className={publicClasses.container}>
         <header className="mb-8 animate-on-scroll">
-          <p className="text-[13px] font-medium mb-2" style={{ color: Colors.primary }}>
+          <p className={`${publicClasses.eyebrow} mb-2`} style={{ color: Colors.primary }}>
             Nearby active trips
           </p>
-          <h2 className="text-4xl lg:text-5xl leading-tight font-light mb-3" style={{ color: Colors.primary }}>
+          <h2
+            className={`${publicClasses.landingSectionTitle} mb-3`}
+            style={{ color: Colors.primary }}
+          >
             Join the closest ride now
           </h2>
-          <p className="text-[13px]" style={{ color: Colors.neutralLight }}>
+          <p className={publicClasses.landingBody}>
             Live list of pending and in-progress trips near your current location.
           </p>
         </header>

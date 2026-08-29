@@ -1,5 +1,5 @@
 import Button from '@/components/inputs/Button';
-import { Input } from '@/components/ui/input';
+import Input from '@/components/inputs/Input';
 import {
   Dialog,
   DialogContent,
@@ -7,6 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { publicClasses } from '@/containers/public/publicTheme';
 import { UUID } from '@/types';
 import { useQuickJoinTrip } from '@/usecases/trips/trip.hooks';
 import { AsYouType, isValidPhoneNumber } from 'libphonenumber-js';
@@ -47,15 +48,15 @@ const PhoneJoinModal = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent showCloseButton={!quickJoinTripIsLoading}>
+      <DialogContent showCloseButton={!quickJoinTripIsLoading} className="rounded-md shadow-sm">
         <DialogHeader>
-          <DialogTitle>Join this trip</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className={publicClasses.pageTitle}>Join this trip</DialogTitle>
+          <DialogDescription className={publicClasses.bodyMuted}>
             Enter your phone number to continue instantly.
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={onSubmit} className="space-y-3">
+        <form onSubmit={onSubmit} className="flex flex-col gap-4">
           <Controller
             name="phoneNumber"
             control={control}
@@ -67,26 +68,28 @@ const PhoneJoinModal = ({
             render={({ field }) => (
               <Input
                 {...field}
+                label="Phone number"
                 placeholder="+250 781 234 567"
                 onChange={(event) => {
                   const formattedValue = new AsYouType('RW').input(event.target.value);
                   field.onChange(formattedValue);
                 }}
-                aria-invalid={Boolean(errors.phoneNumber)}
+                errorMessage={errors.phoneNumber?.message}
               />
             )}
           />
 
-          {errors.phoneNumber?.message && (
-            <p className="text-[12px] text-red-600">{errors.phoneNumber.message}</p>
-          )}
-
-          <p className="text-[12px] font-light text-neutral-500">
+          <p className={publicClasses.bodyMuted}>
             This is a test entrance. Actual entrance will be recorded via
             integration with external service providers.
           </p>
 
-          <Button type="submit" submit primary isLoading={quickJoinTripIsLoading}>
+          <Button
+            type="submit"
+            submit
+            isLoading={quickJoinTripIsLoading}
+            primary
+          >
             Continue
           </Button>
         </form>

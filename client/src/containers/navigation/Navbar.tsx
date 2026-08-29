@@ -90,7 +90,7 @@ const Navbar = () => {
   return (
     <header
       className="fixed top-0 left-0 right-0 z-[1000] w-full border-b backdrop-blur-sm transition-all duration-300 bg-background/80"
-      style={{ borderColor: `${publicColors.primary}15` }}
+      style={{ borderColor: publicColors.border }}
     >
       <nav
         className="mx-auto px-6 lg:px-8"

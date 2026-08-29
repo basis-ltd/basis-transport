@@ -14,7 +14,7 @@ import { Link } from 'react-router-dom';
 import { Seo } from '@/components/seo';
 import PublicLayout from '@/containers/public/PublicLayout';
 import PublicNavbar from '@/containers/public/PublicNavbar';
-import { publicColors } from '@/containers/public/publicTheme';
+import { publicClasses, publicColors } from '@/containers/public/publicTheme';
 import { toast } from 'sonner';
 
 type LoginTab = 'username' | 'phone';
@@ -209,7 +209,7 @@ const Login = () => {
       <PublicLayout>
         <PublicNavbar variant="auth" />
         <main className="w-full min-h-screen flex flex-col items-center justify-center gap-4 px-4 lg:px-8 pt-24 pb-12">
-          <section className="w-full max-w-[420px] shadow-sm rounded-md bg-white/90 p-8 mx-auto flex flex-col gap-4 animate-fade-in-up">
+          <section className={publicClasses.authCard}>
             <header className="flex flex-col gap-2 items-center mb-2">
               <h1
                 className="text-[13px] leading-tight font-semibold text-center"
@@ -227,10 +227,10 @@ const Login = () => {
             <nav className="grid grid-cols-2 gap-2" aria-label="Login mode">
               <Link
                 to="#"
-                className={`h-10 rounded-md text-[12px] font-light transition-colors duration-200 ease-in-out flex items-center justify-center ${
+                className={`${publicClasses.tabBase} ${
                   activeTab === 'username'
-                    ? 'bg-primary text-white shadow-sm'
-                    : 'bg-primary/10 text-primary'
+                    ? publicClasses.tabSelected
+                    : publicClasses.tabUnselected
                 }`}
                 onClick={(e) => {
                   e.preventDefault();
@@ -241,10 +241,10 @@ const Login = () => {
               </Link>
               <Link
                 to="#"
-                className={`h-10 rounded-md text-[12px] font-light transition-colors duration-200 ease-in-out flex items-center justify-center ${
+                className={`${publicClasses.tabBase} ${
                   activeTab === 'phone'
-                    ? 'bg-primary text-white shadow-sm'
-                    : 'bg-primary/10 text-primary'
+                    ? publicClasses.tabSelected
+                    : publicClasses.tabUnselected
                 }`}
                 onClick={(e) => {
                   e.preventDefault();
@@ -322,9 +322,9 @@ const Login = () => {
                 <footer className="w-full flex flex-col gap-2">
                   <Button
                     type="submit"
+                    primary
                     className="w-full"
                     isLoading={loginIsLoading}
-                    primary
                   >
                     Sign in
                   </Button>
@@ -467,6 +467,7 @@ const Login = () => {
                 <footer className="w-full flex flex-col gap-2">
                   <Button
                     type="submit"
+                    primary
                     className="w-full"
                     isLoading={
                       loginIsLoading ||
@@ -474,7 +475,6 @@ const Login = () => {
                       sendPhoneOtpIsLoading ||
                       verifyPhoneOtpIsLoading
                     }
-                    primary
                   >
                     {phoneStep === 'precheck'
                       ? 'Continue'

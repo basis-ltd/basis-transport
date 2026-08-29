@@ -34,17 +34,16 @@ const DashboardCard = ({
 
   return (
     <article
-      className="surface-card relative flex h-full w-full cursor-pointer flex-col justify-between gap-4 overflow-hidden p-5 transition-all duration-200 ease-in-out hover:scale-[1.02]"
+      className="card-framed relative flex h-full w-full cursor-pointer flex-col justify-between gap-4 overflow-hidden p-5 transition-colors duration-200 ease-(--ease-flat) hover:border-(--ink)"
       tabIndex={0}
       aria-label={title}
     >
-      <section className="surface-tint pointer-events-none absolute inset-0" />
       <section className="relative z-10 flex w-full items-start justify-between gap-3">
         <header className="flex min-w-0 flex-1 flex-col gap-2">
           <Heading
             isLoading={isLoading}
             type="h3"
-            className="!text-[12px] !font-medium !leading-tight !text-secondary"
+            className="type-meta"
           >
             {title}
           </Heading>
@@ -52,7 +51,7 @@ const DashboardCard = ({
             <Heading
               isLoading={isLoading}
               type="h1"
-              className="!text-[13px] !font-semibold !leading-tight !text-primary"
+              className="type-metric"
             >
               {Number(value).toLocaleString()}
             </Heading>

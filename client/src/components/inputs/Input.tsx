@@ -7,15 +7,14 @@ import React, {
   ForwardedRef,
   MouseEventHandler,
 } from 'react';
-import { FieldErrorsImpl, FieldValues } from 'react-hook-form';
-import { Merge } from 'react-hook-form';
-import { FieldError } from 'react-hook-form';
+import { cn } from '@/lib/utils';
 import { SkeletonLoader } from './Loader';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Link } from 'react-router-dom';
 import { faSearch, IconDefinition } from '@fortawesome/free-solid-svg-icons';
-import { InputErrorMessage } from './ErrorLabels';
-import CustomTooltip from '../custom/CustomTooltip';
+import type { InputErrorMessageProp } from './ErrorLabels';
+import { resolveErrorText } from './ErrorLabels';
+import { FieldMessage, FieldShell } from './Field';
+import { controlClassName, readOnlyControlClassName } from './control';
 import { CheckedState } from '@radix-ui/react-checkbox';
 import { Checkbox } from '../ui/checkbox';
 
@@ -39,11 +38,9 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   onKeyDown?: (e: KeyboardEvent<HTMLInputElement>) => void;
   onKeyUp?: (e: KeyboardEvent<HTMLInputElement>) => void;
   label?: string;
-  errorMessage?:
-    | string
-    | FieldError
-    | Merge<FieldError, FieldErrorsImpl<FieldValues>>
-    | undefined;
+  errorMessage?: InputErrorMessageProp;
+  /** Helper text under the control. The error replaces it when both exist. */
+  description?: string;
   required?: boolean;
   isLoading?: boolean;
   accept?: string;
@@ -52,8 +49,8 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   suffixIcon?: IconDefinition;
   showSearchSuffix?: boolean;
   suffixIconPrimary?: boolean;
-  prefixIconHandler?: MouseEventHandler<HTMLAnchorElement> | undefined;
-  suffixIconHandler?: MouseEventHandler<HTMLAnchorElement> | undefined;
+  prefixIconHandler?: MouseEventHandler<HTMLButtonElement> | undefined;
+  suffixIconHandler?: MouseEventHandler<HTMLButtonElement> | undefined;
   labelClassName?: string;
   inputMode?: 'text' | 'url' | 'tel' | 'email' | 'numeric' | 'decimal';
   pattern?: string;
@@ -77,6 +74,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       onKeyUp,
       label,
       errorMessage,
+      description,
       required,
       isLoading,
       prefixIcon,
@@ -92,6 +90,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       readOnly,
       placeholder,
       name,
+      id,
       type = 'text',
       checked,
       defaultChecked,
@@ -101,11 +100,13 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     },
     ref: ForwardedRef<HTMLInputElement>
   ) => {
+    /* Checked state is the inversion rule: the box fills with ink and its
+       check goes to paper. Never a tint, never an accent colour. */
     if (['checkbox', 'radio'].includes(type)) {
-      if (['checkbox'].includes(type)) {
+      if (type === 'checkbox') {
         return (
           <div className="flex w-fit flex-col gap-1.5">
-            <label className="flex w-fit items-center gap-1.5 text-[11px] lg:text-[12px] font-light leading-tight">
+            <label className="flex w-fit items-center gap-2 text-sm">
               <Checkbox
                 onCheckedChange={
                   onChange as ((checked: CheckedState) => void) | undefined
@@ -114,110 +115,112 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
                 value={value}
                 checked={checked || !!value}
                 defaultChecked={defaultChecked || !!value}
-                className={`${
-                  value || defaultChecked || checked
-                    ? 'data-[state=checked]:bg-primary text-white'
-                    : ''
-                } w-4 h-4 border-[1.5px] cursor-pointer border-secondary outline-none focus:outline-none ease-in-out duration-50`}
+                className="size-5 cursor-pointer border-(--ink) outline-none duration-200 data-[state=checked]:bg-(--ink) data-[state=checked]:text-(--paper)"
               />
-              <p
-                className={`${
-                  label ? 'flex' : 'hidden'
-                } text-secondary text-[11px] lg:text-[12px] font-light leading-tight`}
-              >
-                {label}
-              </p>
+              <p className={cn(label ? 'flex' : 'hidden', 'text-sm')}>{label}</p>
             </label>
-            <InputErrorMessage message={errorMessage} />
+            <FieldMessage
+              description={description}
+              errorMessage={errorMessage}
+            />
           </div>
         );
       }
+
       return (
         <div className="flex w-fit flex-col gap-1.5">
-          <label className="flex items-center gap-1.5 text-[11px] lg:text-[12px] font-light leading-tight">
+          <label className="flex items-center gap-2 text-sm">
             <input
               type={type}
               name={name}
               value={value}
-              defaultChecked={defaultChecked as boolean}
-              checked={checked as boolean}
+              defaultChecked={defaultChecked}
+              checked={checked}
               onChange={onChange}
-              className={`w-4 h-4 border-[1.5px] rounded-xl cursor-pointer border-secondary outline-none focus:outline-none accent-primary focus:border-[1.6px] focus:border-primary ease-in-out duration-50 ${className}`}
+              className={cn(
+                'size-5 cursor-pointer rounded-(--radius-pill) border border-(--ink) accent-(--ink) outline-none duration-200',
+                className
+              )}
             />
-            <p
-              className={`${label ? 'flex' : 'hidden'} text-[11px] lg:text-[12px] font-light leading-tight`}
-            >
-              {label}
-            </p>
+            <p className={cn(label ? 'flex' : 'hidden', 'text-sm')}>{label}</p>
           </label>
-          <InputErrorMessage message={errorMessage} />
+          <FieldMessage
+            description={description}
+            errorMessage={errorMessage}
+          />
         </div>
       );
     }
 
-    return (
-        <label className={`flex flex-col gap-2 w-full ${labelClassName}`}>
-          <header
-            className={`${
-              label ? 'pl-1 flex items-center gap-1.5 text-[11px] lg:text-[12px] font-light leading-tight text-secondary' : 'hidden'
-            }`}
-          >
-          {label}{' '}
-          {required && (
-            <CustomTooltip
-              label={required ? `${label} is required` : ''}
-              labelClassName="text-[11px] bg-red-600"
-            >
-              <span className="text-red-600 cursor-pointer">*</span>
-            </CustomTooltip>
-          )}
-        </header>
+    const hasError = Boolean(resolveErrorText(errorMessage));
+    const messageId =
+      id && (hasError || description) ? `${id}-message` : undefined;
 
-          <article className="relative w-full flex flex-col gap-1.5">
+    return (
+      <FieldShell
+        label={label}
+        required={required}
+        description={description}
+        errorMessage={errorMessage}
+        messageId={messageId}
+        className={labelClassName}
+      >
+        {/* The affixes sit inside this wrapper, which is the input's own box —
+            not the field's. Positioning them against the field made them drift
+            downward the moment an error message grew underneath. An unhandled
+            affix is decoration and renders inert; it used to be an anchor to
+            "#", which put a dead stop in the tab order. */}
+        <section className="relative w-full">
           {prefixIcon || prefixText ? (
-            <nav className="absolute inset-y-0 start-0 flex items-center ps-3">
-              <Link
-                to={'#'}
+            prefixIconHandler ? (
+              <button
+                type="button"
                 onClick={prefixIconHandler}
-                className="text-secondary hover:text-primary transition-colors duration-200"
+                className="absolute inset-y-0 start-0 flex items-center ps-3.5 text-(--muted) outline-none transition-colors duration-200 ease-(--ease-flat) hover:text-(--ink)"
               >
-                {prefixIcon && (
-                  <FontAwesomeIcon
-                    className="text-[9px] sm:text-[10px] md:text-[10px] lg:text-[11px]"
-                    icon={prefixIcon}
-                  />
-                )}
-                {prefixText && (
-                  <span className="text-[11px] lg:text-[12px] font-light leading-tight">
-                    {prefixText}
-                  </span>
-                )}
-              </Link>
-            </nav>
+                {prefixIcon ? (
+                  <FontAwesomeIcon className="text-current" icon={prefixIcon} />
+                ) : null}
+                {prefixText ? (
+                  <span className="text-sm">{prefixText}</span>
+                ) : null}
+              </button>
+            ) : (
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3.5 text-(--muted)"
+              >
+                {prefixIcon ? (
+                  <FontAwesomeIcon className="text-current" icon={prefixIcon} />
+                ) : null}
+                {prefixText ? (
+                  <span className="text-sm">{prefixText}</span>
+                ) : null}
+              </span>
+            )
           ) : null}
 
-          {(suffixIcon || showSearchSuffix) && (
-            <nav className="absolute inset-y-0 end-0 flex items-center pe-3">
-              <Link
-                to={'#'}
-                onClick={suffixIconHandler}
-                className={`text-secondary hover:text-primary transition-colors duration-200 ${
-                  suffixIconPrimary ? 'text-primary' : ''
-                }`}
-              >
-                <FontAwesomeIcon
-                  className="text-[9px] sm:text-[10px] md:text-[10px] lg:text-[11px]"
-                  icon={suffixIcon || faSearch}
-                />
-              </Link>
-            </nav>
-          )}
+          {suffixIcon || showSearchSuffix ? (
+            <button
+              type="button"
+              onClick={suffixIconHandler}
+              className={cn(
+                'absolute inset-y-0 end-0 flex items-center rounded-e-(--radius-control) px-3.5 text-sm outline-none transition-[background-color,color] duration-200 ease-(--ease-flat)',
+                suffixIconPrimary
+                  ? 'bg-(--ink) text-(--paper) active:shadow-[var(--press-on-ink)_999px_999px_0_inset]'
+                  : 'text-(--muted) hover:text-(--ink)'
+              )}
+            >
+              <FontAwesomeIcon icon={suffixIcon || faSearch} />
+            </button>
+          ) : null}
 
           {isLoading ? (
             <SkeletonLoader type="input" />
           ) : (
             <UIInput
-              defaultValue={defaultValue as string}
+              id={id}
+              defaultValue={defaultValue}
               value={value}
               type={type || 'text'}
               min={type === 'number' ? 0 : min}
@@ -233,34 +236,24 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
               placeholder={readOnly ? '' : placeholder}
               inputMode={inputMode}
               pattern={pattern}
-              className={`
-                !h-10 min-h-10 !py-0 px-3
-                font-light leading-tight
-                placeholder:!font-light
-                placeholder:text-[11px] lg:placeholder:text-[12px]
-                text-[11px] lg:text-[12px]
-                flex items-center w-full
-                rounded-md border border-[1px] border-primary/20
-                outline-none focus:outline-none
-                focus:border-primary
-                focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20
-                ease-in-out duration-200 bg-white shadow-sm
-                ${className}
-                ${prefixIcon && 'ps-10'}
-                ${prefixText ? 'ps-[3.25rem]' : ''}
-                ${(suffixIcon || showSearchSuffix) && 'pe-10'}
-                ${
-                  readOnly &&
-                  '!border-[.1px] !border-background hover:cursor-default focus:!border-background'
-                }
-              `}
+              aria-invalid={hasError}
+              aria-describedby={messageId}
+              className={cn(
+                controlClassName,
+                prefixIcon && 'ps-10',
+                prefixText && 'ps-[3.6rem]',
+                (suffixIcon || showSearchSuffix) && 'pe-11',
+                readOnly && readOnlyControlClassName,
+                className
+              )}
             />
           )}
-          <InputErrorMessage message={errorMessage} />
-        </article>
-      </label>
+        </section>
+      </FieldShell>
     );
   }
 );
+
+Input.displayName = 'Input';
 
 export default Input;

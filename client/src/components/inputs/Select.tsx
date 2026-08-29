@@ -7,10 +7,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { UUID } from 'crypto';
-import { FieldValues } from 'react-hook-form';
-import { FieldError, Merge } from 'react-hook-form';
-import { FieldErrorsImpl } from 'react-hook-form';
-import { InputErrorMessage } from './ErrorLabels';
+import { cn } from '@/lib/utils';
+import type { InputErrorMessageProp } from './ErrorLabels';
+import { FieldShell } from './Field';
 
 type SelectProps = {
   label?: string | number | undefined;
@@ -24,11 +23,8 @@ type SelectProps = {
   labelClassName?: string | undefined;
   name?: string | undefined;
   readOnly?: boolean;
-  errorMessage?:
-    | string
-    | FieldError
-    | Merge<FieldError, FieldErrorsImpl<FieldValues>>
-    | undefined;
+  description?: string;
+  errorMessage?: InputErrorMessageProp;
 };
 
 const Select = ({
@@ -43,58 +39,38 @@ const Select = ({
   labelClassName = undefined,
   name = undefined,
   readOnly = false,
+  description = undefined,
   errorMessage = undefined,
 }: SelectProps) => {
   return (
-    <label className={`flex flex-col gap-2 w-full ${labelClassName}`}>
-      <p
-        className={
-          label
-            ? 'pl-1 flex items-center gap-1.5 text-[11px] lg:text-[12px] font-light leading-tight text-secondary'
-            : 'hidden'
-        }
-      >
-        {label} <span className={required ? `text-red-600` : 'hidden'}>*</span>
-      </p>
+    <FieldShell
+      label={label}
+      required={required}
+      description={description}
+      errorMessage={errorMessage}
+      className={labelClassName}
+    >
       <SelectComponent
         onValueChange={onChange}
         defaultValue={defaultValue}
         value={value}
         name={name}
+        disabled={readOnly}
       >
-        <SelectTrigger
-          className={`w-full cursor-pointer !h-10 min-h-10 text-[11px] lg:text-[12px] font-light border border-primary/20 focus:border-primary focus-visible:ring-2 focus-visible:ring-primary/20 bg-white shadow-sm rounded-md ${className}`}
-        >
-          <SelectValue
-            className="text-[11px] lg:text-[12px] font-light"
-            placeholder={
-              <p className="text-[11px] lg:text-[12px] font-light text-secondary/70">
-                {placeholder}
-              </p>
-            }
-          />
+        <SelectTrigger className={cn('cursor-pointer', className)}>
+          <SelectValue placeholder={placeholder} />
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
-            {options.map((option, index: number) => {
-              return (
-                <SelectItem
-                  key={index}
-                  value={option.value}
-                  disabled={readOnly}
-                  className="cursor-pointer text-[11px] lg:text-[12px] font-light py-1 hover:bg-background"
-                >
-                  <p className="text-[11px] lg:text-[12px] font-light py-[3px]">
-                    {option.label}
-                  </p>
-                </SelectItem>
-              );
-            })}
+            {options.map((option) => (
+              <SelectItem key={String(option.value)} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
           </SelectGroup>
         </SelectContent>
       </SelectComponent>
-      <InputErrorMessage message={errorMessage} />
-    </label>
+    </FieldShell>
   );
 };
 

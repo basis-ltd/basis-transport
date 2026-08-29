@@ -6,7 +6,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Seo } from "@/components/seo";
 import PublicLayout from "@/containers/public/PublicLayout";
 import PublicNavbar from "@/containers/public/PublicNavbar";
-import { publicColors } from "@/containers/public/publicTheme";
+import { publicClasses, publicColors } from "@/containers/public/publicTheme";
 import { toast } from "sonner";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -97,8 +97,8 @@ const ForgotPassword = () => {
       />
       <PublicLayout>
         <PublicNavbar variant="auth" />
-        <div className="w-full min-h-screen flex flex-col items-center justify-center gap-4 px-4 lg:px-8 pt-24 pb-12">
-          <section className="w-full max-w-[420px] shadow-lg rounded-2xl bg-white/90 border border-primary/10 p-8 mx-auto flex flex-col gap-4 animate-fade-in-up">
+        <main className="w-full min-h-screen flex flex-col items-center justify-center gap-4 px-4 lg:px-8 pt-24 pb-12">
+          <section className={publicClasses.authCard}>
             <header className="flex flex-col gap-2 items-center mb-4">
               <Heading type="h1" className="text-center">
                 Forgot password
@@ -115,10 +115,10 @@ const ForgotPassword = () => {
             <nav className="grid grid-cols-2 gap-2" aria-label="Reset method">
               <Link
                 to="#"
-                className={`h-10 rounded-md text-[12px] font-light transition-colors duration-200 ease-in-out flex items-center justify-center ${
+                className={`${publicClasses.tabBase} ${
                   method === "email"
-                    ? "bg-primary text-white shadow-sm"
-                    : "bg-primary/10 text-primary"
+                    ? publicClasses.tabSelected
+                    : publicClasses.tabUnselected
                 }`}
                 onClick={(e) => {
                   e.preventDefault();
@@ -129,10 +129,10 @@ const ForgotPassword = () => {
               </Link>
               <Link
                 to="#"
-                className={`h-10 rounded-md text-[12px] font-light transition-colors duration-200 ease-in-out flex items-center justify-center ${
+                className={`${publicClasses.tabBase} ${
                   method === "phone"
-                    ? "bg-primary text-white shadow-sm"
-                    : "bg-primary/10 text-primary"
+                    ? publicClasses.tabSelected
+                    : publicClasses.tabUnselected
                 }`}
                 onClick={(e) => {
                   e.preventDefault();
@@ -191,31 +191,31 @@ const ForgotPassword = () => {
               )}
               <Button
                 type="submit"
-                className="w-full"
+                primary
+                    className="w-full"
                 isLoading={
                   method === "email"
                     ? forgotPasswordIsLoading
                     : sendPhoneResetOtpIsLoading
                 }
-                primary
               >
                 Send reset {method === "email" ? "link" : "code"}
               </Button>
               <p
-                className="text-sm"
+                className="text-[12px] font-light"
                 style={{ color: publicColors.neutralLight }}
               >
                 Remember your password?{" "}
                 <Link
                   to="/auth/login"
-                  className="text-primary hover:underline transition-colors duration-200 ease-in-out text-[11px] lg:text-[12px]"
+                  className="text-primary hover:underline transition-colors duration-200 ease-in-out text-[12px]"
                 >
                   Back to login
                 </Link>
               </p>
             </form>
           </section>
-        </div>
+        </main>
       </PublicLayout>
     </>
   );
