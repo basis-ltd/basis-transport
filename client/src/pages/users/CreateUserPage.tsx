@@ -1,12 +1,14 @@
 import Button from '@/components/inputs/Button';
 import Input from '@/components/inputs/Input';
+import TelInput from '@/components/inputs/TelInput';
 import { SkeletonLoader } from '@/components/inputs/Loader';
 import Select from '@/components/inputs/Select';
 import { Heading } from '@/components/inputs/TextInputs';
 import { Gender } from '@/constants/user.constants';
 import AppLayout from '@/containers/navigation/AppLayout';
 import { capitalizeString } from '@/helpers/strings.helper';
-import validateInputs from '@/helpers/validations.helper';
+import validateInputs, { normalizePhoneNumber } from '@/helpers/validations.helper';
+import { validatePhoneNumber } from '@/utils/phone.util';
 import { useAppSelector } from '@/states/hooks';
 import { Role } from '@/types/role.type';
 import { useFetchRoles } from '@/usecases/roles/role.hooks';
@@ -14,6 +16,7 @@ import { useCreateUser } from '@/usecases/users/user.hooks';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
+import { PageBody, PageHeader } from '@/components/layout/PageShell';
 
 const CreateUserPage = () => {
   /**
@@ -64,7 +67,7 @@ const CreateUserPage = () => {
       user: {
         name: data.name,
         email: data.email,
-        phoneNumber: data.phoneNumber,
+        phoneNumber: normalizePhoneNumber(data.phoneNumber) ?? data.phoneNumber,
         gender: data.gender,
       },
       roleIds: selectedRoles?.map((role) => role.id),
@@ -80,10 +83,11 @@ const CreateUserPage = () => {
 
   return (
     <AppLayout>
-      <main className="w-full flex flex-col gap-4">
-        <nav className="w-full flex flex-col gap-4">
-          <Heading>Create User</Heading>
-        </nav>
+      <PageBody>
+        <PageHeader
+          title="Create user"
+          description="Add someone to Basis Transport and set their access."
+        />
         <form className="w-full flex flex-col gap-4" onSubmit={onSubmit}>
           <fieldset className="w-full grid grid-cols-2 gap-4 justify-between">
             <Controller
@@ -122,12 +126,15 @@ const CreateUserPage = () => {
             <Controller
               name="phoneNumber"
               control={control}
-              rules={{ required: `Please enter user's phone number` }}
+              rules={{
+                required: `Please enter user's phone number`,
+                validate: (value) => validatePhoneNumber(value),
+              }}
               render={({ field }) => (
-                <Input
+                <TelInput
                   {...field}
                   label="Phone Number"
-                  placeholder="Enter user phone number"
+                  placeholder="7XX XXX XXX"
                   errorMessage={errors.phoneNumber?.message as string}
                   required
                 />
@@ -153,7 +160,7 @@ const CreateUserPage = () => {
             />
           </fieldset>
           <article className="w-full flex flex-col gap-4 mt-4">
-            <Heading type="h3" className="uppercase">
+            <Heading type="h3">
               Assign roles
             </Heading>
             {rolesIsFetching ? (
@@ -171,7 +178,7 @@ const CreateUserPage = () => {
                   .map((role) => (
                     <label
                       key={role.id}
-                      className="w-full flex items-center gap-3 p-3 rounded-lg border border-primary/10 bg-background hover:border-primary/30 hover:bg-primary/5 transition-all duration-200 cursor-pointer text-[13px] hover:text-foreground"
+                      className="w-full flex items-center gap-3 p-3 rounded-lg border border-(--line) bg-background hover:border-(--line) hover:bg-(--surface) transition-all duration-200 cursor-pointer text-[13px] hover:text-foreground"
                     >
                       <Input
                         type="checkbox"
@@ -184,7 +191,7 @@ const CreateUserPage = () => {
                           );
                         }}
                       />
-                      <span className="text-secondary font-light transition-all duration-200">
+                      <span className="text-(--muted) font-normal transition-all duration-200">
                         {capitalizeString(role.name)}
                       </span>
                     </label>
@@ -206,7 +213,7 @@ const CreateUserPage = () => {
             </Button>
           </menu>
         </form>
-      </main>
+      </PageBody>
     </AppLayout>
   );
 };

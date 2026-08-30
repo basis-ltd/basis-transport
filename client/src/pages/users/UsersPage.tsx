@@ -1,10 +1,10 @@
 import Button from '@/components/inputs/Button';
-import { Heading } from '@/components/inputs/TextInputs';
 import Table from '@/components/table/Table';
 import AppLayout from '@/containers/navigation/AppLayout';
 import { useUserColumns } from '@/usecases/users/columns.user';
 import { useFetchUsers } from '@/usecases/users/user.hooks';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import { PageBody, PageHeader } from "@/components/layout/PageShell";
 
 const UsersPage = () => {
   /**
@@ -26,15 +26,16 @@ const UsersPage = () => {
 
   return (
     <AppLayout>
-      <main className="w-full flex flex-col gap-4">
-        <nav className="w-full flex flex-col gap-4">
-          <ul className="w-full flex items-center gap-3 justify-between">
-            <Heading>Users</Heading>
+      <PageBody>
+        <PageHeader
+          title="Users"
+          description="Everyone with access to Basis Transport."
+          actions={
             <Button route="/users/create" icon={faPlus} primary>
               Create
             </Button>
-          </ul>
-        </nav>
+          }
+        />
         <section className="w-full flex flex-col gap-4">
           <Table
             columns={userColumns}
@@ -48,7 +49,7 @@ const UsersPage = () => {
             setSize={setSize}
           />
         </section>
-      </main>
+      </PageBody>
     </AppLayout>
   );
 };

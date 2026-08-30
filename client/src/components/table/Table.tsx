@@ -136,7 +136,9 @@ export default function Table<TData, TValue>({
 
   return (
     <>
-      <section className={`w-full border rounded-md ${containerClassName}`}>
+      <section
+        className={`w-full overflow-x-auto rounded-(--radius-card) border border-(--line) ${containerClassName}`}
+      >
         <DataTable className={tableClassName}>
           <TableHeader className="px-0">
             {table.getHeaderGroups().map((headerGroup) => (
@@ -144,7 +146,7 @@ export default function Table<TData, TValue>({
                 {headerGroup.headers.map((header) => {
                   return (
                     <TableHead
-                      className={`text-[12px] text-black font-normal p-4 ${headerCellClassName}`}
+                      className={`h-(--control-md) px-4 text-[0.8125rem] font-medium text-(--muted) ${headerCellClassName}`}
                       key={header.id}
                       colSpan={header.colSpan}
                     >
@@ -176,14 +178,14 @@ export default function Table<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && 'selected'}
-                  className={`p-2 ${rowClickHandler ? 'cursor-pointer' : ''
-                    } hover:bg-background ${typeof rowClassName === 'function'
+                  className={`border-(--line) transition-colors duration-200 ease-(--ease-flat) hover:bg-(--surface) data-[state=selected]:bg-(--ink) data-[state=selected]:text-(--paper) ${
+                    rowClickHandler ? 'cursor-pointer' : ''
+                  } ${
+                    typeof rowClassName === 'function'
                       ? rowClassName(row.original)
                       : rowClassName
-                    }`}
-                  onClick={(e) => {
-                    e.preventDefault();
-                  }}
+                  }`}
+                  onClick={() => rowClickHandler?.(row.original)}
                 >
                   {row.getVisibleCells().map((cell) => {
                     const preventAction = [
@@ -198,8 +200,9 @@ export default function Table<TData, TValue>({
                     );
                     return (
                       <TableCell
-                        className={`${preventAction ? '!cursor-auto' : ''
-                          } text-[12px] text-black p-4 ${cellClassName}`}
+                        className={`h-12 px-4 text-sm ${
+                          preventAction ? 'cursor-auto' : ''
+                        } ${cellClassName}`}
                         key={cell.id}
                         onClick={(e) => {
                           if (preventAction) {
@@ -223,9 +226,7 @@ export default function Table<TData, TValue>({
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  <span className="text-gray-500 font-light text-[12px]">
-                    {noDataMessage}
-                  </span>
+                  <span className="type-meta">{noDataMessage}</span>
                 </TableCell>
               </TableRow>
             )}

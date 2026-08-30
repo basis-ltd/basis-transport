@@ -1,15 +1,17 @@
 import Button from '@/components/inputs/Button';
 import Input from '@/components/inputs/Input';
-import validateInputs from '@/helpers/validations.helper';
+import TelInput from '@/components/inputs/TelInput';
+import validateInputs, { normalizePhoneNumber } from '@/helpers/validations.helper';
 import { useSignup } from '@/usecases/auth/auth.hooks';
+import { validatePhoneNumber } from '@/utils/phone.util';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
 import { Seo } from '@/components/seo';
-import PublicLayout from '@/containers/public/PublicLayout';
-import PublicNavbar from '@/containers/public/PublicNavbar';
-import { publicColors } from '@/containers/public/publicTheme';
+import {
+  AuthPageShell,
+} from './AuthPageShell';
 
 const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -26,7 +28,7 @@ const Signup = () => {
       name: data?.name,
       email: data?.email,
       password: data?.password,
-      phoneNumber: data?.phoneNumber,
+      phoneNumber: normalizePhoneNumber(data?.phoneNumber) ?? data?.phoneNumber,
     });
   });
 
@@ -38,23 +40,19 @@ const Signup = () => {
         canonicalPath="/auth/register"
         ogDescription="Create your Basis Transport account to access live bus tracking, seat availability, and public transport analytics."
       />
-      <PublicLayout>
-        <PublicNavbar variant="auth" />
-        <div className="w-full min-h-screen flex flex-col items-center justify-center gap-4 px-4 lg:px-8 pt-24 pb-12">
+      <AuthPageShell>
           <form
-            className="w-full max-w-[420px] shadow-lg rounded-2xl bg-white/90 border border-primary/10 p-8 mx-auto flex flex-col gap-4 animate-fade-in-up"
+            className="card-framed flex w-full flex-col gap-5 p-8 max-sm:p-5"
             onSubmit={onSubmit}
           >
             <header className="flex flex-col gap-2 items-center mb-4">
               <h1
-                className="text-3xl lg:text-4xl leading-tight font-light text-balance text-center"
-                style={{ color: publicColors.primary }}
+                className="text-center text-balance text-(--ink)"
               >
                 Create Account
               </h1>
               <p
-                className="text-base leading-relaxed text-center"
-                style={{ color: publicColors.neutralLight }}
+                className="type-body-sm text-center text-(--muted)"
               >
                 Please fill in the form to create your account
               </p>
@@ -103,19 +101,16 @@ const Signup = () => {
                 name="phoneNumber"
                 rules={{
                   required: `Please enter your phone number`,
-                  validate: (value) =>
-                    validateInputs(value, 'number') ||
-                    'Please enter a valid phone number',
+                  validate: (value) => validatePhoneNumber(value),
                 }}
                 render={({ field }) => (
-                  <Input
+                  <TelInput
                     {...field}
-                    errorMessage={errors.phoneNumber?.message}
-                    placeholder="Enter phone number"
+                    errorMessage={errors.phoneNumber?.message as string}
+                    placeholder="7XX XXX XXX"
                     label="Phone Number"
                     autoComplete="tel"
                     required
-                    type="tel"
                   />
                 )}
               />
@@ -150,17 +145,17 @@ const Signup = () => {
               <menu className="w-full flex flex-col items-center justify-between gap-2">
                 <Button
                   type="submit"
-                  className="w-full"
-                  isLoading={signupIsLoading}
                   primary
+                    className="w-full"
+                  isLoading={signupIsLoading}
                 >
                   Sign Up
                 </Button>
-                <p className="text-sm" style={{ color: publicColors.neutralLight }}>
+                <p className="type-body-sm text-(--muted)">
                   Already have an account?{' '}
                   <Link
                     to="/auth/login"
-                    className="text-primary hover:underline transition-colors duration-200 ease-in-out text-[11px] lg:text-[12px]"
+                    className="text-(--ink) hover:underline transition-colors duration-200 ease-in-out type-body-sm"
                   >
                     Login
                   </Link>
@@ -168,8 +163,7 @@ const Signup = () => {
               </menu>
             </footer>
           </form>
-        </div>
-      </PublicLayout>
+      </AuthPageShell>
     </>
   );
 };

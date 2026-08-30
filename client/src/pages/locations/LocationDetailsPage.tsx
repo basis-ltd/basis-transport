@@ -1,6 +1,12 @@
 import Button from '@/components/inputs/Button';
 import { SkeletonLoader } from '@/components/inputs/Loader';
-import { Heading } from '@/components/inputs/TextInputs';
+import {
+  DetailList,
+  PageBody,
+  PageFooter,
+  PageHeader,
+  PageSection,
+} from '@/components/layout/PageShell';
 import { TableUserLabel } from '@/components/users/TableUserLabel';
 import { environment } from '@/constants/environment.constants';
 import AppLayout from '@/containers/navigation/AppLayout';
@@ -11,24 +17,14 @@ import { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 const LocationDetailsPage = () => {
-  /**
-   * STATE VARIABLES
-   */
   const { location } = useAppSelector((state) => state.location);
 
-  /**
-   * NAVIGATION
-   */
   const { id } = useParams();
   const navigate = useNavigate();
 
-  /**
-   * LOCATION HOOKS
-   */
   const { getLocationById, locationIsFetching, locationIsError } =
     useGetLocationById();
 
-  // FETCH LOCATION
   useEffect(() => {
     if (id) {
       getLocationById(id);
@@ -38,54 +34,19 @@ const LocationDetailsPage = () => {
   if (locationIsFetching) {
     return (
       <AppLayout>
-        <main className="w-full max-w-6xl mx-auto px-4 py-8 space-y-8">
-          <header className="rounded-md bg-white shadow-sm p-6">
-            <section>
-              <SkeletonLoader width="300px" height="36px" className="mb-2" />
-              <SkeletonLoader width="400px" height="20px" />
-            </section>
-          </header>
-
-          <article className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-            <section className="lg:col-span-2 bg-white rounded-md p-8 shadow-sm">
-              <header className="mb-8">
-                <SkeletonLoader width="250px" height="28px" className="mb-2" />
-                <SkeletonLoader width="200px" height="20px" />
-              </header>
-
-              <dl>
-                <dt className="text-[12px] font-medium text-secondary uppercase tracking-wide">
-                  <SkeletonLoader width="100px" height="16px" />
-                </dt>
-                <dd className="mt-2">
-                  <SkeletonLoader width="220px" height="20px" />
-                </dd>
-
-                <dt className="mt-6 text-[12px] font-medium text-secondary uppercase tracking-wide">
-                  <SkeletonLoader width="120px" height="16px" />
-                </dt>
-                <dd className="mt-2">
-                  <SkeletonLoader width="180px" height="20px" />
-                </dd>
-
-                <dt className="mt-6 text-[12px] font-medium text-secondary uppercase tracking-wide">
-                  <SkeletonLoader width="110px" height="16px" />
-                </dt>
-                <dd className="mt-2">
-                  <SkeletonLoader width="150px" height="20px" />
-                </dd>
-              </dl>
-            </section>
-
-            <section className="lg:col-span-3 bg-white rounded-md p-8 shadow-sm">
-              <header className="mb-8">
-                <SkeletonLoader width="60px" height="28px" className="mb-2" />
-                <SkeletonLoader width="220px" height="20px" />
-              </header>
+        <PageBody>
+          <PageHeader title="Location" />
+          <div className="grid gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+            <PageSection title="Location information">
+              <SkeletonLoader type="text" height="1rem" />
+              <SkeletonLoader type="text" height="1rem" />
+              <SkeletonLoader type="text" height="1rem" />
+            </PageSection>
+            <PageSection title="Map">
               <SkeletonLoader type="card" height="24rem" />
-            </section>
-          </article>
-        </main>
+            </PageSection>
+          </div>
+        </PageBody>
       </AppLayout>
     );
   }
@@ -93,134 +54,107 @@ const LocationDetailsPage = () => {
   if (locationIsError || !location) {
     return (
       <AppLayout>
-        <main className="w-full min-h-screen flex items-center justify-center">
-          <section className="text-center space-y-3 rounded-md bg-white shadow-sm p-6">
-            <h1 className="text-[13px] font-semibold text-primary">
-              Location Not Found
-            </h1>
-            <p className="text-[12px] font-light text-secondary/80">
-              We couldn't locate this location's information.
+        <PageBody>
+          <PageHeader title="Location" />
+          <PageSection>
+            <p className="type-body-sm text-(--muted)">
+              We couldn’t find this location. It may have been removed.
             </p>
-          </section>
-        </main>
+            <div>
+              <Button
+                onClick={(event) => {
+                  event.preventDefault();
+                  navigate(-1);
+                }}
+              >
+                Back
+              </Button>
+            </div>
+          </PageSection>
+        </PageBody>
       </AppLayout>
     );
   }
 
+  const coordinates = location?.address?.coordinates;
   const position =
-    location?.address?.coordinates &&
-    Array.isArray(location.address.coordinates) &&
-    location.address.coordinates.length >= 2
-      ? {
-          lat: location.address.coordinates[0],
-          lng: location.address.coordinates[1],
-        }
+    Array.isArray(coordinates) && coordinates.length >= 2
+      ? { lat: coordinates[0], lng: coordinates[1] }
       : undefined;
 
   return (
     <AppLayout>
-      <main className="w-full max-w-6xl mx-auto px-4 py-6 space-y-8">
-        <header className="rounded-md bg-white shadow-sm p-6 sm:p-8">
-          <section>
-            <p className="inline-flex items-center rounded-md bg-background-secondary px-3 py-1 text-[12px] font-medium tracking-wide text-primary mb-3">
-              Location Overview
-            </p>
-            <Heading className="text-[13px] font-semibold text-primary mb-2">
-              {location?.name}
-            </Heading>
-            <p className="text-[12px] font-light text-secondary/80 max-w-2xl">
-              Detailed information about {location?.name}
-            </p>
-          </section>
-        </header>
+      <PageBody>
+        <PageHeader
+          title={location?.name}
+          description="Stop details and where it sits on the map."
+        />
 
-        <article className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-          <section className="lg:col-span-2 bg-white rounded-md p-8 shadow-sm">
-            <header className="mb-8">
-              <Heading
-                type="h2"
-                className="text-[13px] font-semibold text-primary mb-2"
-              >
-                Location Information
-              </Heading>
-              <p className="text-[12px] font-light text-secondary/80">
-                Basic location details
-              </p>
-            </header>
+        <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+          <PageSection
+            title="Location information"
+            description="Basic stop details."
+          >
+            <DetailList
+              columns={1}
+              items={[
+                {
+                  label: 'Description',
+                  value:
+                    location?.description ||
+                    'No description provided for this location yet.',
+                },
+                {
+                  label: 'Created by',
+                  value: <TableUserLabel user={location?.createdBy} />,
+                },
+                {
+                  label: 'Created',
+                  value: new Date(location?.createdAt).toLocaleDateString(),
+                },
+              ]}
+            />
+          </PageSection>
 
-            <dl>
-              <dt className="text-[12px] font-medium text-secondary uppercase tracking-wide">
-                Description
-              </dt>
-              <dd className="mt-2 rounded-md bg-background-secondary px-4 py-3 text-[12px] font-light text-primary leading-relaxed">
-                {location?.description || 'No description provided for this location yet.'}
-              </dd>
-
-              <dt className="mt-6 text-[12px] font-medium text-secondary uppercase tracking-wide">
-                Created By
-              </dt>
-              <dd className="mt-2 rounded-md bg-background-secondary px-4 py-3">
-                <TableUserLabel user={location?.createdBy} />
-              </dd>
-
-              <dt className="mt-6 text-[12px] font-medium text-secondary uppercase tracking-wide">
-                Created At
-              </dt>
-              <dd className="mt-2 rounded-md bg-background-secondary px-4 py-3 text-[12px] font-light text-primary">
-                {new Date(location?.createdAt).toLocaleDateString()}
-              </dd>
-            </dl>
-          </section>
-
-          <section className="lg:col-span-3 bg-white rounded-md p-8 shadow-sm">
-            <header className="mb-8">
-              <Heading
-                type="h2"
-                className="text-[13px] font-semibold text-primary mb-2"
-              >
-                Map
-              </Heading>
-              <p className="text-[12px] font-light text-secondary/80">
-                Geographical location
-              </p>
-            </header>
-            {position ? (
-              <section className="h-[50vh] w-full rounded-md overflow-hidden shadow-sm">
+          <PageSection title="Map" description="Where this stop is.">
+            {position && environment.googleMapsApiKey ? (
+              <div className="h-[420px] w-full overflow-hidden rounded-(--radius-card)">
                 <APIProvider apiKey={environment.googleMapsApiKey}>
                   <Map
                     defaultCenter={position}
                     defaultZoom={15}
-                    gestureHandling={'greedy'}
-                    fullscreenControl={true}
+                    gestureHandling="greedy"
+                    fullscreenControl
                   >
                     <Marker position={position} title={location?.name} />
                   </Map>
                 </APIProvider>
-              </section>
+              </div>
             ) : (
-              <section className="h-[50vh] w-full flex items-center justify-center bg-background-secondary rounded-md shadow-sm">
-                <p className="text-[12px] font-light text-secondary/80">
-                  Address is not available.
+              <div className="flex h-[420px] w-full items-center justify-center rounded-(--radius-card) bg-(--surface)">
+                <p className="type-meta">
+                  {position
+                    ? 'Map appears when Google Maps is configured.'
+                    : 'No address recorded for this stop.'}
                 </p>
-              </section>
+              </div>
             )}
-          </section>
-        </article>
-        <nav aria-label="Location details actions" className="w-full flex items-center gap-3 justify-between">
+          </PageSection>
+        </div>
+
+        <PageFooter>
           <Button
-            className="rounded-md px-6 text-[12px] font-light"
-            onClick={(e) => {
-              e.preventDefault();
+            onClick={(event) => {
+              event.preventDefault();
               navigate(-1);
             }}
           >
             Back
           </Button>
-        </nav>
-      </main>
+        </PageFooter>
+      </PageBody>
     </AppLayout>
   );
 };
 
 export default LocationDetailsPage;
-

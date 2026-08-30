@@ -1,17 +1,23 @@
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faArrowUp,
   faArrowDown,
   faArrowRight,
+  faArrowUp,
 } from '@fortawesome/free-solid-svg-icons';
 import { Link } from 'react-router-dom';
-import { Heading } from '../inputs/TextInputs';
+import { SkeletonLoader } from '../inputs/Loader';
 
 interface DashboardCardProps {
   title: string;
   value: string | number;
-  change?: string | number;
+  /**
+   * Period-over-period change, as a percentage. Omit it when there is nothing
+   * to compare against — the card used to be handed a hardcoded `0` and render
+   * "0% · Compared to last month" under every metric, which stated a
+   * comparison the API never made.
+   */
+  change?: number;
   icon: IconProp;
   route?: string;
   description?: string;
@@ -24,74 +30,73 @@ const DashboardCard = ({
   change,
   icon,
   route,
-  description = 'Compared to last month',
+  description,
   isLoading = false,
 }: DashboardCardProps) => {
-  // STATE VARIABLES
-  const isPositive = Number(change) > 0;
-  const isNegative = Number(change) < 0;
-  const hasChange = change !== undefined && Number.isFinite(Number(change));
+  const hasChange = typeof change === 'number' && Number.isFinite(change);
+  const isPositive = hasChange && change > 0;
+  const isNegative = hasChange && change < 0;
 
   return (
     <article
-      className="surface-card relative flex h-full w-full cursor-pointer flex-col justify-between gap-4 overflow-hidden p-5 transition-all duration-200 ease-in-out hover:scale-[1.02]"
-      tabIndex={0}
+      className="card-framed flex h-full flex-col justify-between gap-5 p-5 transition-colors duration-200 ease-(--ease-flat) hover:border-(--ink)"
       aria-label={title}
     >
-      <section className="surface-tint pointer-events-none absolute inset-0" />
-      <section className="relative z-10 flex w-full items-start justify-between gap-3">
-        <header className="flex min-w-0 flex-1 flex-col gap-2">
-          <Heading
-            isLoading={isLoading}
-            type="h3"
-            className="!text-[12px] !font-medium !leading-tight !text-secondary"
-          >
+      <header className="flex items-start justify-between gap-3">
+        <div className="flex min-w-0 flex-1 flex-col gap-2">
+          <p className="type-meta truncate" title={title}>
             {title}
-          </Heading>
-          <section className="flex flex-wrap items-end gap-2">
-            <Heading
-              isLoading={isLoading}
-              type="h1"
-              className="!text-[13px] !font-semibold !leading-tight !text-primary"
-            >
-              {Number(value).toLocaleString()}
-            </Heading>
-            {hasChange && (
-              <p
-                className={`flex items-center gap-1 text-[12px] font-light ${
-                  isPositive
-                    ? 'text-green-600'
-                    : isNegative
-                      ? 'text-red-600'
-                      : 'text-muted-foreground'
-                }`}
-              >
-                <FontAwesomeIcon
-                  className="text-[9px] sm:text-[10px] md:text-[10px] lg:text-[11px]"
-                  icon={isPositive ? faArrowUp : isNegative ? faArrowDown : faArrowRight}
-                />
-                {isPositive && '+'}
-                {change}%
-              </p>
-            )}
-          </section>
-          <p className="text-[12px] font-light leading-relaxed text-secondary">
-            {description}
           </p>
-        </header>
-        <figure
-          className="flex shrink-0 items-center justify-center rounded-md bg-primary/10 p-3 text-primary shadow-sm"
+          {isLoading ? (
+            <SkeletonLoader type="text" width="5rem" height="1.75rem" />
+          ) : (
+            <p className="type-metric text-(--ink)">
+              {Number(value).toLocaleString()}
+            </p>
+          )}
+        </div>
+        <span
+          aria-hidden="true"
+          className="flex size-9 shrink-0 items-center justify-center rounded-(--radius-control) bg-(--accent-surface) text-(--accent-ink)"
         >
-          <FontAwesomeIcon className="text-[12px] md:text-[13px]" icon={icon} />
-        </figure>
-      </section>
-      <Link
-        to={route ?? '#'}
-        className="relative z-10 mt-1 flex w-fit items-center gap-1.5 text-[12px] font-light leading-tight text-primary transition-colors duration-200 ease-in-out hover:underline"
-      >
-        View details
-        <FontAwesomeIcon icon={faArrowRight} className="text-[10px]" aria-hidden />
-      </Link>
+          <FontAwesomeIcon icon={icon} className="size-4" />
+        </span>
+      </header>
+
+      <footer className="flex flex-wrap items-center justify-between gap-2">
+        {hasChange ? (
+          <p
+            className={`type-meta flex items-center gap-1.5 ${
+              isPositive
+                ? 'text-(--approve)'
+                : isNegative
+                  ? 'text-(--danger)'
+                  : ''
+            }`}
+          >
+            <FontAwesomeIcon
+              icon={isPositive ? faArrowUp : isNegative ? faArrowDown : faArrowRight}
+              className="size-3"
+              aria-hidden="true"
+            />
+            {isPositive ? '+' : ''}
+            {change}%{description ? ` · ${description}` : ''}
+          </p>
+        ) : description ? (
+          <p className="type-meta">{description}</p>
+        ) : (
+          <span />
+        )}
+
+        {route ? (
+          <Link
+            to={route}
+            className="link-sweep text-sm font-medium text-(--ink)"
+          >
+            View
+          </Link>
+        ) : null}
+      </footer>
     </article>
   );
 };

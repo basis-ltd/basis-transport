@@ -17,7 +17,7 @@ export const ReferenceIdInput = ({ label }: ReferenceIdInputProps) => {
         {label}
         <FontAwesomeIcon
           icon={isCopied ? faCheckCircle : faCopy}
-          className={`w-4 h-4 cursor-pointer align-middle ml-1 ${isCopied ? "text-primary" : "text-secondary"} text-[11px]`}
+          className={`w-4 h-4 cursor-pointer align-middle ml-1 ${isCopied ? "text-(--ink)" : "text-(--muted)"} text-xs`}
           onClick={(e) => {
             e.preventDefault();
             if (!label) return;

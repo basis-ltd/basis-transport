@@ -28,6 +28,8 @@ import moment from "moment";
 import Loader from "@/components/inputs/Loader";
 import { TripStatus } from "@/constants/trip.constants";
 import { capitalizeString } from "@/helpers/strings.helper";
+import useConfirm from "@/components/feedback/ConfirmDialog";
+import { PageBody, PageHeader } from "@/components/layout/PageShell";
 
 const TRIP_OPERATOR_ROLES = ["DRIVER", "ADMIN", "SUPER_ADMIN"];
 
@@ -66,6 +68,7 @@ const TripDetailsPage = () => {
    * BROWSE LOCATIONS
    */
   const { browserLocation, browserLocationIsLoading } = useBrowseLocations();
+  const { confirm, confirmDialog } = useConfirm();
 
   /**
    * TRIP HOOKS
@@ -195,89 +198,137 @@ const TripDetailsPage = () => {
   const getStatusColor = (status: TripStatus) => {
     switch (status) {
       case TripStatus.IN_PROGRESS:
-        return "text-primary bg-primary/10";
+        return "text-(--ink) bg-(--surface)";
       case TripStatus.COMPLETED:
-        return "text-green-700 bg-green-700/10";
+        return "text-(--approve) bg-green-700/10";
       case TripStatus.CANCELLED:
-        return "text-destructive bg-destructive/10";
+        return "text-(--danger) bg-destructive/10";
       default:
-        return "text-secondary bg-background-secondary/60";
+        return "text-(--muted) bg-(--surface)/60";
     }
+  };
+
+  /* `flatMap` over the roles rendered one button per matching role, so a user
+     holding two of them saw the action twice. */
+  const isRider = Boolean(
+    user?.userRoles?.some((role) => ["USER"].includes(role.role?.name ?? ""))
+  );
+
+  const onToggleTripMembership = async () => {
+    if (!browserLocation) return;
+
+    const leaving = Boolean(currentUserTrip);
+    const agreed = await confirm({
+      title: leaving ? "Exit this trip?" : "Join this trip?",
+      description: leaving
+        ? "Your trip will be marked complete and your exit point recorded at your current location."
+        : "You will be added to this trip and your boarding point recorded at your current location.",
+      confirmLabel: leaving ? "Exit trip" : "Join trip",
+      destructive: leaving,
+    });
+
+    if (!agreed) return;
+
+    if (leaving && currentUserTrip) {
+      updateUserTrip({
+        id: currentUserTrip.id,
+        userTrip: {
+          status: UserTripStatus.COMPLETED,
+          exitLocation: {
+            type: "Point",
+            coordinates: [browserLocation.lat, browserLocation.lng],
+          },
+          endTime: new Date().toISOString(),
+        },
+      });
+      return;
+    }
+
+    if (trip?.id && user?.id) {
+      createUserTrip({
+        tripId: trip.id,
+        userId: user.id,
+        entranceLocation: {
+          type: "Point",
+          coordinates: [browserLocation.lat, browserLocation.lng],
+        },
+      });
+    }
+  };
+
+  const onStartTrip = async () => {
+    if (!trip?.id) return;
+    const agreed = await confirm({
+      title: "Start this trip?",
+      description:
+        "Riders will be able to join, and the trip will show as running.",
+      confirmLabel: "Start trip",
+    });
+    if (agreed) startTrip(trip.id);
+  };
+
+  const onCompleteTrip = async () => {
+    if (!trip?.id) return;
+    const agreed = await confirm({
+      title: "Complete this trip?",
+      description:
+        "The trip closes to new riders and is recorded as finished. This cannot be undone.",
+      confirmLabel: "Complete trip",
+    });
+    if (agreed) completeTrip(trip.id);
+  };
+
+  const onCancelTrip = async () => {
+    if (!trip?.id) return;
+    const agreed = await confirm({
+      title: "Cancel this trip?",
+      description:
+        "Riders will be told the service is not running. This cannot be undone.",
+      confirmLabel: "Cancel trip",
+      destructive: true,
+    });
+    if (agreed) cancelTrip(trip.id);
   };
 
   return (
     <AppLayout>
-      <main className="w-full flex flex-col gap-4">
-        <nav className="w-full flex flex-col gap-4">
-          <menu className="w-full flex flex-wrap items-start gap-3 justify-between">
-            <Heading>#{trip?.referenceId}</Heading>
+      <PageBody>
+        <PageHeader
+          title={`Trip #${trip?.referenceId ?? ''}`}
+          description="Route, schedule, and who is on board."
+          actions={
 
-            <ul className="flex flex-col gap-1">
-              {/* JOIN/EXIT TRIP */}
-              {user?.userRoles?.flatMap(
-                (role) =>
-                  ["USER"].includes(role.role?.name ?? "") && (
-                    <Button
-                      primary={!currentUserTrip}
-                      danger={!!currentUserTrip}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        if (currentUserTrip && browserLocation) {
-                          updateUserTrip({
-                            id: currentUserTrip?.id,
-                            userTrip: {
-                              status: UserTripStatus.COMPLETED,
-                              exitLocation: {
-                                type: "Point",
-                                coordinates: [
-                                  browserLocation.lat,
-                                  browserLocation.lng,
-                                ],
-                              },
-                              endTime: new Date().toISOString(),
-                            },
-                          });
-                        } else if (trip?.id && user?.id && browserLocation) {
-                          createUserTrip({
-                            tripId: trip?.id,
-                            userId: user?.id,
-                            entranceLocation: {
-                              type: "Point",
-                              coordinates: [
-                                browserLocation.lat,
-                                browserLocation.lng,
-                              ],
-                            },
-                          });
-                        }
-                      }}
-                      disabled={
-                        createUserTripIsLoading ||
-                        updateUserTripIsLoading ||
-                        browserLocationIsLoading
-                      }
-                      isLoading={
-                        createUserTripIsLoading || updateUserTripIsLoading
-                      }
-                    >
-                      {currentUserTrip ? "Exit Trip" : "Join Trip"}
-                    </Button>
-                  ),
+            <ul className="flex flex-wrap items-center gap-2">
+              {/* JOIN / EXIT TRIP */}
+              {isRider && (
+                <Button
+                  primary={!currentUserTrip}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    void onToggleTripMembership();
+                  }}
+                  disabled={
+                    createUserTripIsLoading ||
+                    updateUserTripIsLoading ||
+                    browserLocationIsLoading
+                  }
+                  isLoading={createUserTripIsLoading || updateUserTripIsLoading}
+                >
+                  {currentUserTrip ? "Exit trip" : "Join trip"}
+                </Button>
               )}
 
-              {/* START/END/CANCEL TRIP */}
+              {/* START / COMPLETE / CANCEL TRIP */}
               {showStartTrip && (
                 <Button
                   primary
                   onClick={(e) => {
                     e.preventDefault();
-                    if (trip?.id) {
-                      startTrip(trip?.id);
-                    }
+                    void onStartTrip();
                   }}
                   isLoading={isLoading}
                 >
-                  Start Trip
+                  Start trip
                 </Button>
               )}
               {showCompleteTrip && (
@@ -285,70 +336,64 @@ const TripDetailsPage = () => {
                   primary
                   onClick={(e) => {
                     e.preventDefault();
-                    if (trip?.id) {
-                      completeTrip(trip?.id);
-                    }
+                    void onCompleteTrip();
                   }}
                   isLoading={completeTripIsLoading}
                 >
-                  Complete Trip
+                  Complete trip
                 </Button>
               )}
               {showCancelTrip && (
                 <Button
-                  danger
                   onClick={(e) => {
                     e.preventDefault();
-                    if (trip?.id) {
-                      cancelTrip(trip?.id);
-                    }
+                    void onCancelTrip();
                   }}
                   isLoading={cancelTripIsLoading}
                 >
-                  Cancel Trip
+                  Cancel trip
                 </Button>
               )}
             </ul>
-          </menu>
-        </nav>
+          }
+        />
         <section className="w-full flex flex-col gap-4">
-          <Heading type="h2">Trip Details</Heading>
           <article className="w-full grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
             {/* Trip Status */}
-            <article className="bg-white rounded-2xl shadow-sm border border-primary/10 p-5">
-              <h3 className="text-sm font-light text-secondary/70 mb-2">
+            <article className="card-framed p-5">
+              <h3 className="type-meta mb-2">
                 Trip Status
               </h3>
               <p
                 className={`${getStatusColor(
                   trip?.status as TripStatus,
-                )} inline-block px-4 py-1 rounded-full text-sm font-light`}
+                )} inline-block px-4 py-1 rounded-full text-sm font-normal`}
               >
                 {capitalizeString(trip?.status) || "N/A"}
               </p>
             </article>
 
             {/* Trip Times */}
-            <article className="bg-white rounded-2xl shadow-sm border border-primary/10 p-5">
-              <h3 className="text-sm font-light text-secondary/70 mb-2">
+            <article className="card-framed p-5">
+              <h3 className="type-meta mb-2">
                 Trip Times
               </h3>
               <section className="space-y-1">
                 <ul className="w-full flex items-center gap-2 justify-between py-2">
-                  <p className="text-sm font-light text-secondary/80">
+                  <p className="text-sm font-normal text-(--muted)">
                     Start:{" "}
                     {trip?.startTime
                       ? moment(new Date(trip.startTime)).format("HH:mm")
                       : "Not started"}
                   </p>
-                  <p className="text-sm font-light text-secondary/80">
+                  <p className="text-sm font-normal text-(--muted)">
                     End:{" "}
                     {trip?.endTime
                       ? moment(new Date(trip.endTime)).format("HH:mm")
                       : "Not completed"}
                   </p>
                 </ul>
-                <p className="text-sm font-light text-secondary/80 underline">
+                <p className="text-sm font-normal text-(--muted) underline">
                   Duration:{" "}
                   {trip?.startTime && trip?.endTime
                     ? moment(new Date(trip.endTime)).diff(
@@ -362,28 +407,28 @@ const TripDetailsPage = () => {
             </article>
 
             {/* Trip Locations */}
-            <article className="bg-white rounded-2xl shadow-sm border border-primary/10 p-5">
-              <h3 className="text-sm font-light text-secondary/70 mb-2">
+            <article className="card-framed p-5">
+              <h3 className="type-meta mb-2">
                 Trip Locations
               </h3>
               <section className="space-y-1">
-                <p className="text-sm font-light text-secondary/80">
+                <p className="text-sm font-normal text-(--muted)">
                   From: {trip?.locationFrom?.name || "N/A"}
                 </p>
-                <p className="text-sm font-light text-secondary/80">
+                <p className="text-sm font-normal text-(--muted)">
                   To: {trip?.locationTo?.name || "N/A"}
                 </p>
               </section>
             </article>
 
             {/* Available Seats */}
-            <article className="bg-white rounded-2xl shadow-sm border border-primary/10 p-5">
-              <h3 className="text-sm font-light text-secondary/70 mb-2">
+            <article className="card-framed p-5">
+              <h3 className="type-meta mb-2">
                 Available Seats
               </h3>
-              <p className="text-lg font-medium text-primary">
+              <p className="text-lg font-medium text-(--ink)">
                 {tripAvailableCapacityIsFetching ? (
-                  <Loader className="text-primary" />
+                  <Loader className="text-(--ink)" />
                 ) : (
                   (availableCapacity?.availableCapacity ?? 0)
                 )}
@@ -424,7 +469,8 @@ const TripDetailsPage = () => {
             Back
           </Button>
         </menu>
-      </main>
+        {confirmDialog}
+      </PageBody>
     </AppLayout>
   );
 };

@@ -1,5 +1,5 @@
 import { RoleTypes } from '../constants/role.constants';
-import { AuthenticatedUser } from '../types/auth.types';
+import { AuthenticatedUser } from '../common/types/auth.types';
 import { UUID } from '../types';
 
 export function hasAnyRole(

@@ -1,6 +1,12 @@
-import { ChevronLeftIcon, DoubleArrowLeftIcon, DoubleArrowRightIcon } from "@radix-ui/react-icons";
-import { ChevronRightIcon } from "@radix-ui/react-icons";
-import { Button } from "../ui/button";
+import {
+  faAngleLeft,
+  faAngleRight,
+  faAnglesLeft,
+  faAnglesRight,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Button from "../inputs/Button";
+import { controlClassName, panelClassName, panelItemClassName } from "../inputs/control";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { UnknownAction } from "@reduxjs/toolkit";
 import { Table } from "@tanstack/react-table";
@@ -58,13 +64,13 @@ export function DataTablePagination<TData>({
       <article className="flex flex-col gap-1 w-full text-center 
                       md:w-auto md:text-left">
         {table.getFilteredSelectedRowModel().rows.length > 0 && (
-          <span className="text-xs text-muted-foreground">
+          <span className="type-meta">
             {table.getFilteredSelectedRowModel().rows.length} of{' '}
             {table.getFilteredRowModel().rows.length} row(s) selected.
           </span>
         )}
         {totalCount > 0 && (
-          <span className="text-xs">
+          <span className="type-meta">
             Total records: {formatNumbers(totalCount)}
           </span>
         )}
@@ -73,7 +79,7 @@ export function DataTablePagination<TData>({
       <menu className="flex flex-wrap items-center justify-center gap-x-4 gap-y-3 
                      md:justify-end md:gap-x-6">
         <section className="flex items-center space-x-2">
-          <span className="hidden text-[11px] font-normal sm:block">Rows per page</span>
+          <span className="type-meta hidden sm:block">Rows per page</span>
           <Select
             value={`${size}`}
             onValueChange={(value) => {
@@ -83,15 +89,15 @@ export function DataTablePagination<TData>({
               }
             }}
           >
-            <SelectTrigger className="h-8 w-[70px] cursor-pointer">
+            <SelectTrigger className={`${controlClassName} h-(--control-sm) w-[76px] cursor-pointer justify-between`}>
               <SelectValue placeholder={size} />
             </SelectTrigger>
-            <SelectContent side="top">
+            <SelectContent side="top" className={panelClassName}>
               {pageSizeOptions.map((option) => (
                 <SelectItem
                   value={`${option.value}`}
                   key={option.value}
-                  className="cursor-pointer hover:bg-background text-[11px] font-normal"
+                  className={panelItemClassName}
                 >
                   {option?.label}
                 </SelectItem>
@@ -101,7 +107,7 @@ export function DataTablePagination<TData>({
         </section>
 
         <section className="flex items-center gap-2">
-          <span className="text-[11px] font-normal whitespace-nowrap">
+          <span className="type-meta whitespace-nowrap">
             Page {page + 1} of {formatNumbers(totalPages || 1)}
           </span>
           <input
@@ -109,7 +115,7 @@ export function DataTablePagination<TData>({
             min={1}
             max={totalPages || 1}
             defaultValue={page + 1}
-            className="w-12 text-center placeholder:text-[11px] text-[11px] py-1 px-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
+            className={`${controlClassName} h-(--control-sm) w-14 px-2 text-center tabular`}
             onChange={(e) => {
               const targetPage = e.target.value ? Number(e.target.value) : 0;
               if (targetPage >= 1 && targetPage <= (totalPages || 1)) {
@@ -135,8 +141,8 @@ export function DataTablePagination<TData>({
 
         <section className="flex items-center space-x-1">
           <Button
-            variant="outline"
-            className="w-8 h-8 p-0 cursor-pointer"
+            type="button"
+            size="icon-sm"
             onClick={() => {
               table.setPageIndex(0);
               if (setPage) setPage(0);
@@ -144,11 +150,11 @@ export function DataTablePagination<TData>({
             disabled={page === 0}
           >
             <span className="sr-only">Go to first page</span>
-            <DoubleArrowLeftIcon className="w-4 h-4" />
+            <FontAwesomeIcon icon={faAnglesLeft} aria-hidden="true" />
           </Button>
           <Button
-            variant="outline"
-            className="w-8 h-8 p-0 cursor-pointer"
+            type="button"
+            size="icon-sm"
             onClick={() => {
               table.previousPage();
               if (setPage) setPage((page - 1) as unknown as number);
@@ -156,11 +162,11 @@ export function DataTablePagination<TData>({
             disabled={page === 0}
           >
             <span className="sr-only">Go to previous page</span>
-            <ChevronLeftIcon className="w-4 h-4" />
+            <FontAwesomeIcon icon={faAngleLeft} aria-hidden="true" />
           </Button>
           <Button
-            variant="outline"
-            className="w-8 h-8 p-0 cursor-pointer"
+            type="button"
+            size="icon-sm"
             onClick={() => {
               table.nextPage();
               if (setPage) setPage((page + 1) as unknown as number);
@@ -168,11 +174,11 @@ export function DataTablePagination<TData>({
             disabled={totalPages === 0 || page >= (totalPages - 1)}
           >
             <span className="sr-only">Go to next page</span>
-            <ChevronRightIcon className="w-4 h-4" />
+            <FontAwesomeIcon icon={faAngleRight} aria-hidden="true" />
           </Button>
           <Button
-            variant="outline"
-            className="w-8 h-8 p-0 cursor-pointer"
+            type="button"
+            size="icon-sm"
             onClick={() => {
               table.setPageIndex((totalPages - 1) || 0);
               if (setPage) setPage((totalPages - 1) || 0 as unknown as number);
@@ -180,7 +186,7 @@ export function DataTablePagination<TData>({
             disabled={totalPages === 0 || page >= (totalPages - 1)}
           >
             <span className="sr-only">Go to last page</span>
-            <DoubleArrowRightIcon className="w-4 h-4" />
+            <FontAwesomeIcon icon={faAnglesRight} aria-hidden="true" />
           </Button>
         </section>
       </menu>

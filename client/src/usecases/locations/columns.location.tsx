@@ -43,7 +43,7 @@ export const useLocationColumns = ({
         cell: ({ row }) => {
           const coordinates = row?.original?.address?.coordinates;
           if (!coordinates || !Array.isArray(coordinates) || coordinates.length < 2) {
-            return <span className="text-gray-500">No coordinates</span>;
+            return <span className="text-(--muted)">No coordinates</span>;
           }
           
           const [lat, lng] = coordinates;
@@ -52,7 +52,7 @@ export const useLocationColumns = ({
           return (
             <UiButton
               variant={`outline`}
-              className="cursor-pointer hover:bg-background hover:text-foreground"
+              className="cursor-pointer hover:bg-(--surface) hover:text-foreground"
               onClick={(e) => {
                 e.preventDefault();
                 window.open(googleMapsUrl, '_blank');

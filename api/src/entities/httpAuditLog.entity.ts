@@ -9,7 +9,12 @@ import { User } from './user.entity';
  */
 @Entity('http_audit_logs')
 export class HttpAuditLog extends AbstractEntity {
-  @Column({ name: 'correlation_id', type: 'varchar', length: 128, nullable: true })
+  @Column({
+    name: 'correlation_id',
+    type: 'varchar',
+    length: 128,
+    nullable: true,
+  })
   correlationId?: string;
 
   @Column({ name: 'http_method', type: 'varchar', length: 16, nullable: false })

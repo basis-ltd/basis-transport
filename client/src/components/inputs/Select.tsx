@@ -1,100 +1,102 @@
 import {
-  Select as SelectComponent,
+  Select as SelectRoot,
   SelectContent,
   SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { UUID } from 'crypto';
-import { FieldValues } from 'react-hook-form';
-import { FieldError, Merge } from 'react-hook-form';
-import { FieldErrorsImpl } from 'react-hook-form';
-import { InputErrorMessage } from './ErrorLabels';
+import { cn } from '@/lib/utils';
+import { controlClassName, panelClassName, panelItemClassName } from './control';
+import type { InputErrorMessageProp } from './ErrorLabels';
+import { resolveErrorText } from './ErrorLabels';
+import { FieldShell } from './Field';
+
+export interface SelectOption {
+  label: string | undefined;
+  value: string;
+  disabled?: boolean;
+}
 
 type SelectProps = {
-  label?: string | number | undefined;
-  options?: Array<{ label: string | undefined; value: string | UUID }>;
-  defaultValue?: string | undefined;
+  label?: string | number;
+  options?: SelectOption[];
+  defaultValue?: string;
   placeholder?: string;
   className?: string;
-  onChange?: ((value: string) => void) | undefined;
-  value?: string | undefined;
+  onChange?: (value: string) => void;
+  value?: string;
   required?: boolean;
-  labelClassName?: string | undefined;
-  name?: string | undefined;
+  labelClassName?: string;
+  name?: string;
   readOnly?: boolean;
-  errorMessage?:
-    | string
-    | FieldError
-    | Merge<FieldError, FieldErrorsImpl<FieldValues>>
-    | undefined;
+  description?: string;
+  errorMessage?: InputErrorMessageProp;
 };
 
+/**
+ * The stock `ui/select` trigger is a 36px control with a ring focus; this shell
+ * gives it the same edge, height, and inset focus ring as every other field, so
+ * a select and the input beside it share a baseline.
+ */
 const Select = ({
   options = [],
-  defaultValue = undefined,
+  defaultValue,
   placeholder = 'Select here...',
-  className = undefined,
+  className,
   value = '',
   onChange,
-  label = undefined,
+  label,
   required = false,
-  labelClassName = undefined,
-  name = undefined,
+  labelClassName,
+  name,
   readOnly = false,
-  errorMessage = undefined,
+  description,
+  errorMessage,
 }: SelectProps) => {
+  const hasError = Boolean(resolveErrorText(errorMessage));
+
   return (
-    <label className={`flex flex-col gap-2 w-full ${labelClassName}`}>
-      <p
-        className={
-          label
-            ? 'pl-1 flex items-center gap-1.5 text-[11px] lg:text-[12px] font-light leading-tight text-secondary'
-            : 'hidden'
-        }
-      >
-        {label} <span className={required ? `text-red-600` : 'hidden'}>*</span>
-      </p>
-      <SelectComponent
+    <FieldShell
+      label={label}
+      required={required}
+      description={description}
+      errorMessage={errorMessage}
+      className={labelClassName}
+    >
+      <SelectRoot
         onValueChange={onChange}
         defaultValue={defaultValue}
         value={value}
         name={name}
+        disabled={readOnly}
       >
         <SelectTrigger
-          className={`w-full cursor-pointer !h-10 min-h-10 text-[11px] lg:text-[12px] font-light border border-primary/20 focus:border-primary focus-visible:ring-2 focus-visible:ring-primary/20 bg-white shadow-sm rounded-md ${className}`}
+          aria-invalid={hasError}
+          className={cn(
+            controlClassName,
+            'cursor-pointer justify-between data-[placeholder]:text-(--muted) [&>span]:line-clamp-1 [&_svg]:text-(--muted)',
+            className
+          )}
         >
-          <SelectValue
-            className="text-[11px] lg:text-[12px] font-light"
-            placeholder={
-              <p className="text-[11px] lg:text-[12px] font-light text-secondary/70">
-                {placeholder}
-              </p>
-            }
-          />
+          <SelectValue placeholder={placeholder} />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent className={panelClassName}>
           <SelectGroup>
-            {options.map((option, index: number) => {
-              return (
-                <SelectItem
-                  key={index}
-                  value={option.value}
-                  disabled={readOnly}
-                  className="cursor-pointer text-[11px] lg:text-[12px] font-light py-1 hover:bg-background"
-                >
-                  <p className="text-[11px] lg:text-[12px] font-light py-[3px]">
-                    {option.label}
-                  </p>
-                </SelectItem>
-              );
-            })}
+            {options.map((option) => (
+              <SelectItem
+                key={option.value}
+                value={option.value}
+                disabled={option.disabled}
+                className={panelItemClassName}
+              >
+                {option.label}
+              </SelectItem>
+            ))}
           </SelectGroup>
         </SelectContent>
-      </SelectComponent>
-      <InputErrorMessage message={errorMessage} />
-    </label>
+      </SelectRoot>
+    </FieldShell>
   );
 };
 

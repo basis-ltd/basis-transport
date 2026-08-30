@@ -1,4 +1,3 @@
-import { Heading } from '@/components/inputs/TextInputs';
 import AppLayout from '@/containers/navigation/AppLayout';
 import { useAppSelector } from '@/states/hooks';
 import { useGetUserTrip } from '@/usecases/user-trip/userTrip.hooks';
@@ -8,6 +7,12 @@ import MapView from '@/components/maps/MapView';
 import { UserTripStatus } from '@/constants/userTrip.constants';
 import moment from 'moment';
 import Button from '@/components/inputs/Button';
+import {
+  PageBody,
+  PageFooter,
+  PageHeader,
+  PageSection,
+} from '@/components/layout/PageShell';
 
 const UserTripDetailsPage = () => {
   /**
@@ -112,13 +117,13 @@ const UserTripDetailsPage = () => {
   const getStatusColor = (status: UserTripStatus) => {
     switch (status) {
       case UserTripStatus.IN_PROGRESS:
-        return 'text-primary bg-primary/10';
+        return 'text-(--ink) bg-(--surface)';
       case UserTripStatus.COMPLETED:
-        return 'text-green-700 bg-green-700/10';
+        return 'text-(--approve) bg-green-700/10';
       case UserTripStatus.CANCELLED:
-        return 'text-destructive bg-destructive/10';
+        return 'text-(--danger) bg-destructive/10';
       default:
-        return 'text-secondary bg-background-secondary/60';
+        return 'text-(--muted) bg-(--surface)/60';
     }
   };
 
@@ -129,26 +134,27 @@ const UserTripDetailsPage = () => {
 
   return (
     <AppLayout>
-      <main className="w-full flex flex-col gap-4">
-        <header className="w-full flex flex-col gap-4">
-          <nav className="w-full">
-            <ul className="w-full flex items-center gap-3 justify-between">
-              <Heading isLoading={userTripIsFetching}>
-                {userTrip?.user?.name}'s Trip #{userTrip?.trip?.referenceId}
-              </Heading>
-            </ul>
-          </nav>
-        </header>
+      <PageBody>
+        <PageHeader
+          title={
+            userTripIsFetching
+              ? 'Trip'
+              : `${userTrip?.user?.name ?? 'Rider'} · Trip #${
+                  userTrip?.trip?.referenceId ?? ''
+                }`
+          }
+          description="Where this journey started, where it ended, and how it ran."
+        />
 
         <article className="w-full flex flex-col gap-4">
           <section className="w-full grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
             {/* Trip Status */}
-            <article className="bg-white rounded-2xl shadow-sm border border-primary/10 p-5">
-              <h3 className="text-sm font-light text-secondary/70 mb-2">
+            <article className="card-framed p-5">
+              <h3 className="type-meta mb-2">
                 Trip Status
               </h3>
               <span
-                className={`inline-block px-4 py-1 rounded-full text-sm font-light ${getStatusColor(
+                className={`inline-block px-4 py-1 rounded-full text-sm font-normal ${getStatusColor(
                   userTrip?.status as UserTripStatus
                 )}`}
               >
@@ -157,8 +163,8 @@ const UserTripDetailsPage = () => {
             </article>
 
             {/* Trip Times */}
-            <article className="bg-white rounded-2xl shadow-sm border border-primary/10 p-5">
-              <h3 className="text-sm font-light text-secondary/70 mb-2">
+            <article className="card-framed p-5">
+              <h3 className="type-meta mb-2">
                 Trip Times (
                 {moment(
                   new Date(
@@ -171,20 +177,20 @@ const UserTripDetailsPage = () => {
               </h3>
               <section className="space-y-1">
                 <ul className="w-full flex items-center gap-2 justify-between py-2">
-                  <p className="text-sm font-light text-secondary/80">
+                  <p className="text-sm font-normal text-(--muted)">
                     Start:{' '}
                     {userTrip?.startTime
                       ? moment(new Date(userTrip.startTime)).format('HH:mm')
                       : 'Not started'}
                   </p>
-                  <p className="text-sm font-light text-secondary/80">
+                  <p className="text-sm font-normal text-(--muted)">
                     End:{' '}
                     {userTrip?.endTime
                       ? moment(new Date(userTrip.endTime)).format('HH:mm')
                       : 'Not completed'}
                   </p>
                 </ul>
-                <p className="text-sm font-light text-secondary/80 underline">
+                <p className="text-sm font-normal text-(--muted) underline">
                   Time spent:{' '}
                   {userTrip?.endTime
                     ? moment(new Date(userTrip.endTime)).diff(
@@ -198,52 +204,53 @@ const UserTripDetailsPage = () => {
             </article>
 
             {/* User Information */}
-            <article className="bg-white rounded-2xl shadow-sm border border-primary/10 p-5">
-              <h3 className="text-sm font-light text-secondary/70 mb-2">
+            <article className="card-framed p-5">
+              <h3 className="type-meta mb-2">
                 Passenger Information
               </h3>
               <section className="space-y-1">
-                <p className="text-sm font-light text-secondary/80">
+                <p className="text-sm font-normal text-(--muted)">
                   Name: {userTrip?.user?.name || 'Unknown'}
                 </p>
-                <p className="text-sm font-light text-secondary/80">
+                <p className="text-sm font-normal text-(--muted)">
                   Phone: {userTrip?.user?.phoneNumber || 'N/A'}
                 </p>
               </section>
             </article>
 
             {/* Trip Reference */}
-            <article className="bg-white rounded-2xl shadow-sm border border-primary/10 p-5">
-              <h3 className="text-sm font-light text-secondary/70 mb-2">
+            <article className="card-framed p-5">
+              <h3 className="type-meta mb-2">
                 Trip Reference
               </h3>
-              <p className="text-lg font-medium text-primary">
+              <p className="text-lg font-medium text-(--ink)">
                 #{userTrip?.trip?.referenceId || 'N/A'}
               </p>
             </article>
           </section>
         </article>
 
-        <section className="w-full flex flex-col gap-4">
-          <Heading type="h2">Trip Map</Heading>
+        <PageSection title="Trip map" description="The route this rider took.">
           <MapView
             height="40vh"
             origin={origin}
             destination={destination}
             defaultCenter={mapDefaultCenter}
             fromLabel={userTrip?.entranceLocation ? 'Entry Point' : 'Start Location'}
-            toLabel={userTrip?.exitLocation ? 'Exit Point' : 'Destination'}
+            toLabel={userTrip?.exitLocation ? 'Exit point' : 'Destination'}
           />
-        </section>
-        <menu className="w-full flex items-center gap-3 justify-between">
-          <Button onClick={(e) => {
-            e.preventDefault();
-            navigate(-1);
-          }}>
+        </PageSection>
+        <PageFooter>
+          <Button
+            onClick={(e) => {
+              e.preventDefault();
+              navigate(-1);
+            }}
+          >
             Back
           </Button>
-        </menu>
-      </main>
+        </PageFooter>
+      </PageBody>
     </AppLayout>
   );
 };

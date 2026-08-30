@@ -1,0 +1,329 @@
+/* The marketing surface. These are aliases, not a second palette: the values
+   live in index.css so light/dark and the app layer move together. Anything
+   new should reach for the global token directly. */
+.landing-page {
+  --landing-paper: var(--paper);
+  --landing-ink: var(--ink);
+  --landing-muted: var(--muted);
+  --landing-line: var(--line);
+  --landing-surface: var(--surface);
+  --landing-radius: var(--radius-control);
+  --landing-control: var(--control-md);
+  color: var(--landing-ink);
+}
+
+/* Painting is split from token definition on purpose. `.landing-page` lives in
+   an unlayered stylesheet, so any `background`/`color` it declares outranks
+   Tailwind's layered utilities — a `bg-[var(--landing-ink)]` on an element that
+   also carries `.landing-page` (the public navbar) would silently render white.
+   Elements that want the paper ground opt in with `.landing-paper`. */
+.landing-paper {
+  background: var(--landing-paper);
+}
+
+.landing-container {
+  width: 100%;
+  max-width: 1280px;
+  margin-inline: auto;
+  padding-inline: 20px;
+}
+
+@media (width >= 40rem) {
+  .landing-container {
+    padding-inline: 32px;
+  }
+}
+
+@media (width >= 64rem) {
+  .landing-container {
+    padding-inline: 40px;
+  }
+}
+
+.landing-display {
+  font-size: clamp(2rem, 1.5rem + 2.1vw, 2.875rem);
+  line-height: 1.08;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.landing-body {
+  font-size: 1rem;
+  line-height: 1.6;
+  font-weight: 400;
+}
+
+.landing-label {
+  font-size: 0.875rem;
+  line-height: 1.2;
+  font-weight: 500;
+}
+
+.landing-meta {
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  font-weight: 400;
+  color: var(--landing-muted);
+}
+
+.landing-eyebrow {
+  font-size: 0.75rem;
+  line-height: 1.4;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--landing-muted);
+}
+
+.landing-section {
+  padding-block: clamp(3.5rem, 2.5rem + 3vw, 5.5rem);
+}
+
+.landing-section-surface {
+  background: var(--landing-surface);
+}
+
+.landing-section-header {
+  margin-bottom: clamp(2.5rem, 1.5rem + 2vw, 3.5rem);
+}
+
+.landing-route-divider {
+  position: relative;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--landing-line) 12%,
+    var(--landing-line) 88%,
+    transparent
+  );
+}
+
+.landing-route-divider::before,
+.landing-route-divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  border: 1px solid var(--landing-ink);
+  border-radius: 999px;
+  background: var(--landing-paper);
+  transform: translateY(-50%);
+}
+
+.landing-section-surface .landing-route-divider::before,
+.landing-section-surface .landing-route-divider::after {
+  background: var(--landing-surface);
+}
+
+.landing-route-divider::before {
+  left: 0;
+}
+
+.landing-route-divider::after {
+  right: 0;
+}
+
+.landing-card {
+  border: 1px solid var(--landing-line);
+  border-radius: var(--landing-radius);
+  background: var(--landing-paper);
+  padding: 1.5rem;
+  transition:
+    border-color 0.2s cubic-bezier(0, 0, 1, 1),
+    box-shadow 0.2s cubic-bezier(0, 0, 1, 1);
+}
+
+.landing-card:hover {
+  border-color: color-mix(in oklab, var(--landing-ink) 18%, var(--landing-line));
+  box-shadow: 0 1px 0 color-mix(in oklab, var(--landing-ink) 6%, transparent);
+}
+
+.landing-icon-chip {
+  display: inline-flex;
+  width: 2.75rem;
+  height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--landing-line);
+  border-radius: var(--landing-radius);
+  background: var(--landing-paper);
+  color: var(--landing-ink);
+}
+
+.landing-cta-band {
+  background: var(--landing-ink);
+  color: var(--landing-paper);
+}
+
+.landing-cta-band .landing-display,
+.landing-cta-band .landing-body {
+  color: inherit;
+}
+
+.landing-cta-band .landing-body {
+  opacity: 0.82;
+}
+
+.landing-affix-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--landing-radius);
+  color: var(--landing-muted);
+  outline: none;
+  transition:
+    background-color 0.2s cubic-bezier(0, 0, 1, 1),
+    color 0.2s cubic-bezier(0, 0, 1, 1),
+    box-shadow 0.2s cubic-bezier(0, 0, 1, 1);
+}
+
+.landing-affix-btn:hover {
+  background: var(--landing-surface);
+  color: var(--landing-ink);
+}
+
+.landing-affix-btn:active {
+  box-shadow: var(--press-on-paper) 999px 999px 0 inset;
+}
+
+.landing-affix-btn:focus-visible {
+  box-shadow:
+    var(--landing-paper) 0 0 0 2px inset,
+    var(--landing-ink) 0 0 0 2px;
+}
+
+.landing-affix-btn:disabled {
+  pointer-events: none;
+  opacity: 0.4;
+}
+
+.landing-btn-primary {
+  display: inline-flex;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--landing-radius);
+  background: var(--landing-ink);
+  color: var(--landing-paper);
+  padding-inline: 20px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1;
+  border: 1px solid var(--landing-ink);
+  cursor: pointer;
+  transition: background-color 0.2s cubic-bezier(0, 0, 1, 1);
+}
+
+.landing-btn-primary:hover {
+  background: color-mix(in oklab, var(--landing-ink) 88%, var(--landing-paper));
+}
+
+/* Press is a full-surface inset flood, never a transform. A 999px inset
+   spread floods the control whatever its size. */
+.landing-btn-primary:active {
+  box-shadow: var(--press-on-ink) 999px 999px 0 inset;
+}
+
+.landing-btn-primary:focus-visible {
+  box-shadow:
+    var(--landing-paper) 0 0 0 2px inset,
+    var(--landing-ink) 0 0 0 2px;
+}
+
+.landing-btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.landing-link-sweep {
+  position: relative;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--landing-ink);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.landing-link-sweep::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  bottom: -0.5px;
+  height: 1px;
+  background-color: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.landing-link-sweep:hover::after,
+.landing-link-sweep:focus-visible::after {
+  transform: scaleX(1);
+}
+
+.landing-trip-option {
+  display: flex;
+  cursor: pointer;
+  align-items: flex-start;
+  gap: 10px;
+  border: 1px solid var(--landing-line);
+  border-radius: var(--landing-radius);
+  background: var(--landing-paper);
+  padding: 12px 14px;
+  text-align: left;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.landing-trip-option:has(input:checked) {
+  border-color: var(--landing-ink);
+  box-shadow: inset 0 0 0 1px var(--landing-ink);
+}
+
+.landing-trip-option input {
+  margin-top: 3px;
+  accent-color: var(--landing-ink);
+}
+
+/* Entrance — the keyframes live in index.css as `fadeInUp`. */
+.landing-enter {
+  animation: fadeInUp var(--dur-state) var(--ease-glide) both;
+}
+
+/* Scroll entrance, with no JavaScript and no hidden-by-default state.
+   The previous version set opacity:0 in CSS and relied on an
+   IntersectionObserver to put it back — so any failure to run that observer
+   (a script error, a throttled or background renderer, a browser that never
+   fires it) left the entire page below the hero permanently blank.
+   A view() timeline cannot fail that way: where it is unsupported the rule
+   never applies and the content simply renders. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .landing-page .animate-on-scroll {
+      animation: fadeInUp var(--dur-state) var(--ease-glide) both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 45%;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-page .animate-on-scroll,
+  .landing-enter,
+  .landing-btn-primary,
+  .landing-link-sweep::after {
+    animation: none;
+    transition: none;
+  }
+}
+
+html:has(.landing-page) {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:has(.landing-page) {
+    scroll-behavior: auto;
+  }
+}

@@ -5,7 +5,7 @@ import { UUID } from '../types';
 export enum AuditAction {
   CREATE = 'CREATE',
   UPDATE = 'UPDATE',
-  DELETE = 'DELETE'
+  DELETE = 'DELETE',
 }
 
 @Entity('audit_logs')

@@ -1,5 +1,4 @@
 import Button from '@/components/inputs/Button';
-import { Heading } from '@/components/inputs/TextInputs';
 import Table from '@/components/table/Table';
 import AppLayout from '@/containers/navigation/AppLayout';
 import { useAppSelector } from '@/states/hooks';
@@ -11,6 +10,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import moment from 'moment';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faLocationDot, faRoute } from '@fortawesome/free-solid-svg-icons';
+import { PageBody, PageHeader } from "@/components/layout/PageShell";
 
 const UserTripsPage = () => {
   /**
@@ -68,12 +68,11 @@ const UserTripsPage = () => {
 
   return (
     <AppLayout>
-      <main className="w-full flex flex-col gap-4">
-        <nav className="w-full flex flex-col gap-4">
-          <ul className="w-full flex items-center gap-3 justify-between">
-            <Heading>User Trips</Heading>
-          </ul>
-        </nav>
+      <PageBody>
+        <PageHeader
+          title="My trips"
+          description="Journeys you have joined or completed."
+        />
         <section className="w-full flex flex-col gap-4">
           <section className="hidden md:block">
             <Table
@@ -92,45 +91,45 @@ const UserTripsPage = () => {
             {userTripsList?.map((userTrip) => (
               <article
                 key={userTrip.id}
-                className="rounded-2xl border border-primary/10 bg-white p-5 shadow-sm"
+                className="card-framed p-5"
               >
                 <header className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-[11px] font-light uppercase tracking-wide text-secondary/70">
+                    <p className="type-meta text-(--muted)">
                       Trip {userTrip.trip?.referenceId ?? '--'}
                     </p>
-                    <h3 className="text-lg font-medium text-primary">
+                    <h3 className="text-lg font-medium text-(--ink)">
                       {userTrip.trip?.locationFrom?.name ?? 'Start'} → {userTrip.trip?.locationTo?.name ?? 'Destination'}
                     </h3>
-                    <p className="text-[12px] font-light text-secondary/80 mt-1 flex items-center gap-1">
-                      <FontAwesomeIcon icon={faLocationDot} className="text-primary/70" />
+                    <p className="type-body-sm text-(--muted) mt-1 flex items-center gap-1">
+                      <FontAwesomeIcon icon={faLocationDot} className="text-(--ink)" />
                       {userTrip.startTime
                         ? moment(userTrip.startTime).format('MMM D, HH:mm')
                         : 'Start time pending'}
                     </p>
                   </div>
-                  <span className="px-3 py-1 rounded-full text-[11px] font-light bg-primary/10 text-primary">
+                  <span className="px-3 py-1 rounded-full type-meta bg-(--surface) text-(--ink)">
                     {userTrip.status
                       ? userTrip.status.replace(/_/g, ' ')
                       : 'Unknown'}
                   </span>
                 </header>
-                <section className="flex items-center gap-2 text-[12px] font-light text-secondary/70 mt-4">
-                  <FontAwesomeIcon icon={faRoute} className="text-primary" />
+                <section className="flex items-center gap-2 type-body-sm text-(--muted) mt-4">
+                  <FontAwesomeIcon icon={faRoute} className="text-(--ink)" />
                   {userTrip.user?.name ?? 'Passenger'}
                 </section>
                 <section className="grid grid-cols-2 gap-3 mt-4">
-                  <article className="p-3 rounded-xl bg-background-secondary/70">
-                    <p className="text-[11px] font-light text-secondary/70">Started</p>
-                    <p className="text-base font-medium text-primary">
+                  <article className="p-3 rounded-xl bg-(--surface)/70">
+                    <p className="type-meta text-(--muted)">Started</p>
+                    <p className="text-base font-medium text-(--ink)">
                       {userTrip.startTime
                         ? moment(userTrip.startTime).fromNow()
                         : 'N/A'}
                     </p>
                   </article>
-                  <article className="p-3 rounded-xl bg-background-secondary/70">
-                    <p className="text-[11px] font-light text-secondary/70">Duration</p>
-                    <p className="text-base font-medium text-primary">
+                  <article className="p-3 rounded-xl bg-(--surface)/70">
+                    <p className="type-meta text-(--muted)">Duration</p>
+                    <p className="text-base font-medium text-(--ink)">
                       {userTrip.startTime && userTrip.endTime
                         ? `${moment(userTrip.endTime).diff(
                             moment(userTrip.startTime),
@@ -157,7 +156,7 @@ const UserTripsPage = () => {
             Back
           </Button>
         </menu>
-      </main>
+      </PageBody>
     </AppLayout>
   );
 };

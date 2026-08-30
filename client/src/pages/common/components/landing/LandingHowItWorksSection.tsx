@@ -1,53 +1,45 @@
-import { publicColors as Colors } from '@/containers/public/publicTheme';
 import { landingSteps } from './landingContent';
+import LandingSection, { LandingSectionHeader } from './LandingSection';
 
 const LandingHowItWorksSection = () => {
   return (
-    <section
-      className="py-24"
-      style={{ backgroundColor: Colors.bgAlt }}
-      id="how-it-works"
-    >
-      <article className="max-w-4xl mx-auto px-6 lg:px-8">
-        <header className="text-center mb-16 animate-on-scroll">
-          <h2
-            className="text-4xl lg:text-5xl leading-tight mb-6 font-light"
-            style={{ color: Colors.primary }}
-          >
-            Three steps to your first confident commute
-          </h2>
-        </header>
+    <LandingSection id="how-it-works" tone="surface">
+      <LandingSectionHeader
+        eyebrow="How it works"
+        title="Three steps to your first confident commute"
+        description="Plan your route, check what's running, and travel knowing what to expect."
+      />
 
-        <ol className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {landingSteps.map((step) => (
-            <li
-              key={step.step}
-              className="animate-on-scroll"
-              style={{ animationDelay: step.animationDelay }}
-            >
-              <article className="text-center">
-                <figure
-                  className="w-16 h-16 mx-auto mb-6 rounded-lg flex items-center justify-center font-light text-xl"
-                  style={{
-                    backgroundColor: Colors.primary,
-                    color: Colors.white,
-                  }}
-                >
+      <ol className="grid gap-8 md:grid-cols-3">
+        {landingSteps.map((step, index) => (
+          <li
+            key={step.step}
+            className="animate-on-scroll relative"
+            style={{ animationDelay: step.animationDelay }}
+          >
+            {index < landingSteps.length - 1 ? (
+              <span
+                className="absolute top-7 left-[calc(50%+2rem)] hidden h-px w-[calc(100%-4rem)] border-t border-dashed border-[var(--landing-line)] md:block"
+                aria-hidden="true"
+              />
+            ) : null}
+            <article className="text-center">
+              <figure className="mx-auto mb-5 flex size-14 items-center justify-center rounded-[var(--landing-radius)] border border-[var(--landing-line)] bg-[var(--landing-paper)]">
+                <span className="landing-label tabular-nums text-[var(--landing-ink)]">
                   {step.step}
-                </figure>
-                <h3
-                  className="text-xl font-medium mb-3"
-                  style={{ color: Colors.primary }}
-                >
-                  {step.title}
-                </h3>
-                <p style={{ color: Colors.neutralLight }}>{step.description}</p>
-              </article>
-            </li>
-          ))}
-        </ol>
-      </article>
-    </section>
+                </span>
+              </figure>
+              <h3 className="landing-label mb-3 text-[var(--landing-ink)]">
+                {step.title}
+              </h3>
+              <p className="landing-body text-[var(--landing-muted)]">
+                {step.description}
+              </p>
+            </article>
+          </li>
+        ))}
+      </ol>
+    </LandingSection>
   );
 };
 

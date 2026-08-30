@@ -1,1 +1,1 @@
-export { AbstractEntity } from "./abstract.entity";
+export { AbstractEntity } from './abstract.entity';

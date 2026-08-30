@@ -7,10 +7,10 @@ import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Seo } from '@/components/seo';
-import PublicLayout from '@/containers/public/PublicLayout';
-import PublicNavbar from '@/containers/public/PublicNavbar';
-import { publicColors } from '@/containers/public/publicTheme';
 import { toast } from 'sonner';
+import {
+  AuthPageShell,
+} from './AuthPageShell';
 
 type ResetForm = {
   password: string;
@@ -70,55 +70,43 @@ const ResetPassword = () => {
         noIndex
         openGraph={false}
       />
-      <PublicLayout>
-        <PublicNavbar variant="auth" />
-        <div className="w-full min-h-screen flex flex-col items-center justify-center gap-4 px-4 lg:px-8 pt-24 pb-12">
+      <AuthPageShell>
           {!token ? (
-            <div
-              className="w-full max-w-[420px] shadow-lg rounded-2xl bg-white/90 border border-primary/10 p-8 mx-auto flex flex-col gap-4 animate-fade-in-up text-center"
-            >
+            <section className="card-framed flex w-full flex-col gap-5 p-8 text-center max-sm:p-5">
               <h1
-                className="text-3xl lg:text-4xl leading-tight font-light text-balance"
-                style={{ color: publicColors.primary }}
+                className="text-balance text-(--ink)"
               >
                 Link invalid
               </h1>
               <p
-                className="text-base leading-relaxed"
-                style={{ color: publicColors.neutralLight }}
+                className="type-body-sm mt-4 text-(--muted)"
               >
                 This password reset link is missing or invalid. Request a new
                 one below.
               </p>
               <Link
                 to="/auth/forgot-password"
-                className="text-primary hover:underline transition-colors duration-200 ease-in-out text-sm"
+                className="type-body-sm text-(--ink) hover:underline transition-colors duration-200 ease-in-out mt-4 inline-block"
               >
                 Request a new reset link
               </Link>
               <Link
                 to="/auth/login"
-                className="text-sm"
-                style={{ color: publicColors.neutralLight }}
+                className="type-body-sm mt-2 inline-block text-(--muted)"
               >
                 Back to login
               </Link>
-            </div>
+            </section>
           ) : (
-            <form
-              className="w-full max-w-[420px] shadow-lg rounded-2xl bg-white/90 border border-primary/10 p-8 mx-auto flex flex-col gap-4 animate-fade-in-up"
-              onSubmit={onSubmit}
-            >
+            <form className="card-framed flex w-full flex-col gap-5 p-8 max-sm:p-5" onSubmit={onSubmit}>
               <header className="flex flex-col gap-2 items-center mb-4">
                 <h1
-                  className="text-3xl lg:text-4xl leading-tight font-light text-balance text-center"
-                  style={{ color: publicColors.primary }}
+                  className="text-center text-balance text-(--ink)"
                 >
                   New password
                 </h1>
                 <p
-                  className="text-base leading-relaxed text-center"
-                  style={{ color: publicColors.neutralLight }}
+                  className="type-body-sm text-center text-(--muted)"
                 >
                   Choose a strong password for your account.
                 </p>
@@ -179,23 +167,22 @@ const ResetPassword = () => {
               <menu className="w-full flex flex-col items-center gap-2">
                 <Button
                   type="submit"
-                  className="w-full"
-                  isLoading={isLoading}
                   primary
+                    className="w-full"
+                  isLoading={isLoading}
                 >
                   Update password
                 </Button>
                 <Link
                   to="/auth/login"
-                  className="text-sm text-primary hover:underline transition-colors duration-200 ease-in-out"
+                  className="type-body-sm text-(--ink) hover:underline transition-colors duration-200 ease-in-out"
                 >
                   Back to login
                 </Link>
               </menu>
             </form>
           )}
-        </div>
-      </PublicLayout>
+      </AuthPageShell>
     </>
   );
 };

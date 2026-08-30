@@ -3,6 +3,7 @@ import { ReferenceIdInput } from "@/components/table/TableInputs";
 import {
   ellipsisHClassName,
   tableActionClassName,
+  tableDangerActionClassName,
 } from "@/constants/input.constants";
 import { capitalizeString, formatDate } from "@/helpers/strings.helper";
 import { useAppDispatch } from "@/states/hooks";
@@ -85,22 +86,19 @@ export const useTransportCardColumns = () => {
                     dispatch(setUpdateTransportCard(true));
                   }}
                 >
-                  <FontAwesomeIcon
-                    icon={faPenToSquare}
-                    className="text-primary"
-                  />
+                  <FontAwesomeIcon icon={faPenToSquare} aria-hidden="true" />
                   Update
                 </Link>
                 <Link
                   to={`/account/transport-cards/${row?.original?.id}/delete`}
-                  className={tableActionClassName}
+                  className={tableDangerActionClassName}
                   onClick={(e) => {
                     e.preventDefault();
                     dispatch(setSelectedTransportCard(row?.original));
                     dispatch(setDeleteTransportCard(true));
                   }}
                 >
-                  <FontAwesomeIcon icon={faTrash} className="text-red-700" />
+                  <FontAwesomeIcon icon={faTrash} aria-hidden="true" />
                   Delete
                 </Link>
               </menu>

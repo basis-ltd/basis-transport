@@ -1,196 +1,111 @@
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBars,
+  faRightFromBracket,
   faUser,
   faUserCircle,
-  faRightFromBracket,
-} from "@fortawesome/free-solid-svg-icons";
-import { Link, useNavigate } from "react-router-dom";
-import { useRef, useState, useEffect, useMemo } from "react";
-import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
-import { openMobileSidebar } from "@/states/slices/sidebarSlice";
-import { useAppDispatch, useAppSelector } from "@/states/hooks";
-import { publicColors } from "@/containers/public/publicTheme";
-import basisTransportLogo from "/logo.svg";
-import { useLogout } from "@/usecases/auth/auth.hooks";
+} from '@fortawesome/free-solid-svg-icons';
+import { Link, useNavigate } from 'react-router-dom';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { panelClassName, panelItemClassName } from '@/components/inputs/control';
+import useConfirm from '@/components/feedback/ConfirmDialog';
+import { openMobileSidebar } from '@/states/slices/sidebarSlice';
+import { useAppDispatch, useAppSelector } from '@/states/hooks';
+import { useLogout } from '@/usecases/auth/auth.hooks';
+import basisTransportLogo from '/logo.svg';
 
-type UserMenuItem = {
-  id: string;
-  label: string;
-  icon: IconDefinition;
-  to: string;
-  variant: "default" | "danger";
-  action: () => void;
-};
-
+/**
+ * The user menu is Radix by way of shadcn rather than the hand-rolled dropdown
+ * that used to live here: that version tracked outside clicks with its own
+ * mousedown listener, and its items were anchors to "#" with `role="button"`,
+ * so the menu was unreachable by keyboard and left dead stops in the tab order.
+ */
 const Navbar = () => {
-  /**
-   * STATE VARIABLES
-   */
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const dropdownRef = useRef<HTMLUListElement>(null);
   const dispatch = useAppDispatch();
   const { token } = useAppSelector((state) => state.auth);
   const { mobileOpen } = useAppSelector((state) => state.sidebar);
   const logout = useLogout();
-
-  /**
-   * NAVIGATION
-   */
   const navigate = useNavigate();
+  const { confirm, confirmDialog } = useConfirm();
 
-  const userMenuItems = useMemo<UserMenuItem[]>(
-    () => [
-      {
-        id: "profile",
-        label: "Profile",
-        icon: faUserCircle,
-        to: "/account/profile",
-        variant: "default",
-        action: () => {
-          navigate("/account/profile");
-          setDropdownOpen(false);
-        },
-      },
-      {
-        id: "logout",
-        label: "Logout",
-        icon: faRightFromBracket,
-        to: "#",
-        variant: "danger",
-        action: () => {
-          void logout();
-          setDropdownOpen(false);
-        },
-      },
-    ],
-    [logout, navigate]
-  );
+  const onLogout = async () => {
+    const agreed = await confirm({
+      title: 'Sign out?',
+      description:
+        'You will need to sign in again to reach your trips, cards, and saved routes.',
+      confirmLabel: 'Sign out',
+      icon: faRightFromBracket,
+      destructive: true,
+    });
 
-  // Close dropdown on outside click
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setDropdownOpen(false);
-      }
+    if (agreed) {
+      void logout();
     }
-    if (dropdownOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    } else {
-      document.removeEventListener("mousedown", handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [dropdownOpen]);
+  };
 
   return (
-    <header
-      className="fixed top-0 left-0 right-0 z-[1000] w-full border-b backdrop-blur-sm transition-all duration-300 bg-background/80"
-      style={{ borderColor: `${publicColors.primary}15` }}
-    >
-      <nav
-        className="mx-auto px-6 lg:px-8"
-        aria-label="Main navigation"
-      >
-        <section className="flex justify-between items-center h-[var(--navbar-height)]">
-          <ul className="flex items-center gap-4 list-none p-0 m-0">
+    <header className="fixed left-0 right-0 top-0 z-(--z-navbar) w-full border-b border-(--line) bg-(--paper)">
+      <nav className="mx-auto px-6 lg:px-8" aria-label="Main navigation">
+        <section className="flex h-[var(--navbar-height)] items-center justify-between">
+          <div className="flex items-center gap-4">
             <button
               type="button"
-              className="flex h-9 w-9 items-center justify-center rounded-md bg-primary/10 text-primary transition-colors duration-200 ease-in-out hover:bg-primary/15 md:hidden"
-              onClick={() => {
-                dispatch(openMobileSidebar());
-              }}
+              className="flex size-9 cursor-pointer items-center justify-center rounded-(--radius-control) text-(--muted) transition-colors duration-200 ease-(--ease-flat) hover:bg-(--surface) hover:text-(--ink) md:hidden"
+              onClick={() => dispatch(openMobileSidebar())}
               aria-label="Open sidebar"
               aria-controls="app-sidebar"
               aria-expanded={mobileOpen}
             >
-              <FontAwesomeIcon icon={faBars} className="text-[12px]" />
+              <FontAwesomeIcon icon={faBars} className="size-4" />
             </button>
+
             <Link
-              to={token ? "/dashboard" : "/"}
-              onClick={() => {
-                if (token) {
-                  navigate("/dashboard");
-                } else {
-                  navigate("/");
-                }
-              }}
-              className="flex items-center gap-2 group rounded-md outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-2 focus-visible:ring-offset-background select-none"
+              to={token ? '/dashboard' : '/'}
+              className="flex select-none items-center gap-2 rounded-(--radius-control) text-(--ink) outline-none focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px]"
             >
-              <img
-                src={basisTransportLogo}
-                alt="Basis Transport Logo"
-                className="w-6 h-6 text-[12px]"
-              />
-              <span
-                className="text-base font-normal"
-                style={{ color: publicColors.primary }}
-              >
-                Basis
-              </span>
+              <img src={basisTransportLogo} alt="" aria-hidden="true" className="size-6" />
+              <span className="text-base font-medium">Basis</span>
             </Link>
-          </ul>
-          <ul className="flex items-center gap-4 list-none p-0 m-0">
-            <li className="relative">
-              <Link
-                to="#"
-                className="py-[6px] px-[10px] rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-white transition-colors duration-200 ease-in-out outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-                aria-label="User profile"
-                aria-haspopup="true"
-                aria-expanded={dropdownOpen}
-                onClick={(e) => {
-                  e.preventDefault();
-                  setDropdownOpen((open) => !open);
-                }}
-                tabIndex={0}
-                role="button"
+          </div>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              aria-label="User menu"
+              className="flex size-9 cursor-pointer items-center justify-center rounded-(--radius-pill) bg-(--surface) text-(--ink) transition-colors duration-200 ease-(--ease-flat) outline-none hover:bg-(--surface-hover) focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px]"
+            >
+              <FontAwesomeIcon icon={faUser} className="size-3.5" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className={`${panelClassName} w-52`}>
+              <DropdownMenuItem
+                className={panelItemClassName}
+                onSelect={() => navigate('/account/profile')}
               >
-                <FontAwesomeIcon icon={faUser} className="text-[10px] lg:text-[11px]" />
-              </Link>
-              {dropdownOpen && (
-                <ul
-                  ref={dropdownRef}
-                  className="absolute right-0 mt-2 w-40 bg-white border border-primary/10 rounded-lg shadow-lg py-2 z-50 animate-fade-in"
-                  role="menu"
-                  aria-label="User menu"
-                >
-                  {userMenuItems.map((item) => (
-                    <li key={item.id}>
-                      <Link
-                        to={item.to}
-                        className={`flex items-center gap-2 text-[13px] px-4 py-2 text-foreground font-light transition-colors duration-200 ease-in-out rounded-md group ${
-                          item.variant === "danger"
-                            ? "hover:bg-destructive/10 hover:text-destructive"
-                            : "hover:bg-primary/10 hover:text-primary"
-                        }`}
-                        role="menuitem"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          item.action();
-                        }}
-                      >
-                        <FontAwesomeIcon
-                          icon={item.icon}
-                          className={
-                            item.variant === "danger"
-                              ? "text-destructive/70 group-hover:text-destructive"
-                              : "text-primary/70 group-hover:text-primary"
-                          }
-                        />
-                        {item.label}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </li>
-          </ul>
+                <FontAwesomeIcon icon={faUserCircle} className="size-3.5" aria-hidden="true" />
+                Profile
+              </DropdownMenuItem>
+              {/* Signing out is destructive, so it says so and carries its icon —
+                  the hue is not what makes it legible. */}
+              <DropdownMenuItem
+                className={panelItemClassName}
+                // The confirmation is a sibling of this menu, not a child, so
+                // the menu can close normally. Opening on the next tick lets
+                // Radix finish returning focus to the trigger before the
+                // dialog claims it.
+                onSelect={() => window.setTimeout(() => void onLogout(), 0)}
+              >
+                <FontAwesomeIcon icon={faRightFromBracket} className="size-3.5" aria-hidden="true" />
+                Log out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </section>
       </nav>
+      {confirmDialog}
     </header>
   );
 };

@@ -1,46 +1,42 @@
 import { FC, ChangeEvent, useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { Textarea } from '@/components/ui/textarea';
-import { InputErrorMessage } from './ErrorLabels';
-import { FieldValues } from 'react-hook-form';
-import { Merge } from 'react-hook-form';
-import { FieldErrorsImpl } from 'react-hook-form';
-import { FieldError } from 'react-hook-form';
+import { textareaClassName } from './control';
+import type { InputErrorMessageProp } from './ErrorLabels';
+import { resolveErrorText } from './ErrorLabels';
+import { FieldShell } from './Field';
 
 interface TextAreaProps {
   cols?: number;
   rows?: number;
   className?: string;
-  defaultValue?: string | number | readonly string[] | undefined;
+  defaultValue?: string | number | readonly string[];
   resize?: boolean;
   onChange?: (e: ChangeEvent<HTMLTextAreaElement>) => void;
-  placeholder?: string | undefined;
+  placeholder?: string;
   required?: boolean;
   readonly?: boolean;
-  onBlur?: () => void | undefined;
+  onBlur?: () => void;
   label?: string | React.ReactNode;
-  value?: string | number | readonly string[] | undefined;
-  height?: string;
-  errorMessage?:
-    | string
-    | FieldError
-    | Merge<FieldError, FieldErrorsImpl<FieldValues>>
-    | undefined;
+  value?: string | number | readonly string[];
+  description?: string | React.ReactNode;
+  errorMessage?: InputErrorMessageProp;
 }
 
 const TextArea: FC<TextAreaProps> = ({
   cols = 50,
   rows = 5,
-  className = '',
-  defaultValue = undefined,
+  className,
+  defaultValue,
   resize = false,
   onChange,
-  placeholder = undefined,
+  placeholder,
   required = false,
   readonly = false,
   onBlur,
   label = null,
   value,
+  description,
   errorMessage,
 }) => {
   const ref = useRef<HTMLTextAreaElement>(null);
@@ -52,15 +48,12 @@ const TextArea: FC<TextAreaProps> = ({
   }, [defaultValue, value]);
 
   return (
-    <label className="flex flex-col gap-2 w-full">
-      {label && (
-        <header className="flex items-center gap-1 pl-1">
-          <span className="text-[11px] lg:text-[12px] font-light leading-tight text-secondary peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-            {label}
-          </span>
-          {required && <span className="text-red-600">*</span>}
-        </header>
-      )}
+    <FieldShell
+      label={label}
+      required={required}
+      description={description}
+      errorMessage={errorMessage}
+    >
       <Textarea
         cols={cols}
         rows={rows}
@@ -68,17 +61,13 @@ const TextArea: FC<TextAreaProps> = ({
         value={value}
         readOnly={readonly}
         placeholder={placeholder}
-        className={cn(
-          `w-full h-[20vh] bg-white shadow-sm text-[11px] lg:text-[12px] font-light border border-primary/20 focus:border-primary focus-visible:ring-2 focus-visible:ring-primary/20 placeholder:font-light rounded-md`,
-          !resize && 'resize-none',
-          className
-        )}
+        aria-invalid={Boolean(resolveErrorText(errorMessage))}
+        className={cn(textareaClassName, !resize && 'resize-none', className)}
         onChange={onChange}
         onBlur={onBlur}
         defaultValue={defaultValue}
       />
-      <InputErrorMessage message={errorMessage} />
-    </label>
+    </FieldShell>
   );
 };
 

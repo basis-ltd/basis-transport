@@ -9,3 +9,9 @@ export interface Geometry {
     | 'GeometryCollection';
   coordinates: number[];
 }
+
+/** One labelled value on a chart axis. Every chart in the app takes these. */
+export interface ChartDataPoint {
+  name: string;
+  value: number;
+}

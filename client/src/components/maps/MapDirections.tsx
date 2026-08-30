@@ -100,24 +100,24 @@ const MapDirections = ({
   if (error) {
     return (
       <aside
-        className="absolute top-2 right-2 bg-white/95 backdrop-blur-sm shadow-xl rounded-xl p-2 sm:p-4 w-[96vw] max-w-md md:w-[32vw] flex flex-col gap-3 z-[1000] border border-gray-100"
+        className="absolute top-2 right-2 bg-(--paper) backdrop-blur-sm shadow-xl rounded-xl p-2 sm:p-4 w-[96vw] max-w-md md:w-[32vw] flex flex-col gap-3 z-[1000] border border-(--line)"
         aria-label="Route information"
       >
         <header className="space-y-2">
-          <Heading className="text-xl font-semibold text-gray-800">Location Information</Heading>
-          <section className="bg-gray-50 rounded-lg p-2 sm:p-3 space-y-2">
+          <Heading className="text-xl font-medium text-(--ink)">Location Information</Heading>
+          <section className="bg-(--surface) rounded-lg p-2 sm:p-3 space-y-2">
             <article className="flex items-start gap-2">
-              <span className="font-bold text-primary">A</span>
-              <section className="text-gray-600 text-sm">
+              <span className="font-medium text-(--ink)">A</span>
+              <section className="text-(--muted) text-sm">
                 <p className="font-medium">{fromLabel}</p>
-                <p className="text-gray-500">({origin.lat}, {origin.lng})</p>
+                <p className="text-(--muted)">({origin.lat}, {origin.lng})</p>
               </section>
             </article>
             <article className="flex items-start gap-2">
-              <span className="font-bold text-primary">B</span>
-              <section className="text-gray-600 text-sm">
+              <span className="font-medium text-(--ink)">B</span>
+              <section className="text-(--muted) text-sm">
                 <p className="font-medium">{toLabel}</p>
-                <p className="text-gray-500">({destination.lat}, {destination.lng})</p>
+                <p className="text-(--muted)">({destination.lat}, {destination.lng})</p>
               </section>
             </article>
           </section>
@@ -131,67 +131,67 @@ const MapDirections = ({
 
   return (
     <aside
-      className="absolute top-2 right-2 bg-white/95 backdrop-blur-sm shadow-xl rounded-xl p-2 sm:p-4 w-[96vw] max-w-md md:w-[32vw] flex flex-col gap-3 z-[1000] border border-gray-100"
+      className="absolute top-2 right-2 bg-(--paper) backdrop-blur-sm shadow-xl rounded-xl p-2 sm:p-4 w-[96vw] max-w-md md:w-[32vw] flex flex-col gap-3 z-[1000] border border-(--line)"
       aria-label="Route information"
     >
       <header className="space-y-2">
-        <Heading className="text-xl font-semibold text-gray-800">Route Overview</Heading>
-        <section className="bg-gray-50 rounded-lg p-2 sm:p-3 space-y-2">
+        <Heading className="text-xl font-medium text-(--ink)">Route Overview</Heading>
+        <section className="bg-(--surface) rounded-lg p-2 sm:p-3 space-y-2">
           <article className="flex items-start gap-2">
-            <span className="font-bold text-primary">A</span>
-            <section className="text-gray-600 text-sm">
+            <span className="font-medium text-(--ink)">A</span>
+            <section className="text-(--muted) text-sm">
               <p className="font-medium">{fromLabel}</p>
-              <p className="text-gray-500">{leg.start_address?.split(',')?.slice(1)?.join(', ')}</p>
+              <p className="text-(--muted)">{leg.start_address?.split(',')?.slice(1)?.join(', ')}</p>
             </section>
           </article>
           <article className="flex items-start gap-2">
-            <span className="font-bold text-primary">B</span>
-            <section className="text-gray-600 text-sm">
+            <span className="font-medium text-(--ink)">B</span>
+            <section className="text-(--muted) text-sm">
               <p className="font-medium">{toLabel}</p>
-              <p className="text-gray-500">{leg.end_address?.split(',')?.slice(1)?.join(', ')}</p>
+              <p className="text-(--muted)">{leg.end_address?.split(',')?.slice(1)?.join(', ')}</p>
             </section>
           </article>
         </section>
       </header>
-      <section className="flex items-center justify-between bg-primary/5 rounded-lg p-2 sm:p-3">
+      <section className="flex items-center justify-between bg-(--surface) rounded-lg p-2 sm:p-3">
         <article className="flex items-center gap-2">
-          <span className="text-primary">🛣️</span>
-          <span className="font-medium text-gray-700">{leg.distance?.text}</span>
+          <span className="text-(--ink)">🛣️</span>
+          <span className="font-medium text-(--ink)">{leg.distance?.text}</span>
         </article>
         <article className="flex items-center gap-2">
-          <span className="text-primary">⏱️</span>
-          <span className="font-medium text-gray-700">{leg.duration?.text}</span>
+          <span className="text-(--ink)">⏱️</span>
+          <span className="font-medium text-(--ink)">{leg.duration?.text}</span>
         </article>
       </section>
       {hasAlternatives && (
         <section className="w-full space-y-2">
           <header>
-            <Heading type="h3" className="text-center text-gray-700 font-medium">
+            <Heading type="h3" className="text-center text-(--ink) font-medium">
               Possible Routes
             </Heading>
           </header>
-          <nav className="flex items-center justify-between bg-gray-50 rounded-lg p-2">
+          <nav className="flex items-center justify-between bg-(--surface) rounded-lg p-2">
             <button 
               onClick={handlePrev}
-              className="p-[2px] hover:bg-gray-100 cursor-pointer rounded-full transition-colors"
+              className="p-[2px] hover:bg-(--surface) cursor-pointer rounded-full transition-colors"
               aria-label="Previous route"
             >
               <FontAwesomeIcon
                 icon={faChevronCircleLeft}
-                className="text-primary text-xl"
+                className="text-(--ink) text-xl"
               />
             </button>
-            <span className="text-gray-600 text-sm font-medium">
+            <span className="text-(--muted) text-sm font-medium">
               Route {routeIndex + 1} of {routes.length}
             </span>
             <button 
               onClick={handleNext}
-              className="p-[2px] hover:bg-gray-100 cursor-pointer rounded-full transition-colors"
+              className="p-[2px] hover:bg-(--surface) cursor-pointer rounded-full transition-colors"
               aria-label="Next route"
             >
               <FontAwesomeIcon
                 icon={faChevronCircleRight}
-                className="text-primary text-xl"
+                className="text-(--ink) text-xl"
               />
             </button>
           </nav>

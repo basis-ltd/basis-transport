@@ -1,10 +1,11 @@
 import DashboardCard from "@/components/dashboard/DashboardCard";
-import DashboardGraph from "@/components/dashboard/DashboardGraph";
+import DonutChart from "@/components/charts/DonutChart";
+import SeriesChart from "@/components/charts/SeriesChart";
 import DashboardTripCard, {
   NearbyDashboardTrip,
 } from "@/components/dashboard/DashboardTripCard";
 import Button from "@/components/inputs/Button";
-import { Heading } from "@/components/inputs/TextInputs";
+import DatePicker from "@/components/inputs/DatePicker";
 import AppLayout from "@/containers/navigation/AppLayout";
 import { useAppSelector } from "@/states/hooks";
 import {
@@ -19,11 +20,20 @@ import {
   faBus,
   faClockRotateLeft,
   faCreditCard,
+  faTriangleExclamation,
   faUsers,
 } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import moment from "moment";
 import { useEffect, useMemo, useState } from "react";
 import { Seo } from "@/components/seo";
+import {
+  PageBody,
+  PageHeader,
+  PageSection,
+} from "@/components/layout/PageShell";
+import { capitalizeString } from "@/helpers/strings.helper";
+import type { ChartDataPoint } from "@/types/common.type";
 
 const UserDashboard = () => {
   /**
@@ -50,13 +60,24 @@ const UserDashboard = () => {
     fetchTimeSpentInTrips,
   } = useTimeSpentInTrips();
 
+  /* The range used to be hardcoded to the current month, so the metric could
+     only ever answer one question. */
+  const [range, setRange] = useState<{ from?: Date; to?: Date }>({
+    from: moment().startOf("month").toDate(),
+    to: moment().endOf("month").toDate(),
+  });
+
   useEffect(() => {
+    if (!range.from || !range.to) {
+      return;
+    }
+
     fetchTimeSpentInTrips({
-      startDate: moment().startOf("month").format("YYYY-MM-DD"),
-      endDate: moment().endOf("month").format("YYYY-MM-DD"),
+      startDate: moment(range.from).format("YYYY-MM-DD"),
+      endDate: moment(range.to).format("YYYY-MM-DD"),
       userId: user?.id,
     });
-  }, [fetchTimeSpentInTrips, user?.id]);
+  }, [fetchTimeSpentInTrips, range.from, range.to, user?.id]);
 
   // COUNT TRANSPORT CARDS
   const {
@@ -84,17 +105,15 @@ const UserDashboard = () => {
   const cardsData = useMemo(
     () => [
       {
-        title: "Total trips",
+        title: "Trips joined",
         value: userTripsCount,
-        change: 0,
         icon: faBus,
         route: "/user-trips",
         isLoading: userTripsCountIsFetching,
       },
       {
-        title: "Time spent on trips (hours)",
+        title: "Hours travelled",
         value: timeSpentInTrips,
-        change: 0,
         icon: faClockRotateLeft,
         route: "/user-trips",
         isLoading: timeSpentInTripsIsFetching,
@@ -102,7 +121,6 @@ const UserDashboard = () => {
       {
         title: "Active cards",
         value: transportCardsCount,
-        change: 0,
         icon: faCreditCard,
         route: "/account/transport-cards",
         isLoading: transportCardsCountIsFetching,
@@ -110,7 +128,6 @@ const UserDashboard = () => {
       {
         title: "Total users",
         value: usersCount,
-        change: 0,
         icon: faUsers,
         route: "/users",
         isLoading: usersCountIsFetching,
@@ -128,36 +145,27 @@ const UserDashboard = () => {
     ],
   );
 
-  // GRAPH DATA
-  const generateRandomData = () => {
-    const months = [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec",
-    ];
-    return months.map((month) => ({
-      month,
-      value: Math.floor(Math.random() * (400 - 100) + 100),
-    }));
-  };
-
-  const [graphData, setGraphData] =
-    useState<{ month: string; value: number }[]>(generateRandomData());
-
-  useEffect(() => {
-    setGraphData(generateRandomData());
-  }, []);
-
   const { nearbyTrips, isLoading, locationSource } = useFetchNearbyTrips();
+
+  /** Nearby trips grouped by status — real counts, not a generated series. */
+  const tripsByStatus = useMemo<ChartDataPoint[]>(() => {
+    const counts = new Map<string, number>();
+    (nearbyTrips ?? []).forEach((trip: NearbyDashboardTrip) => {
+      const label = capitalizeString(trip.status.replace(/_/g, " "));
+      counts.set(label, (counts.get(label) ?? 0) + 1);
+    });
+    return [...counts.entries()].map(([name, value]) => ({ name, value }));
+  }, [nearbyTrips]);
+
+  /** Seats still open on each nearby trip, by reference. */
+  const capacityByTrip = useMemo<ChartDataPoint[]>(
+    () =>
+      (nearbyTrips ?? []).slice(0, 8).map((trip: NearbyDashboardTrip) => ({
+        name: `#${trip.referenceId}`,
+        value: Math.max(0, trip.availableCapacity),
+      })),
+    [nearbyTrips]
+  );
 
   return (
     <>
@@ -168,75 +176,126 @@ const UserDashboard = () => {
         ogDescription="View your personalized dashboard with real-time bus tracking, trip metrics, and transport analytics."
       />
       <AppLayout>
-        <main className="h-full w-full flex flex-col gap-4">
-          <nav className="w-full flex flex-col gap-4">
-            <Heading>Dashboard</Heading>
-          </nav>
-          <section
-            className={`w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 justify-between`}
-          >
-            {cardsData?.map((card, idx) => (
-              <article
-                key={idx}
-                className="transition-transform duration-300 w-full ease-in-out"
-              >
-                <DashboardCard {...card} />
-              </article>
+        <PageBody>
+          <PageHeader
+            title={`Welcome back, ${user?.name?.split(" ")?.[0] ?? "there"}`}
+            description="Your trips, cards, and the services running near you."
+            actions={
+              <>
+                <div className="w-[150px]">
+                  <DatePicker
+                    label="From"
+                    value={range.from}
+                    toDate={range.to}
+                    onChange={(from) =>
+                      setRange((current) => ({ ...current, from }))
+                    }
+                  />
+                </div>
+                <div className="w-[150px]">
+                  <DatePicker
+                    label="To"
+                    value={range.to}
+                    fromDate={range.from}
+                    onChange={(to) =>
+                      setRange((current) => ({ ...current, to }))
+                    }
+                  />
+                </div>
+              </>
+            }
+          />
+
+          {/* Equal-height tiles on one four-up grid, so the row reads as a
+              single band rather than four cards of different depths. */}
+          <section className="grid w-full auto-rows-fr grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+            {cardsData?.map((card) => (
+              <DashboardCard key={card.title} {...card} />
             ))}
           </section>
 
-          <section className="w-full bg-white/90 rounded-md shadow-sm p-6 flex flex-col gap-4">
-            <header>
-              <Heading type="h3">Monthly Trips Trend</Heading>
-            </header>
-            <figure className="w-full h-[300px]">
-              <DashboardGraph data={graphData} dataKey="month" />
-            </figure>
-          </section>
-          <section className="w-full flex flex-col gap-3 my-4">
-            <header className="w-full flex flex-wrap items-start gap-3 justify-between">
-              <article className="flex flex-col gap-1">
-                <Heading type="h3">Trips near you</Heading>
-                <p className="text-[12px] font-light text-secondary">
-                  Live nearby rides ordered around your current or approximate
-                  location.
+          <section className="grid w-full items-stretch gap-5 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+            <PageSection
+              title="Seats open on nearby trips"
+              description="Remaining capacity on the trips closest to you."
+              bodyClassName="flex-1 justify-center"
+            >
+              {capacityByTrip.length ? (
+                <SeriesChart
+                  kind="bar"
+                  data={capacityByTrip}
+                  ariaLabel="Seats still available on each nearby trip"
+                  height={260}
+                />
+              ) : (
+                <p className="type-meta py-10 text-center">
+                  No nearby trips to chart yet.
                 </p>
-              </article>
+              )}
+            </PageSection>
+
+            <PageSection
+              title="Nearby trips by status"
+              description="How the trips around you are currently running."
+              bodyClassName="flex-1 justify-center"
+            >
+              {tripsByStatus.length ? (
+                <DonutChart
+                  data={tripsByStatus}
+                  ariaLabel="Nearby trips grouped by status"
+                  centerValue={String(nearbyTrips?.length ?? 0)}
+                  centerLabel="trips"
+                  height={180}
+                />
+              ) : (
+                <p className="type-meta py-10 text-center">
+                  No nearby trips to chart yet.
+                </p>
+              )}
+            </PageSection>
+          </section>
+          <PageSection
+            title="Trips near you"
+            description="Live nearby rides, ordered by distance from your current or approximate location."
+            actions={
               <Button icon={faFileLines} route="/trips">
                 View all
               </Button>
-            </header>
+            }
+          >
             {locationSource === "ip" && (
-              <p className="text-[12px] font-light text-amber-700">
-                Approximate IP location is being used. Enable browser location
-                for more accurate nearby trips.
+              <p className="type-meta flex items-start gap-2 text-(--warning)">
+                <FontAwesomeIcon
+                  icon={faTriangleExclamation}
+                  className="mt-[0.2em] size-3 shrink-0"
+                  aria-hidden="true"
+                />
+                Using an approximate location from your network. Turn on browser
+                location for accurate nearby trips.
               </p>
             )}
             {isLoading ? (
-              <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3 justify-items-start">
+              <ul className="grid auto-rows-fr grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 {Array.from({ length: 3 }).map((_, index) => (
                   <li
                     key={index}
-                    className="h-[188px] w-full max-w-[20rem] rounded-md bg-white/80 shadow-sm animate-pulse"
+                    className="h-[188px] w-full animate-pulse rounded-(--radius-card) bg-(--surface)"
                   />
                 ))}
               </ul>
             ) : nearbyTrips?.length ? (
-              <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3 justify-items-start">
+              <ul className="grid auto-rows-fr grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 {nearbyTrips.map((trip: NearbyDashboardTrip) => (
                   <DashboardTripCard key={trip.id} trip={trip} />
                 ))}
               </ul>
             ) : (
-              <article className="w-full rounded-md bg-white/95 p-4 shadow-sm">
-                <p className="text-[12px] font-light text-secondary">
-                  No nearby active trips found right now. Check back in a
-                  moment.
-                </p>
-              </article>
+              <p className="type-meta">
+                No active trips near you right now. Check back in a moment.
+              </p>
             )}
-          </section>
-        </main>
+          </PageSection>
+        </PageBody>
       </AppLayout>
     </>
   );

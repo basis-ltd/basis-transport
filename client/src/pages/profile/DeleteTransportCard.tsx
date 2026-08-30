@@ -40,25 +40,28 @@ const DeleteTransportCard = () => {
       heading={`Delete ${selectedTransportCard?.name || "card"}`}
     >
       <article className="w-full flex flex-col gap-4">
-        <p className="text-sm text-secondary font-light py-2">
+        <p className="text-sm text-(--muted) font-normal py-2">
           This will permanently remove transport card{" "}
-          <span className="font-medium text-primary">
+          <span className="font-medium text-(--ink)">
             {selectedTransportCard?.cardNumber}
           </span>
           . This cannot be undone.
         </p>
 
-        <Button
-          submit
-          type="button"
-          danger
-          className="self-end"
-          disabled={isLoading}
-          isLoading={isLoading}
-          onClick={handleConfirm}
-        >
-          Delete
-        </Button>
+        <footer className="flex items-center justify-end gap-2">
+          <Button type="button" disabled={isLoading} onClick={closeModal}>
+            Keep card
+          </Button>
+          <Button
+            primary
+            type="button"
+            disabled={isLoading}
+            isLoading={isLoading}
+            onClick={handleConfirm}
+          >
+            Delete card
+          </Button>
+        </footer>
       </article>
     </Modal>
   );
