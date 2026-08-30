@@ -1,5 +1,4 @@
 import Button from '@/components/inputs/Button';
-import { Heading } from '@/components/inputs/TextInputs';
 import Table from '@/components/table/Table';
 import AppLayout from '@/containers/navigation/AppLayout';
 import { useAppSelector } from '@/states/hooks';
@@ -8,6 +7,7 @@ import { useFetchLocations } from '@/usecases/locations/location.hooks';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { PageBody, PageHeader } from "@/components/layout/PageShell";
 
 const LocationsPage = () => {
   /**
@@ -50,10 +50,11 @@ const LocationsPage = () => {
 
   return (
     <AppLayout>
-      <main className="w-full flex flex-col gap-4">
-        <nav className="w-full flex flex-col gap-4">
-          <ul className="flex items-center gap-3 justify-between">
-            <Heading>Locations</Heading>
+      <PageBody>
+        <PageHeader
+          title="Locations"
+          description="Stops and stations trips can run between."
+          actions={
             <Button
               primary
               icon={faPlus}
@@ -62,10 +63,10 @@ const LocationsPage = () => {
                 navigate('/locations/create');
               }}
             >
-              Add Location
+              Add location
             </Button>
-          </ul>
-        </nav>
+          }
+        />
         <section className="w-full flex flex-col gap-4">
           <Table
             columns={locationColumns}
@@ -79,7 +80,7 @@ const LocationsPage = () => {
             setSize={setSize}
           />
         </section>
-      </main>
+      </PageBody>
     </AppLayout>
   );
 };

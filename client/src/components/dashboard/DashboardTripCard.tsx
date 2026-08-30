@@ -1,5 +1,5 @@
 import Button from '@/components/inputs/Button';
-import { capitalizeString, getStatusBackgroundColor } from '@/helpers/strings.helper';
+import StatusBadge from '@/components/inputs/StatusBadge';
 
 export type NearbyDashboardTrip = {
   id: string;
@@ -30,44 +30,40 @@ const DashboardTripCard = ({ trip }: DashboardTripCardProps) => {
 
   return (
     <li className="list-none h-full w-full">
-      <article className="flex h-full w-full flex-col overflow-hidden rounded-md shadow-sm bg-background">
+      <article className="card-framed flex h-full w-full flex-col overflow-hidden">
         <section className="flex flex-1 flex-col p-6">
           <header className="mb-8">
-            <p className="mb-4 text-[12px] font-light leading-tight text-secondary">
+            <p className="type-meta mb-4">
               Your next trip · #{trip.referenceId}
             </p>
-            <div className="rounded-md bg-white p-6 shadow-sm">
+            <div className="card-quiet p-5">
               <div className="mb-4 flex items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
-                  <p className="text-[12px] font-light leading-tight text-secondary">
+                  <p className="type-body-sm text-(--muted)">
                     {routeLabel}
                   </p>
-                  <p className="mt-1 text-[13px] font-semibold leading-tight text-primary">
+                  <p className="mt-1 type-card-title text-(--ink)">
                     {distanceLabel}
                   </p>
                 </div>
                 <div className="shrink-0 text-right">
-                  <p
-                    className={`inline-block shadow-sm ${getStatusBackgroundColor(trip.status)}`}
-                  >
-                    {capitalizeString(trip.status)}
-                  </p>
+                  <StatusBadge status={trip.status} />
                 </div>
               </div>
               <div className="flex gap-4">
                 <div className="min-w-0 flex-1">
-                  <p className="mb-1 text-[12px] font-light leading-tight text-secondary">
+                  <p className="mb-1 type-body-sm text-(--muted)">
                     Available seats
                   </p>
-                  <p className="text-[13px] font-light leading-tight text-primary">
+                  <p className="type-body-sm leading-tight text-(--ink)">
                     {seatsLeft} left
                   </p>
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="mb-1 text-[12px] font-light leading-tight text-secondary">
+                  <p className="mb-1 type-body-sm text-(--muted)">
                     Distance
                   </p>
-                  <p className="mt-1 text-[12px] font-light leading-tight text-secondary">
+                  <p className="mt-1 type-body-sm text-(--muted)">
                     {distanceLabel}
                   </p>
                 </div>
@@ -76,23 +72,23 @@ const DashboardTripCard = ({ trip }: DashboardTripCardProps) => {
           </header>
 
           <section>
-            <p className="mb-4 text-[12px] font-medium uppercase tracking-wide text-secondary">
+            <p className="type-meta mb-4">
               Route
             </p>
             <ul className="space-y-3">
-              <li className="rounded-md bg-white p-4 shadow-sm transition-opacity hover:opacity-80">
-                <p className="text-[12px] font-medium leading-tight text-primary">
+              <li className="rounded-md bg-(--paper) p-4 transition-opacity hover:opacity-80">
+                <p className="type-label leading-tight text-(--ink)">
                   {trip.locationFrom?.name || 'Unknown'}
                 </p>
-                <p className="mt-1 text-[12px] font-light leading-tight text-secondary">
+                <p className="mt-1 type-body-sm text-(--muted)">
                   Pickup
                 </p>
               </li>
-              <li className="rounded-md bg-white p-4 shadow-sm transition-opacity hover:opacity-80">
-                <p className="text-[12px] font-medium leading-tight text-primary">
+              <li className="rounded-md bg-(--paper) p-4 transition-opacity hover:opacity-80">
+                <p className="type-label leading-tight text-(--ink)">
                   {trip.locationTo?.name || 'Unknown'}
                 </p>
-                <p className="mt-1 text-[12px] font-light leading-tight text-secondary">
+                <p className="mt-1 type-body-sm text-(--muted)">
                   Drop-off
                 </p>
               </li>

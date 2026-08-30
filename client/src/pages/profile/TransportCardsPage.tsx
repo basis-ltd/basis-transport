@@ -1,4 +1,3 @@
-import { Heading } from "@/components/inputs/TextInputs";
 import AppLayout from "@/containers/navigation/AppLayout";
 import { useAppDispatch, useAppSelector } from "@/states/hooks";
 import { useFetchTransportCards } from "@/usecases/transport-cards/transportCard.hooks";
@@ -14,6 +13,7 @@ import Table from "@/components/table/Table";
 import { useTransportCardColumns } from "@/usecases/transport-cards/columns.transportCard";
 import { useEffect } from "react";
 import { TransportCardProvider } from "@/constants/transportCard.constants";
+import { PageBody, PageHeader } from "@/components/layout/PageShell";
 
 const TransportCardsPage = () => {
   // STATE VARIABLES
@@ -54,21 +54,23 @@ const TransportCardsPage = () => {
 
   return (
     <AppLayout>
-      <main className="w-full flex flex-col gap-4">
-        <nav className="w-full flex flex-wrap items-center gap-4 justify-between">
-          <Heading>My Transport Cards</Heading>
-          <Button
-            primary
-            submit
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              dispatch(setCreateTransportCard(true));
-            }}
-          >
-            Add card
-          </Button>
-        </nav>
+      <PageBody>
+        <PageHeader
+          title="My transport cards"
+          description="Cards you use to pay for travel."
+          actions={
+            <Button
+              primary
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                dispatch(setCreateTransportCard(true));
+              }}
+            >
+              Add card
+            </Button>
+          }
+        />
         <Table
           data={transportCardsList}
           columns={transportCardColumns}
@@ -92,7 +94,7 @@ const TransportCardsPage = () => {
             Back
           </Button>
         </menu>
-      </main>
+      </PageBody>
       <CreateTransportCard />
       <DeleteTransportCard />
       <UpdateTransportCard />

@@ -1,6 +1,7 @@
 import { environment } from '@/constants/environment.constants';
 import { APIProvider, Map, Marker } from '@vis.gl/react-google-maps';
-import { LocateFixed, MapPin } from 'lucide-react';
+import { faLocationCrosshairs, faLocationDot } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 const KIGALI_CENTER = { lat: -1.9441, lng: 30.0619 };
 
@@ -51,13 +52,13 @@ const LandingHeroMapPanel = ({
         <figcaption className="landing-meta absolute left-3 top-3 z-10 max-w-[calc(100%-1.5rem)] space-y-1 rounded-[var(--landing-radius)] bg-[var(--landing-paper)] px-3 py-2 text-[var(--landing-ink)]">
           {pickupLabel ? (
             <span className="flex items-start gap-1.5">
-              <MapPin className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
+              <FontAwesomeIcon icon={faLocationDot} className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
               <span className="truncate">{pickupLabel}</span>
             </span>
           ) : null}
           {dropoffLabel ? (
             <span className="flex items-start gap-1.5 text-[var(--landing-muted)]">
-              <MapPin className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
+              <FontAwesomeIcon icon={faLocationDot} className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
               <span className="truncate">{dropoffLabel}</span>
             </span>
           ) : null}
@@ -75,7 +76,8 @@ const LandingHeroMapPanel = ({
           disabled={isLocating}
           className="absolute bottom-3 left-3 z-10 inline-flex h-9 items-center gap-2 rounded-[var(--landing-radius)] border border-[var(--landing-line)] bg-[var(--landing-paper)] px-3 text-sm text-[var(--landing-ink)] transition-colors hover:bg-[var(--landing-surface)] disabled:opacity-60"
         >
-          <LocateFixed
+          <FontAwesomeIcon
+            icon={faLocationCrosshairs}
             className={`size-4 ${isLocating ? 'animate-pulse' : ''}`}
             aria-hidden="true"
           />

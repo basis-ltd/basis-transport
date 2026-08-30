@@ -1,14 +1,14 @@
 import Button from '@/components/inputs/Button';
 import Input from '@/components/inputs/Input';
-import Select from '@/components/inputs/Select';
-import { Heading } from '@/components/inputs/TextInputs';
 import AppLayout from '@/containers/navigation/AppLayout';
 import { useAppSelector } from '@/states/hooks';
 import { useFetchLocations } from '@/usecases/locations/location.hooks';
 import { useCreateTrip } from '@/usecases/trips/trip.hooks';
 import { useEffect } from 'react';
+import Combobox from '@/components/inputs/Combobox';
 import { Controller, useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
+import { PageBody, PageHeader } from '@/components/layout/PageShell';
 
 const CreateTripPage = () => {
   /**
@@ -75,12 +75,11 @@ const CreateTripPage = () => {
 
   return (
     <AppLayout>
-      <main className="w-full flex flex-col gap-4">
-        <nav className="w-full flex flex-col gap-4">
-          <ul className="w-full flex items-center gap-3 justify-between">
-            <Heading>Create Trip</Heading>
-          </ul>
-        </nav>
+      <PageBody>
+        <PageHeader
+          title="Create trip"
+          description="Schedule a service between two stops."
+        />
         <form className="w-full flex flex-col gap-6" onSubmit={onSubmit}>
           <fieldset className="w-full grid grid-cols-2 gap-4 justify-between">
             <Controller
@@ -89,7 +88,7 @@ const CreateTripPage = () => {
               rules={{ required: `Please select the departing location` }}
               render={({ field }) => {
                 return (
-                  <Select
+                  <Combobox
                     label="Departing Location"
                     disabled={locationsIsFetching}
                     options={locationsList?.map((location) => ({
@@ -98,6 +97,7 @@ const CreateTripPage = () => {
                     }))}
                     {...field}
                     placeholder="Select departing location"
+                    searchPlaceholder="Search stops…"
                     errorMessage={errors.locationFromId?.message}
                     required
                   />
@@ -122,12 +122,13 @@ const CreateTripPage = () => {
                 }
 
                 return (
-                  <Select
+                  <Combobox
                     label="Arriving Location"
                     disabled={locationsIsFetching}
                     options={options}
                     {...field}
                     placeholder="Select arriving location"
+                    searchPlaceholder="Search stops…"
                     errorMessage={errors.locationToId?.message}
                     required
                   />
@@ -177,7 +178,7 @@ const CreateTripPage = () => {
             </Button>
           </menu>
         </form>
-      </main>
+      </PageBody>
     </AppLayout>
   );
 };

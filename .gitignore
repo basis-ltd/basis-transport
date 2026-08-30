@@ -137,3 +137,14 @@ dist
 
 #DS_Store
 .DS_Store
+
+# Agents
+.agents/
+.agent/
+.cursor/
+.kiro/
+.gemini/
+.agent/
+.cursor/
+.kiro/
+.gemini/

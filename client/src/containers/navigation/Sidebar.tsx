@@ -128,7 +128,7 @@ const Sidebar = () => {
       initial={false}
       animate={isDesktopViewport ? { x: 0 } : { x: mobileOpen ? 0 : '-100%' }}
       transition={{ duration: 0.3, ease: 'easeInOut' }}
-      className="fixed left-0 top-[var(--navbar-height)] z-[50000] flex h-[calc(100vh-var(--navbar-height))] w-[var(--mobile-sidebar-width)] flex-col bg-background-secondary text-foreground shadow-sm transition-[width] duration-300 ease-in-out md:z-40 md:w-[var(--app-sidebar-width)]"
+      className="fixed left-0 top-[var(--navbar-height)] z-[50000] flex h-[calc(100vh-var(--navbar-height))] w-[var(--mobile-sidebar-width)] flex-col border-r border-(--line) bg-(--paper) text-(--ink) transition-[width] duration-300 ease-in-out md:z-40 md:w-[var(--app-sidebar-width)]"
       aria-hidden={!isDesktopViewport && !mobileOpen}
     >
       <header
@@ -147,35 +147,30 @@ const Sidebar = () => {
               e.preventDefault();
               dispatch(setDesktopSidebarExpanded(!desktopExpanded));
             }}
-            className="flex h-8 w-8 items-center cursor-pointer justify-center rounded-md bg-primary/10 text-primary transition-all duration-200 ease-in-out hover:bg-primary/15 hover:text-primary"
+            className="flex size-8 cursor-pointer items-center justify-center rounded-(--radius-control) text-(--muted) transition-colors duration-200 ease-(--ease-flat) hover:bg-(--surface) hover:text-(--ink)"
             aria-label={desktopExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
           >
-            <FontAwesomeIcon
-              icon={desktopExpanded ? faAnglesLeft : faBars}
-              className="text-[12px] cursor-pointer"
-            />
+            <FontAwesomeIcon icon={desktopExpanded ? faAnglesLeft : faBars} className="size-3.5" />
           </button>
         ) : (
           <>
-            <p className="text-[12px] font-light uppercase tracking-wide text-secondary/60">
-              Basis Transport
-            </p>
+            <p className="type-label">Basis Transport</p>
             <button
               type="button"
               onClick={() => {
                 dispatch(closeMobileSidebar());
               }}
-              className="flex h-8 w-8 items-center justify-center rounded-md bg-primary/10 text-primary transition-all duration-200 ease-in-out hover:bg-primary/15 hover:text-primary"
+              className="flex size-8 cursor-pointer items-center justify-center rounded-(--radius-control) text-(--muted) transition-colors duration-200 ease-(--ease-flat) hover:bg-(--surface) hover:text-(--ink)"
               aria-label="Close sidebar"
             >
-              <FontAwesomeIcon icon={faXmark} className="text-[12px]" />
+              <FontAwesomeIcon icon={faXmark} className="size-3.5" />
             </button>
           </>
         )}
       </header>
 
       <div className="mx-4 mb-3">
-        <div className="h-px bg-primary/10" />
+        <div className="h-px bg-(--line)" />
       </div>
 
       <nav className="flex-1 overflow-y-auto overflow-x-hidden px-3">
@@ -200,12 +195,12 @@ const Sidebar = () => {
               <li key={nav.title} className="flex flex-col">
                 <Link
                   to={nav.path}
-                  className={`group relative flex items-center gap-3 overflow-hidden rounded-md text-[12px] font-light leading-tight transition-all duration-200 ease-in-out
-                    ${sidebarExpanded ? 'px-3 py-3' : 'justify-center p-3'}
+                  className={`group relative flex items-center gap-3 overflow-hidden rounded-(--radius-pill) text-sm font-medium transition-colors duration-200 ease-(--ease-flat)
+                    ${sidebarExpanded ? 'px-3 py-2.5' : 'justify-center p-2.5'}
                     ${
                       isActive
-                        ? 'bg-primary/10 text-primary'
-                        : 'text-secondary hover:bg-primary/5 hover:text-primary'
+                        ? 'bg-(--ink) text-(--paper)'
+                        : 'text-(--muted) hover:bg-(--surface) hover:text-(--ink)'
                     }
                   `}
                   onClick={(e) => {
@@ -231,11 +226,7 @@ const Sidebar = () => {
                 >
                   <FontAwesomeIcon
                     icon={nav.icon}
-                    className={`text-[15px] flex-shrink-0 transition-colors duration-200 ease-in-out ${
-                      isActive
-                        ? 'text-primary'
-                        : 'text-secondary group-hover:text-primary'
-                    }`}
+                    className="size-4 shrink-0"
                   />
 
                   {sidebarExpanded && (
@@ -243,7 +234,7 @@ const Sidebar = () => {
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={labelFade}
-                      className="whitespace-nowrap text-[12px] font-light leading-tight"
+                      className="whitespace-nowrap text-sm font-medium"
                     >
                       {nav.title}
                     </motion.span>
@@ -252,7 +243,7 @@ const Sidebar = () => {
                   {hasSubcategories && sidebarExpanded && (
                     <FontAwesomeIcon
                       icon={faChevronDown}
-                      className={`ml-auto text-[10px] text-secondary/60 transition-transform duration-300 ease-in-out ${
+                      className={`ml-auto size-3 transition-transform duration-200 ease-(--ease-glide) ${
                         isSubcategoriesOpen ? 'rotate-180' : ''
                       }`}
                     />
@@ -268,7 +259,7 @@ const Sidebar = () => {
                       transition={{ duration: 0.2, ease: 'easeInOut' }}
                       className="my-1 overflow-hidden"
                     >
-                      <ul className="ml-[14px] flex flex-col gap-1.5 border-l border-primary/10 py-1.5 pl-2 pr-1">
+                      <ul className="ml-[14px] flex flex-col gap-1.5 border-l border-(--line) py-1.5 pl-2 pr-1">
                         {nav.subCategories?.map((subCategory: NavigationItem) => {
                           const isSubActive =
                             activeSubcategoryPath === subCategory.path;
@@ -277,10 +268,10 @@ const Sidebar = () => {
                             <li key={subCategory.title}>
                               <Link
                                 to={subCategory.path}
-                                className={`group flex items-center gap-2.5 rounded-md px-3 py-2 text-[12px] font-light leading-tight transition-all duration-200 ease-in-out ${
+                                className={`group flex items-center gap-2.5 rounded-(--radius-pill) px-3 py-2 text-sm font-normal transition-colors duration-200 ease-(--ease-flat) ${
                                   isSubActive
-                                    ? 'bg-primary/10 text-primary'
-                                    : 'text-secondary hover:bg-primary/5 hover:text-primary'
+                                    ? 'bg-(--ink) text-(--paper)'
+                                    : 'text-(--muted) hover:bg-(--surface) hover:text-(--ink)'
                                 }`}
                                 onClick={() => {
                                   if (!isDesktopViewport) {
@@ -290,17 +281,13 @@ const Sidebar = () => {
                               >
                                 <FontAwesomeIcon
                                   icon={subCategory.icon}
-                                  className={`text-[12px] flex-shrink-0 ${
-                                    isSubActive
-                                      ? 'text-primary'
-                                      : 'text-secondary/70 group-hover:text-primary'
-                                  }`}
+                                  className="size-3.5 shrink-0"
                                 />
                                 <motion.span
                                   initial={{ opacity: 0 }}
                                   animate={{ opacity: 1 }}
                                   transition={labelFade}
-                                  className="whitespace-nowrap text-[12px] font-light leading-tight"
+                                  className="whitespace-nowrap text-sm font-medium"
                                 >
                                   {subCategory.title}
                                 </motion.span>
@@ -319,20 +306,20 @@ const Sidebar = () => {
       </nav>
 
       <footer className="mt-auto px-4 py-6">
-        <div className="mb-3 h-px bg-primary/10" />
+        <div className="mb-3 h-px bg-(--line)" />
         {sidebarExpanded ? (
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={labelFade}
-            className="text-center text-[12px] font-light leading-tight uppercase tracking-wide text-secondary/50"
+            className="type-meta text-center"
           >
             Basis Transport
           </motion.p>
         ) : (
           <figure className="flex justify-center">
             <span
-              className="block h-2 w-2 rounded-md bg-primary/15"
+              className="block size-2 rounded-(--radius-pill) bg-(--line-strong)"
               aria-hidden
             />
           </figure>

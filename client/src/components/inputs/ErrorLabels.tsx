@@ -1,4 +1,5 @@
-import { AlertTriangle } from 'lucide-react';
+import { faTriangleExclamation } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   FieldError,
   FieldErrorsImpl,
@@ -12,10 +13,6 @@ export type InputErrorMessageProp =
   | FieldError
   | Merge<FieldError, FieldErrorsImpl<FieldValues>>
   | undefined;
-
-type InputErrorMessageProps = {
-  message: InputErrorMessageProp;
-};
 
 export function resolveErrorText(
   message: InputErrorMessageProp
@@ -32,14 +29,22 @@ export function resolveErrorText(
 
 /**
  * Colour is never the only carrier of the message — a red line on its own says
- * something is wrong without saying what, and disappears in greyscale.
+ * something is wrong without saying what, and vanishes in greyscale.
  */
-export const InputErrorMessage = ({ message }: InputErrorMessageProps) => {
+export const InputErrorMessage = ({
+  message,
+}: {
+  message: InputErrorMessageProp;
+}) => {
   const text = resolveErrorText(message);
   if (!text) return null;
   return (
     <p role="alert" className={fieldErrorClassName}>
-      <AlertTriangle className="mt-[0.2em] size-3 shrink-0" aria-hidden="true" />
+      <FontAwesomeIcon
+        icon={faTriangleExclamation}
+        className="mt-[0.2em] size-3 shrink-0"
+        aria-hidden="true"
+      />
       {text}
     </p>
   );

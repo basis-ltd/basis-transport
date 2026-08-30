@@ -4,16 +4,16 @@ import validateInputs from "@/helpers/validations.helper";
 import { Controller, useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { Seo } from "@/components/seo";
-import PublicLayout from "@/containers/public/PublicLayout";
-import PublicNavbar from "@/containers/public/PublicNavbar";
-import { publicClasses, publicColors } from "@/containers/public/publicTheme";
 import { toast } from "sonner";
 import { useCallback, useEffect, useState } from "react";
 import {
   useForgotPassword,
   useSendPhoneResetOtp,
 } from "@/usecases/auth/auth.hooks";
-import { Heading } from "@/components/inputs/TextInputs";
+import {
+  AuthPageShell,
+  AuthTabs,
+} from './AuthPageShell';
 
 const ForgotPassword = () => {
   // NAVIGATION
@@ -95,53 +95,27 @@ const ForgotPassword = () => {
         noIndex
         openGraph={false}
       />
-      <PublicLayout>
-        <PublicNavbar variant="auth" />
-        <main className="w-full min-h-screen flex flex-col items-center justify-center gap-4 px-4 lg:px-8 pt-24 pb-12">
-          <section className={publicClasses.authCard}>
+      <AuthPageShell>
+          <section className="card-framed flex w-full flex-col gap-5 p-8 max-sm:p-5">
             <header className="flex flex-col gap-2 items-center mb-4">
-              <Heading type="h1" className="text-center">
-                Forgot password
-              </Heading>
+              <h1 className="type-h3 text-center">Forgot password</h1>
               <p
-                className="text-[12px] leading-relaxed text-center"
-                style={{ color: publicColors.neutralLight }}
+                className="type-body-sm text-center text-(--muted)"
               >
                 {method === "email"
                   ? "Enter your email and we'll send you a reset link if an account exists."
                   : "Enter your phone number and we'll send you a reset code if an account exists."}
               </p>
             </header>
-            <nav className="grid grid-cols-2 gap-2" aria-label="Reset method">
-              <Link
-                to="#"
-                className={`${publicClasses.tabBase} ${
-                  method === "email"
-                    ? publicClasses.tabSelected
-                    : publicClasses.tabUnselected
-                }`}
-                onClick={(e) => {
-                  e.preventDefault();
-                  switchMethod("email");
-                }}
-              >
-                Email
-              </Link>
-              <Link
-                to="#"
-                className={`${publicClasses.tabBase} ${
-                  method === "phone"
-                    ? publicClasses.tabSelected
-                    : publicClasses.tabUnselected
-                }`}
-                onClick={(e) => {
-                  e.preventDefault();
-                  switchMethod("phone");
-                }}
-              >
-                Phone
-              </Link>
-            </nav>
+            <AuthTabs
+              label="Reset method"
+              value={method}
+              onChange={switchMethod}
+              options={[
+                { label: 'Email', value: 'email' },
+                { label: 'Phone', value: 'phone' },
+              ]}
+            />
             <form className="w-full flex flex-col gap-4" onSubmit={onSubmit}>
               {method === "email" ? (
                 <fieldset className="w-full flex flex-col gap-5">
@@ -202,21 +176,19 @@ const ForgotPassword = () => {
                 Send reset {method === "email" ? "link" : "code"}
               </Button>
               <p
-                className="text-[12px] font-light"
-                style={{ color: publicColors.neutralLight }}
+                className="type-body-sm text-(--muted)"
               >
                 Remember your password?{" "}
                 <Link
                   to="/auth/login"
-                  className="text-primary hover:underline transition-colors duration-200 ease-in-out text-[12px]"
+                  className="text-(--ink) hover:underline transition-colors duration-200 ease-in-out type-body-sm"
                 >
                   Back to login
                 </Link>
               </p>
             </form>
           </section>
-        </main>
-      </PublicLayout>
+      </AuthPageShell>
     </>
   );
 };

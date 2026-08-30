@@ -1,23 +1,24 @@
 import { FC, ChangeEvent, useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { Textarea } from '@/components/ui/textarea';
+import { textareaClassName } from './control';
 import type { InputErrorMessageProp } from './ErrorLabels';
+import { resolveErrorText } from './ErrorLabels';
 import { FieldShell } from './Field';
 
 interface TextAreaProps {
   cols?: number;
   rows?: number;
   className?: string;
-  defaultValue?: string | number | readonly string[] | undefined;
+  defaultValue?: string | number | readonly string[];
   resize?: boolean;
   onChange?: (e: ChangeEvent<HTMLTextAreaElement>) => void;
-  placeholder?: string | undefined;
+  placeholder?: string;
   required?: boolean;
   readonly?: boolean;
-  onBlur?: () => void | undefined;
+  onBlur?: () => void;
   label?: string | React.ReactNode;
-  value?: string | number | readonly string[] | undefined;
-  height?: string;
+  value?: string | number | readonly string[];
   description?: string | React.ReactNode;
   errorMessage?: InputErrorMessageProp;
 }
@@ -25,11 +26,11 @@ interface TextAreaProps {
 const TextArea: FC<TextAreaProps> = ({
   cols = 50,
   rows = 5,
-  className = '',
-  defaultValue = undefined,
+  className,
+  defaultValue,
   resize = false,
   onChange,
-  placeholder = undefined,
+  placeholder,
   required = false,
   readonly = false,
   onBlur,
@@ -60,8 +61,8 @@ const TextArea: FC<TextAreaProps> = ({
         value={value}
         readOnly={readonly}
         placeholder={placeholder}
-        aria-invalid={Boolean(errorMessage)}
-        className={cn(!resize && 'resize-none', className)}
+        aria-invalid={Boolean(resolveErrorText(errorMessage))}
+        className={cn(textareaClassName, !resize && 'resize-none', className)}
         onChange={onChange}
         onBlur={onBlur}
         defaultValue={defaultValue}

@@ -41,8 +41,8 @@ function FooterNavLink({
     <Link
       to={isPlaceholder ? "/" : link.to}
       onClick={isPlaceholder ? (e) => e.preventDefault() : undefined}
-      className={`text-[12px] font-light hover:underline underline-offset-2 transition-colors ${
-        muted ? '' : 'text-primary'
+      className={`type-body-sm hover:underline underline-offset-2 transition-colors ${
+        muted ? '' : 'text-(--ink)'
       }`}
       style={muted ? { color: publicColors.neutralLight } : undefined}
     >
@@ -102,7 +102,7 @@ const PublicFooter = () => {
 
         <section className="pt-8">
           <p
-            className="text-[12px] leading-relaxed mb-6 font-light"
+            className="text-[12px] leading-relaxed mb-6 font-normal"
             style={{ color: publicColors.neutralLight }}
           >
             <span className="font-medium">
@@ -112,7 +112,7 @@ const PublicFooter = () => {
           </p>
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pt-6">
             <p
-              className="text-[12px] font-light"
+              className="type-body-sm"
               style={{ color: publicColors.neutralLight }}
             >
               © 2026 Basis Transport. All rights reserved.

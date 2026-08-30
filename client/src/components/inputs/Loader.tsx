@@ -1,7 +1,8 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { VariantProps, cva } from 'class-variance-authority';
-import { Loader2 } from 'lucide-react';
+import { faSpinner } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 const spinnerVariants = cva('flex-col items-center justify-center', {
   variants: {
@@ -15,7 +16,7 @@ const spinnerVariants = cva('flex-col items-center justify-center', {
   },
 });
 
-const loaderVariants = cva('animate-spin text-primary', {
+const loaderVariants = cva('animate-spin text-(--ink)', {
   variants: {
     size: {
       small: 'size-4',
@@ -43,7 +44,10 @@ const Loader = ({
 }: SpinnerContentProps) => {
   return (
     <span className={spinnerVariants({ show })}>
-      <Loader2 className={cn(loaderVariants({ size }), className)} />
+      <FontAwesomeIcon
+        icon={faSpinner}
+        className={cn(loaderVariants({ size }), className)}
+      />
       {children}
     </span>
   );

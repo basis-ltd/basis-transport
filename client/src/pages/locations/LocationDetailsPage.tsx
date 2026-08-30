@@ -39,7 +39,7 @@ const LocationDetailsPage = () => {
     return (
       <AppLayout>
         <main className="w-full max-w-6xl mx-auto px-4 py-8 space-y-8">
-          <header className="rounded-md bg-white shadow-sm p-6">
+          <header className="rounded-md bg-(--paper) p-6">
             <section>
               <SkeletonLoader width="300px" height="36px" className="mb-2" />
               <SkeletonLoader width="400px" height="20px" />
@@ -47,28 +47,28 @@ const LocationDetailsPage = () => {
           </header>
 
           <article className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-            <section className="lg:col-span-2 bg-white rounded-md p-8 shadow-sm">
+            <section className="lg:col-span-2 bg-(--paper) rounded-md p-8">
               <header className="mb-8">
                 <SkeletonLoader width="250px" height="28px" className="mb-2" />
                 <SkeletonLoader width="200px" height="20px" />
               </header>
 
               <dl>
-                <dt className="text-[12px] font-medium text-secondary uppercase tracking-wide">
+                <dt className="type-label text-(--muted)">
                   <SkeletonLoader width="100px" height="16px" />
                 </dt>
                 <dd className="mt-2">
                   <SkeletonLoader width="220px" height="20px" />
                 </dd>
 
-                <dt className="mt-6 text-[12px] font-medium text-secondary uppercase tracking-wide">
+                <dt className="mt-6 type-label text-(--muted)">
                   <SkeletonLoader width="120px" height="16px" />
                 </dt>
                 <dd className="mt-2">
                   <SkeletonLoader width="180px" height="20px" />
                 </dd>
 
-                <dt className="mt-6 text-[12px] font-medium text-secondary uppercase tracking-wide">
+                <dt className="mt-6 type-label text-(--muted)">
                   <SkeletonLoader width="110px" height="16px" />
                 </dt>
                 <dd className="mt-2">
@@ -77,7 +77,7 @@ const LocationDetailsPage = () => {
               </dl>
             </section>
 
-            <section className="lg:col-span-3 bg-white rounded-md p-8 shadow-sm">
+            <section className="lg:col-span-3 bg-(--paper) rounded-md p-8">
               <header className="mb-8">
                 <SkeletonLoader width="60px" height="28px" className="mb-2" />
                 <SkeletonLoader width="220px" height="20px" />
@@ -94,11 +94,11 @@ const LocationDetailsPage = () => {
     return (
       <AppLayout>
         <main className="w-full min-h-screen flex items-center justify-center">
-          <section className="text-center space-y-3 rounded-md bg-white shadow-sm p-6">
-            <h1 className="text-[13px] font-semibold text-primary">
+          <section className="text-center space-y-3 rounded-md bg-(--paper) p-6">
+            <h1 className="text-[13px] font-medium text-(--ink)">
               Location Not Found
             </h1>
-            <p className="text-[12px] font-light text-secondary/80">
+            <p className="type-body-sm text-(--muted)">
               We couldn't locate this location's information.
             </p>
           </section>
@@ -120,72 +120,72 @@ const LocationDetailsPage = () => {
   return (
     <AppLayout>
       <main className="w-full max-w-6xl mx-auto px-4 py-6 space-y-8">
-        <header className="rounded-md bg-white shadow-sm p-6 sm:p-8">
+        <header className="rounded-md bg-(--paper) p-6 sm:p-8">
           <section>
-            <p className="inline-flex items-center rounded-md bg-background-secondary px-3 py-1 text-[12px] font-medium tracking-wide text-primary mb-3">
+            <p className="inline-flex items-center rounded-md bg-(--surface) px-3 py-1 type-label text-(--ink) mb-3">
               Location Overview
             </p>
-            <Heading className="text-[13px] font-semibold text-primary mb-2">
+            <Heading className="text-[13px] font-medium text-(--ink) mb-2">
               {location?.name}
             </Heading>
-            <p className="text-[12px] font-light text-secondary/80 max-w-2xl">
+            <p className="type-body-sm text-(--muted) max-w-2xl">
               Detailed information about {location?.name}
             </p>
           </section>
         </header>
 
         <article className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-          <section className="lg:col-span-2 bg-white rounded-md p-8 shadow-sm">
+          <section className="lg:col-span-2 bg-(--paper) rounded-md p-8">
             <header className="mb-8">
               <Heading
                 type="h2"
-                className="text-[13px] font-semibold text-primary mb-2"
+                className="text-[13px] font-medium text-(--ink) mb-2"
               >
                 Location Information
               </Heading>
-              <p className="text-[12px] font-light text-secondary/80">
+              <p className="type-body-sm text-(--muted)">
                 Basic location details
               </p>
             </header>
 
             <dl>
-              <dt className="text-[12px] font-medium text-secondary uppercase tracking-wide">
+              <dt className="type-label text-(--muted)">
                 Description
               </dt>
-              <dd className="mt-2 rounded-md bg-background-secondary px-4 py-3 text-[12px] font-light text-primary leading-relaxed">
+              <dd className="mt-2 rounded-md bg-(--surface) px-4 py-3 type-body-sm text-(--ink) leading-relaxed">
                 {location?.description || 'No description provided for this location yet.'}
               </dd>
 
-              <dt className="mt-6 text-[12px] font-medium text-secondary uppercase tracking-wide">
+              <dt className="mt-6 type-label text-(--muted)">
                 Created By
               </dt>
-              <dd className="mt-2 rounded-md bg-background-secondary px-4 py-3">
+              <dd className="mt-2 rounded-md bg-(--surface) px-4 py-3">
                 <TableUserLabel user={location?.createdBy} />
               </dd>
 
-              <dt className="mt-6 text-[12px] font-medium text-secondary uppercase tracking-wide">
+              <dt className="mt-6 type-label text-(--muted)">
                 Created At
               </dt>
-              <dd className="mt-2 rounded-md bg-background-secondary px-4 py-3 text-[12px] font-light text-primary">
+              <dd className="mt-2 rounded-md bg-(--surface) px-4 py-3 type-body-sm text-(--ink)">
                 {new Date(location?.createdAt).toLocaleDateString()}
               </dd>
             </dl>
           </section>
 
-          <section className="lg:col-span-3 bg-white rounded-md p-8 shadow-sm">
+          <section className="lg:col-span-3 bg-(--paper) rounded-md p-8">
             <header className="mb-8">
               <Heading
                 type="h2"
-                className="text-[13px] font-semibold text-primary mb-2"
+                className="text-[13px] font-medium text-(--ink) mb-2"
               >
                 Map
               </Heading>
-              <p className="text-[12px] font-light text-secondary/80">
+              <p className="type-body-sm text-(--muted)">
                 Geographical location
               </p>
             </header>
             {position ? (
-              <section className="h-[50vh] w-full rounded-md overflow-hidden shadow-sm">
+              <section className="h-[50vh] w-full rounded-md overflow-hidden">
                 <APIProvider apiKey={environment.googleMapsApiKey}>
                   <Map
                     defaultCenter={position}
@@ -198,8 +198,8 @@ const LocationDetailsPage = () => {
                 </APIProvider>
               </section>
             ) : (
-              <section className="h-[50vh] w-full flex items-center justify-center bg-background-secondary rounded-md shadow-sm">
-                <p className="text-[12px] font-light text-secondary/80">
+              <section className="h-[50vh] w-full flex items-center justify-center bg-(--surface) rounded-md">
+                <p className="type-body-sm text-(--muted)">
                   Address is not available.
                 </p>
               </section>
@@ -208,7 +208,7 @@ const LocationDetailsPage = () => {
         </article>
         <nav aria-label="Location details actions" className="w-full flex items-center gap-3 justify-between">
           <Button
-            className="rounded-md px-6 text-[12px] font-light"
+            className="rounded-md px-6 type-body-sm"
             onClick={(e) => {
               e.preventDefault();
               navigate(-1);

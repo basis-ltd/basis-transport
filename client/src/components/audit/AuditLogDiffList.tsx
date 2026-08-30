@@ -52,7 +52,7 @@ export function AuditLogDiffList({
 
   if (entries.length === 0) {
     return (
-      <p className={`text-sm text-gray-500 ${className}`}>{emptyMessage}</p>
+      <p className={`text-sm text-(--muted) ${className}`}>{emptyMessage}</p>
     );
   }
 

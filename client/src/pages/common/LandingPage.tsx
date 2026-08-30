@@ -1,6 +1,6 @@
 import '@/styles/landingPage.css';
 import { useGetPublicLandingStatsQuery } from '@/api/queries/apiQuerySlice';
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useMemo } from 'react';
 import { Seo } from '@/components/seo';
 import { absoluteUrl } from '@/constants/seo.constants';
 import PublicFooter from '@/containers/public/PublicFooter';
@@ -22,7 +22,6 @@ const LandingPage = () => {
     isError,
   } = useGetPublicLandingStatsQuery();
 
-  const observerRef = useRef<IntersectionObserver | null>(null);
 
   const { commutesValue, usersValue } = useMemo(() => {
     if (isLoading || isError || !landingStats) {
@@ -39,25 +38,6 @@ const LandingPage = () => {
     document
       .getElementById('how-it-works')
       ?.scrollIntoView({ behavior: 'smooth' });
-  }, []);
-
-  useEffect(() => {
-    observerRef.current = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('animate-fade-in-up');
-            entry.target.classList.remove('animate-on-scroll');
-          }
-        });
-      },
-      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
-    );
-
-    const animatedElements = document.querySelectorAll('.animate-on-scroll');
-    animatedElements.forEach((element) => observerRef.current?.observe(element));
-
-    return () => observerRef.current?.disconnect();
   }, []);
 
   return (

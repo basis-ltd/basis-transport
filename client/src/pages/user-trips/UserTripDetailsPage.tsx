@@ -112,13 +112,13 @@ const UserTripDetailsPage = () => {
   const getStatusColor = (status: UserTripStatus) => {
     switch (status) {
       case UserTripStatus.IN_PROGRESS:
-        return 'text-primary bg-primary/10';
+        return 'text-(--ink) bg-(--surface)';
       case UserTripStatus.COMPLETED:
-        return 'text-green-700 bg-green-700/10';
+        return 'text-(--approve) bg-green-700/10';
       case UserTripStatus.CANCELLED:
-        return 'text-destructive bg-destructive/10';
+        return 'text-(--danger) bg-destructive/10';
       default:
-        return 'text-secondary bg-background-secondary/60';
+        return 'text-(--muted) bg-(--surface)/60';
     }
   };
 
@@ -143,12 +143,12 @@ const UserTripDetailsPage = () => {
         <article className="w-full flex flex-col gap-4">
           <section className="w-full grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
             {/* Trip Status */}
-            <article className="bg-white rounded-2xl shadow-sm border border-primary/10 p-5">
-              <h3 className="text-sm font-light text-secondary/70 mb-2">
+            <article className="bg-(--paper) rounded-2xl border border-(--line) p-5">
+              <h3 className="text-sm font-normal text-(--muted) mb-2">
                 Trip Status
               </h3>
               <span
-                className={`inline-block px-4 py-1 rounded-full text-sm font-light ${getStatusColor(
+                className={`inline-block px-4 py-1 rounded-full text-sm font-normal ${getStatusColor(
                   userTrip?.status as UserTripStatus
                 )}`}
               >
@@ -157,8 +157,8 @@ const UserTripDetailsPage = () => {
             </article>
 
             {/* Trip Times */}
-            <article className="bg-white rounded-2xl shadow-sm border border-primary/10 p-5">
-              <h3 className="text-sm font-light text-secondary/70 mb-2">
+            <article className="bg-(--paper) rounded-2xl border border-(--line) p-5">
+              <h3 className="text-sm font-normal text-(--muted) mb-2">
                 Trip Times (
                 {moment(
                   new Date(
@@ -171,20 +171,20 @@ const UserTripDetailsPage = () => {
               </h3>
               <section className="space-y-1">
                 <ul className="w-full flex items-center gap-2 justify-between py-2">
-                  <p className="text-sm font-light text-secondary/80">
+                  <p className="text-sm font-normal text-(--muted)">
                     Start:{' '}
                     {userTrip?.startTime
                       ? moment(new Date(userTrip.startTime)).format('HH:mm')
                       : 'Not started'}
                   </p>
-                  <p className="text-sm font-light text-secondary/80">
+                  <p className="text-sm font-normal text-(--muted)">
                     End:{' '}
                     {userTrip?.endTime
                       ? moment(new Date(userTrip.endTime)).format('HH:mm')
                       : 'Not completed'}
                   </p>
                 </ul>
-                <p className="text-sm font-light text-secondary/80 underline">
+                <p className="text-sm font-normal text-(--muted) underline">
                   Time spent:{' '}
                   {userTrip?.endTime
                     ? moment(new Date(userTrip.endTime)).diff(
@@ -198,26 +198,26 @@ const UserTripDetailsPage = () => {
             </article>
 
             {/* User Information */}
-            <article className="bg-white rounded-2xl shadow-sm border border-primary/10 p-5">
-              <h3 className="text-sm font-light text-secondary/70 mb-2">
+            <article className="bg-(--paper) rounded-2xl border border-(--line) p-5">
+              <h3 className="text-sm font-normal text-(--muted) mb-2">
                 Passenger Information
               </h3>
               <section className="space-y-1">
-                <p className="text-sm font-light text-secondary/80">
+                <p className="text-sm font-normal text-(--muted)">
                   Name: {userTrip?.user?.name || 'Unknown'}
                 </p>
-                <p className="text-sm font-light text-secondary/80">
+                <p className="text-sm font-normal text-(--muted)">
                   Phone: {userTrip?.user?.phoneNumber || 'N/A'}
                 </p>
               </section>
             </article>
 
             {/* Trip Reference */}
-            <article className="bg-white rounded-2xl shadow-sm border border-primary/10 p-5">
-              <h3 className="text-sm font-light text-secondary/70 mb-2">
+            <article className="bg-(--paper) rounded-2xl border border-(--line) p-5">
+              <h3 className="text-sm font-normal text-(--muted) mb-2">
                 Trip Reference
               </h3>
-              <p className="text-lg font-medium text-primary">
+              <p className="text-lg font-medium text-(--ink)">
                 #{userTrip?.trip?.referenceId || 'N/A'}
               </p>
             </article>

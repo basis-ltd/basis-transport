@@ -27,7 +27,7 @@ const LandingHowItWorksSection = () => {
             >
               <article className="text-center">
                 <figure
-                  className="w-16 h-16 mx-auto mb-6 rounded-md flex items-center justify-center font-light text-[13px]"
+                  className="w-16 h-16 mx-auto mb-6 rounded-md flex items-center justify-center font-normal text-[13px]"
                   style={{
                     backgroundColor: Colors.primary,
                     color: Colors.white,

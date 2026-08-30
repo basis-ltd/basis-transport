@@ -12,10 +12,11 @@ import { useEffect, useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
 import { Seo } from '@/components/seo';
-import PublicLayout from '@/containers/public/PublicLayout';
-import PublicNavbar from '@/containers/public/PublicNavbar';
-import { publicClasses, publicColors } from '@/containers/public/publicTheme';
 import { toast } from 'sonner';
+import {
+  AuthPageShell,
+  AuthTabs,
+} from './AuthPageShell';
 
 type LoginTab = 'username' | 'phone';
 type PhoneStep = 'precheck' | 'password' | 'otp';
@@ -206,57 +207,31 @@ const Login = () => {
         canonicalPath="/auth/login"
         ogDescription="Login to Basis Transport to access real-time bus tracking, seat availability, and public transport analytics."
       />
-      <PublicLayout>
-        <PublicNavbar variant="auth" />
-        <main className="w-full min-h-screen flex flex-col items-center justify-center gap-4 px-4 lg:px-8 pt-24 pb-12">
-          <section className={publicClasses.authCard}>
+      <AuthPageShell>
+          <section className="card-framed flex w-full flex-col gap-5 p-8 max-sm:p-5">
             <header className="flex flex-col gap-2 items-center mb-2">
               <h1
-                className="text-[13px] leading-tight font-semibold text-center"
-                style={{ color: publicColors.primary }}
+                className="type-h3 text-center text-(--ink)"
               >
                 Welcome Back
               </h1>
               <p
-                className="text-[12px] leading-relaxed text-center font-light"
-                style={{ color: publicColors.neutralLight }}
+                className="type-body-sm text-center text-(--muted)"
               >
                 Please sign in to your account
               </p>
             </header>
-            <nav className="grid grid-cols-2 gap-2" aria-label="Login mode">
-              <Link
-                to="#"
-                className={`${publicClasses.tabBase} ${
-                  activeTab === 'username'
-                    ? publicClasses.tabSelected
-                    : publicClasses.tabUnselected
-                }`}
-                onClick={(e) => {
-                  e.preventDefault();
-                  switchTab('username');
-                }}
-              >
-                Email or Phone
-              </Link>
-              <Link
-                to="#"
-                className={`${publicClasses.tabBase} ${
-                  activeTab === 'phone'
-                    ? publicClasses.tabSelected
-                    : publicClasses.tabUnselected
-                }`}
-                onClick={(e) => {
-                  e.preventDefault();
-                  switchTab('phone');
-                }}
-              >
-                Phone only
-              </Link>
-            </nav>
+            <AuthTabs
+              label="Login mode"
+              value={activeTab}
+              onChange={switchTab}
+              options={[
+                { label: 'Email or Phone', value: 'username' },
+                { label: 'Phone only', value: 'phone' },
+              ]}
+            />
             <p
-              className="text-[12px] font-light text-center"
-              style={{ color: publicColors.neutralLight }}
+              className="type-body-sm text-center text-(--muted)"
             >
               Use phone only if you joined without a password.
             </p>
@@ -264,10 +239,9 @@ const Login = () => {
             <p
               aria-live="polite"
               role="status"
-              className={`text-[12px] font-light text-center rounded-md bg-primary/5 px-3 py-2 ${
+              className={`type-body-sm text-center rounded-md bg-(--surface) px-3 py-2 ${
                 liveMessage ? 'block' : 'hidden'
-              }`}
-              style={{ color: publicColors.primary }}
+              } text-(--ink)`}
             >
               {liveMessage}
             </p>
@@ -330,8 +304,7 @@ const Login = () => {
                   </Button>
                   <Link
                     to="/auth/forgot-password"
-                    className="text-[12px] font-light hover:underline transition-colors duration-200 ease-in-out text-center"
-                    style={{ color: publicColors.neutralLight }}
+                    className="type-body-sm hover:underline transition-colors duration-200 ease-in-out text-center text-(--muted)"
                   >
                     Forgot your password?
                   </Link>
@@ -352,15 +325,13 @@ const Login = () => {
               >
                 <header className="flex flex-col gap-1">
                   <p
-                    className="text-[12px] font-medium"
-                    style={{ color: publicColors.primary }}
+                    className="type-label text-(--ink)"
                   >
                     {phoneStepTitle}
                   </p>
                   {phoneStep !== 'precheck' ? (
                     <p
-                      className="text-[12px] font-light"
-                      style={{ color: publicColors.neutralLight }}
+                      className="type-body-sm text-(--muted)"
                     >
                       Using {maskedPhoneNumber}
                     </p>
@@ -396,8 +367,7 @@ const Login = () => {
                 {phoneStep === 'password' ? (
                   <fieldset className="w-full flex flex-col gap-5">
                     <p
-                      className="text-[12px] font-light"
-                      style={{ color: publicColors.neutralLight }}
+                      className="type-body-sm text-(--muted)"
                     >
                       This phone already has a password. Enter it to continue.
                     </p>
@@ -430,8 +400,7 @@ const Login = () => {
                 {phoneStep === 'otp' ? (
                   <fieldset className="w-full flex flex-col gap-5">
                     <p
-                      className="text-[12px] font-light"
-                      style={{ color: publicColors.neutralLight }}
+                      className="type-body-sm text-(--muted)"
                     >
                       Enter the 6-digit code sent to your phone.
                     </p>
@@ -456,8 +425,7 @@ const Login = () => {
                       )}
                     />
                     <p
-                      className="text-[12px] font-light"
-                      style={{ color: publicColors.neutralLight }}
+                      className="type-body-sm text-(--muted)"
                     >
                       Did not get it? Wait 60s, then resend.
                     </p>
@@ -485,8 +453,7 @@ const Login = () => {
                   {phoneStep === 'password' ? (
                     <Link
                       to="/auth/forgot-password"
-                      className="text-[12px] font-light hover:underline underline-offset-2 transition-colors duration-200 ease-in-out text-center"
-                      style={{ color: publicColors.neutralLight }}
+                      className="type-body-sm hover:underline underline-offset-2 transition-colors duration-200 ease-in-out text-center text-(--muted)"
                     >
                       Forgot your password?
                     </Link>
@@ -494,8 +461,7 @@ const Login = () => {
                   {phoneStep === 'otp' ? (
                     <Link
                       to="#"
-                      className="text-[12px] font-light text-center hover:underline"
-                      style={{ color: publicColors.neutralLight }}
+                      className="type-body-sm text-center hover:underline text-(--muted)"
                       onClick={(e) => {
                         e.preventDefault();
                         onResendOtp();
@@ -507,8 +473,7 @@ const Login = () => {
                   {phoneStep !== 'precheck' ? (
                     <Link
                       to="/auth/login"
-                      className="text-[12px] font-light text-center hover:underline"
-                      style={{ color: publicColors.neutralLight }}
+                      className="type-body-sm text-center hover:underline text-(--muted)"
                       onClick={(e) => {
                         e.preventDefault();
                         setPhoneStep('precheck');
@@ -522,19 +487,18 @@ const Login = () => {
             ) : null}
 
             <footer className="w-full flex flex-col items-center justify-between gap-2">
-              <p className="text-[12px] font-light" style={{ color: publicColors.neutralLight }}>
+              <p className="type-body-sm text-(--muted)">
                 Don&apos;t have an account?{' '}
                 <Link
                   to="/auth/register"
-                  className="text-primary hover:underline transition-colors duration-200 ease-in-out text-[12px]"
+                  className="text-(--ink) hover:underline transition-colors duration-200 ease-in-out type-body-sm"
                 >
                   Sign up
                 </Link>
               </p>
             </footer>
           </section>
-        </main>
-      </PublicLayout>
+      </AuthPageShell>
     </>
   );
 };

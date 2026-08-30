@@ -1,47 +1,61 @@
 import {
-  Select as SelectComponent,
+  Select as SelectRoot,
   SelectContent,
   SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { UUID } from 'crypto';
 import { cn } from '@/lib/utils';
+import { controlClassName, panelClassName, panelItemClassName } from './control';
 import type { InputErrorMessageProp } from './ErrorLabels';
+import { resolveErrorText } from './ErrorLabels';
 import { FieldShell } from './Field';
 
+export interface SelectOption {
+  label: string | undefined;
+  value: string;
+  disabled?: boolean;
+}
+
 type SelectProps = {
-  label?: string | number | undefined;
-  options?: Array<{ label: string | undefined; value: string | UUID }>;
-  defaultValue?: string | undefined;
+  label?: string | number;
+  options?: SelectOption[];
+  defaultValue?: string;
   placeholder?: string;
   className?: string;
-  onChange?: ((value: string) => void) | undefined;
-  value?: string | undefined;
+  onChange?: (value: string) => void;
+  value?: string;
   required?: boolean;
-  labelClassName?: string | undefined;
-  name?: string | undefined;
+  labelClassName?: string;
+  name?: string;
   readOnly?: boolean;
   description?: string;
   errorMessage?: InputErrorMessageProp;
 };
 
+/**
+ * The stock `ui/select` trigger is a 36px control with a ring focus; this shell
+ * gives it the same edge, height, and inset focus ring as every other field, so
+ * a select and the input beside it share a baseline.
+ */
 const Select = ({
   options = [],
-  defaultValue = undefined,
+  defaultValue,
   placeholder = 'Select here...',
-  className = undefined,
+  className,
   value = '',
   onChange,
-  label = undefined,
+  label,
   required = false,
-  labelClassName = undefined,
-  name = undefined,
+  labelClassName,
+  name,
   readOnly = false,
-  description = undefined,
-  errorMessage = undefined,
+  description,
+  errorMessage,
 }: SelectProps) => {
+  const hasError = Boolean(resolveErrorText(errorMessage));
+
   return (
     <FieldShell
       label={label}
@@ -50,26 +64,38 @@ const Select = ({
       errorMessage={errorMessage}
       className={labelClassName}
     >
-      <SelectComponent
+      <SelectRoot
         onValueChange={onChange}
         defaultValue={defaultValue}
         value={value}
         name={name}
         disabled={readOnly}
       >
-        <SelectTrigger className={cn('cursor-pointer', className)}>
+        <SelectTrigger
+          aria-invalid={hasError}
+          className={cn(
+            controlClassName,
+            'cursor-pointer justify-between data-[placeholder]:text-(--muted) [&>span]:line-clamp-1 [&_svg]:text-(--muted)',
+            className
+          )}
+        >
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent className={panelClassName}>
           <SelectGroup>
             {options.map((option) => (
-              <SelectItem key={String(option.value)} value={option.value}>
+              <SelectItem
+                key={option.value}
+                value={option.value}
+                disabled={option.disabled}
+                className={panelItemClassName}
+              >
                 {option.label}
               </SelectItem>
             ))}
           </SelectGroup>
         </SelectContent>
-      </SelectComponent>
+      </SelectRoot>
     </FieldShell>
   );
 };

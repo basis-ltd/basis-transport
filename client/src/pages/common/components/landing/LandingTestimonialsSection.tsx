@@ -30,7 +30,7 @@ const LandingTestimonialsSection = () => {
                 </p>
                 <footer>
                   <cite
-                    className="not-italic text-[12px] font-medium"
+                    className="not-italic type-label"
                     style={{ color: Colors.primary }}
                   >
                     {`— ${testimonial.author}, ${testimonial.role}`}

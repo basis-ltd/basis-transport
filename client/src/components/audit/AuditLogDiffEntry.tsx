@@ -23,19 +23,19 @@ export function AuditLogDiffEntry({
 }: AuditLogDiffEntryProps) {
   return (
     <article
-      className={`w-full flex flex-col gap-2 rounded-md shadow-xs border-[.5px] border-gray-200 bg-white p-3 ${className}`}
+      className={`w-full flex flex-col gap-2 rounded-md border-[.5px] border-(--line) bg-(--paper) p-3 ${className}`}
     >
-      <header className="flex flex-col gap-1 text-[11px] sm:text-sm">
-        <p className="font-normal text-[11px] text-primary">
+      <header className="flex flex-col gap-1 text-xs sm:text-sm">
+        <p className="font-normal text-xs text-(--ink)">
           ACTION: {log.action}
           {log?.entityType && showEntityType ? (
-            <span className="font-normal text-gray-600">
+            <span className="font-normal text-(--muted)">
               {" "}
               · {log.entityType}
             </span>
           ) : null}
         </p>
-        <p className="text-gray-500 text-[11px]">
+        <p className="text-(--muted) text-xs">
           {formatDate(new Date(log.createdAt), "DD/MM/YYYY HH:mm:ss")}
           {" · "}
           {actorLabel(log)}
@@ -47,31 +47,31 @@ export function AuditLogDiffEntry({
       >
         {changes.map((c) => (
           <li key={c.key} className="break-words">
-            <span className="font-sans font-normal text-[11px] text-secondary">
+            <span className="font-sans font-normal text-xs text-(--muted)">
               {capitalizeString(c?.key)}
             </span>
-            <span className="font-sans font-normal text-[11px] text-gray-500">
+            <span className="font-sans font-normal text-xs text-(--muted)">
               :{" "}
             </span>
             {c.oldFormatted !== null && c.newFormatted !== null ? (
               <>
-                <span className="text-red-700 line-through text-[11px]">
+                <span className="text-(--danger) line-through text-xs">
                   {c?.oldFormatted}
                 </span>
-                <span className="font-sans font-normal text-[11px] text-gray-400">
+                <span className="font-sans font-normal text-xs text-(--muted)">
                   {" "}
                   →{" "}
                 </span>
-                <span className="text-green-700 text-[11px]">
+                <span className="text-(--approve) text-xs">
                   {c?.newFormatted}
                 </span>
               </>
             ) : c?.oldFormatted !== null ? (
-              <span className="text-red-700 line-through">
+              <span className="text-(--danger) line-through">
                 {c?.oldFormatted}
               </span>
             ) : (
-              <span className="text-green-700">{c?.newFormatted}</span>
+              <span className="text-(--approve)">{c?.newFormatted}</span>
             )}
           </li>
         ))}

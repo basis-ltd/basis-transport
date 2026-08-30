@@ -1,4 +1,5 @@
-import { LocateFixed, MapPin } from 'lucide-react';
+import { faLocationCrosshairs, faLocationDot } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 interface LandingHeroLocationStatusProps {
   isLocating: boolean;
@@ -14,7 +15,7 @@ const LandingHeroLocationStatus = ({
   if (isLocating) {
     return (
       <p className="landing-meta flex items-center gap-2">
-        <LocateFixed className="size-4 shrink-0 animate-pulse" aria-hidden="true" />
+        <FontAwesomeIcon icon={faLocationCrosshairs} className="size-4 shrink-0 animate-pulse" aria-hidden="true" />
         Finding your location…
       </p>
     );
@@ -23,7 +24,7 @@ const LandingHeroLocationStatus = ({
   if (hasCurrentLocation) {
     return (
       <p className="landing-meta flex items-center gap-2">
-        <MapPin className="size-4 shrink-0" aria-hidden="true" />
+        <FontAwesomeIcon icon={faLocationDot} className="size-4 shrink-0" aria-hidden="true" />
         Using your current location
       </p>
     );
@@ -31,7 +32,7 @@ const LandingHeroLocationStatus = ({
 
   return (
     <p className="landing-meta flex items-center gap-2">
-      <MapPin className="size-4 shrink-0" aria-hidden="true" />
+      <FontAwesomeIcon icon={faLocationDot} className="size-4 shrink-0" aria-hidden="true" />
       <span>Location not detected</span>
       <span aria-hidden="true">·</span>
       <button

@@ -19,7 +19,7 @@ import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { TripAvailableCapacity } from '@/components/trips/TripAvailableCapacity';
 import moment from 'moment';
-import TableStatusLabel from '@/components/custom/TableStatusLabel';
+import StatusBadge from '@/components/inputs/StatusBadge';
 import { ReferenceIdInput } from '@/components/table/TableInputs';
 import { setSelectedTrip, setStartTripModal } from '@/states/slices/tripSlice';
 
@@ -52,7 +52,7 @@ export const useTripColumns = () => {
       {
         header: 'Status',
         accessorKey: 'status',
-        cell: ({ row }) => <TableStatusLabel status={row?.original?.status} />,
+        cell: ({ row }) => <StatusBadge status={row?.original?.status} />,
       },
       {
         header: 'Start Time',

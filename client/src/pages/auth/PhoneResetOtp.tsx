@@ -3,11 +3,11 @@ import Input from "@/components/inputs/Input";
 import { Controller, useForm } from "react-hook-form";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Seo } from "@/components/seo";
-import PublicLayout from "@/containers/public/PublicLayout";
-import PublicNavbar from "@/containers/public/PublicNavbar";
-import { publicClasses, publicColors } from "@/containers/public/publicTheme";
 import { toast } from "sonner";
 import { useSendPhoneResetOtp, useVerifyPhoneResetOtp } from "@/usecases/auth/auth.hooks";
+import {
+  AuthPageShell,
+} from './AuthPageShell';
 
 type OtpForm = {
   otp: string;
@@ -90,48 +90,41 @@ const PhoneResetOtp = () => {
         noIndex
         openGraph={false}
       />
-      <PublicLayout>
-        <PublicNavbar variant="auth" />
-        <main className="w-full min-h-screen flex flex-col items-center justify-center gap-4 px-4 lg:px-8 pt-24 pb-12">
+      <AuthPageShell>
           {!phoneNumber ? (
-            <section className={`${publicClasses.authCard} text-center`}>
+            <section className="card-framed flex w-full flex-col gap-5 p-8 text-center max-sm:p-5">
               <h1
-                className={`${publicClasses.pageTitle} text-balance`}
-                style={{ color: publicColors.primary }}
+                className="text-balance text-(--ink)"
               >
                 Phone missing
               </h1>
               <p
-                className={`${publicClasses.bodyMuted} mt-4`}
-                style={{ color: publicColors.neutralLight }}
+                className="type-body-sm mt-4 text-(--muted)"
               >
                 This page needs a phone number. Request a new reset code below.
               </p>
               <Link
                 to="/auth/forgot-password"
-                className="text-[12px] text-primary hover:underline transition-colors duration-200 ease-in-out mt-4 inline-block"
+                className="type-body-sm text-(--ink) hover:underline transition-colors duration-200 ease-in-out mt-4 inline-block"
               >
                 Request a reset code
               </Link>
             </section>
           ) : (
-            <form className={publicClasses.authCard} onSubmit={onSubmitOtp}>
+            <form className="card-framed flex w-full flex-col gap-5 p-8 max-sm:p-5" onSubmit={onSubmitOtp}>
               <header className="flex flex-col gap-2 items-center mb-4">
                 <h1
-                  className={`${publicClasses.pageTitle} text-center text-balance`}
-                  style={{ color: publicColors.primary }}
+                  className="text-center text-balance text-(--ink)"
                 >
                   Verify code
                 </h1>
                 <p
-                  className={`${publicClasses.bodyMuted} text-center`}
-                  style={{ color: publicColors.neutralLight }}
+                  className="type-body-sm text-center text-(--muted)"
                 >
                   Enter the 6-digit code sent to your phone number.
                 </p>
                 <p
-                  className="text-[12px] font-light text-center"
-                  style={{ color: publicColors.neutralLight }}
+                  className="type-body-sm text-center text-(--muted)"
                 >
                   Using {phoneNumber}
                 </p>
@@ -171,7 +164,7 @@ const PhoneResetOtp = () => {
                 </Button>
                 <Link
                   to="#"
-                  className="text-[12px] text-primary hover:underline transition-colors duration-200 ease-in-out"
+                  className="type-body-sm text-(--ink) hover:underline transition-colors duration-200 ease-in-out"
                   onClick={(e) => {
                     e.preventDefault();
                     onResendCode();
@@ -183,16 +176,14 @@ const PhoneResetOtp = () => {
                 </Link>
                 <Link
                   to="/auth/login"
-                  className="text-[12px] font-light hover:underline transition-colors duration-200 ease-in-out"
-                  style={{ color: publicColors.neutralLight }}
+                  className="type-body-sm hover:underline transition-colors duration-200 ease-in-out text-(--muted)"
                 >
                   Back to login
                 </Link>
               </menu>
             </form>
           )}
-        </main>
-      </PublicLayout>
+      </AuthPageShell>
     </>
   );
 };

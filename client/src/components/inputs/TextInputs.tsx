@@ -10,7 +10,7 @@ interface HeadingProps {
 /**
  * Headings compose a type utility rather than a size, so a scale change is one
  * edit in index.css rather than three hundred call sites. Every level used to
- * spell out its own `text-[15px] font-normal text-primary/80`, which is why
+ * spell out its own `text-[15px] font-normal text-(--ink)`, which is why
  * three of the six were identical and call sites had to shout with
  * `!text-[13px]` to get anything else.
  */

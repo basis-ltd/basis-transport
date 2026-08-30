@@ -5,7 +5,14 @@ import PublicFooter from '@/containers/public/PublicFooter';
 import PublicLayout from '@/containers/public/PublicLayout';
 import PublicNavbar from '@/containers/public/PublicNavbar';
 import { capitalizeString } from '@/helpers/strings.helper';
-import { ArrowLeft, Bus, Clock3, MapPin, Users } from 'lucide-react';
+import {
+  faArrowLeft,
+  faBus,
+  faClock,
+  faLocationDot,
+  faUsers,
+} from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import moment from 'moment';
 import { useEffect, useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
@@ -98,17 +105,17 @@ const TravelGuidancePage = () => {
 
         <ul className="mt-4 grid gap-2 sm:grid-cols-3">
           <li className="flex items-center gap-2 landing-meta">
-            <Clock3 className="size-4 shrink-0" aria-hidden="true" />
+            <FontAwesomeIcon icon={faClock} className="size-4 shrink-0" aria-hidden="true" />
             <span>{formatSchedule(trip.startTime)}</span>
           </li>
           <li className="flex items-center gap-2 landing-meta">
-            <Users className="size-4 shrink-0" aria-hidden="true" />
+            <FontAwesomeIcon icon={faUsers} className="size-4 shrink-0" aria-hidden="true" />
             <span>
               {seatsLeft} of {totalSeats} seats available
             </span>
           </li>
           <li className="flex items-center gap-2 landing-meta">
-            <MapPin className="size-4 shrink-0" aria-hidden="true" />
+            <FontAwesomeIcon icon={faLocationDot} className="size-4 shrink-0" aria-hidden="true" />
             <span>{formatDistance(trip.distanceMeters)}</span>
           </li>
         </ul>
@@ -132,7 +139,7 @@ const TravelGuidancePage = () => {
               to="/"
               className="landing-link-sweep mb-6 inline-flex items-center gap-2"
             >
-              <ArrowLeft className="size-4" aria-hidden="true" />
+              <FontAwesomeIcon icon={faArrowLeft} className="size-4" aria-hidden="true" />
               Back to home
             </Link>
 
@@ -150,21 +157,21 @@ const TravelGuidancePage = () => {
             {hasRoute ? (
             <section
               aria-labelledby="route-summary-heading"
-              className="mb-8 rounded-[var(--landing-radius)] border border-[var(--landing-line)] bg-[var(--landing-surface)] p-5"
+              className="mb-8 rounded-[var(--landing-radius)] bg-[var(--landing-surface)] p-5"
             >
               <h2 id="route-summary-heading" className="landing-label mb-3">
                 Route
               </h2>
               <div className="grid gap-3 sm:grid-cols-2">
                 <p className="flex items-start gap-2 landing-body">
-                  <MapPin className="mt-1 size-4 shrink-0" aria-hidden="true" />
+                  <FontAwesomeIcon icon={faLocationDot} className="mt-1 size-4 shrink-0" aria-hidden="true" />
                   <span>
                     <span className="landing-meta block">From</span>
                     {from || '—'}
                   </span>
                 </p>
                 <p className="flex items-start gap-2 landing-body">
-                  <MapPin className="mt-1 size-4 shrink-0" aria-hidden="true" />
+                  <FontAwesomeIcon icon={faLocationDot} className="mt-1 size-4 shrink-0" aria-hidden="true" />
                   <span>
                     <span className="landing-meta block">To</span>
                     {to || '—'}
@@ -176,7 +183,7 @@ const TravelGuidancePage = () => {
 
             <section aria-labelledby="bus-options-heading" className="mb-10">
               <div className="mb-4 flex items-center gap-2">
-                <Bus className="size-5" aria-hidden="true" />
+                <FontAwesomeIcon icon={faBus} className="size-5" aria-hidden="true" />
                 <h2 id="bus-options-heading" className="landing-label">
                   {hasRoute ? 'Bus options' : 'Nearby departures'}
                 </h2>

@@ -1,4 +1,5 @@
-import { AlertTriangle } from 'lucide-react';
+import { faTriangleExclamation } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 import CustomTooltip from '../custom/CustomTooltip';
@@ -8,14 +9,13 @@ import {
   fieldHelpClassName,
   fieldLabelClassName,
 } from './control';
-import type { InputErrorMessageProp } from './ErrorLabels';
-import { resolveErrorText } from './ErrorLabels';
+import { resolveErrorText, type InputErrorMessageProp } from './ErrorLabels';
 
 /**
  * The wrapper every labelled control renders through: label, control, one
- * message. Input, Select, and TextArea used to each own a slightly different
+ * message. Input, Select, and TextArea each used to own a slightly different
  * version of this — different label markup, and an error that had an icon in
- * one, no icon in another, and a red asterisk with no tooltip in the third.
+ * one, no icon in another, and a bare red asterisk in the third.
  */
 export interface FieldShellProps {
   label?: ReactNode;
@@ -59,7 +59,8 @@ export const FieldMessage = ({
   if (error) {
     return (
       <p id={id} role="alert" className={fieldErrorClassName}>
-        <AlertTriangle
+        <FontAwesomeIcon
+          icon={faTriangleExclamation}
           className="mt-[0.2em] size-3 shrink-0"
           aria-hidden="true"
         />

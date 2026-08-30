@@ -1,5 +1,6 @@
 import { Controller, useForm } from 'react-hook-form';
-import { AlertCircle, LocateFixed } from 'lucide-react';
+import { faLocationCrosshairs } from '@fortawesome/free-solid-svg-icons';
+import Input from '@/components/inputs/Input';
 
 export const LANDING_HERO_FORM_ID = 'landing-hero-form';
 
@@ -14,6 +15,12 @@ interface LandingHeroFormProps {
   isLocating: boolean;
 }
 
+/**
+ * The hero fields are the app's `Input`, not a hero-only treatment. They used
+ * to be raw `landing-field` markup with a hand-built affix button and a
+ * hand-built error row — a second input system on the one page a visitor is
+ * most likely to compare against the sign-in form.
+ */
 const LandingHeroForm = ({
   onSubmit,
   onUseCurrentLocation,
@@ -37,7 +44,7 @@ const LandingHeroForm = ({
       onSubmit={handleSubmit(onSubmit)}
       className="w-full"
     >
-      <fieldset className="grid gap-4 sm:grid-cols-2">
+      <fieldset className="grid items-start gap-4 sm:grid-cols-2">
         <legend className="sr-only">Plan your trip</legend>
 
         <Controller
@@ -45,48 +52,21 @@ const LandingHeroForm = ({
           control={control}
           rules={{ required: 'Tell us where you are starting from' }}
           render={({ field }) => (
-            <label className="block">
-              <span className="landing-label mb-1.5 block">
-                Current location
-              </span>
-              <div className="landing-field-group">
-                <input
-                  {...field}
-                  className="landing-field"
-                  placeholder="Where are you now?"
-                  autoComplete="street-address"
-                  aria-invalid={Boolean(errors.pickupLocation)}
-                />
-                <button
-                  type="button"
-                  onClick={() =>
-                    onUseCurrentLocation((value) =>
-                      setValue('pickupLocation', value, {
-                        shouldValidate: true,
-                      })
-                    )
-                  }
-                  disabled={isLocating}
-                  title="Use my location"
-                  aria-label="Use my location"
-                  className="landing-field-affix"
-                >
-                  <LocateFixed
-                    className={`size-4 ${isLocating ? 'animate-pulse' : ''}`}
-                    aria-hidden="true"
-                  />
-                </button>
-              </div>
-              {errors.pickupLocation?.message ? (
-                <span
-                  className="landing-meta mt-1.5 flex items-center gap-1.5 text-[var(--landing-ink)]"
-                  role="alert"
-                >
-                  <AlertCircle className="size-3.5 shrink-0" aria-hidden="true" />
-                  {errors.pickupLocation.message}
-                </span>
-              ) : null}
-            </label>
+            <Input
+              {...field}
+              label="Current location"
+              placeholder="Where are you now?"
+              autoComplete="street-address"
+              errorMessage={errors.pickupLocation?.message}
+              suffixIcon={faLocationCrosshairs}
+              suffixIconHandler={(event) => {
+                event.preventDefault();
+                onUseCurrentLocation((value) =>
+                  setValue('pickupLocation', value, { shouldValidate: true })
+                );
+              }}
+              disabled={isLocating}
+            />
           )}
         />
 
@@ -95,27 +75,13 @@ const LandingHeroForm = ({
           control={control}
           rules={{ required: 'Tell us where you are headed' }}
           render={({ field }) => (
-            <label className="block">
-              <span className="landing-label mb-1.5 block">
-                Drop-off location
-              </span>
-              <input
-                {...field}
-                className="landing-field"
-                placeholder="Where are you going?"
-                autoComplete="street-address"
-                aria-invalid={Boolean(errors.dropoffLocation)}
-              />
-              {errors.dropoffLocation?.message ? (
-                <span
-                  className="landing-meta mt-1.5 flex items-center gap-1.5 text-[var(--landing-ink)]"
-                  role="alert"
-                >
-                  <AlertCircle className="size-3.5 shrink-0" aria-hidden="true" />
-                  {errors.dropoffLocation.message}
-                </span>
-              ) : null}
-            </label>
+            <Input
+              {...field}
+              label="Drop-off location"
+              placeholder="Where are you going?"
+              autoComplete="street-address"
+              errorMessage={errors.dropoffLocation?.message}
+            />
           )}
         />
       </fieldset>

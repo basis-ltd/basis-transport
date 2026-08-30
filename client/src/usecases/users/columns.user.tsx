@@ -1,5 +1,5 @@
 import CustomPopover from '@/components/custom/CustomPopover';
-import TableStatusLabel from '@/components/custom/TableStatusLabel';
+import StatusBadge from '@/components/inputs/StatusBadge';
 import {
   ellipsisHClassName,
   tableActionClassName,
@@ -50,7 +50,7 @@ export const useUserColumns = ({
       {
         header: 'Status',
         accessorKey: 'status',
-        cell: ({ row }) => <TableStatusLabel status={row?.original?.status} />,
+        cell: ({ row }) => <StatusBadge status={row?.original?.status} />,
       },
       {
         header: 'Roles',
@@ -68,7 +68,7 @@ export const useUserColumns = ({
               </span>
               <CustomPopover
                 trigger={
-                  <span className="text-primary cursor-pointer text-[13px]">
+                  <span className="text-(--ink) cursor-pointer text-[13px]">
                     (+{roles.length - 1})
                   </span>
                 }
@@ -77,7 +77,7 @@ export const useUserColumns = ({
                   {roles?.map((role, index) => (
                     <li
                       key={index}
-                      className="text-sm p-1 px-3 rounded-md hover:bg-background"
+                      className="text-sm p-1 px-3 rounded-md hover:bg-(--surface)"
                     >
                       {capitalizeString(role as string)}
                     </li>

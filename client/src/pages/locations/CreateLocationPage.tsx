@@ -1,7 +1,6 @@
 import Button from '@/components/inputs/Button';
 import Input from '@/components/inputs/Input';
 import TextArea from '@/components/inputs/TextArea';
-import { Heading } from '@/components/inputs/TextInputs';
 import MapView from '@/components/maps/MapView';
 import AppLayout from '@/containers/navigation/AppLayout';
 import { useCreateLocation } from '@/usecases/locations/location.hooks';
@@ -9,6 +8,7 @@ import { MapMouseEvent } from '@vis.gl/react-google-maps';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
+import { PageBody, PageHeader } from '@/components/layout/PageShell';
 
 const CreateLocationPage = () => {
   const [selectedPosition, setSelectedPosition] = useState<{
@@ -61,10 +61,11 @@ const CreateLocationPage = () => {
 
   return (
     <AppLayout>
-      <main className="flex w-full flex-col gap-4">
-        <nav className="flex w-full items-center justify-between gap-4">
-          <Heading>Create Location</Heading>
-        </nav>
+      <PageBody>
+        <PageHeader
+          title="Create location"
+          description="Add a stop or station that trips can run between."
+        />
         <form onSubmit={onSubmit} className="flex flex-col gap-4">
           <Controller
             name="name"
@@ -95,11 +96,11 @@ const CreateLocationPage = () => {
           />
 
           {errors.latitude && (
-            <p className="text-red-500">{errors.latitude.message as string}</p>
+            <p className="text-(--danger)">{errors.latitude.message as string}</p>
           )}
 
           <section className="flex w-full flex-col gap-2 mt-2">
-            <h2 className="text-lg font-semibold">
+            <h2 className="text-lg font-medium">
               Select location on the map:
             </h2>
             <article className="w-full h-[50vh]">
@@ -130,7 +131,7 @@ const CreateLocationPage = () => {
             </Button>
           </menu>
         </form>
-      </main>
+      </PageBody>
     </AppLayout>
   );
 };

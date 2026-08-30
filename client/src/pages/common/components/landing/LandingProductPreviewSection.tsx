@@ -20,7 +20,7 @@ const LandingProductPreviewSection = () => {
           </p>
         </header>
 
-        <figure className="animate-on-scroll rounded-md overflow-hidden shadow-sm">
+        <figure className="animate-on-scroll rounded-md overflow-hidden">
           <article style={{ backgroundColor: Colors.bgAlt }}>
             <section className="p-6">
               <header className="mb-8">
@@ -31,7 +31,7 @@ const LandingProductPreviewSection = () => {
                   Your Next Bus
                 </p>
                 <div
-                  className="rounded-md p-6 shadow-sm"
+                  className="rounded-md p-6"
                   style={{ backgroundColor: Colors.white }}
                 >
                   <div className="flex items-start justify-between mb-4">
@@ -51,7 +51,7 @@ const LandingProductPreviewSection = () => {
                     </div>
                     <div className="text-right">
                       <p
-                        className="text-[12px] font-medium"
+                        className="type-label"
                         style={{ color: Colors.neutral }}
                       >
                         On time
@@ -100,7 +100,7 @@ const LandingProductPreviewSection = () => {
                 </p>
                 <ul className="space-y-3">
                   <li
-                    className="rounded-md p-4 shadow-sm cursor-pointer hover:opacity-80 transition-opacity"
+                    className="rounded-md p-4 cursor-pointer hover:opacity-80 transition-opacity"
                     style={{ backgroundColor: Colors.white }}
                   >
                     <p
@@ -117,7 +117,7 @@ const LandingProductPreviewSection = () => {
                     </p>
                   </li>
                   <li
-                    className="rounded-md p-4 shadow-sm cursor-pointer hover:opacity-80 transition-opacity"
+                    className="rounded-md p-4 cursor-pointer hover:opacity-80 transition-opacity"
                     style={{ backgroundColor: Colors.white }}
                   >
                     <p

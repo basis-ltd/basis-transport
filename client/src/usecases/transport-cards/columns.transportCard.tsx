@@ -87,7 +87,7 @@ export const useTransportCardColumns = () => {
                 >
                   <FontAwesomeIcon
                     icon={faPenToSquare}
-                    className="text-primary"
+                    className="text-(--ink)"
                   />
                   Update
                 </Link>
@@ -100,7 +100,7 @@ export const useTransportCardColumns = () => {
                     dispatch(setDeleteTransportCard(true));
                   }}
                 >
-                  <FontAwesomeIcon icon={faTrash} className="text-red-700" />
+                  <FontAwesomeIcon icon={faTrash} className="text-(--danger)" />
                   Delete
                 </Link>
               </menu>

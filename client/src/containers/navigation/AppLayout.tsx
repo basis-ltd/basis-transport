@@ -27,20 +27,20 @@ const AppLayout: FC<AppLayoutProps> = ({ children }) => {
   const sectionClasses = [
     'absolute left-2 right-2 top-[var(--navbar-height)] mt-2',
     'h-fit max-h-[91vh] min-h-0 overflow-y-auto',
-    'rounded-md bg-white px-6 py-6 shadow-sm transition-all duration-300 ease-in-out',
+    'card-framed px-6 py-6 transition-all duration-300 ease-in-out',
     'md:left-[calc(var(--app-sidebar-width)+0.75rem)] md:right-4 md:w-auto md:px-12',
   ].join(' ');
 
   return (
     <main
-      className="relative min-h-screen overflow-x-hidden bg-background"
+      className="relative min-h-screen overflow-x-hidden bg-(--surface-sunken)"
       style={layoutVariables}
     >
       <Navbar />
       <Sidebar />
       {mobileOpen && (
         <aside
-          className="fixed inset-x-0 bottom-0 top-[var(--navbar-height)] z-30 bg-black/50 md:hidden"
+          className="fixed inset-x-0 bottom-0 top-[var(--navbar-height)] z-30 bg-(--overlay) md:hidden"
           onClick={() => {
             dispatch(closeMobileSidebar());
           }}

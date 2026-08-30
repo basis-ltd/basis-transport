@@ -14,6 +14,7 @@ import { useCreateUser } from '@/usecases/users/user.hooks';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
+import { PageBody, PageHeader } from '@/components/layout/PageShell';
 
 const CreateUserPage = () => {
   /**
@@ -80,10 +81,11 @@ const CreateUserPage = () => {
 
   return (
     <AppLayout>
-      <main className="w-full flex flex-col gap-4">
-        <nav className="w-full flex flex-col gap-4">
-          <Heading>Create User</Heading>
-        </nav>
+      <PageBody>
+        <PageHeader
+          title="Create user"
+          description="Add someone to Basis Transport and set their access."
+        />
         <form className="w-full flex flex-col gap-4" onSubmit={onSubmit}>
           <fieldset className="w-full grid grid-cols-2 gap-4 justify-between">
             <Controller
@@ -153,7 +155,7 @@ const CreateUserPage = () => {
             />
           </fieldset>
           <article className="w-full flex flex-col gap-4 mt-4">
-            <Heading type="h3" className="uppercase">
+            <Heading type="h3">
               Assign roles
             </Heading>
             {rolesIsFetching ? (
@@ -171,7 +173,7 @@ const CreateUserPage = () => {
                   .map((role) => (
                     <label
                       key={role.id}
-                      className="w-full flex items-center gap-3 p-3 rounded-lg border border-primary/10 bg-background hover:border-primary/30 hover:bg-primary/5 transition-all duration-200 cursor-pointer text-[13px] hover:text-foreground"
+                      className="w-full flex items-center gap-3 p-3 rounded-lg border border-(--line) bg-background hover:border-(--line) hover:bg-(--surface) transition-all duration-200 cursor-pointer text-[13px] hover:text-foreground"
                     >
                       <Input
                         type="checkbox"
@@ -184,7 +186,7 @@ const CreateUserPage = () => {
                           );
                         }}
                       />
-                      <span className="text-secondary font-light transition-all duration-200">
+                      <span className="text-(--muted) font-normal transition-all duration-200">
                         {capitalizeString(role.name)}
                       </span>
                     </label>
@@ -206,7 +208,7 @@ const CreateUserPage = () => {
             </Button>
           </menu>
         </form>
-      </main>
+      </PageBody>
     </AppLayout>
   );
 };

@@ -1,5 +1,11 @@
 import { Type } from 'class-transformer';
-import { IsIn, IsOptional, IsString, ValidateNested } from 'class-validator';
+import {
+  IsArray,
+  IsIn,
+  IsOptional,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
 
 const GEOMETRY_TYPES = [
   'Point',
@@ -16,6 +22,7 @@ export class AddressDto {
   @IsIn([...GEOMETRY_TYPES])
   type: string;
 
+  @IsArray()
   coordinates: unknown[];
 }
 

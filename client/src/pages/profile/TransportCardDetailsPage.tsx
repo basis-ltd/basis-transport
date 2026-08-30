@@ -20,7 +20,6 @@ import {
   setUpdateTransportCard,
 } from "@/states/slices/transportCardSlice";
 import { AuditLogEntityType } from "@/types/auditLog.entity";
-import { Heading } from "@/components/inputs/TextInputs";
 import { useFetchTransportCardById } from "@/usecases/transport-cards/transportCard.hooks";
 import { useFetchAuditLogsByEntityId } from "@/usecases/audit-logs/auditLog.hooks";
 import { AuditLogDiffList } from "@/components/audit";
@@ -29,7 +28,14 @@ import CustomPopover from "@/components/custom/CustomPopover";
 import {
   ellipsisHClassName,
   tableActionClassName,
+  tableDangerActionClassName,
 } from "@/constants/input.constants";
+import {
+  PageBody,
+  PageFooter,
+  PageHeader,
+  PageSection,
+} from "@/components/layout/PageShell";
 
 const TransportCardDetailsPage = () => {
   // NAVIGATION
@@ -75,60 +81,93 @@ const TransportCardDetailsPage = () => {
 
   return (
     <AppLayout>
-      <main className="w-full flex flex-col gap-4 mx-auto">
-        <nav className="w-full flex items-center gap-4 justify-end">
-          <CustomPopover
-            trigger={
-              <FontAwesomeIcon
-                icon={faEllipsisH}
-                className={ellipsisHClassName}
-              />
-            }
-          >
-            <menu className="w-full flex flex-col gap-1">
-              <Link
-                to={`/account/transport-cards/${id}/edit`}
-                className={tableActionClassName}
-                onClick={(e) => {
-                  e.preventDefault();
-                  dispatch(setSelectedTransportCard(transportCard));
-                  dispatch(setUpdateTransportCard(true));
-                }}
-              >
-                <FontAwesomeIcon
-                  icon={faPenToSquare}
-                  className="text-primary text-[11px]"
-                />
-                Edit card
-              </Link>
-              <Link
-                to={`/account/transport-cards/${id}/delete`}
-                className={tableActionClassName}
-                onClick={(e) => {
-                  e.preventDefault();
-                  dispatch(setSelectedTransportCard(transportCard));
-                  dispatch(setDeleteTransportCard(true));
-                }}
-              >
-                <FontAwesomeIcon
-                  icon={faTrash}
-                  className="text-red-700 text-[11px]"
-                />
-                Delete card
-              </Link>
-            </menu>
-          </CustomPopover>
-        </nav>
-        <section className="w-full flex flex-col gap-4">
-          <ul className="w-full grid grid-cols-2 gap-4">
-            {Object.entries(transportCard ?? {}).map(([key, value]) => {
-              return <KeyValuePair key={key} keyText={key} valueText={value} />;
-            })}
+      <PageBody>
+        <PageHeader
+          title="Card details"
+          description={
+            transportCard?.cardNumber
+              ? `Transport card ${transportCard.cardNumber}`
+              : 'Transport card'
+          }
+          actions={
+            <CustomPopover
+              trigger={
+                <button
+                  type="button"
+                  aria-label="Card actions"
+                  className={ellipsisHClassName}
+                >
+                  <FontAwesomeIcon icon={faEllipsisH} />
+                </button>
+              }
+            >
+              <menu className="flex w-full flex-col gap-1">
+                <Link
+                  to={`/account/transport-cards/${id}/edit`}
+                  className={tableActionClassName}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    dispatch(setSelectedTransportCard(transportCard));
+                    dispatch(setUpdateTransportCard(true));
+                  }}
+                >
+                  <FontAwesomeIcon icon={faPenToSquare} aria-hidden="true" />
+                  Edit card
+                </Link>
+                <Link
+                  to={`/account/transport-cards/${id}/delete`}
+                  className={tableDangerActionClassName}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    dispatch(setSelectedTransportCard(transportCard));
+                    dispatch(setDeleteTransportCard(true));
+                  }}
+                >
+                  <FontAwesomeIcon icon={faTrash} aria-hidden="true" />
+                  Delete card
+                </Link>
+              </menu>
+            </CustomPopover>
+          }
+        />
+
+        <PageSection title="Card information">
+          <ul className="grid gap-5 sm:grid-cols-2">
+            {Object.entries(transportCard ?? {}).map(([key, value]) => (
+              <KeyValuePair key={key} keyText={key} valueText={value} />
+            ))}
           </ul>
-        </section>
-        <footer className="w-full flex items-center gap-4 justify-between">
+        </PageSection>
+
+        <PageSection
+          title="Audit history"
+          description="Every change made to this card."
+          actions={
+            <Button
+              type="button"
+              size="sm"
+              icon={auditOpen ? faChevronUp : faChevronDown}
+              onClick={() => setAuditOpen((open) => !open)}
+            >
+              {auditOpen ? 'Hide' : 'Show'}
+            </Button>
+          }
+        >
+          {auditOpen ? (
+            <AuditLogDiffList
+              logs={auditLogsData?.data?.rows ?? []}
+              isLoading={auditLogsIsFetching}
+              emptyMessage="No update history with diffs yet."
+            />
+          ) : (
+            <p className="type-meta">
+              History is hidden. Show it to review past changes.
+            </p>
+          )}
+        </PageSection>
+
+        <PageFooter>
           <Button
-            submit
             type="button"
             onClick={(e) => {
               e.preventDefault();
@@ -137,26 +176,8 @@ const TransportCardDetailsPage = () => {
           >
             Back
           </Button>
-          <Button
-            type="button"
-            icon={auditOpen ? faChevronUp : faChevronDown}
-            styled={false}
-            onClick={() => setAuditOpen((open) => !open)}
-          >
-            View audit history
-          </Button>
-        </footer>
-        {auditOpen ? (
-          <article className="w-full flex flex-col gap-4">
-            <Heading type="h3">Audit history</Heading>
-            <AuditLogDiffList
-              logs={auditLogsData?.data?.rows ?? []}
-              isLoading={auditLogsIsFetching}
-              emptyMessage="No update history with diffs yet."
-            />
-          </article>
-        ) : null}
-      </main>
+        </PageFooter>
+      </PageBody>
       <DeleteTransportCard />
       <UpdateTransportCard />
     </AppLayout>

@@ -6,7 +6,7 @@ interface PublicLayoutProps {
 
 const PublicLayout = ({ children }: PublicLayoutProps) => {
   return (
-    <main className="landing-page min-h-screen bg-white">
+    <main className="landing-page min-h-screen bg-(--paper)">
       {children}
     </main>
   );
