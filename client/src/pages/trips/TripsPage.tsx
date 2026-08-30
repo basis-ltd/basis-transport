@@ -89,7 +89,7 @@ const TripsPage = () => {
             {tripsList?.map((trip: Trip) => (
               <article
                 key={trip.id}
-                className="rounded-2xl border border-(--line) bg-(--paper) p-5"
+                className="card-framed p-5"
               >
                 <header className="flex items-start justify-between gap-3">
                   <div>

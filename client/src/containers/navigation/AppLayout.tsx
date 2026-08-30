@@ -40,7 +40,7 @@ const AppLayout: FC<AppLayoutProps> = ({ children }) => {
       <Sidebar />
       {mobileOpen && (
         <aside
-          className="fixed inset-x-0 bottom-0 top-[var(--navbar-height)] z-30 bg-(--overlay) md:hidden"
+          className="fixed inset-x-0 bottom-0 top-[var(--navbar-height)] z-(--z-sidebar-scrim) bg-(--overlay) md:hidden"
           onClick={() => {
             dispatch(closeMobileSidebar());
           }}

@@ -128,7 +128,7 @@ const Sidebar = () => {
       initial={false}
       animate={isDesktopViewport ? { x: 0 } : { x: mobileOpen ? 0 : '-100%' }}
       transition={{ duration: 0.3, ease: 'easeInOut' }}
-      className="fixed left-0 top-[var(--navbar-height)] z-[50000] flex h-[calc(100vh-var(--navbar-height))] w-[var(--mobile-sidebar-width)] flex-col border-r border-(--line) bg-(--paper) text-(--ink) transition-[width] duration-300 ease-in-out md:z-40 md:w-[var(--app-sidebar-width)]"
+      className="fixed left-0 top-[var(--navbar-height)] z-(--z-sidebar) flex h-[calc(100vh-var(--navbar-height))] w-[var(--mobile-sidebar-width)] flex-col border-r border-(--line) bg-(--paper) text-(--ink) transition-[width] duration-300 ease-in-out md:w-[var(--app-sidebar-width)]"
       aria-hidden={!isDesktopViewport && !mobileOpen}
     >
       <header
@@ -226,7 +226,9 @@ const Sidebar = () => {
                 >
                   <FontAwesomeIcon
                     icon={nav.icon}
-                    className="size-4 shrink-0"
+                    className={`size-4 shrink-0 ${
+                      isActive ? '' : 'text-(--accent-ink)'
+                    }`}
                   />
 
                   {sidebarExpanded && (
@@ -281,7 +283,9 @@ const Sidebar = () => {
                               >
                                 <FontAwesomeIcon
                                   icon={subCategory.icon}
-                                  className="size-3.5 shrink-0"
+                                  className={`size-3.5 shrink-0 ${
+                                    isSubActive ? '' : 'text-(--accent-ink)'
+                                  }`}
                                 />
                                 <motion.span
                                   initial={{ opacity: 0 }}

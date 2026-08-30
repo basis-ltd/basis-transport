@@ -91,7 +91,7 @@ const UserTripsPage = () => {
             {userTripsList?.map((userTrip) => (
               <article
                 key={userTrip.id}
-                className="rounded-2xl border border-(--line) bg-(--paper) p-5"
+                className="card-framed p-5"
               >
                 <header className="flex items-start justify-between gap-3">
                   <div>

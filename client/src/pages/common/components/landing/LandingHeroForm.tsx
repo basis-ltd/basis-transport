@@ -59,6 +59,7 @@ const LandingHeroForm = ({
               autoComplete="street-address"
               errorMessage={errors.pickupLocation?.message}
               suffixIcon={faLocationCrosshairs}
+              suffixIconLabel="Use my location"
               suffixIconHandler={(event) => {
                 event.preventDefault();
                 onUseCurrentLocation((value) =>

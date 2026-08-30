@@ -164,7 +164,7 @@ const UserProfilePage = () => {
               >
                 <span
                   aria-hidden="true"
-                  className="flex size-9 shrink-0 items-center justify-center rounded-(--radius-control) bg-(--surface) text-(--ink)"
+                  className="flex size-9 shrink-0 items-center justify-center rounded-(--radius-control) bg-(--accent-surface) text-(--accent-ink)"
                 >
                   <FontAwesomeIcon icon={action.icon} className="size-4" />
                 </span>

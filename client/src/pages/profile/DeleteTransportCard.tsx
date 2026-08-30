@@ -48,16 +48,20 @@ const DeleteTransportCard = () => {
           . This cannot be undone.
         </p>
 
-        <Button
-          submit
-          type="button"
-          className="self-end"
-          disabled={isLoading}
-          isLoading={isLoading}
-          onClick={handleConfirm}
-        >
-          Delete
-        </Button>
+        <footer className="flex items-center justify-end gap-2">
+          <Button type="button" disabled={isLoading} onClick={closeModal}>
+            Keep card
+          </Button>
+          <Button
+            primary
+            type="button"
+            disabled={isLoading}
+            isLoading={isLoading}
+            onClick={handleConfirm}
+          >
+            Delete card
+          </Button>
+        </footer>
       </article>
     </Modal>
   );

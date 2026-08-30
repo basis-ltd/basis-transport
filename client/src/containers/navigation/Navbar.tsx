@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { panelClassName, panelItemClassName } from '@/components/inputs/control';
+import useConfirm from '@/components/feedback/ConfirmDialog';
 import { openMobileSidebar } from '@/states/slices/sidebarSlice';
 import { useAppDispatch, useAppSelector } from '@/states/hooks';
 import { useLogout } from '@/usecases/auth/auth.hooks';
@@ -30,9 +31,25 @@ const Navbar = () => {
   const { mobileOpen } = useAppSelector((state) => state.sidebar);
   const logout = useLogout();
   const navigate = useNavigate();
+  const { confirm, confirmDialog } = useConfirm();
+
+  const onLogout = async () => {
+    const agreed = await confirm({
+      title: 'Sign out?',
+      description:
+        'You will need to sign in again to reach your trips, cards, and saved routes.',
+      confirmLabel: 'Sign out',
+      icon: faRightFromBracket,
+      destructive: true,
+    });
+
+    if (agreed) {
+      void logout();
+    }
+  };
 
   return (
-    <header className="fixed left-0 right-0 top-0 z-[1000] w-full border-b border-(--line) bg-(--paper)">
+    <header className="fixed left-0 right-0 top-0 z-(--z-navbar) w-full border-b border-(--line) bg-(--paper)">
       <nav className="mx-auto px-6 lg:px-8" aria-label="Main navigation">
         <section className="flex h-[var(--navbar-height)] items-center justify-between">
           <div className="flex items-center gap-4">
@@ -63,7 +80,7 @@ const Navbar = () => {
             >
               <FontAwesomeIcon icon={faUser} className="size-3.5" />
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className={`${panelClassName} w-44`}>
+            <DropdownMenuContent align="end" className={`${panelClassName} w-52`}>
               <DropdownMenuItem
                 className={panelItemClassName}
                 onSelect={() => navigate('/account/profile')}
@@ -75,7 +92,11 @@ const Navbar = () => {
                   the hue is not what makes it legible. */}
               <DropdownMenuItem
                 className={panelItemClassName}
-                onSelect={() => void logout()}
+                // The confirmation is a sibling of this menu, not a child, so
+                // the menu can close normally. Opening on the next tick lets
+                // Radix finish returning focus to the trigger before the
+                // dialog claims it.
+                onSelect={() => window.setTimeout(() => void onLogout(), 0)}
               >
                 <FontAwesomeIcon icon={faRightFromBracket} className="size-3.5" aria-hidden="true" />
                 Log out
@@ -84,6 +105,7 @@ const Navbar = () => {
           </DropdownMenu>
         </section>
       </nav>
+      {confirmDialog}
     </header>
   );
 };

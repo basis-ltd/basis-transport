@@ -1,5 +1,7 @@
 import { useBrowseLocations } from '@/usecases/locations/location.hooks';
 import { useState } from 'react';
+import { faLocationCrosshairs } from '@fortawesome/free-solid-svg-icons';
+import useConfirm from '@/components/feedback/ConfirmDialog';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import LandingHeroActions from './LandingHeroActions';
@@ -28,6 +30,7 @@ const LandingHeroSection = ({
   const [routePreview, setRoutePreview] = useState({ pickup: '', dropoff: '' });
 
   const { browserLocation, browserLocationIsLoading } = useBrowseLocations();
+  const { confirm, confirmDialog } = useConfirm();
 
   const userPosition =
     browserLocation.lat && browserLocation.lng
@@ -63,7 +66,26 @@ const LandingHeroSection = ({
     }));
   };
 
-  const requestCurrentLocation = (setPickup?: (value: string) => void) => {
+  /**
+     * Reading device location leaves the page, so it is asked for rather than
+     * taken: the reader gets to see what is about to happen before the browser
+     * permission prompt appears.
+     */
+  const requestCurrentLocation = async (
+    setPickup?: (value: string) => void
+  ) => {
+    const agreed = await confirm({
+      title: 'Use your current location?',
+      description:
+        'Basis will read your device location once to fill in where you are starting from. It is not saved or shared.',
+      confirmLabel: 'Use my location',
+      icon: faLocationCrosshairs,
+    });
+
+    if (!agreed) {
+      return;
+    }
+
     if (!navigator.geolocation) {
       if (userPosition) {
         applyCurrentLocation(setPickup);
@@ -103,7 +125,7 @@ const LandingHeroSection = ({
 
   const onSeeNearby = () => {
     if (!userPosition) {
-      requestCurrentLocation();
+      void requestCurrentLocation();
       return;
     }
 
@@ -118,14 +140,16 @@ const LandingHeroSection = ({
             <LandingHeroLocationStatus
               isLocating={isResolvingLocation}
               hasCurrentLocation={Boolean(userPosition)}
-              onUseCurrentLocation={() => requestCurrentLocation()}
+              onUseCurrentLocation={() => void requestCurrentLocation()}
             />
 
             <LandingHeroHeadline onLearnMore={onLearnMore} />
 
             <LandingHeroForm
               onSubmit={onPlanSubmit}
-              onUseCurrentLocation={requestCurrentLocation}
+              onUseCurrentLocation={(setPickup) =>
+                void requestCurrentLocation(setPickup)
+              }
               isLocating={isResolvingLocation}
             />
 
@@ -144,13 +168,14 @@ const LandingHeroSection = ({
             <LandingHeroMapPanel
               userPosition={userPosition}
               isLocating={isResolvingLocation}
-              onUseCurrentLocation={() => requestCurrentLocation()}
+              onUseCurrentLocation={() => void requestCurrentLocation()}
               pickupLabel={routePreview.pickup}
               dropoffLabel={routePreview.dropoff}
             />
           </div>
         </div>
       </div>
+      {confirmDialog}
     </section>
   );
 };

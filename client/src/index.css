@@ -79,6 +79,19 @@
   --control-md: 40px;
   --control-lg: 44px;
 
+  /* ── Layers ──────────────────────────────────────────────────────────────
+     One ladder for everything that floats. Before this the app had z-50,
+     z-30, z-40, z-1000, z-10000 and z-50000 chosen independently per
+     component, and every Radix layer (dialog, dropdown, select, popover,
+     tooltip) sat at z-50 — underneath the z-1000 navbar and the z-50000
+     sidebar. A confirmation dialog opened behind the navigation. */
+  --z-sidebar-scrim: 40;
+  --z-sidebar: 45;
+  --z-navbar: 50;
+  --z-popover: 100;
+  --z-modal: 200;
+  --z-toast: 300;
+
   --ease-flat: cubic-bezier(0, 0, 1, 1);
   --ease-menu: cubic-bezier(0.2, 0.8, 0.4, 1);
   --ease-glide: cubic-bezier(0.22, 1, 0.36, 1);
@@ -86,15 +99,29 @@
   --dur-state: 200ms;
   --dur-sweep: 500ms;
 
-  /* Consequence — the only hues in the system. Structure stays black and
-     white; colour is spent only where something failed, is about to be
+  /* ── Brand secondary ─────────────────────────────────────────────────────
+     The one decorative hue. It marks things worth noticing — icons, active
+     highlights, chart-adjacent accents — and never states what a control
+     does: primary actions, input focus, and selection stay `--ink`, because
+     "this is the main button" is a job for contrast, not colour.
+
+     `--approve` is derived from it rather than being a second, near-identical
+     green. Two greens twelve steps apart would have read as the same colour
+     while meaning different things — one decorative, one an outcome — so the
+     system carries one green and lets the icon and label say which is which. */
+  --accent-ink: #308449;
+  --accent-strong: #26693a;
+  --accent-surface: #eaf5ee;
+  --accent-line: #bfe0cb;
+
+  /* Consequence — colour is spent only where something failed, is about to be
      destroyed, or has resolved. Icon and label always come first. */
   --danger: #b91c1c;
   --danger-surface: #fef2f2;
   --danger-line: #fecaca;
-  --approve: #15803d;
-  --approve-surface: #f0fdf4;
-  --approve-line: #bbf7d0;
+  --approve: var(--accent-ink);
+  --approve-surface: var(--accent-surface);
+  --approve-line: var(--accent-line);
   --warning: #b45309;
   --warning-surface: #fffbeb;
   --warning-line: #fde68a;
@@ -105,8 +132,8 @@
 
   /* Chart series carry real hue — four grey strokes are not tellable apart.
      Multi-series charts must also vary strokeDasharray. */
-  --chart-1: #1d4ed8;
-  --chart-2: #15803d;
+  --chart-1: var(--accent-ink);
+  --chart-2: #1d4ed8;
   --chart-3: #b45309;
   --chart-4: #6d28d9;
   --chart-5: #b91c1c;
@@ -135,12 +162,17 @@
   --shadow-menu: 0 4px 16px rgba(0, 0, 0, 0.55);
   --shadow-modal: 0 8px 40px rgba(0, 0, 0, 0.7);
 
+  --accent-ink: #4fb972;
+  --accent-strong: #6fcb8d;
+  --accent-surface: #0e1a13;
+  --accent-line: #1f4a2e;
+
   --danger: #f87171;
   --danger-surface: #1f1010;
   --danger-line: #7f1d1d;
-  --approve: #4ade80;
-  --approve-surface: #0c1a10;
-  --approve-line: #14532d;
+  --approve: var(--accent-ink);
+  --approve-surface: var(--accent-surface);
+  --approve-line: var(--accent-line);
   --warning: #fbbf24;
   --warning-surface: #1c1408;
   --warning-line: #78350f;
@@ -149,8 +181,8 @@
   --info-line: #1e3a8a;
   --on-consequence: #000000;
 
-  --chart-1: #60a5fa;
-  --chart-2: #4ade80;
+  --chart-1: var(--accent-ink);
+  --chart-2: #60a5fa;
   --chart-3: #fbbf24;
   --chart-4: #c4b5fd;
   --chart-5: #f87171;
@@ -249,6 +281,36 @@
     color: inherit;
   }
 
+  /* Anything that can be activated says so under the cursor. One rule rather
+     than a `cursor-pointer` on sixty call sites, which is the version that
+     drifts the moment someone adds the sixty-first. Labels and text fields are
+     deliberately absent — a label wrapping an input would replace the text
+     caret with a pointer. */
+  button:not(:disabled),
+  summary,
+  a[href],
+  select:not(:disabled),
+  [role='button']:not([aria-disabled='true']),
+  [role='option'],
+  [role='menuitem'],
+  [role='menuitemcheckbox'],
+  [role='menuitemradio'],
+  [role='tab'],
+  [role='switch'],
+  [type='checkbox']:not(:disabled),
+  [type='radio']:not(:disabled) {
+    cursor: pointer;
+  }
+
+  /* A disabled control is not a dead area — it should say it is unavailable. */
+  button:disabled,
+  select:disabled,
+  input:disabled,
+  textarea:disabled,
+  [aria-disabled='true'] {
+    cursor: not-allowed;
+  }
+
   /* Form fields opt out of the themed selection so typed text stays readable */
   input::selection,
   textarea::selection {
@@ -261,6 +323,25 @@
     background-color: transparent;
     color: inherit;
   }
+}
+
+/* Deliberately unlayered so it outranks the `z-50` Tailwind utility baked into
+   the stock shadcn components — those stay untouched and get their depth from
+   the ladder above, addressed through the `data-slot` each one already emits. */
+[data-slot='dropdown-menu-content'],
+[data-slot='dropdown-menu-sub-content'],
+[data-slot='select-content'],
+[data-slot='popover-content'],
+[data-slot='tooltip-content'],
+[data-slot='command-dialog-content'] {
+  z-index: var(--z-popover);
+}
+
+[data-slot='dialog-overlay'],
+[data-slot='dialog-content'],
+[data-slot='sheet-overlay'],
+[data-slot='sheet-content'] {
+  z-index: var(--z-modal);
 }
 
 @layer utilities {

@@ -16,7 +16,7 @@ const navItemClassName =
 
 const PublicNavbar = ({ variant = 'default' }: PublicNavbarProps) => {
   return (
-    <header className="invert-surface sticky top-0 z-50">
+    <header className="invert-surface sticky top-0 z-(--z-navbar)">
       <nav className="landing-container" aria-label="Public navigation">
         <section className="flex h-16 items-center justify-between">
           <Link

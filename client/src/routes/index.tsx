@@ -4,6 +4,7 @@ import PhoneResetOtp from '@/pages/auth/PhoneResetOtp';
 import ResetPassword from '@/pages/auth/ResetPassword';
 import LandingPage from '@/pages/common/LandingPage';
 import TravelGuidancePage from '@/pages/common/TravelGuidancePage';
+import NotFoundPage from '@/pages/common/NotFoundPage';
 import UserDashboard from '@/pages/dashboard/UserDashboard';
 import TripsPage from '@/pages/trips/TripsPage';
 import { Routes, Route } from 'react-router-dom';
@@ -98,6 +99,16 @@ const Router = () => {
           <Route path="transport-cards/:id" element={<TransportCardDetailsPage />} />
         </Route>
       </Route>
+
+      {/**
+       * UNMATCHED
+       *
+       * Sits outside the authenticated guard on purpose. Inside it, an unknown
+       * public address would redirect to sign-in — telling the reader they are
+       * not allowed in, when the truth is that the page does not exist. The
+       * page picks the app frame or the public frame from the auth state.
+       */}
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
 };

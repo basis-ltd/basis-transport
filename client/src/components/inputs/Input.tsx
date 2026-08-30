@@ -51,6 +51,8 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   suffixIconPrimary?: boolean;
   prefixIconHandler?: MouseEventHandler<HTMLButtonElement> | undefined;
   suffixIconHandler?: MouseEventHandler<HTMLButtonElement> | undefined;
+  /** Accessible name for the suffix control. An icon-only button needs one. */
+  suffixIconLabel?: string;
   labelClassName?: string;
   inputMode?: 'text' | 'url' | 'tel' | 'email' | 'numeric' | 'decimal';
   pattern?: string;
@@ -96,6 +98,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       defaultChecked,
       min,
       suffixIconHandler,
+      suffixIconLabel,
       accept = 'image/*',
     },
     ref: ForwardedRef<HTMLInputElement>
@@ -204,6 +207,8 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             <button
               type="button"
               onClick={suffixIconHandler}
+              aria-label={suffixIconLabel}
+              title={suffixIconLabel}
               className={cn(
                 'absolute inset-y-0 end-0 flex items-center rounded-e-(--radius-control) px-3.5 text-sm outline-none transition-[background-color,color] duration-200 ease-(--ease-flat)',
                 suffixIconPrimary

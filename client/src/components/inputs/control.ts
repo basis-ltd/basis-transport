@@ -51,4 +51,4 @@ export const panelClassName =
 
 /** Menu rows are full-width and sit on the small control height. */
 export const panelItemClassName =
-  'flex h-(--control-sm) w-full cursor-pointer select-none items-center gap-2 rounded-(--radius-control) px-3 text-sm font-normal outline-none transition-colors duration-200 ease-(--ease-flat) data-[highlighted]:bg-(--surface-hover) data-[selected=true]:bg-(--surface-hover) aria-selected:bg-(--ink) aria-selected:text-(--paper) data-[disabled]:pointer-events-none data-[disabled]:opacity-50';
+  'flex h-(--control-sm) w-full cursor-pointer select-none items-center gap-2 rounded-(--radius-control) px-3 text-sm font-normal outline-none transition-colors duration-200 ease-(--ease-flat) data-[highlighted]:bg-(--surface-hover) data-[selected=true]:bg-(--surface-hover) aria-selected:bg-(--ink) hover:text-(--ink) aria-selected:text-(--paper) aria-selected:hover:text-(--ink) data-[disabled]:pointer-events-none data-[disabled]:opacity-50';
