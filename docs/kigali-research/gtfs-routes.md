@@ -1,0 +1,59 @@
+# Kigali GTFS routes (Digital Transport for Africa, dry-season collection, ~2019–2021)
+
+55 routes. Volunteer GTFS — inactive on Mobility Database (mdb-1961). Not Ecofleet live data.
+
+- `101` (KBS): Remera Taxi Park-Sonatubes-Rwandex-CBD
+- `102` (KBS): Kabuga-Mulindi-Remera-Sonatubes-Rwandex Nyabugogo Taxi  Park
+- `103` (KBS): Rubilizi-Kabeza-Remera-Sonatubes-Rwandex-CBD
+- `104` (KBS): Kibaya-Kanombe MH-Airport-Remera-Sonatubes-Rwandex-CBD
+- `105` (KBS): Remera Taxi Park-Chez Lando-Kacyiru-NyabugogoTaxi Park
+- `106` (KBS): Remera Taxi Park-15-Ndera-Musave
+- `107` (KBS): Remera Taxi Park-Mulindi-Masaka
+- `108` (KBS): RemeraTaxi Park-Sonatubes-NyanzaTaxi Park
+- `109` (KBS): Remera Taxi Park-Sonatubes-Rwandex-Gikondo (Nyenyeli)- Bwerankoli
+- `111` (KBS): Kabuga-Mulindi-Remera Taxi Park
+- `112` (KBS): RemeraTaxi Park-Sonatubes-Rwandex-Nyabugogo Taxi Park
+- `113` (KBS): Busanza-Rubilizi-Kabeza-Remera Taxi Park
+- `114` (KBS): Kibaya-Kanombe MH-Airport-RemeraTaxi Park
+- `115` (KBS): Remera Taxi Park-Airport-Busanza
+- `201` (Royal Express): St. Joseph – Kikukiro Centre de Santé – Sonatubes – Rwandex - CBD
+- `202` (Royal Express): 
+- `203` (Royal Express): Nyanza Taxi Park-Gatenga Magerwa - Down Town Taxi Park
+- `204` (Royal Express): Nyanza Taxi Park-Zion Temple – Rwandex - Nyabugogo Taxi Park
+- `205` (Royal Express): Bwerankoli – Gikondo (Nyenyeli) – Rwampara – Rugunga - Down  Town Taxi Park
+- `206` (Royal Express): Bwerankoli – Gikondo (Nyenyeli) – Rwampara – Rugunga -  Nyabugogo Taxi Park
+- `207` (Royal Express): Nyanza-Kicukiro Centre-Kagarama-Muyange
+- `208` (Royal Express): Nyanza Taxi Park - Gahanga
+- `211` (Royal Express): Nyanza Bus Park – Kicukiro Centre– Prince House-Chez Lando-  Kacyiru
+- `212` (Royal Express): St. Joseph – Kicukiro Centre de Santé – Sonatubes – Rwandex  - Nyabugogo Taxi Park
+- `213` (Royal Express): Nyanza Taxi Park- Kicukiro Centre - Prince House  – Chez Lando – Stadium – Kimironko Taxi Park
+- `214` (Royal Express): Nyanza Taxi Park-Gatenga Magerwa -NyabugogoTaxi Park
+- `215` (Royal Express): Bwerankoli – Gikindo (Nyenyeli) – Rwandex – Sonatubes –  Prince House – Chez Lando – Stadium – Kimironko Taxi Park
+- `301` (RFTC): Kinyinya - Nyarutarama - RDB - Kimihurura -Down Town Taxi  Park
+- `302` (RFTC): Kimironko-Stadium - Chez Lando - Kimihurura - CBD
+- `303` (RFTC): Batsinda - Kagugu - Gakiriro - Kinamba - Down Town Taxi Park
+- `304` (RFTC): Kacyiru - Kimihurura - Down Town Taxi Park
+- `305` (RFTC): Kimironko taxi park - Stadium - Chez Lando - Kacyiru - Nyabugogo  Taxi Park
+- `306` (RFTC): Kimironko Taxi Park - Zindiro - Masizi - Birembo
+- `308` (RFTC): AZAM Roundabout-Contrôle Technique-Chez  Lando - Kimihurura - CBD
+- `309` (RFTC): Kimironko Taxi Park- Kibagabaga - Kinyinya
+- `310` (RFTC): Batsinda - Kagugu - Gakiriro - Kinamba - Nyabugogo Taxi Park
+- `311` (RFTC): Kagugu - Bel Etoile - ULK - Kinamba - Nyabugogo Taxi Park
+- `313` (RFTC): Kagugu - Bel Etoile - ULK - Kinamba - Down Town Taxi Park
+- `314` (RFTC): Nyabugogo Taxi Park - Kinamba - UTEXRWA - Kibagabaga- Kimironko
+- `315` (RFTC): Kinyinya - Utexrwa - Kinamba - Nyabugogo Taxi Park
+- `316` (RFTC): AZAM Roundabout - Kimironko Taxi Park
+- `317` (RFTC): Kinyinya - UTEXRWA - Kinamba - Down Town Taxi Park
+- `318` (RFTC): Batsinda - Kagugu - Kibagabaga - Kimironko Taxi Park
+- `320` (RFTC): 
+- `321` (RFTC): Nyabugogo taxi park - Batsinda - Gasanze
+- `322` (RFTC): Kimironko Taxi Park - Mulindi - Masaka
+- `325` (RFTC): Kabuga - Kigali Parent School - Kimironko Taxi Park
+- `401` (RFTC): Nyamirambo (Ryanyuma) - Rafiki - Camp Kigali -CBD
+- `402` (RFTC): Nyamirambo (Ryanyuma) - Kimisagara-Nyabugogo-Down Town  Taxi park- Down Town Taxi Park
+- `403` (RFTC): Nyacyonga - Karuruma-Muhima - Down Town Taxi Park
+- `404` (RFTC): Bishenyi - Ruyenzi-Giticyinyoni - Nyabugogo
+- `406` (RFTC): Nyamirambo- Rwarutabura - Mageragere
+- `411` (RFTC): Nyabugogo Taxi Park – Giticyinyoni-Nzove -Rutonde
+- `412` (RFTC): Nyabugogo Taxi Park - Giticyinyoni
+- `414` (RFTC): Nyabugogo taxi park - Ruliba-Karama Complex School
