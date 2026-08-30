@@ -1,7 +1,9 @@
 import Button from '@/components/inputs/Button';
 import Input from '@/components/inputs/Input';
-import validateInputs from '@/helpers/validations.helper';
+import TelInput from '@/components/inputs/TelInput';
+import validateInputs, { normalizePhoneNumber } from '@/helpers/validations.helper';
 import { useSignup } from '@/usecases/auth/auth.hooks';
+import { validatePhoneNumber } from '@/utils/phone.util';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -26,7 +28,7 @@ const Signup = () => {
       name: data?.name,
       email: data?.email,
       password: data?.password,
-      phoneNumber: data?.phoneNumber,
+      phoneNumber: normalizePhoneNumber(data?.phoneNumber) ?? data?.phoneNumber,
     });
   });
 
@@ -99,19 +101,16 @@ const Signup = () => {
                 name="phoneNumber"
                 rules={{
                   required: `Please enter your phone number`,
-                  validate: (value) =>
-                    validateInputs(value, 'number') ||
-                    'Please enter a valid phone number',
+                  validate: (value) => validatePhoneNumber(value),
                 }}
                 render={({ field }) => (
-                  <Input
+                  <TelInput
                     {...field}
-                    errorMessage={errors.phoneNumber?.message}
-                    placeholder="Enter phone number"
+                    errorMessage={errors.phoneNumber?.message as string}
+                    placeholder="7XX XXX XXX"
                     label="Phone Number"
                     autoComplete="tel"
                     required
-                    type="tel"
                   />
                 )}
               />

@@ -1,12 +1,14 @@
 import Button from '@/components/inputs/Button';
 import Input from '@/components/inputs/Input';
+import TelInput from '@/components/inputs/TelInput';
 import { SkeletonLoader } from '@/components/inputs/Loader';
 import Select from '@/components/inputs/Select';
 import { Heading } from '@/components/inputs/TextInputs';
 import { Gender } from '@/constants/user.constants';
 import AppLayout from '@/containers/navigation/AppLayout';
 import { capitalizeString } from '@/helpers/strings.helper';
-import validateInputs from '@/helpers/validations.helper';
+import validateInputs, { normalizePhoneNumber } from '@/helpers/validations.helper';
+import { validatePhoneNumber } from '@/utils/phone.util';
 import { useAppSelector } from '@/states/hooks';
 import { Role } from '@/types/role.type';
 import { useFetchRoles } from '@/usecases/roles/role.hooks';
@@ -65,7 +67,7 @@ const CreateUserPage = () => {
       user: {
         name: data.name,
         email: data.email,
-        phoneNumber: data.phoneNumber,
+        phoneNumber: normalizePhoneNumber(data.phoneNumber) ?? data.phoneNumber,
         gender: data.gender,
       },
       roleIds: selectedRoles?.map((role) => role.id),
@@ -124,12 +126,15 @@ const CreateUserPage = () => {
             <Controller
               name="phoneNumber"
               control={control}
-              rules={{ required: `Please enter user's phone number` }}
+              rules={{
+                required: `Please enter user's phone number`,
+                validate: (value) => validatePhoneNumber(value),
+              }}
               render={({ field }) => (
-                <Input
+                <TelInput
                   {...field}
                   label="Phone Number"
-                  placeholder="Enter user phone number"
+                  placeholder="7XX XXX XXX"
                   errorMessage={errors.phoneNumber?.message as string}
                   required
                 />

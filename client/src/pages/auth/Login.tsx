@@ -1,6 +1,8 @@
 import Button from '@/components/inputs/Button';
 import Input from '@/components/inputs/Input';
-import validateInputs from '@/helpers/validations.helper';
+import TelInput from '@/components/inputs/TelInput';
+import validateInputs, { normalizePhoneNumber } from '@/helpers/validations.helper';
+import { formatPhoneForDisplay, validatePhoneNumber } from '@/utils/phone.util';
 import {
   useLogin,
   usePhoneLoginPrecheck,
@@ -81,9 +83,10 @@ const Login = () => {
   } = useForm<PhoneOtpForm>();
 
   const maskedPhoneNumber = useMemo(() => {
-    const trimmed = phoneNumber.replace(/\s+/g, '');
+    const formatted = formatPhoneForDisplay(phoneNumber) || phoneNumber;
+    const trimmed = formatted.replace(/\s+/g, '');
     if (trimmed.length < 4) {
-      return phoneNumber;
+      return formatted;
     }
 
     const prefix = trimmed.slice(0, 6);
@@ -109,8 +112,10 @@ const Login = () => {
 
   const onPhonePrecheckSubmit = handlePrecheckSubmit(async (data) => {
     try {
-      const payload = await runPrecheck({ phoneNumber: data.phoneNumber });
-      setPhoneNumber(data.phoneNumber);
+      const normalizedPhone =
+        normalizePhoneNumber(data.phoneNumber) ?? data.phoneNumber;
+      const payload = await runPrecheck({ phoneNumber: normalizedPhone });
+      setPhoneNumber(normalizedPhone);
 
       if (payload?.hasPassword) {
         setPhoneStep('password');
@@ -118,7 +123,7 @@ const Login = () => {
         return;
       }
 
-      await sendPhoneOtp({ phoneNumber: data.phoneNumber });
+      await sendPhoneOtp({ phoneNumber: normalizedPhone });
       setLiveMessage('Code sent. Enter the 6-digit code to continue.');
       setPhoneStep('otp');
     } catch (error) {
@@ -345,18 +350,15 @@ const Login = () => {
                       name="phoneNumber"
                       rules={{
                         required: 'Please enter your phone number',
-                        validate: (value) =>
-                          validateInputs(value, 'phone') ||
-                          'Please enter a valid phone number',
+                        validate: (value) => validatePhoneNumber(value),
                       }}
                       render={({ field }) => (
-                        <Input
+                        <TelInput
                           {...field}
                           errorMessage={precheckErrors.phoneNumber?.message}
-                          placeholder="Enter phone number"
+                          placeholder="7XX XXX XXX"
                           label="Phone Number"
                           autoComplete="tel"
-                          type="tel"
                           required
                         />
                       )}

@@ -1,6 +1,8 @@
 import Button from "@/components/inputs/Button";
 import Input from "@/components/inputs/Input";
-import validateInputs from "@/helpers/validations.helper";
+import TelInput from "@/components/inputs/TelInput";
+import validateInputs, { normalizePhoneNumber } from "@/helpers/validations.helper";
+import { validatePhoneNumber } from "@/utils/phone.util";
 import { Controller, useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { Seo } from "@/components/seo";
@@ -50,7 +52,9 @@ const ForgotPassword = () => {
     if (method === "email") {
       forgotPassword({ email: data.email });
     } else {
-      sendPhoneResetOtp({ phoneNumber: data.phoneNumber });
+      const phoneNumber =
+        normalizePhoneNumber(data.phoneNumber) ?? data.phoneNumber;
+      sendPhoneResetOtp({ phoneNumber });
     }
   });
 
@@ -77,8 +81,9 @@ const ForgotPassword = () => {
 
   useEffect(() => {
     if (isSendPhoneResetOtpSuccess) {
+      const phoneNumber = normalizePhoneNumber(watch('phoneNumber')) ?? watch('phoneNumber');
       navigate(
-        `/auth/reset-phone-otp?phone=${encodeURIComponent(watch('phoneNumber'))}`,
+        `/auth/reset-phone-otp?phone=${encodeURIComponent(phoneNumber)}`,
       );
       resetSendPhoneResetOtp();
       reset();
@@ -145,18 +150,15 @@ const ForgotPassword = () => {
                     control={control}
                     name="phoneNumber"
                     rules={{
-                      validate: (value) =>
-                        validateInputs(value, "phone") ||
-                        "Please enter a valid phone number",
+                      validate: (value) => validatePhoneNumber(value),
                     }}
                     render={({ field }) => (
-                      <Input
+                      <TelInput
                         {...field}
-                        errorMessage={errors.phoneNumber?.message}
-                        placeholder="Enter phone number"
+                        errorMessage={errors.phoneNumber?.message as string}
+                        placeholder="7XX XXX XXX"
                         label="Phone number"
                         autoComplete="tel"
-                        type="tel"
                         required
                       />
                     )}

@@ -1,5 +1,7 @@
+import { isValidPhoneNumber, normalizePhoneNumber } from '@/utils/phone.util';
+
 const isEmail = (value: string) => /\S+@\S+\.\S+/.test(value);
-const isPhone = (value: string) => /^(\+?\d{9,15})$/.test(value.replace(/\s+/g, ''));
+const isPhone = (value: string) => isValidPhoneNumber(value);
 const isEmailOrPhone = (value: string) => isEmail(value) || isPhone(value);
 const isPassword = (value: string) =>
   value.length >= 6 &&
@@ -37,3 +39,5 @@ const validateInputs = (value: string, type: string) => {
 };
 
 export default validateInputs;
+
+export { normalizePhoneNumber };
