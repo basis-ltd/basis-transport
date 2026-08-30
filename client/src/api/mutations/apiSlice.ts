@@ -1,9 +1,6 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { baseQuery } from '../rootApi';
-import { Trip } from '@/types/trip.type';
-import { UserTrip } from '@/types/userTrip.type';
 import { UUID } from '@/types';
-import { Location } from '@/types/location.type';
 import { User } from '@/types/user.type';
 
 export const apiSlice = createApi({
@@ -112,95 +109,6 @@ export const apiSlice = createApi({
     }),
 
     /**
-     * LOCATIONS
-     */
-
-    // CREATE LOCATION
-    createLocation: builder.mutation({
-      query: (location: Partial<Location>) => ({
-        url: '/locations',
-        method: 'POST',
-        body: location,
-      }),
-    }),
-
-    /**
-     * TRIPS
-     */
-
-    // CREATE TRIP
-    createTrip: builder.mutation({
-      query: (trip: Partial<Trip>) => ({
-        url: '/trips',
-        method: 'POST',
-        body: trip,
-      }),
-    }),
-
-    // START TRIP
-    startTrip: builder.mutation({
-      query: (id: UUID) => ({
-        url: `/trips/${id}/start`,
-        method: 'PATCH',
-      }),
-    }),
-
-    // END TRIP
-    completeTrip: builder.mutation({
-      query: (id: UUID) => ({
-        url: `/trips/${id}/complete`,
-        method: 'PATCH',
-      }),
-    }),
-
-    // CANCEL TRIP
-    cancelTrip: builder.mutation({
-      query: (id: UUID) => ({
-        url: `/trips/${id}/cancel`,
-        method: 'PATCH',
-      }),
-    }),
-
-    // QUICK JOIN TRIP
-    quickJoinTrip: builder.mutation({
-      query: ({
-        tripId,
-        phoneNumber,
-        entranceLocation,
-      }: {
-        tripId: UUID;
-        phoneNumber: string;
-        entranceLocation: { type: 'Point'; coordinates: [number, number] };
-      }) => ({
-        url: `/trips/${tripId}/quick-join`,
-        method: 'POST',
-        body: { phoneNumber, entranceLocation },
-      }),
-    }),
-
-    /**
-     * USER TRIPS
-     */
-
-    // CREATE USER TRIP
-    createUserTrip: builder.mutation({
-      query: (userTrip: Partial<UserTrip>) => ({
-        url: '/user-trips',
-        method: 'POST',
-        body: userTrip,
-      }),
-    }),
-
-    // UPDATE USER TRIP
-    updateUserTrip: builder.mutation({
-      query: ({ id, userTrip }: { id: UUID; userTrip: Partial<UserTrip> }) => ({
-        url: `/user-trips/${id}`,
-        method: 'PATCH',
-        body: userTrip,
-      }),
-    }),
-
-    /**
      * USERS
      */
 
@@ -229,13 +137,5 @@ export const {
   useCompleteRegistrationMutation,
   useForgotPasswordMutation,
   useResetPasswordMutation,
-  useCreateLocationMutation,
-  useCreateTripMutation,
-  useCreateUserTripMutation,
-  useUpdateUserTripMutation,
   useCreateUserMutation,
-  useStartTripMutation,
-  useCompleteTripMutation,
-  useCancelTripMutation,
-  useQuickJoinTripMutation,
 } = apiSlice;

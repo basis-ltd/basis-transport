@@ -19,8 +19,10 @@ import { Stop } from '../entities/networkStop.entity';
 import { TransitRoute } from '../entities/transitRoute.entity';
 import { RouteStop } from '../entities/routeStop.entity';
 import { RouteFrequency } from '../entities/routeFrequency.entity';
+import { NetworkDataset, RoutePattern, PatternStopProjection, SavedItem, PassengerReport } from '../entities/networkDataset.entity';
 
 export const entities = [
+  NetworkDataset, RoutePattern, PatternStopProjection, SavedItem, PassengerReport,
   User,
   Role,
   UserRole,
@@ -62,12 +64,13 @@ export const entities = [
           username: configService.get<string>('database.username'),
           password: configService.get<string>('database.password'),
           database: configService.get<string>('database.name'),
-          synchronize: true,
+          // Schema changes are explicit migrations; never alter a live database on boot.
+          synchronize: false,
           logging: false,
           entities,
           ssl: sslDisabledHosts.includes(String(host))
             ? false
-            : { rejectUnauthorized: false },
+            : { rejectUnauthorized: true },
         };
       },
     }),

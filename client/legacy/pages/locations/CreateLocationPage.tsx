@@ -1,3 +1,4 @@
+import BackButton from '@/components/inputs/BackButton';
 import Button from '@/components/inputs/Button';
 import Input from '@/components/inputs/Input';
 import TextArea from '@/components/inputs/TextArea';
@@ -113,14 +114,7 @@ const CreateLocationPage = () => {
           </section>
 
           <menu className="flex w-full items-center justify-between gap-3">
-            <Button
-              onClick={(e) => {
-                e.preventDefault();
-                navigate(-1);
-              }}
-            >
-              Back
-            </Button>
+            <BackButton />
             <Button
               primary
               submit

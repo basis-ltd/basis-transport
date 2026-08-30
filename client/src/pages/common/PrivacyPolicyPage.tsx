@@ -7,23 +7,24 @@ const PrivacyPolicyPage = () => (
     canonicalPath="/privacy"
     eyebrow="Legal"
   >
-    <p>Last updated: March 2026</p>
+    <p>Last updated: August 2026</p>
 
     <h2>What we collect</h2>
     <p>
-      We collect information you provide when you create an account, plan a trip,
-      or contact support — including your name, phone number, email address, and
-      commute preferences.
+      Account and support information is stored when you submit it. Journey searches
+      are processed to calculate directions, not saved as passenger history.
+      Favorites stay on your device unless you explicitly synchronize them.
     </p>
     <p>
-      We also collect device and usage data such as approximate location (when you
-      allow it), app interactions, and technical logs needed to keep the service
-      reliable.
+      Location is requested only when you choose Use my location. Google processes
+      place searches and coordinates needed for maps and walking directions.
+      Shared links can contain precise coordinates. Technical metrics record
+      counts and durations, not journey endpoints.
     </p>
 
     <h2>How we use it</h2>
     <ul>
-      <li>Provide schedules, capacity, and route guidance</li>
+      <li>Provide route, stop, and walking guidance</li>
       <li>Authenticate your account and send service notifications</li>
       <li>Improve reliability, safety, and product performance</li>
       <li>Respond to support requests</li>
@@ -32,14 +33,14 @@ const PrivacyPolicyPage = () => (
     <h2>Sharing</h2>
     <p>
       We do not sell your personal data. We share information only with service
-      providers who help us operate Basis Transport (hosting, SMS, analytics),
+      providers who help us operate Basis Transport (hosting, maps, email, and SMS),
       and when required by law.
     </p>
 
     <h2>Your choices</h2>
+    <p>Google Maps features also process information under <a href="https://policies.google.com/privacy" className="landing-link-sweep">Google’s Privacy Policy</a>.</p>
     <p>
-      You can update profile details in the app, opt out of non-essential
-      notifications, and request deletion of your account by contacting support.
+      You can update profile details in the app, remove saved items, and request deletion of your account by contacting support.
     </p>
 
     <h2>Contact</h2>

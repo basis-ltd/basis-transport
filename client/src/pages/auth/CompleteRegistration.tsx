@@ -44,7 +44,7 @@ const CompleteRegistration = () => {
     }
 
     if (!user.mustCompleteRegistration) {
-      navigate('/dashboard');
+      navigate('/saved');
     }
   }, [isHydrated, navigate, token, user]);
 

@@ -1,3 +1,4 @@
+import BackButton from "@/components/inputs/BackButton";
 import Button from "@/components/inputs/Button";
 import { Heading } from "@/components/inputs/TextInputs";
 import Table from "@/components/table/Table";
@@ -23,7 +24,7 @@ import {
 } from "@/usecases/user-trip/userTrip.hooks";
 import { faFileLines } from "@fortawesome/free-regular-svg-icons";
 import { useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import moment from "moment";
 import Loader from "@/components/inputs/Loader";
 import { TripStatus } from "@/constants/trip.constants";
@@ -57,11 +58,6 @@ const TripDetailsPage = () => {
   /**
    * NAVIGATION
    */
-  const navigate = useNavigate();
-
-  /**
-   * NAVIGATION
-   */
   const { id } = useParams();
 
   /**
@@ -85,7 +81,7 @@ const TripDetailsPage = () => {
       getTripById(trip?.id);
       reset();
     }
-  }, [isSuccess, navigate, trip?.id, reset, getTripById]);
+  }, [isSuccess, trip?.id, reset, getTripById]);
 
   // COMPLETE TRIP
   const { completeTrip, completeTripIsLoading } = useCompleteTrip();
@@ -460,14 +456,7 @@ const TripDetailsPage = () => {
           />
         </section>
         <menu className="w-full flex items-center gap-3 justify-between">
-          <Button
-            onClick={(e) => {
-              e.preventDefault();
-              navigate(-1);
-            }}
-          >
-            Back
-          </Button>
+          <BackButton />
         </menu>
         {confirmDialog}
       </PageBody>

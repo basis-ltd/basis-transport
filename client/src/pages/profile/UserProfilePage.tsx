@@ -1,4 +1,5 @@
 import CustomPopover from '@/components/custom/CustomPopover';
+import BackButton from '@/components/inputs/BackButton';
 import Button from '@/components/inputs/Button';
 import StatusBadge from '@/components/inputs/StatusBadge';
 import {
@@ -25,26 +26,25 @@ import {
   faKey,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 const quickActions = [
   {
-    to: '/account/transport-cards',
+    to: '/saved',
     icon: faCreditCard,
-    title: 'My cards',
-    description: 'View and manage your transport cards.',
+    title: 'Saved places and journeys',
+    description: 'Keep your usual connections close.',
   },
   {
-    to: '/user-trips',
+    to: '/travel',
     icon: faBus,
-    title: 'My trips',
-    description: 'Review the journeys you have taken.',
+    title: 'Plan a journey',
+    description: 'Find a connection through the bus network.',
   },
 ];
 
 const UserProfilePage = () => {
   const { user } = useAppSelector((state) => state.auth);
-  const navigate = useNavigate();
 
   if (!user) {
     return (
@@ -178,14 +178,7 @@ const UserProfilePage = () => {
         </PageSection>
 
         <PageFooter>
-          <Button
-            onClick={(event) => {
-              event.preventDefault();
-              navigate(-1);
-            }}
-          >
-            Back
-          </Button>
+          <BackButton />
         </PageFooter>
       </PageBody>
     </AppLayout>

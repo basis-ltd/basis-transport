@@ -1,4 +1,4 @@
-import Button from '@/components/inputs/Button';
+import BackButton from '@/components/inputs/BackButton';
 import { SkeletonLoader } from '@/components/inputs/Loader';
 import {
   DetailList,
@@ -14,13 +14,12 @@ import { useAppSelector } from '@/states/hooks';
 import { useGetLocationById } from '@/usecases/locations/location.hooks';
 import { APIProvider, Map, Marker } from '@vis.gl/react-google-maps';
 import { useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 const LocationDetailsPage = () => {
   const { location } = useAppSelector((state) => state.location);
 
   const { id } = useParams();
-  const navigate = useNavigate();
 
   const { getLocationById, locationIsFetching, locationIsError } =
     useGetLocationById();
@@ -61,14 +60,7 @@ const LocationDetailsPage = () => {
               We couldn’t find this location. It may have been removed.
             </p>
             <div>
-              <Button
-                onClick={(event) => {
-                  event.preventDefault();
-                  navigate(-1);
-                }}
-              >
-                Back
-              </Button>
+              <BackButton />
             </div>
           </PageSection>
         </PageBody>
@@ -143,14 +135,7 @@ const LocationDetailsPage = () => {
         </div>
 
         <PageFooter>
-          <Button
-            onClick={(event) => {
-              event.preventDefault();
-              navigate(-1);
-            }}
-          >
-            Back
-          </Button>
+          <BackButton />
         </PageFooter>
       </PageBody>
     </AppLayout>

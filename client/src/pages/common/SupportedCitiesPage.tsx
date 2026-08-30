@@ -3,25 +3,25 @@ import PublicContentPage from './PublicContentPage';
 const cities = [
   {
     name: 'Kigali',
-    status: 'Live',
-    detail: 'Full schedule, capacity, and route guidance across major corridors.',
+    status: 'Internal network beta',
+    detail: 'Historic network under review. Current service and usage rights must be verified before public release.',
   },
   {
     name: 'Musanze',
-    status: 'Expanding',
-    detail: 'Core routes and stop coverage rolling out with operator partners.',
+    status: 'Not supported',
+    detail: 'No verified network is currently published.',
   },
   {
     name: 'Huye',
-    status: 'Planned',
-    detail: 'On the roadmap — join the waitlist via Contact us to get notified.',
+    status: 'Not supported',
+    detail: 'No verified network is currently published.',
   },
 ];
 
 const SupportedCitiesPage = () => (
   <PublicContentPage
     title="Supported cities"
-    description="Where Basis Transport is live today — and where we're heading next."
+    description="Coverage and verification status for the journey planner."
     canonicalPath="/cities"
     eyebrow="Coverage"
   >

@@ -29,12 +29,14 @@ const readApiErrorMessage = (error: unknown): string =>
     }
   )?.data?.message || 'Something went wrong';
 
-const getAuthRedirectPath = (user?: User) => {
+export const getAuthRedirectPath = (user?: User) => {
   if (user?.mustCompleteRegistration) {
     return '/auth/complete-registration';
   }
 
-  return '/dashboard';
+  const returnTo = new URLSearchParams(window.location.search).get('returnTo');
+  if (returnTo && /^\/(saved|travel)(\?|$)/.test(returnTo) && !returnTo.includes('\\')) return returnTo;
+  return user?.userRoles?.some(r => ['ADMIN','SUPER_ADMIN'].includes(r.role?.name || '')) ? '/admin/network' : '/saved';
 };
 
 /**
@@ -117,7 +119,7 @@ export const useLogout = () => {
   return async () => {
     await clearPersistedAuthSession();
     dispatch(setLogout());
-    navigate('/auth/login');
+    navigate('/');
   };
 };
 
@@ -259,7 +261,7 @@ export const useCompleteRegistration = () => {
     await persistAuthSession({ user, token });
     dispatch(setToken(token));
     dispatch(setUser(user));
-    navigate('/dashboard');
+    navigate(getAuthRedirectPath(user));
   };
 
   return {

@@ -1,8 +1,9 @@
 import AppLayout from "@/containers/navigation/AppLayout";
 import { useAppDispatch, useAppSelector } from "@/states/hooks";
 import { useFetchTransportCards } from "@/usecases/transport-cards/transportCard.hooks";
+import BackButton from "@/components/inputs/BackButton";
 import Button from "@/components/inputs/Button";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import DeleteTransportCard from "./DeleteTransportCard";
 import UpdateTransportCard from "./UpdateTransportCard";
 import CreateTransportCard from "./CreateTransportCard";
@@ -21,8 +22,6 @@ const TransportCardsPage = () => {
   const { user } = useAppSelector((state) => state.auth);
   const { transportCardsList } = useAppSelector((state) => state.transportCard);
 
-  // NAVIGATION
-  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const providerQuery = searchParams.get("provider");
   const provider =
@@ -83,16 +82,7 @@ const TransportCardsPage = () => {
           setSize={setSize}
         />
         <menu className="w-full flex items-center gap-3 justify-between">
-          <Button
-            submit
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              navigate(-1);
-            }}
-          >
-            Back
-          </Button>
+          <BackButton />
         </menu>
       </PageBody>
       <CreateTransportCard />

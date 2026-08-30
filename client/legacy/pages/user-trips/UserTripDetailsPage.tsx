@@ -1,12 +1,12 @@
 import AppLayout from '@/containers/navigation/AppLayout';
 import { useAppSelector } from '@/states/hooks';
 import { useGetUserTrip } from '@/usecases/user-trip/userTrip.hooks';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import MapView from '@/components/maps/MapView';
 import { UserTripStatus } from '@/constants/userTrip.constants';
 import moment from 'moment';
-import Button from '@/components/inputs/Button';
+import BackButton from '@/components/inputs/BackButton';
 import {
   PageBody,
   PageFooter,
@@ -31,11 +31,6 @@ const UserTripDetailsPage = () => {
     lat: 0,
     lng: 0,
   });
-
-  /**
-   * NAVIGATION
-   */
-  const navigate = useNavigate();
 
   useEffect(() => {
     if (userTrip) {
@@ -241,14 +236,7 @@ const UserTripDetailsPage = () => {
           />
         </PageSection>
         <PageFooter>
-          <Button
-            onClick={(e) => {
-              e.preventDefault();
-              navigate(-1);
-            }}
-          >
-            Back
-          </Button>
+          <BackButton />
         </PageFooter>
       </PageBody>
     </AppLayout>

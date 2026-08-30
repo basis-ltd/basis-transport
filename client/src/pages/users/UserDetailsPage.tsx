@@ -1,4 +1,4 @@
-import Button from '@/components/inputs/Button';
+import BackButton from '@/components/inputs/BackButton';
 import StatusBadge from '@/components/inputs/StatusBadge';
 import {
   DetailList,
@@ -14,12 +14,11 @@ import { capitalizeString } from '@/helpers/strings.helper';
 import { useAppSelector } from '@/states/hooks';
 import { useGetUserById } from '@/usecases/users/user.hooks';
 import { useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 const UserDetailsPage = () => {
   const { user } = useAppSelector((state) => state.user);
   const { id } = useParams();
-  const navigate = useNavigate();
   const { getUserById, userIsFetching } = useGetUserById();
 
   useEffect(() => {
@@ -41,14 +40,7 @@ const UserDetailsPage = () => {
             </p>
             {!userIsFetching ? (
               <div>
-                <Button
-                  onClick={(event) => {
-                    event.preventDefault();
-                    navigate(-1);
-                  }}
-                >
-                  Back
-                </Button>
+                <BackButton />
               </div>
             ) : null}
           </PageSection>
@@ -117,14 +109,7 @@ const UserDetailsPage = () => {
         </PageSection>
 
         <PageFooter>
-          <Button
-            onClick={(event) => {
-              event.preventDefault();
-              navigate(-1);
-            }}
-          >
-            Back
-          </Button>
+          <BackButton />
         </PageFooter>
       </PageBody>
     </AppLayout>

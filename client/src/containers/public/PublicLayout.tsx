@@ -6,9 +6,9 @@ interface PublicLayoutProps {
 
 const PublicLayout = ({ children }: PublicLayoutProps) => {
   return (
-    <main className="landing-page min-h-screen bg-(--paper)">
+    <div className="landing-page min-h-screen bg-(--paper)">
       {children}
-    </main>
+    </div>
   );
 };
 

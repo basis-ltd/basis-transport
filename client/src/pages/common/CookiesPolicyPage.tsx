@@ -7,12 +7,12 @@ const CookiesPolicyPage = () => (
     canonicalPath="/cookies"
     eyebrow="Legal"
   >
-    <p>Last updated: March 2026</p>
+    <p>Last updated: August 2026</p>
 
     <h2>What cookies are</h2>
     <p>
-      Cookies are small text files stored on your device. We use them to keep you
-      signed in, remember preferences, and understand how the product is used.
+      Cookies are small text files stored on your device. The application also uses browser storage for authentication, appearance,
+      and favorites that you explicitly save.
     </p>
 
     <h2>Types we use</h2>
@@ -22,12 +22,11 @@ const CookiesPolicyPage = () => (
         core app functionality.
       </li>
       <li>
-        <strong>Functional</strong> — remember settings such as language or
-        recently viewed routes.
+        <strong>Functional</strong> — remember appearance and explicitly saved favorites. Searches are not saved automatically.
       </li>
       <li>
-        <strong>Analytics</strong> — help us measure performance and improve
-        reliability. These are aggregated where possible.
+        <strong>Service metrics</strong> — server-side counts and timings do not require
+        a journey-history cookie. Google Maps may use its own storage under its policies.
       </li>
     </ul>
 

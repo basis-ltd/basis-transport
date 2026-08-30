@@ -1,5 +1,22 @@
 # Data attribution
 
+## Journey planner update — August 2026
+
+The active planner no longer uses the flattened seed described below. It imports
+the original GTFS archive into immutable, directional dataset versions, retaining
+source stop IDs and repeated occurrences. The local import has 195 patterns,
+55 routes, 828 source-qualified named stop IDs and 28 quality notices. Shapes,
+calendars, calendar exceptions, overnight frequency windows and relative observed
+times are imported. Historic fares are not treated as current fares.
+
+The feed remains historic (service calendar 2019-02-25–2021-02-25), with unresolved
+usage rights. It is restricted to local/internal testing. Public publication
+requires current verification and rights evidence. The older corridor/shuttle
+records remain preserved but are not guessed into routable directional patterns.
+
+The following sections document the **legacy seed's provenance**, not the active
+planner's coverage. See [the current runbook](docs/JOURNEY-PLANNER-RUNBOOK.md).
+
 The Kigali network layer in this repository (`agencies`, `corridors`, `stops`,
 `transit_routes`, `route_stops`, `route_frequencies`) is seeded from **public,
 attributed sources only**, via the offline snapshot in

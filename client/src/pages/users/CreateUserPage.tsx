@@ -1,3 +1,4 @@
+import BackButton from '@/components/inputs/BackButton';
 import Button from '@/components/inputs/Button';
 import Input from '@/components/inputs/Input';
 import TelInput from '@/components/inputs/TelInput';
@@ -200,14 +201,7 @@ const CreateUserPage = () => {
             )}
           </article>
           <menu className="w-full flex items-center gap-3 justify-between">
-            <Button
-              onClick={(e) => {
-                e.preventDefault();
-                navigate(-1);
-              }}
-            >
-              Back
-            </Button>
+            <BackButton />
             <Button primary submit isLoading={createUserIsLoading}>
               Save
             </Button>

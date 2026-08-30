@@ -7,30 +7,30 @@ const TermsOfServicePage = () => (
     canonicalPath="/terms"
     eyebrow="Legal"
   >
-    <p>Last updated: March 2026</p>
+    <p>Last updated: August 2026</p>
 
     <h2>Using the service</h2>
     <p>
-      Basis Transport provides public transport information including schedules,
-      capacity, and travel guidance. You agree to use the app lawfully and not
+      Basis Transport provides public transport information including routes,
+      stops, and travel guidance. You agree to use the app lawfully and not
       misuse, reverse engineer, or disrupt the platform.
     </p>
 
     <h2>Accounts</h2>
     <p>
       You are responsible for activity on your account and for keeping your
-      login credentials secure. Provide accurate contact details so we can reach
-      you about your trips.
+      login credentials secure. Accounts are optional for journey planning and device favorites.
     </p>
 
     <h2>Information accuracy</h2>
     <p>
-      We work to keep arrivals and capacity current, but real-world conditions
-      can change quickly. Use Basis Transport as a planning aid — not as the
+      Live arrivals and capacity are not provided. Network estimates may be
+      incomplete; check source freshness and local boarding and crossing conditions. Use Basis Transport as a planning aid — not as the
       sole basis for safety-critical decisions.
     </p>
 
     <h2>Availability</h2>
+    <p>Google Maps features are subject to the <a href="https://maps.google.com/help/terms_maps/" className="landing-link-sweep">Google Maps additional terms</a>.</p>
     <p>
       We may update, suspend, or discontinue features with reasonable notice
       where possible. The service is provided on an as-available basis.

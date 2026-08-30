@@ -1,59 +1,15 @@
 import { Link, NavLink } from 'react-router-dom';
+import { useState } from 'react';
+import { Menu, X } from 'lucide-react';
+import { useAppSelector } from '@/states/hooks';
 import basisTransportLogo from '/logo.svg';
 
-export interface PublicNavbarProps {
-  variant?: 'default' | 'auth';
+export interface PublicNavbarProps {variant?:'default'|'auth'}
+export default function PublicNavbar({variant='default'}:PublicNavbarProps){
+  const [open,setOpen]=useState(false),user=useAppSelector(s=>s.auth.user);
+  const links=[['/travel','Plan a journey'],['/routes','Routes'],['/stops','Stops'],['/saved','Saved']];
+  return <header className="invert-surface sticky top-0 z-(--z-navbar)"><nav className="landing-container" aria-label="Public navigation"><div className="flex h-16 items-center justify-between gap-4">
+    <Link to="/" className="flex items-center gap-2.5 text-(--ink)"><img src={basisTransportLogo} alt="" className="size-7 brightness-0 invert"/><span className="text-base font-medium">Basis</span></Link>
+    {variant!=='auth'&&<><div className="hidden items-center gap-1 md:flex">{links.map(([to,label])=><NavLink key={to} to={to} className={({isActive})=>'rounded-lg px-3 py-3 text-sm '+(isActive?'bg-(--surface) text-(--ink)':'text-(--muted) hover:text-(--ink)')}>{label}</NavLink>)}<Link to={user?'/account/profile':'/auth/login'} className="ml-3 px-3 py-3 text-sm text-(--muted)">{user?'Account':'Sign in'}</Link></div><button type="button" aria-label={open?'Close navigation':'Open navigation'} aria-expanded={open} className="flex size-11 items-center justify-center text-(--ink) md:hidden" onClick={()=>setOpen(v=>!v)}>{open?<X size={22}/>:<Menu size={22}/>}</button></>}
+  </div>{open&&variant!=='auth'&&<div className="grid pb-4 md:hidden">{links.map(([to,label])=><NavLink key={to} to={to} onClick={()=>setOpen(false)} className="rounded-lg px-3 py-3 text-sm text-(--ink)">{label}</NavLink>)}<Link to={user?'/account/profile':'/auth/login'} className="px-3 py-3 text-sm text-(--muted)">{user?'Account':'Sign in'}</Link></div>}</nav></header>;
 }
-
-/**
- * The one inverted slab at the top of the page. `invert-surface` swaps the
- * tokens locally rather than hand-painting ink and paper, so nav items, focus
- * rings, and ::selection all keep working inside the black bar without any
- * special-casing — and the same markup flips correctly in dark mode.
- */
-const navItemClassName =
-  'rounded-(--radius-pill) px-3 py-2.5 text-sm font-medium text-(--muted) transition-colors duration-200 ease-(--ease-flat) hover:bg-(--surface) hover:text-(--ink)';
-
-const PublicNavbar = ({ variant = 'default' }: PublicNavbarProps) => {
-  return (
-    <header className="invert-surface sticky top-0 z-(--z-navbar)">
-      <nav className="landing-container" aria-label="Public navigation">
-        <section className="flex h-16 items-center justify-between">
-          <Link
-            to="/"
-            className="flex items-center gap-2.5 rounded-(--radius-pill) text-(--ink)"
-          >
-            <img
-              src={basisTransportLogo}
-              alt="Basis Transport"
-              className="size-7 brightness-0 invert"
-            />
-            <span className="text-base font-medium">Basis</span>
-          </Link>
-
-          {variant !== 'auth' ? (
-            <div className="flex items-center gap-1">
-              <Link to="/#how-it-works" className={navItemClassName}>
-                How it works
-              </Link>
-              <NavLink
-                to="/auth/login"
-                className={`${navItemClassName} max-sm:hidden`}
-              >
-                Sign in
-              </NavLink>
-              <Link
-                to="/auth/register"
-                className="ml-2 inline-flex h-(--control-sm) items-center justify-center rounded-(--radius-control) bg-(--ink) px-4 text-sm font-medium text-(--paper) transition-colors duration-200 ease-(--ease-flat) hover:bg-[color-mix(in_oklab,var(--ink)_88%,var(--paper))] active:shadow-[var(--press-on-ink)_999px_999px_0_inset]"
-              >
-                Create account
-              </Link>
-            </div>
-          ) : null}
-        </section>
-      </nav>
-    </header>
-  );
-};
-
-export default PublicNavbar;

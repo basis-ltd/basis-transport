@@ -10,12 +10,14 @@ import {
 } from '@nestjs/common';
 import { FindOptionsWhere } from 'typeorm';
 import { UsersService } from './users.service';
-import { CurrentUser } from '../../common/decorators/auth.decorators';
+import { CurrentUser, Roles } from '../../common/decorators/auth.decorators';
+import { RoleTypes } from '../../constants/role.constants';
 import { AuthenticatedUser } from '../../common/types/auth.types';
 import { UUID } from '../../types';
 import { User } from '../../entities/user.entity';
 
 @Controller('users')
+@Roles(RoleTypes.ADMIN, RoleTypes.SUPER_ADMIN)
 export class UsersController {
   constructor(private readonly userService: UsersService) {}
 

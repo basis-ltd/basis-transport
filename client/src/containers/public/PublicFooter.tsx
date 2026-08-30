@@ -101,9 +101,9 @@ const PublicFooter = () => {
             style={{ color: publicColors.neutralLight }}
           >
             <span className="font-medium">
-              Enjoy your daily journeys with us, always free and always accessible for everyone.
+              Plan a journey without creating an account.
             </span>{' '}
-            At Basis Transport, we are dedicated to making your commute stress-free and easy, without any cost to you. Thanks to support from advertisements, we make it possible for every traveler to get where they need to go with confidence and peace of mind.
+            Browse routes and stops, follow directions, and save favorites on your device. Check coverage and source freshness before travelling.
           </p>
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pt-6 border-t border-(--line)">
             <p

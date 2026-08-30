@@ -2,38 +2,18 @@ import './polyfills';
 import 'reflect-metadata';
 import cluster from 'cluster';
 import os from 'os';
-import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import { json, urlencoded } from 'express';
+import { configureHttp } from './common/configure-http';
 import { AppModule } from './app.module';
 import logger from './helpers/logger.helper';
 
 async function bootstrap() {
+  // Apply database migrations before starting this HTTP process.
   const app = await NestFactory.create(AppModule, {
     bodyParser: false,
   });
 
-  app.use(json({ limit: '50mb' }));
-  app.use(urlencoded({ extended: false }));
-  app.enableCors();
-  app.setGlobalPrefix('api', {
-    exclude: ['/'],
-  });
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      transform: true,
-      forbidNonWhitelisted: false,
-      exceptionFactory: (errors) => {
-        const messages = errors.flatMap((error) =>
-          Object.values(error.constraints || {})
-        );
-        return new BadRequestException({
-          message: messages[0] || 'Validation failed',
-        });
-      },
-    })
-  );
+  configureHttp(app);
 
   const port = process.env.PORT || 8080;
   await app.listen(port);
@@ -43,7 +23,9 @@ async function bootstrap() {
 const useCluster = process.env.NODE_ENV === 'production';
 
 if (useCluster && cluster.isPrimary) {
-  const numCPUs = os.cpus().length;
+  // Per-process limits are predictable by default. Gateways must enforce a
+  // shared limit when scaling beyond one worker.
+  const numCPUs = Math.max(1, Math.min(Number(process.env.WEB_CONCURRENCY || 1), os.cpus().length));
   logger.info(`Master ${process.pid} is running`);
 
   for (let i = 0; i < numCPUs; i++) {

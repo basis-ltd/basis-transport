@@ -1,21 +1,21 @@
 import Button from '@/components/inputs/Button';
 import Input from '@/components/inputs/Input';
-import TelInput from '@/components/inputs/TelInput';
 import TextArea from '@/components/inputs/TextArea';
 import validateInputs from '@/helpers/validations.helper';
-import { validatePhoneNumber } from '@/utils/phone.util';
 import { Controller, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import PublicContentPage from './PublicContentPage';
+import { useState } from 'react';
+import { networkRequest } from '@/features/journey/api';
 
 interface ContactFormValues {
   name: string;
   email: string;
-  phoneNumber?: string;
   message: string;
 }
 
 const ContactUsPage = () => {
+  const [sending, setSending] = useState(false);
   const {
     control,
     handleSubmit,
@@ -23,11 +23,14 @@ const ContactUsPage = () => {
     formState: { errors },
   } = useForm<ContactFormValues>();
 
-  const onSubmit = handleSubmit((data) => {
-    toast.success(
-      `Thanks, ${data.name}. We received your message and will get back to you soon.`,
-    );
-    reset();
+  const onSubmit = handleSubmit(async (data) => {
+    setSending(true);
+    try {
+      await networkRequest('/reports', { method: 'POST', body: JSON.stringify({kind:'contact',name:data.name,email:data.email,message:data.message}) });
+      toast.success('Your message has been received.');
+      reset();
+    } catch (error) { toast.error((error as Error).message); }
+    finally { setSending(false); }
   });
 
   return (
@@ -76,22 +79,6 @@ const ContactUsPage = () => {
         />
 
         <Controller
-          name="phoneNumber"
-          control={control}
-          rules={{
-            validate: (value) => validatePhoneNumber(value, false),
-          }}
-          render={({ field }) => (
-            <TelInput
-              {...field}
-              label="Phone (optional)"
-              placeholder="7XX XXX XXX"
-              errorMessage={errors.phoneNumber?.message}
-            />
-          )}
-        />
-
-        <Controller
           name="message"
           control={control}
           rules={{ required: 'Tell us how we can help' }}
@@ -107,7 +94,7 @@ const ContactUsPage = () => {
         />
 
         <div>
-          <Button type="submit" primary>
+          <Button type="submit" primary isLoading={sending}>
             Send message
           </Button>
         </div>

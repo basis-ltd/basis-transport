@@ -65,7 +65,7 @@ const Navbar = () => {
             </button>
 
             <Link
-              to={token ? '/dashboard' : '/'}
+              to={token ? '/saved' : '/'}
               className="flex select-none items-center gap-2 rounded-(--radius-control) text-(--ink) outline-none focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px]"
             >
               <img src={basisTransportLogo} alt="" aria-hidden="true" className="size-6" />

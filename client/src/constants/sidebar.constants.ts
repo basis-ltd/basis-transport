@@ -16,14 +16,14 @@ export interface NavigationItem {
 
 export const SIDEBAR_NAV_ITEMS: NavigationItem[] = [
   {
-    title: 'Dashboard',
-    path: `/dashboard`,
+    title: 'Saved journeys',
+    path: `/saved`,
     icon: faChartLine,
     roles: ['ADMIN', 'USER', 'DRIVER', 'SUPER_ADMIN'],
   },
   {
-    title: 'Trips',
-    path: `/trips`,
+    title: 'Plan a journey',
+    path: `/travel`,
     icon: faBus,
     roles: ['ADMIN', 'USER', 'DRIVER', 'SUPER_ADMIN'],
   },
@@ -34,8 +34,8 @@ export const SIDEBAR_NAV_ITEMS: NavigationItem[] = [
     roles: ['ADMIN', 'SUPER_ADMIN'],
   },
   {
-    title: 'Locations',
-    path: `/locations`,
+    title: 'Network administration',
+    path: `/admin/network`,
     icon: faMapMarkerAlt,
     roles: ['ADMIN', 'SUPER_ADMIN'],
   },
@@ -68,7 +68,7 @@ export const getSidebarNavigationForUser = (
   roleNames: string[] = [],
 ): NavigationItem[] => {
   if (!roleNames.length) {
-    return SIDEBAR_NAV_ITEMS;
+    return [];
   }
 
   return filterNavigationItemsByRoles(SIDEBAR_NAV_ITEMS, roleNames);

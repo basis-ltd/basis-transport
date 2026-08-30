@@ -43,7 +43,7 @@ export async function seedRoles(): Promise<void> {
 
     const permissions = await permissionRepository.find({
       where: {
-        name: In(Object.values(PermissionNames)),
+        name: In(Object.values(PermissionNames).filter(name => !name.startsWith('TRIP_'))),
       },
     });
 

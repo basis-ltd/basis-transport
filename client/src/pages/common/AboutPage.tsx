@@ -9,19 +9,19 @@ const AboutPage = () => (
   >
     <p>
       Basis Transport is built for people who rely on buses every day — students,
-      workers, and families who deserve clear schedules, honest capacity, and
+      workers, and families who deserve clear routes, useful stop information, and
       guidance before they leave home.
     </p>
     <p>
-      Our team combines local transport knowledge with real-time data so you can
-      answer the questions that matter: Is my bus coming? Will I get a seat? Should
-      I leave now or wait five minutes?
+      Our network planner helps answer practical questions: where should I board,
+      which bus should I take, and where should I change? It does not provide live
+      arrivals or seat availability.
     </p>
     <h2>Our promise</h2>
     <p>
-      The core commuter experience stays free. We fund the platform through
-      partnerships and advertising so everyone can access reliable travel
-      information.
+      Planning, route discovery, sharing, and on-device favorites do not require
+      an account. Signing in adds optional favorite synchronization. Coverage is
+      published only after source rights and current service have been reviewed.
     </p>
   </PublicContentPage>
 );

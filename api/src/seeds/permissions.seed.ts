@@ -12,7 +12,7 @@ export async function seedPermissions(): Promise<void> {
 
   try {
     const permissionsService = app.get(PermissionsService);
-    const permissionNames = Object.values(PermissionNames);
+    const permissionNames = Object.values(PermissionNames).filter(name => !name.startsWith('TRIP_'));
 
     for (const permissionName of permissionNames) {
       await permissionsService.createPermission({

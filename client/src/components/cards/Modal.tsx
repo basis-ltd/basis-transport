@@ -5,8 +5,8 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from '@/components/ui/dialog';
-import { DialogDescription } from '@radix-ui/react-dialog';
 
 interface ModalProps {
   isOpen: boolean;

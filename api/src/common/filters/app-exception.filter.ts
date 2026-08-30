@@ -58,16 +58,11 @@ export class AppExceptionFilter implements ExceptionFilter {
     }
 
     const err = exception as CustomError;
-    logger.error({
-      message: err?.message,
-      stack: err?.stack,
-      name: err?.name,
-      ...(err?.data && { data: err.data }),
-    });
+    logger.error({ message: 'Unexpected request failure', name: err?.name });
 
     this.logsService.createLog({
       type: LogTypes.INTERNAL_SERVER_ERROR,
-      message: err?.message,
+      message: 'Unexpected request failure',
       userId: err?.data?.userId ? (err.data.userId as UUID) : undefined,
       referenceId: err?.data?.referenceId,
       referenceType:
@@ -75,7 +70,7 @@ export class AppExceptionFilter implements ExceptionFilter {
     });
 
     return response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-      message: err?.message || 'Internal server error',
+      message: 'Internal server error',
     });
   }
 }

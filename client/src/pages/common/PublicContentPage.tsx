@@ -1,12 +1,11 @@
 import '@/styles/landingPage.css';
 import { Seo } from '@/components/seo';
+import Button from '@/components/inputs/Button';
 import PublicFooter from '@/containers/public/PublicFooter';
 import PublicLayout from '@/containers/public/PublicLayout';
 import PublicNavbar from '@/containers/public/PublicNavbar';
-import { Link } from 'react-router-dom';
-import type { ReactNode } from 'react';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import type { ReactNode } from 'react';
 
 interface PublicContentPageProps {
   title: string;
@@ -33,10 +32,11 @@ const PublicContentPage = ({
       <PublicNavbar />
       <main className="landing-page landing-paper min-h-[calc(100vh-4rem)]">
         <div className="landing-container py-10 lg:py-14">
-          <Link to="/" className="landing-link-sweep mb-6 inline-flex items-center gap-2">
-            <FontAwesomeIcon icon={faArrowLeft} className="size-3.5" aria-hidden="true" />
-            Back to home
-          </Link>
+          <nav aria-label="Breadcrumb" className="mb-6">
+            <Button variant="breadcrumb" route="/" icon={faArrowLeft}>
+              Back to home
+            </Button>
+          </nav>
 
           <header className="mb-10 max-w-3xl">
             {eyebrow ? <p className="landing-eyebrow mb-3">{eyebrow}</p> : null}

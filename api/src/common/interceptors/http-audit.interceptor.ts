@@ -34,7 +34,9 @@ export class HttpAuditInterceptor implements NestInterceptor {
     const req = http.getRequest<Request>();
     const res = http.getResponse<Response>();
 
-    if (!MUTATING.has(req.method)) {
+    // Plans are computations, not passenger records. Saved links and messages are
+    // already stored in their owner-scoped stores; do not duplicate them in audit logs.
+    if (!MUTATING.has(req.method) || /^\/api\/(journeys|me\/saved-items|reports)(\/|$)/.test(req.path)) {
       return next.handle();
     }
 

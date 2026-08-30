@@ -16,18 +16,10 @@ import { LogsModule } from './modules/logs/logs.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { RolesModule } from './modules/roles/roles.module';
-import { LocationsModule } from './modules/locations/locations.module';
-import { TripsModule } from './modules/trips/trips.module';
-import { UserTripsModule } from './modules/user-trips/user-trips.module';
-import { TransportCardsModule } from './modules/transport-cards/transport-cards.module';
-import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { AuditLogsModule } from './modules/audit-logs/audit-logs.module';
 import { SmsModule } from './integrations/sms/sms.module';
-import { AgenciesModule } from './modules/agencies/agencies.module';
-import { CorridorsModule } from './modules/corridors/corridors.module';
-import { StopsModule } from './modules/stops/stops.module';
-import { TransitRoutesModule } from './modules/transit-routes/transit-routes.module';
 import { HealthModule } from './modules/health/health.module';
+import { NetworkModule } from './modules/network/network.module';
 
 @Module({
   imports: [
@@ -44,16 +36,8 @@ import { HealthModule } from './modules/health/health.module';
     AuthModule,
     UsersModule,
     RolesModule,
-    LocationsModule,
-    TripsModule,
-    UserTripsModule,
-    TransportCardsModule,
-    DashboardModule,
     AuditLogsModule,
-    AgenciesModule,
-    CorridorsModule,
-    StopsModule,
-    TransitRoutesModule,
+    NetworkModule,
     HealthModule,
   ],
   controllers: [AppController],

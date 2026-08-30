@@ -49,6 +49,10 @@ export const fieldErrorClassName =
 export const panelClassName =
   'rounded-(--radius-control) border border-(--line) bg-(--paper) p-1 text-(--ink) shadow-(--shadow-menu)';
 
+/** Compact wayfinding chip — surface fill, smaller type, no ink border. */
+export const breadcrumbControlClassName =
+  'inline-flex w-fit items-center gap-1.5 rounded-(--radius-control) border border-transparent bg-(--surface) px-4 py-2 text-[0.8125rem] font-normal leading-snug text-(--ink) transition-[background-color,color,border-color,box-shadow] duration-200 ease-(--ease-flat) hover:border-(--line) hover:bg-(--surface-hover) focus-visible:border-(--ink) focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px]';
+
 /** Menu rows are full-width and sit on the small control height. */
 export const panelItemClassName =
   'flex h-(--control-sm) w-full cursor-pointer select-none items-center gap-2 rounded-(--radius-control) px-3 text-sm font-normal outline-none transition-colors duration-200 ease-(--ease-flat) data-[highlighted]:bg-(--surface-hover) data-[selected=true]:bg-(--surface-hover) aria-selected:bg-(--ink) hover:text-(--ink) aria-selected:text-(--paper) aria-selected:hover:text-(--ink) data-[disabled]:pointer-events-none data-[disabled]:opacity-50';

@@ -4,11 +4,11 @@ import PublicContentPage from './PublicContentPage';
 const helpTopics = [
   {
     title: 'Plan a trip',
-    body: 'Enter your current location and destination on the home page, then review schedules and seat availability on the travel options screen.',
+    body: 'Enter your current location and destination on the home page, then choose a connection and follow its boarding, transfer, and alighting steps. Times and fares may be unknown.',
   },
   {
     title: 'Create an account',
-    body: 'Sign up with your phone number to save routes, receive alerts, and track live trip status.',
+    body: 'No account is needed to plan or save favorites on this device. Sign in only if you want to synchronize explicitly saved items.',
   },
   {
     title: 'Reset your password',
@@ -16,7 +16,7 @@ const helpTopics = [
   },
   {
     title: 'Report an issue',
-    body: 'If data looks wrong or a feature fails, contact us with the route, time, and what you expected to see.',
+    body: 'If data looks wrong or a feature fails, use Report an issue on a stop or route page. Staff review submissions before changing the published network.',
   },
 ];
 

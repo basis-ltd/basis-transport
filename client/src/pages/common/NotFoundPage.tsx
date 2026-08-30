@@ -79,9 +79,9 @@ const NotFoundPage = () => {
      worse than no list at all. */
   const destinations = isSignedIn
     ? [
-        { to: '/dashboard', label: 'Dashboard', icon: faGaugeHigh },
-        { to: '/trips', label: 'Trips', icon: faBus },
-        { to: '/user-trips', label: 'My trips', icon: faRoute },
+        { to: '/saved', label: 'Saved journeys', icon: faGaugeHigh },
+        { to: '/routes', label: 'Bus routes', icon: faBus },
+        { to: '/travel', label: 'Plan a journey', icon: faRoute },
         { to: '/account/transport-cards', label: 'My cards', icon: faCreditCard },
       ]
     : [
@@ -109,15 +109,14 @@ const NotFoundPage = () => {
       </hgroup>
 
       <div className="flex flex-wrap items-center gap-3">
-        <Button primary route={isSignedIn ? '/dashboard' : '/'}>
+        <Button primary route={isSignedIn ? '/saved' : '/'}>
           {isSignedIn ? 'Go to dashboard' : 'Go to home'}
         </Button>
         <Button
+          type="button"
+          variant="breadcrumb"
           icon={faArrowLeft}
-          onClick={(event) => {
-            event.preventDefault();
-            navigate(-1);
-          }}
+          onClick={() => navigate(-1)}
         >
           Go back
         </Button>

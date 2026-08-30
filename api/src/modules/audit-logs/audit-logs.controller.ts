@@ -6,13 +6,10 @@ import {
   MoreThanOrEqual,
 } from 'typeorm';
 import { AuditLogService } from './audit-logs.service';
-import { TransportCardService } from '../transport-cards/transport-cards.service';
 import { UUID } from '../../types';
 import { AuditAction, AuditLog } from '../../entities/auditLog.entity';
-import { CurrentUser } from '../../common/decorators/auth.decorators';
-import { AuthenticatedUser } from '../../common/types/auth.types';
-import { isOwnerOrAdmin } from '../../helpers/auth.helper';
-import { ForbiddenError } from '../../helpers/errors.helper';
+import { Roles } from '../../common/decorators/auth.decorators';
+import { RoleTypes } from '../../constants/role.constants';
 
 function buildUpdatedAtDateCondition(
   startDate: string | undefined,
@@ -33,10 +30,10 @@ function buildUpdatedAtDateCondition(
 }
 
 @Controller('audit-logs')
+@Roles(RoleTypes.ADMIN, RoleTypes.SUPER_ADMIN)
 export class AuditLogsController {
   constructor(
-    private readonly auditLogService: AuditLogService,
-    private readonly transportCardService: TransportCardService
+    private readonly auditLogService: AuditLogService
   ) {}
 
   @Get()
@@ -83,7 +80,6 @@ export class AuditLogsController {
   async fetchEntityHistory(
     @Param('entityType') entityType: string,
     @Param('entityId') entityId: string,
-    @CurrentUser() user: AuthenticatedUser,
     @Query('page') page = 0,
     @Query('size') size = 10,
     @Query('action') action?: AuditAction,
@@ -91,17 +87,6 @@ export class AuditLogsController {
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string
   ) {
-    if (entityType === 'TransportCard') {
-      const card = await this.transportCardService.getTransportCardById(
-        entityId as UUID
-      );
-      if (!isOwnerOrAdmin(user, card.createdById as UUID)) {
-        throw new ForbiddenError(
-          'You cannot view audit history for this transport card'
-        );
-      }
-    }
-
     const condition: FindOptionsWhere<AuditLog> = {};
 
     if (entityType) {

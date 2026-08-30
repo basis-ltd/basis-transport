@@ -1,259 +1,305 @@
-import '@/styles/landingPage.css';
-import { useLazyFetchNearbyTripsQuery } from '@/api/queries/apiQuerySlice';
-import { Seo } from '@/components/seo';
-import PublicFooter from '@/containers/public/PublicFooter';
-import PublicLayout from '@/containers/public/PublicLayout';
-import PublicNavbar from '@/containers/public/PublicNavbar';
-import { capitalizeString } from '@/helpers/strings.helper';
-import {
-  faArrowLeft,
-  faBus,
-  faClock,
-  faLocationDot,
-  faUsers,
-} from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import moment from 'moment';
-import { useEffect, useMemo } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
-import {
-  filterTripsForRoute,
-  type TravelRouteTrip,
-} from './travelGuidance.utils';
-import Button from '@/components/inputs/Button';
-const TRAVEL_GUIDELINES = [
-  'Arrive at the stop a few minutes before the scheduled departure.',
-  'Check seat availability before boarding — capacity updates in real time.',
-  'Keep your phone handy for live trip status once you sign in.',
-];
+import { lazy, Suspense, useCallback, useEffect, useState } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Share2, X } from "lucide-react";
+import { toast } from "sonner";
+import Modal from "@/components/cards/Modal";
+import LandingHeroForm from "./components/landing/LandingHeroForm";
+import JourneyShell, {
+  LoadState,
+  NetworkNotice,
+} from "@/features/journey/JourneyShell";
+import { journeyMessages as copy } from "@/features/journey/messages";
+import JourneyCard from "@/features/journey/JourneyCard";
+import SaveButton from "@/features/journey/SaveButton";
+import { networkRequest } from "@/features/journey/api";
+import { parseTravelQuery, travelUrl } from "@/features/journey/locations";
+import type { JourneyPlan } from "@/features/journey/types";
 
-const TravelGuidancePage = () => {
-  const [searchParams] = useSearchParams();
-  const from = searchParams.get('from') ?? '';
-  const to = searchParams.get('to') ?? '';
-  const lat = Number(searchParams.get('lat'));
-  const lng = Number(searchParams.get('lng'));
-  const hasCoordinates = Boolean(lat) && Boolean(lng) && Number.isFinite(lat) && Number.isFinite(lng);
-  const hasRoute = Boolean(from || to);
+const JourneyMap = lazy(() => import("@/features/journey/JourneyMap"));
+const states = copy;
 
-  const [fetchNearbyTrips, { data, isFetching }] = useLazyFetchNearbyTripsQuery();
-
+export default function TravelGuidancePage() {
+  const [params] = useSearchParams(),
+    navigate = useNavigate(),
+    query = params.toString();
+  const parsed = parseTravelQuery(params);
+  const [plan, setPlan] = useState<JourneyPlan>(),
+    [loading, setLoading] = useState(false),
+    [error, setError] = useState(""),
+    [revision, setRevision] = useState(0);
+  const [preference, setPreference] = useState("fewest_transfers"),
+    [maxWalk, setMaxWalk] = useState(800),
+    [selected, setSelected] = useState(""),
+    [selectedLeg, setSelectedLeg] = useState(0),
+    [showMap, setShowMap] = useState(false),
+    [shareOpen, setShareOpen] = useState(false);
+  const selectLeg = useCallback((index: number) => setSelectedLeg(index), []);
   useEffect(() => {
-    if (!from && !to && !hasCoordinates) {
-      return;
-    }
-
-    fetchNearbyTrips({
-      lat: hasCoordinates ? lat : undefined,
-      lng: hasCoordinates ? lng : undefined,
-      limit: 5,
-    });
-  }, [fetchNearbyTrips, from, to, hasCoordinates, lat, lng]);
-
-  const allTrips = (data?.data ?? []) as TravelRouteTrip[];
-
-  const matchingTrips = useMemo(
-    () => filterTripsForRoute(allTrips, from, to),
-    [allTrips, from, to]
-  );
-
-  const otherNearbyTrips = useMemo(
-    () =>
-      allTrips.filter(
-        (trip) => !matchingTrips.some((match) => match.id === trip.id)
-      ),
-    [allTrips, matchingTrips]
-  );
-
-  const formatSchedule = (startTime?: string | null) => {
-    if (!startTime) {
-      return 'Schedule to be confirmed';
-    }
-
-    return moment(startTime).format('ddd, MMM D · h:mm A');
-  };
-
-  const formatDistance = (distanceMeters?: number) => {
-    if (typeof distanceMeters !== 'number') {
-      return 'Nearby';
-    }
-
-    return `${(distanceMeters / 1000).toFixed(1)} km from you`;
-  };
-
-  const renderTripCard = (trip: TravelRouteTrip) => {
-    const routeLabel = `${trip.locationFrom?.name ?? 'Pickup'} → ${trip.locationTo?.name ?? 'Drop-off'}`;
-    const seatsLeft = Math.max(0, trip.availableCapacity);
-    const totalSeats = trip.totalCapacity ?? seatsLeft;
-
-    return (
-      <li
-        key={trip.id}
-        className="rounded-[var(--landing-radius)] border border-[var(--landing-line)] bg-[var(--landing-paper)] p-4"
-      >
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="min-w-0 space-y-1">
-            <p className="landing-label text-[var(--landing-ink)]">
-              Trip #{trip.referenceId}
-            </p>
-            <p className="landing-body text-[var(--landing-muted)]">{routeLabel}</p>
-          </div>
-          <span className="landing-meta rounded-full border border-[var(--landing-line)] px-2.5 py-1">
-            {capitalizeString(trip.status.replace(/_/g, ' '))}
-          </span>
-        </div>
-
-        <ul className="mt-4 grid gap-2 sm:grid-cols-3">
-          <li className="flex items-center gap-2 landing-meta">
-            <FontAwesomeIcon icon={faClock} className="size-4 shrink-0" aria-hidden="true" />
-            <span>{formatSchedule(trip.startTime)}</span>
-          </li>
-          <li className="flex items-center gap-2 landing-meta">
-            <FontAwesomeIcon icon={faUsers} className="size-4 shrink-0" aria-hidden="true" />
-            <span>
-              {seatsLeft} of {totalSeats} seats available
-            </span>
-          </li>
-          <li className="flex items-center gap-2 landing-meta">
-            <FontAwesomeIcon icon={faLocationDot} className="size-4 shrink-0" aria-hidden="true" />
-            <span>{formatDistance(trip.distanceMeters)}</span>
-          </li>
-        </ul>
-      </li>
+    const controller = new AbortController();
+    const { origin, destination } = parseTravelQuery(
+      new URLSearchParams(query),
     );
-  };
-
-  return (
-    <>
-      <Seo
-        title="Travel options | Basis Transport"
-        description="Bus schedules, seat availability, and travel guidance for your route."
-        canonicalPath="/travel"
-      />
-
-      <PublicLayout>
-        <PublicNavbar />
-        <main className="landing-page landing-paper min-h-[calc(100vh-4rem)]">
-          <div className="landing-container py-10 lg:py-14">
-            <Button
-              route="/"
-            >
-              <FontAwesomeIcon icon={faArrowLeft} className="size-4" aria-hidden="true" />
-              Back to home
-            </Button>
-
-            <header className="mb-8 max-w-3xl space-y-3">
-              <h1 className="landing-display text-[var(--landing-ink)]">
-                {hasRoute ? 'Your travel options' : 'Departures near you'}
-              </h1>
-              <p className="landing-body text-[var(--landing-muted)]">
-                {hasRoute
-                  ? 'Schedules, capacity, and guidance for public transport along your route.'
-                  : 'Schedules, capacity, and guidance for public transport around your current location.'}
-              </p>
-            </header>
-
-            {hasRoute ? (
-            <section
-              aria-labelledby="route-summary-heading"
-              className="mb-8 rounded-[var(--landing-radius)] bg-[var(--landing-surface)] p-5"
-            >
-              <h2 id="route-summary-heading" className="landing-label mb-3">
-                Route
-              </h2>
-              <div className="grid gap-3 sm:grid-cols-2">
-                <p className="flex items-start gap-2 landing-body">
-                  <FontAwesomeIcon icon={faLocationDot} className="mt-1 size-4 shrink-0" aria-hidden="true" />
-                  <span>
-                    <span className="landing-meta block">From</span>
-                    {from || '—'}
-                  </span>
-                </p>
-                <p className="flex items-start gap-2 landing-body">
-                  <FontAwesomeIcon icon={faLocationDot} className="mt-1 size-4 shrink-0" aria-hidden="true" />
-                  <span>
-                    <span className="landing-meta block">To</span>
-                    {to || '—'}
-                  </span>
-                </p>
-              </div>
-            </section>
-            ) : null}
-
-            <section aria-labelledby="bus-options-heading" className="mb-10">
-              <div className="mb-4 flex items-center gap-2">
-                <FontAwesomeIcon icon={faBus} className="size-5" aria-hidden="true" />
-                <h2 id="bus-options-heading" className="landing-label">
-                  {hasRoute ? 'Bus options' : 'Nearby departures'}
-                </h2>
-              </div>
-
-              {isFetching ? (
-                <ul className="grid gap-3">
-                  {Array.from({ length: 3 }).map((_, index) => (
-                    <li
-                      key={index}
-                      className="h-28 animate-pulse rounded-[var(--landing-radius)] bg-[var(--landing-surface)]"
-                    />
-                  ))}
-                </ul>
-              ) : matchingTrips.length ? (
-                <ul className="grid gap-3">{matchingTrips.map(renderTripCard)}</ul>
-              ) : (
-                <div className="rounded-[var(--landing-radius)] border border-[var(--landing-line)] bg-[var(--landing-paper)] p-5">
-                  <p className="landing-body text-[var(--landing-muted)]">
-                    No exact matches for this route yet. Try refining your
-                    locations, or review nearby services below.
-                  </p>
-                  {otherNearbyTrips.length ? (
-                    <ul className="mt-4 grid gap-3">
-                      {otherNearbyTrips.map(renderTripCard)}
-                    </ul>
-                  ) : null}
-                </div>
-              )}
-            </section>
-
-            <section
-              aria-labelledby="guidelines-heading"
-              className="mb-10 max-w-3xl"
-            >
-              <h2 id="guidelines-heading" className="landing-label mb-3">
-                Travel guidelines
-              </h2>
-              <ul className="grid gap-2">
-                {TRAVEL_GUIDELINES.map((guideline) => (
-                  <li
-                    key={guideline}
-                    className="landing-body text-[var(--landing-muted)]"
-                  >
-                    {guideline}
-                  </li>
-                ))}
-              </ul>
-            </section>
-
-            <section className="rounded-[var(--landing-radius)] border border-[var(--landing-line)] bg-[var(--landing-paper)] p-5 max-w-3xl">
-              <h2 className="landing-label mb-2">Need more detail?</h2>
-              <p className="landing-body mb-4 text-[var(--landing-muted)]">
-                Sign in to track live arrivals, save routes, and get personalized
-                commute updates.
-              </p>
-              <div className="flex flex-wrap gap-4">
-                <Link to="/auth/login" className="landing-link-sweep">
-                  Sign in
-                </Link>
-                <Link to="/auth/register" className="landing-link-sweep">
-                  Create account
-                </Link>
-              </div>
-            </section>
-          </div>
-        </main>
-        <PublicFooter />
-      </PublicLayout>
-    </>
+    setPlan(undefined);
+    setError("");
+    setShowMap(false);
+    setSelectedLeg(0);
+    if (!origin || !destination) {
+      setLoading(false);
+      return () => controller.abort();
+    }
+    setLoading(true);
+    const location = (p: typeof origin) =>
+      p.stopId
+        ? { stopId: p.stopId }
+        : { latitude: p.latitude, longitude: p.longitude };
+    void networkRequest<JourneyPlan>("/journeys/plan", {
+      method: "POST",
+      signal: controller.signal,
+      body: JSON.stringify({
+        origin: location(origin),
+        destination: location(destination),
+        maxWalkMeters: maxWalk,
+        maxTransfers: 2,
+        preference,
+      }),
+    })
+      .then((p) => {
+        if (!controller.signal.aborted) {
+          setPlan(p);
+          setSelected(p.journeys[0]?.id || "");
+        }
+      })
+      .catch((e) => {
+        if (!controller.signal.aborted) setError(e.message);
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false);
+      });
+    return () => controller.abort();
+  }, [query, preference, maxWalk, revision]);
+  const [mobileMap, setMobileMap] = useState(
+    () => window.matchMedia("(max-width: 767px)").matches,
   );
-};
-
-export default TravelGuidancePage;
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 767px)");
+    const update = () => setMobileMap(media.matches);
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
+  const selectedJourney = plan?.journeys.find((j) => j.id === selected);
+  const title =
+    parsed.origin && parsed.destination
+      ? parsed.origin.name + " → " + parsed.destination.name
+      : "Find your connection";
+  const href =
+    parsed.origin && parsed.destination
+      ? travelUrl(parsed.origin, parsed.destination)
+      : "/travel";
+  return (
+    <JourneyShell
+      title="Your journey, stop by stop"
+      description="Choose a connection. Know where to board, change buses, and get off."
+      path="/travel"
+    >
+      <section className="journey-search-panel">
+        <LandingHeroForm
+          key={query}
+          origin={parsed.origin}
+          destination={parsed.destination}
+          fromText={parsed.from}
+          toText={parsed.to}
+          onSearch={(a, b) => navigate(travelUrl(a, b))}
+        />
+      </section>
+      {parsed.invalid && (
+        <p className="journey-notice">
+          This link is missing a valid location. Select both endpoints to find a
+          connection.
+        </p>
+      )}
+      {plan && (
+        <NetworkNotice
+          network={{
+            verification: plan.verification,
+            sourceUrl: plan.sourceUrl,
+            validTo: plan.validTo,
+          }}
+        />
+      )}
+      {parsed.origin && parsed.destination && (
+        <div className="journey-results-toolbar">
+          <div>
+            <h2>{title}</h2>
+            <p aria-live="polite">
+              {loading
+                ? "Finding your connections…"
+                : plan
+                  ? copy.connections(plan.journeys.length)
+                  : "Network directions"}
+            </p>
+          </div>
+          <div className="journey-actions">
+            <SaveButton href={href} label={title} kind="journey" />
+            <button
+              type="button"
+              className="journey-button secondary"
+              onClick={() => setShareOpen(true)}
+            >
+              <Share2 size={16} />
+              Share
+            </button>
+          </div>
+        </div>
+      )}
+      <div className="journey-preferences">
+        <label>
+          Prefer
+          <select
+            value={preference}
+            onChange={(e) => setPreference(e.target.value)}
+          >
+            <option value="fewest_transfers">Fewest changes</option>
+            <option value="least_walking">Least walking</option>
+          </select>
+        </label>
+        <label>
+          Walk at each end
+          <select
+            value={maxWalk}
+            onChange={(e) => setMaxWalk(Number(e.target.value))}
+          >
+            <option value={800}>Up to 800 m</option>
+            <option value={1500}>Up to 1.5 km</option>
+            <option value={2000}>Up to 2 km</option>
+          </select>
+        </label>
+      </div>
+      <LoadState
+        loading={loading}
+        error={error}
+        retry={() => setRevision((v) => v + 1)}
+      />
+      {!loading && !error && plan && plan.status !== "ok" && (
+        <div className="journey-empty">
+          <h2>{states[plan.status][0]}</h2>
+          <p>{states[plan.status][1]}</p>
+          <Link className="journey-button secondary" to="/stops">
+            Browse stops
+          </Link>
+        </div>
+      )}
+      {!loading && !error && plan?.status === "ok" && (
+        <div className={"journey-results " + (showMap ? "with-map" : "")}>
+          <div className="journey-results-list">
+            {plan.journeys.map((j) => (
+              <JourneyCard
+                key={j.id}
+                journey={j}
+                sourceDate={plan.validTo}
+                expanded={selected === j.id}
+                selectedLeg={selectedLeg}
+                onSelectLeg={selectLeg}
+                onExpand={() => {
+                  setSelected(j.id);
+                  setSelectedLeg(0);
+                }}
+                onMap={() => {
+                  setSelected(j.id);
+                  setShowMap(true);
+                }}
+              />
+            ))}
+          </div>
+          {showMap && !mobileMap && selectedJourney && (
+            <section className="journey-map-panel" aria-label="Journey map">
+              <button
+                type="button"
+                className="journey-map-close journey-button secondary"
+                onClick={() => setShowMap(false)}
+              >
+                <X size={17} />
+                Close map
+              </button>
+              <Suspense fallback={<p>Loading map…</p>}>
+                <JourneyMap
+                  journey={selectedJourney}
+                  selectedLeg={selectedLeg}
+                  onSelectLeg={selectLeg}
+                />
+              </Suspense>
+            </section>
+          )}
+        </div>
+      )}
+      {mobileMap && (
+        <Modal
+          isOpen={showMap && Boolean(selectedJourney)}
+          onClose={() => setShowMap(false)}
+          heading="Journey map"
+          className="journey-map-modal"
+        >
+          {selectedJourney && (
+            <Suspense fallback={<p>Loading map…</p>}>
+              <JourneyMap
+                journey={selectedJourney}
+                selectedLeg={selectedLeg}
+                onSelectLeg={selectLeg}
+              />
+            </Suspense>
+          )}
+        </Modal>
+      )}
+      {plan && (
+        <details className="journey-data-notes">
+          <summary>About these directions</summary>
+          <ul>
+            {plan.warnings.map((w) => (
+              <li key={w}>{w}</li>
+            ))}
+          </ul>
+          <small>Network version: {plan.datasetVersion}</small>
+        </details>
+      )}
+      {!query && (
+        <div className="journey-empty">
+          <h2>Where would you like to go?</h2>
+          <p>Choose stops or places above. You don’t need an account.</p>
+          <Link to="/stops">Explore nearby stops</Link>
+        </div>
+      )}
+      <Modal
+        isOpen={shareOpen}
+        onClose={() => setShareOpen(false)}
+        heading="Share this journey?"
+      >
+        <p>
+          This link includes the precise coordinates you selected. Anyone with
+          the link can see them.
+        </p>
+        <div className="journey-actions">
+          <button
+            type="button"
+            className="journey-button"
+            onClick={() =>
+              void Promise.resolve()
+                .then(() =>
+                  navigator.clipboard.writeText(window.location.origin + href),
+                )
+                .then(() => {
+                  toast.success("Journey link copied");
+                  setShareOpen(false);
+                })
+                .catch(() =>
+                  toast.error(
+                    "Copying is unavailable. You can copy the address from your browser.",
+                  ),
+                )
+            }
+          >
+            Copy journey link
+          </button>
+        </div>
+      </Modal>
+    </JourneyShell>
+  );
+}

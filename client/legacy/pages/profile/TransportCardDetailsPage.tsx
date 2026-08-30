@@ -1,9 +1,10 @@
 import AppLayout from "@/containers/navigation/AppLayout";
 import DeleteTransportCard from "./DeleteTransportCard";
 import UpdateTransportCard from "./UpdateTransportCard";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { UUID } from "@/types";
+import BackButton from "@/components/inputs/BackButton";
 import Button from "@/components/inputs/Button";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -38,9 +39,7 @@ import {
 } from "@/components/layout/PageShell";
 
 const TransportCardDetailsPage = () => {
-  // NAVIGATION
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
 
   // STATE VARIABLES
   const dispatch = useAppDispatch();
@@ -167,15 +166,7 @@ const TransportCardDetailsPage = () => {
         </PageSection>
 
         <PageFooter>
-          <Button
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              navigate(-1);
-            }}
-          >
-            Back
-          </Button>
+          <BackButton />
         </PageFooter>
       </PageBody>
       <DeleteTransportCard />

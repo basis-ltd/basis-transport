@@ -13,8 +13,11 @@ import { RolesService } from './roles.service';
 import { UUID } from '../../types';
 import { Role } from '../../entities/role.entity';
 import { RoleStatus } from '../../constants/role.constants';
+import { RoleTypes } from '../../constants/role.constants';
+import { Roles } from '../../common/decorators/auth.decorators';
 
 @Controller('roles')
+@Roles(RoleTypes.ADMIN, RoleTypes.SUPER_ADMIN)
 export class RolesController {
   constructor(private readonly roleService: RolesService) {}
 

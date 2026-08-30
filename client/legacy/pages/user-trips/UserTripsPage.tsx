@@ -1,3 +1,4 @@
+import BackButton from '@/components/inputs/BackButton';
 import Button from '@/components/inputs/Button';
 import Table from '@/components/table/Table';
 import AppLayout from '@/containers/navigation/AppLayout';
@@ -6,7 +7,7 @@ import { UUID } from '@/types';
 import { useUserTripColumns } from '@/usecases/user-trip/columns.userTrip';
 import { useFetchUserTrips } from '@/usecases/user-trip/userTrip.hooks';
 import { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import moment from 'moment';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faLocationDot, faRoute } from '@fortawesome/free-solid-svg-icons';
@@ -21,10 +22,6 @@ const UserTripsPage = () => {
   const [tripId, setTripId] = useState<UUID | null>(null);
   const [userId, setUserId] = useState<UUID | null>(null);
 
-  /**
-   * NAVIGATION
-   */
-  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
@@ -149,12 +146,7 @@ const UserTripsPage = () => {
           </section>
         </section>
         <menu className='w-full flex items-center gap-3 justify-between'>
-          <Button onClick={(e) => {
-            e.preventDefault();
-            navigate(-1);
-          }}>
-            Back
-          </Button>
+          <BackButton />
         </menu>
       </PageBody>
     </AppLayout>
