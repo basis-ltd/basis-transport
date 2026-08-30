@@ -20,7 +20,7 @@ import {
   filterTripsForRoute,
   type TravelRouteTrip,
 } from './travelGuidance.utils';
-
+import Button from '@/components/inputs/Button';
 const TRAVEL_GUIDELINES = [
   'Arrive at the stop a few minutes before the scheduled departure.',
   'Check seat availability before boarding — capacity updates in real time.',
@@ -135,13 +135,12 @@ const TravelGuidancePage = () => {
         <PublicNavbar />
         <main className="landing-page landing-paper min-h-[calc(100vh-4rem)]">
           <div className="landing-container py-10 lg:py-14">
-            <Link
-              to="/"
-              className="landing-link-sweep mb-6 inline-flex items-center gap-2"
+            <Button
+              route="/"
             >
               <FontAwesomeIcon icon={faArrowLeft} className="size-4" aria-hidden="true" />
               Back to home
-            </Link>
+            </Button>
 
             <header className="mb-8 max-w-3xl space-y-3">
               <h1 className="landing-display text-[var(--landing-ink)]">

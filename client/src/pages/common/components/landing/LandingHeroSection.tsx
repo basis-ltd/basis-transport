@@ -1,15 +1,20 @@
 import { useBrowseLocations } from '@/usecases/locations/location.hooks';
 import { useState } from 'react';
-import { faLocationCrosshairs } from '@fortawesome/free-solid-svg-icons';
-import useConfirm from '@/components/feedback/ConfirmDialog';
+import { useForm, useWatch } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
 import LandingHeroActions from './LandingHeroActions';
-import LandingHeroForm, { type LandingHeroFormValues } from './LandingHeroForm';
+import LandingHeroForm, {
+  type LandingHeroFormValues,
+} from './LandingHeroForm';
 import LandingHeroHeadline from './LandingHeroHeadline';
 import LandingHeroLocationStatus from './LandingHeroLocationStatus';
 import LandingHeroMapPanel from './LandingHeroMapPanel';
 import LandingHeroTrustIndicators from './LandingHeroTrustIndicators';
+import { useGeolocationPickup } from '@/hooks/locations/useGeolocationPickup';
+import {
+  describeLocation,
+  hasCoordinates,
+} from '@/utils/locations.util';
 
 interface LandingHeroSectionProps {
   commutesValue: string;
@@ -26,20 +31,45 @@ const LandingHeroSection = ({
 }: LandingHeroSectionProps) => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isLocating, setIsLocating] = useState(false);
-  const [routePreview, setRoutePreview] = useState({ pickup: '', dropoff: '' });
+
+  const {
+    control,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm<LandingHeroFormValues>({
+    defaultValues: {
+      pickupLocation: undefined,
+      dropoffLocation: undefined,
+      pickupSource: 'search',
+    },
+  });
+
+  const geolocation = useGeolocationPickup(control, setValue);
+  const pickupLocation = useWatch({ control, name: 'pickupLocation' });
+  const dropoffLocation = useWatch({ control, name: 'dropoffLocation' });
+  const pickupSource = useWatch({ control, name: 'pickupSource' });
 
   const { browserLocation, browserLocationIsLoading } = useBrowseLocations();
-  const { confirm, confirmDialog } = useConfirm();
 
   const userPosition =
     browserLocation.lat && browserLocation.lng
       ? { lat: browserLocation.lat, lng: browserLocation.lng }
       : null;
 
-  const isResolvingLocation = isLocating || browserLocationIsLoading;
+  const isResolvingLocation =
+    geolocation.isLocating || browserLocationIsLoading;
 
-  const buildTravelSearchParams = (from: string, to: string) => {
+  const pickupLabel =
+    pickupSource === 'geolocation' && pickupLocation
+      ? CURRENT_LOCATION_LABEL
+      : describeLocation(pickupLocation);
+  const dropoffLabel = describeLocation(dropoffLocation);
+
+  const buildTravelSearchParams = (from: string, to: string, coords?: {
+    lat: number;
+    lng: number;
+  }) => {
     const params = new URLSearchParams();
 
     if (from) {
@@ -50,86 +80,50 @@ const LandingHeroSection = ({
       params.set('to', to);
     }
 
-    if (userPosition) {
-      params.set('lat', String(userPosition.lat));
-      params.set('lng', String(userPosition.lng));
+    const position = coords ?? userPosition;
+    if (position) {
+      params.set('lat', String(position.lat));
+      params.set('lng', String(position.lng));
     }
 
     return params;
   };
 
-  const applyCurrentLocation = (setPickup?: (value: string) => void) => {
-    setPickup?.(CURRENT_LOCATION_LABEL);
-    setRoutePreview((current) => ({
-      ...current,
-      pickup: CURRENT_LOCATION_LABEL,
-    }));
-  };
-
-  /**
-     * Reading device location leaves the page, so it is asked for rather than
-     * taken: the reader gets to see what is about to happen before the browser
-     * permission prompt appears.
-     */
-  const requestCurrentLocation = async (
-    setPickup?: (value: string) => void
-  ) => {
-    const agreed = await confirm({
-      title: 'Use your current location?',
-      description:
-        'Basis will read your device location once to fill in where you are starting from. It is not saved or shared.',
-      confirmLabel: 'Use my location',
-      icon: faLocationCrosshairs,
-    });
-
-    if (!agreed) {
-      return;
-    }
-
-    if (!navigator.geolocation) {
-      if (userPosition) {
-        applyCurrentLocation(setPickup);
-        return;
-      }
-      toast.error('Location is not available on this device.');
-      return;
-    }
-
-    setIsLocating(true);
-    navigator.geolocation.getCurrentPosition(
-      () => {
-        setIsLocating(false);
-        applyCurrentLocation(setPickup);
-      },
-      () => {
-        setIsLocating(false);
-        if (userPosition) {
-          applyCurrentLocation(setPickup);
-          return;
-        }
-        toast.error('Unable to access your location. Enter it manually.');
-      },
-      { enableHighAccuracy: true, timeout: 8000 }
-    );
-  };
-
   const onPlanSubmit = (data: LandingHeroFormValues) => {
-    const from = data.pickupLocation.trim();
-    const to = data.dropoffLocation.trim();
+    const from =
+      data.pickupSource === 'geolocation'
+        ? CURRENT_LOCATION_LABEL
+        : describeLocation(data.pickupLocation);
+    const to = describeLocation(data.dropoffLocation);
+
+    const coords = hasCoordinates(data.pickupLocation)
+      ? {
+          lat: data.pickupLocation!.latitude,
+          lng: data.pickupLocation!.longitude,
+        }
+      : undefined;
 
     setIsSubmitting(true);
-    setRoutePreview({ pickup: from, dropoff: to });
-    navigate(`/travel?${buildTravelSearchParams(from, to).toString()}`);
+    navigate(`/travel?${buildTravelSearchParams(from, to, coords).toString()}`);
     setIsSubmitting(false);
   };
 
   const onSeeNearby = () => {
-    if (!userPosition) {
-      void requestCurrentLocation();
+    if (!userPosition && !hasCoordinates(pickupLocation)) {
+      void geolocation.useMyLocation('pickupLocation');
       return;
     }
 
-    navigate(`/travel?${buildTravelSearchParams('', '').toString()}`);
+    const coords = hasCoordinates(pickupLocation)
+      ? {
+          lat: pickupLocation!.latitude,
+          lng: pickupLocation!.longitude,
+        }
+      : userPosition ?? undefined;
+
+    navigate(
+      `/travel?${buildTravelSearchParams('', '', coords).toString()}`
+    );
   };
 
   return (
@@ -139,18 +133,22 @@ const LandingHeroSection = ({
           <div className="landing-enter flex flex-col items-start gap-6">
             <LandingHeroLocationStatus
               isLocating={isResolvingLocation}
-              hasCurrentLocation={Boolean(userPosition)}
-              onUseCurrentLocation={() => void requestCurrentLocation()}
+              hasCurrentLocation={Boolean(
+                userPosition ||
+                  (pickupSource === 'geolocation' && pickupLocation)
+              )}
+              onUseCurrentLocation={() =>
+                void geolocation.useMyLocation('pickupLocation')
+              }
             />
 
             <LandingHeroHeadline onLearnMore={onLearnMore} />
 
             <LandingHeroForm
-              onSubmit={onPlanSubmit}
-              onUseCurrentLocation={(setPickup) =>
-                void requestCurrentLocation(setPickup)
-              }
-              isLocating={isResolvingLocation}
+              onSubmit={handleSubmit(onPlanSubmit)}
+              control={control}
+              errors={errors}
+              geolocation={geolocation}
             />
 
             <LandingHeroActions
@@ -168,14 +166,15 @@ const LandingHeroSection = ({
             <LandingHeroMapPanel
               userPosition={userPosition}
               isLocating={isResolvingLocation}
-              onUseCurrentLocation={() => void requestCurrentLocation()}
-              pickupLabel={routePreview.pickup}
-              dropoffLabel={routePreview.dropoff}
+              onUseCurrentLocation={() =>
+                void geolocation.useMyLocation('pickupLocation')
+              }
+              pickupLabel={pickupLabel}
+              dropoffLabel={dropoffLabel}
             />
           </div>
         </div>
       </div>
-      {confirmDialog}
     </section>
   );
 };

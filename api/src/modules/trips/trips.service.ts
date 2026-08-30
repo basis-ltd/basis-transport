@@ -22,6 +22,7 @@ import { UserRole } from '../../entities/userRole.entity';
 import { RoleTypes } from '../../constants/role.constants';
 import { UserStatus } from '../../constants/user.constants';
 import jwt from 'jsonwebtoken';
+import logger from '../../helpers/logger.helper';
 
 interface NearbyTripResult {
   id: UUID;
@@ -620,7 +621,12 @@ export class TripService {
         .leftJoin('trip.locationFrom', 'locationFrom')
         .select('trip.id', 'tripId')
         .addSelect(
-          'ST_Distance(locationFrom.address::geography, ST_SetSRID(ST_MakePoint(:lng, :lat), 4326)::geography)',
+          // Single WKT parameter: a two-parameter ST_MakePoint(:lng, :lat) is
+          // bound out of order once the query also expands an IN (:...) list,
+          // which silently swapped the origin's latitude and longitude.
+          // The alias is quoted: Postgres folds an unquoted locationFrom to
+          // lowercase and then cannot find the joined table.
+          'ST_Distance("locationFrom".address::geography, ST_SetSRID(ST_GeomFromText(:origin), 4326)::geography)',
           'distanceMeters'
         )
         .where('trip.status IN (:...statuses)', {
@@ -628,10 +634,10 @@ export class TripService {
         })
         .andWhere('locationFrom.address IS NOT NULL')
         .setParameters({
-          lat,
-          lng,
+          origin: `POINT(${lng} ${lat})`,
         })
-        .orderBy('distanceMeters', 'ASC')
+        // Quoted for the same reason as the alias above.
+        .orderBy('"distanceMeters"', 'ASC')
         .getRawMany<{ tripId: UUID; distanceMeters: string }>();
 
       const withDistances = rawDistances
@@ -650,7 +656,11 @@ export class TripService {
         .map((trip) => mapTripToResult(trip));
 
       return [...withDistances, ...withoutLocation].slice(0, limit);
-    } catch {
+    } catch (error) {
+      // The PostGIS path is the accurate one; falling back silently used to hide
+      // why it failed, so log before ranking in memory.
+      logger.error('Falling back to in-memory nearby trip ranking', error);
+
       const sortedByDistance = candidateTrips
         .map((trip) => {
           const coordinates = (
@@ -660,7 +670,8 @@ export class TripService {
             return mapTripToResult(trip, Number.POSITIVE_INFINITY);
           }
 
-          const [tripLatitude, tripLongitude] = coordinates;
+          // GeoJSON stores [longitude, latitude].
+          const [tripLongitude, tripLatitude] = coordinates;
           return mapTripToResult(
             trip,
             this.haversineDistanceMeters(lat, lng, tripLatitude, tripLongitude)

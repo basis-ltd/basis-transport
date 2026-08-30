@@ -13,6 +13,12 @@ import { TransportCard } from '../entities/transportCard.entity';
 import { AuditLog } from '../entities/auditLog.entity';
 import { HttpAuditLog } from '../entities/httpAuditLog.entity';
 import { Log } from '../entities/log.entity';
+import { Agency } from '../entities/agency.entity';
+import { Corridor } from '../entities/corridor.entity';
+import { Stop } from '../entities/networkStop.entity';
+import { TransitRoute } from '../entities/transitRoute.entity';
+import { RouteStop } from '../entities/routeStop.entity';
+import { RouteFrequency } from '../entities/routeFrequency.entity';
 
 export const entities = [
   User,
@@ -27,6 +33,12 @@ export const entities = [
   AuditLog,
   HttpAuditLog,
   Log,
+  Agency,
+  Corridor,
+  Stop,
+  TransitRoute,
+  RouteStop,
+  RouteFrequency,
 ];
 
 @Module({
