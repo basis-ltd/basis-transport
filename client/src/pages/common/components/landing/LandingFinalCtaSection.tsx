@@ -1,43 +1,35 @@
-import Button from '@/components/inputs/Button';
-import {
-  publicClasses,
-  publicColors as Colors,
-} from '@/containers/public/publicTheme';
+import { Link } from 'react-router-dom';
+import LandingSection from './LandingSection';
 
 interface LandingFinalCtaSectionProps {
   onLearnMore?: () => void;
 }
 
-const LandingFinalCtaSection = ({
-  onLearnMore,
-}: LandingFinalCtaSectionProps) => {
+const LandingFinalCtaSection = ({ onLearnMore }: LandingFinalCtaSectionProps) => {
   return (
-    <section className={publicClasses.section} style={{ backgroundColor: Colors.white }}>
-      <article className={`${publicClasses.containerNarrow} text-center`}>
-        <header className="animate-on-scroll">
-          <h2 className={`${publicClasses.landingSectionTitle} mb-6`}>
-            Done stressing about your commute?
-          </h2>
-          <p className={`${publicClasses.landingBody} mb-10`}>
-            Create your free account and start your confident commute today.
-          </p>
-          <nav className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button route="/dashboard" primary>
-              Create free account
-            </Button>
-            <Button
-              route="#how-it-works"
-              onClick={(event) => {
-                event.preventDefault();
-                onLearnMore?.();
-              }}
-            >
-              Learn more
-            </Button>
-          </nav>
-        </header>
-      </article>
-    </section>
+    <LandingSection className="landing-cta-band">
+      <div className="mx-auto max-w-2xl text-center animate-on-scroll">
+        <h2 className="landing-display text-balance">
+          Done stressing about your commute?
+        </h2>
+        <p className="landing-body mt-4">
+          Create your free account and start travelling with schedules, seat
+          availability, and route guidance you can trust.
+        </p>
+        <nav className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <Link to="/auth/register" className="landing-btn-primary w-full sm:w-auto">
+            Create free account
+          </Link>
+          <button
+            type="button"
+            onClick={onLearnMore}
+            className="inline-flex h-11 w-full items-center justify-center rounded-[var(--landing-radius)] border border-[color-mix(in_oklab,var(--landing-paper)_35%,transparent)] px-5 text-sm font-medium text-[var(--landing-paper)] transition-colors hover:bg-[color-mix(in_oklab,var(--landing-paper)_10%,transparent)] sm:w-auto"
+          >
+            Learn more
+          </button>
+        </nav>
+      </div>
+    </LandingSection>
   );
 };
 

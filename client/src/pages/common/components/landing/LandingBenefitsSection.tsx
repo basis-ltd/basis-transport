@@ -1,37 +1,32 @@
-import { publicClasses, publicColors as Colors } from '@/containers/public/publicTheme';
 import { landingBenefits } from './landingContent';
+import LandingSection, { LandingSectionHeader } from './LandingSection';
 
 const LandingBenefitsSection = () => {
   return (
-    <section className={publicClasses.section} style={{ backgroundColor: Colors.bgAlt }}>
-      <article className={publicClasses.container}>
-        <header className="text-center mb-16 animate-on-scroll">
-          <h2 className={`${publicClasses.landingSectionTitle} mb-6`}>
-            Why commuters keep using Basis
-          </h2>
-          <p className={publicClasses.landingBody}>
-            It&apos;s not about fancy features. It&apos;s about how you feel.
-          </p>
-        </header>
+    <LandingSection tone="surface">
+      <LandingSectionHeader
+        eyebrow="Why commuters stay"
+        title="Less guessing. More going."
+        description="It's not about fancy features. It's about how you feel on the way to work, school, and everywhere in between."
+      />
 
-        <ul className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {landingBenefits.map((benefit) => (
-            <li
-              key={benefit.title}
-              className={`animate-on-scroll ${publicClasses.card}`}
-              style={{ animationDelay: benefit.animationDelay }}
-            >
-              <h3 className={`${publicClasses.landingCardTitle} mb-3`}>
-                {benefit.title}
-              </h3>
-              <p className={publicClasses.landingBody}>
-                {benefit.description}
-              </p>
-            </li>
-          ))}
-        </ul>
-      </article>
-    </section>
+      <ul className="grid gap-5 md:grid-cols-2">
+        {landingBenefits.map((benefit) => (
+          <li
+            key={benefit.title}
+            className="landing-card animate-on-scroll"
+            style={{ animationDelay: benefit.animationDelay }}
+          >
+            <h3 className="landing-label mb-3 text-[var(--landing-ink)]">
+              {benefit.title}
+            </h3>
+            <p className="landing-body text-[var(--landing-muted)]">
+              {benefit.description}
+            </p>
+          </li>
+        ))}
+      </ul>
+    </LandingSection>
   );
 };
 

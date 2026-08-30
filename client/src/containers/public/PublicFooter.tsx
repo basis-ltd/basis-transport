@@ -1,32 +1,32 @@
-import { Link } from "react-router-dom";
-import { publicClasses, publicColors } from "./publicTheme";
-import basisTransportLogo from "/logo.svg";
+import { Link } from 'react-router-dom';
+import { publicClasses, publicColors } from './publicTheme';
+import basisTransportLogo from '/logo.svg';
 
 type FooterLink = { to: string; label: string };
 
 const footerSections: { title: string; links: FooterLink[] }[] = [
   {
-    title: "Product",
+    title: 'Product',
     links: [
-      { to: "/#how-it-works", label: "How it works" },
-      { to: "#", label: "Supported cities" },
-      { to: "#", label: "About us" },
+      { to: '/#how-it-works', label: 'How it works' },
+      { to: '/cities', label: 'Supported cities' },
+      { to: '/about', label: 'About us' },
     ],
   },
   {
-    title: "Support",
+    title: 'Support',
     links: [
-      { to: "#", label: "Help center" },
-      { to: "#", label: "Contact us" },
-      { to: "#", label: "Privacy" },
+      { to: '/help', label: 'Help center' },
+      { to: '/contact', label: 'Contact us' },
+      { to: '/privacy', label: 'Privacy' },
     ],
   },
 ];
 
 const legalLinks: FooterLink[] = [
-  { to: "#", label: "Privacy Policy" },
-  { to: "#", label: "Terms of Service" },
-  { to: "#", label: "Cookies" },
+  { to: '/privacy', label: 'Privacy Policy' },
+  { to: '/terms', label: 'Terms of Service' },
+  { to: '/cookies', label: 'Cookies' },
 ];
 
 function FooterNavLink({
@@ -36,11 +36,9 @@ function FooterNavLink({
   link: FooterLink;
   muted?: boolean;
 }) {
-  const isPlaceholder = link.to === "#";
   return (
     <Link
-      to={isPlaceholder ? "/" : link.to}
-      onClick={isPlaceholder ? (e) => e.preventDefault() : undefined}
+      to={link.to}
       className={`type-body-sm hover:underline underline-offset-2 transition-colors ${
         muted ? '' : 'text-(--ink)'
       }`}
@@ -53,10 +51,7 @@ function FooterNavLink({
 
 const PublicFooter = () => {
   return (
-    <footer
-      className="py-16"
-      style={{ backgroundColor: publicColors.bgAlt }}
-    >
+    <footer className="py-16" style={{ backgroundColor: publicColors.bgAlt }}>
       <section className={publicClasses.containerWide}>
         <article className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
           <section>
@@ -107,17 +102,17 @@ const PublicFooter = () => {
           >
             <span className="font-medium">
               Enjoy your daily journeys with us, always free and always accessible for everyone.
-            </span>{" "}
+            </span>{' '}
             At Basis Transport, we are dedicated to making your commute stress-free and easy, without any cost to you. Thanks to support from advertisements, we make it possible for every traveler to get where they need to go with confidence and peace of mind.
           </p>
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pt-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pt-6 border-t border-(--line)">
             <p
               className="type-body-sm"
               style={{ color: publicColors.neutralLight }}
             >
               © 2026 Basis Transport. All rights reserved.
             </p>
-            <nav className="flex gap-6" aria-label="Legal">
+            <nav className="flex flex-wrap gap-6" aria-label="Legal">
               {legalLinks.map((link) => (
                 <FooterNavLink key={link.label} link={link} muted />
               ))}

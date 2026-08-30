@@ -207,16 +207,17 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             <button
               type="button"
               onClick={suffixIconHandler}
+              disabled={!suffixIconHandler}
               aria-label={suffixIconLabel}
               title={suffixIconLabel}
               className={cn(
-                'absolute inset-y-0 end-0 flex items-center rounded-e-(--radius-control) px-3.5 text-sm outline-none transition-[background-color,color] duration-200 ease-(--ease-flat)',
+                'absolute end-1 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-(--radius-control) text-sm outline-none transition-[background-color,color,box-shadow] duration-200 ease-(--ease-flat)',
                 suffixIconPrimary
                   ? 'bg-(--ink) text-(--paper) active:shadow-[var(--press-on-ink)_999px_999px_0_inset]'
-                  : 'text-(--muted) hover:text-(--ink)'
+                  : 'text-(--muted) hover:bg-(--surface) hover:text-(--ink) active:shadow-[var(--press-on-paper)_999px_999px_0_inset] focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px] disabled:pointer-events-none disabled:opacity-40'
               )}
             >
-              <FontAwesomeIcon icon={suffixIcon || faSearch} />
+              <FontAwesomeIcon icon={suffixIcon || faSearch} className="size-3.5" />
             </button>
           ) : null}
 
@@ -247,7 +248,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
                 controlClassName,
                 prefixIcon && 'ps-10',
                 prefixText && 'ps-[3.6rem]',
-                (suffixIcon || showSearchSuffix) && 'pe-11',
+                (suffixIcon || showSearchSuffix) && 'pe-10',
                 readOnly && readOnlyControlClassName,
                 className
               )}

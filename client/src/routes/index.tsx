@@ -5,6 +5,13 @@ import ResetPassword from '@/pages/auth/ResetPassword';
 import LandingPage from '@/pages/common/LandingPage';
 import TravelGuidancePage from '@/pages/common/TravelGuidancePage';
 import NotFoundPage from '@/pages/common/NotFoundPage';
+import ContactUsPage from '@/pages/common/ContactUsPage';
+import PrivacyPolicyPage from '@/pages/common/PrivacyPolicyPage';
+import TermsOfServicePage from '@/pages/common/TermsOfServicePage';
+import CookiesPolicyPage from '@/pages/common/CookiesPolicyPage';
+import AboutPage from '@/pages/common/AboutPage';
+import HelpCenterPage from '@/pages/common/HelpCenterPage';
+import SupportedCitiesPage from '@/pages/common/SupportedCitiesPage';
 import UserDashboard from '@/pages/dashboard/UserDashboard';
 import TripsPage from '@/pages/trips/TripsPage';
 import { Routes, Route } from 'react-router-dom';
@@ -31,6 +38,13 @@ const Router = () => {
       {/*Home*/}
       <Route path="/" element={<LandingPage />} />
       <Route path="/travel" element={<TravelGuidancePage />} />
+      <Route path="/contact" element={<ContactUsPage />} />
+      <Route path="/privacy" element={<PrivacyPolicyPage />} />
+      <Route path="/terms" element={<TermsOfServicePage />} />
+      <Route path="/cookies" element={<CookiesPolicyPage />} />
+      <Route path="/about" element={<AboutPage />} />
+      <Route path="/help" element={<HelpCenterPage />} />
+      <Route path="/cities" element={<SupportedCitiesPage />} />
 
       {/**
        * AUTH

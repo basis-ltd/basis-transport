@@ -74,7 +74,7 @@ const LandingHeroMapPanel = ({
           type="button"
           onClick={onUseCurrentLocation}
           disabled={isLocating}
-          className="absolute bottom-3 left-3 z-10 inline-flex h-9 items-center gap-2 rounded-[var(--landing-radius)] border border-[var(--landing-line)] bg-[var(--landing-paper)] px-3 text-sm text-[var(--landing-ink)] transition-colors hover:bg-[var(--landing-surface)] disabled:opacity-60"
+          className="landing-affix-btn absolute bottom-3 left-3 z-10 inline-flex h-9 items-center gap-2 border border-[var(--landing-line)] bg-[var(--landing-paper)] px-3 text-sm text-[var(--landing-ink)]"
         >
           <FontAwesomeIcon
             icon={faLocationCrosshairs}
