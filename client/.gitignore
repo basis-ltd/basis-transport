@@ -3,3 +3,17 @@ node_modules
 
 # Build
 dist
+
+# Agents
+.claude/
+.deepseek/
+.gemini/
+.google/
+.openai/
+.anthropic/
+.groq/
+.groq/
+.groq/
+.groq/
+.groq/
+.groq/

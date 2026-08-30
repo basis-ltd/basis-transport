@@ -139,3 +139,17 @@ dist
 .env
 
 .DS_Store
+
+# Agents
+.claude/
+.deepseek/
+.gemini/
+.google/
+.openai/
+.anthropic/
+.groq/
+.groq/
+.groq/
+.groq/
+.groq/
+.groq/
