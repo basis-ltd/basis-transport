@@ -113,8 +113,15 @@ describe("Guest journey form", () => {
   });
   it("supports keyboard stop selection and swapping endpoints", async () => {
     const onSearch = vi.fn();
+    const onLocationsChange = vi.fn();
     const destination = { name: "Downtown", latitude: -1.94, longitude: 30.06 };
-    render(<LandingHeroForm onSearch={onSearch} destination={destination} />);
+    render(
+      <LandingHeroForm
+        onSearch={onSearch}
+        onLocationsChange={onLocationsChange}
+        destination={destination}
+      />,
+    );
     const from = screen.getByRole("combobox", { name: "From" });
     fireEvent.focus(from);
     fireEvent.change(from, { target: { value: "Kab" } });
@@ -122,6 +129,10 @@ describe("Guest journey form", () => {
     fireEvent.keyDown(from, { key: "ArrowDown" });
     fireEvent.keyDown(from, { key: "Enter" });
     await waitFor(() => expect(from).toHaveValue("Kabuga"));
+    expect(onLocationsChange).toHaveBeenLastCalledWith(
+      expect.objectContaining({ stopId: "A" }),
+      destination,
+    );
     fireEvent.click(
       screen.getByRole("button", { name: "Swap origin and destination" }),
     );
@@ -129,6 +140,17 @@ describe("Guest journey form", () => {
     expect(onSearch).toHaveBeenCalledWith(
       destination,
       expect.objectContaining({ stopId: "A", name: "Kabuga" }),
+    );
+    expect(onLocationsChange).toHaveBeenLastCalledWith(
+      destination,
+      expect.objectContaining({ stopId: "A" }),
+    );
+    fireEvent.change(screen.getByRole("combobox", { name: "From" }), {
+      target: { value: "New starting point" },
+    });
+    expect(onLocationsChange).toHaveBeenLastCalledWith(
+      undefined,
+      expect.objectContaining({ stopId: "A" }),
     );
   });
   it("recovers from geolocation denial", async () => {

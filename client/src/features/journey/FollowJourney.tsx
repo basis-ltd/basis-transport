@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowRight, Check, MapPin, RotateCcw } from "lucide-react";
 import BackButton from "@/components/inputs/BackButton";
+import WalkingDirections from "./WalkingDirections";
 import Button from "@/components/inputs/Button";
 import LocationSearch from "./LocationSearch";
 import type { Journey, JourneyLocation, PassengerStep } from "./types";
@@ -202,9 +203,7 @@ export default function FollowJourney({
     return (
       <section className="follow-journey">
         <p>No step-by-step guidance is available for this journey.</p>
-        <BackButton onClick={onClose}>
-          Back to results
-        </BackButton>
+        <BackButton onClick={onClose}>Back to results</BackButton>
       </section>
     );
 
@@ -277,27 +276,20 @@ export default function FollowJourney({
                 {current.paymentInstructions}
               </p>
             )}
-            {current.timing.label && (
-              <p className="follow-journey-timing">
-                {current.timing.label}
-                {current.timing.seconds !== null &&
-                  ` · about ${Math.ceil(current.timing.seconds / 60)} min`}
-              </p>
-            )}
-          </div>
-          {currentLeg?.kind === "walk" && (
-            <>
-              {currentLeg.quality === "pedestrian-route" && (
-                <p className="journey-google-credit">
-                  <span translate="no">Google Maps</span> · walking directions
+            {current.timing.label &&
+              !(
+                currentLeg?.kind === "walk" &&
+                currentLeg.quality === "unverified-access"
+              ) && (
+                <p className="follow-journey-timing">
+                  {current.timing.label}
+                  {current.timing.seconds !== null &&
+                    ` · about ${Math.ceil(current.timing.seconds / 60)} min`}
                 </p>
               )}
-              <ol className="follow-walking-directions">
-                {currentLeg.instructions.map((instruction, i) => (
-                  <li key={i}>{instruction}</li>
-                ))}
-              </ol>
-            </>
+          </div>
+          {currentLeg?.kind === "walk" && (
+            <WalkingDirections leg={currentLeg} />
           )}
           {next && (
             <div className="follow-journey-next">

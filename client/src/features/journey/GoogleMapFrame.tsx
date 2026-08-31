@@ -48,7 +48,7 @@ function ReadyMap({
   );
 }
 
-/** Only mount from an explicit map view; no precise URLs in provider referrers. */
+/** Shared map loader; no precise URLs in provider referrers. */
 export default function GoogleMapFrame({
   children,
   fallback,

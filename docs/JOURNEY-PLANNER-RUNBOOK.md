@@ -65,8 +65,14 @@ requests also require a loopback peer and localhost Origin in that mode.
 Do not proxy this internal dataset to a public domain. Public mode fails closed
 until a current, verified, rights-approved dataset has been published.
 
-Named stop-to-stop planning works without Google Routes. Coordinate endpoints
-require `GOOGLE_ROUTES_API_KEY` on the server. The browser uses a **different**
+Named stop-to-stop planning works without Google Routes. Street-by-street walking
+requires `GOOGLE_ROUTES_API_KEY` on the server. Coordinate endpoints remain usable
+without it: results contain `unverified-access` walks to nearby boarding points,
+with straight-line minimum distances, null durations, no invented geometry, and
+[Google Maps walking-navigation links](https://developers.google.com/maps/documentation/urls/get-started).
+A missing provider footpath also produces this explicitly unchecked handoff, never
+a claim of pedestrian access. Fully routed walks rank ahead of unchecked walks.
+The browser uses a **different**
 `VITE_GOOGLE_MAPS_API_KEY`. Restrict both keys and enable billing/quota alerts.
 Never paste server keys into client configuration, logs, or issue reports.
 Pedestrian-only fallback between nearby named stops also requires the provider.
@@ -77,8 +83,8 @@ Current-location inputs reverse-geocode the opted-in GPS position using the
 browser key; enable the [Geocoding API](https://developers.google.com/maps/documentation/javascript/geocoding)
 alongside Maps JavaScript and Places. The returned address changes only the label,
 not the GPS coordinates. Failed or timed-out address lookups retain a coordinate
-label with a notice; edits/swap cancel stale address results. No automatic GPS or
-IP-location lookup is used.
+label with a notice; edits/swap cancel stale address results. GPS remains opt-in;
+the landing map's IP hint is separate and never fills a journey field.
 
 ### Remera–Downtown troubleshooting
 
@@ -248,9 +254,13 @@ per state, 2,000 frontier labels, and 150,000 ride expansions. Candidate/frontie
 label/expansion truncation produces an explicit search-limit warning instead of
 being treated as proof of no connection.
 
-Endpoint walks use Google's pedestrian routes (3.5 s timeout); reviewed transfers
-are capped at 400 m. Endpoint preference defaults to 800 m and cannot exceed
-2 km. Ranking is transfers, walking, then ride distance, or least walking first.
+Endpoint walks use Google's pedestrian routes (3.5 s timeout) where available;
+reviewed transfers are capped at 400 m and never use the unverified-access fallback.
+Omitting `maxWalkMeters` selects automatic nearest-connection search: 800 m, then
+1.5 km, 2 km, and at most 5 km if needed. Walks longer than 800 m are disclosed.
+An explicit 100–2,000 m limit is never relaxed; an unchecked distance is a lower
+bound, not a promise that the actual path fits. Ranking prefers checked access,
+then transfers/walking/ride distance, or least walking first.
 Departure requests use time-aware labels before alternative pruning. Only a
 verified dataset and a separately verified `service.timetable` with an IANA
 timezone can produce scheduled waits. `timetable.departures` contains absolute
@@ -347,9 +357,17 @@ encrypted backup location; a temporary directory is not durable backup storage.
   `$request_uri`), disable request-body logging, and exclude travel URLs/labels
   from analytics/error-session replay. Infrastructure configuration is a release
   requirement; application code cannot sanitize an upstream provider's logs.
-- Browser referrer policy is strict-origin. Geolocation is opt-in, with no IP
-  fallback. Google processes searches and walking coordinates; shared links can
-  reveal precise endpoints. Walking responses are not cached or persisted.
+- Browser referrer policy is strict-origin. Precise geolocation is opt-in. The
+  landing map calls [ipapi](https://ipapi.co/api/) without cookies or a referrer
+  to center near a Kigali IP location, with a randomized central-Kigali view for
+  other cities, malformed responses, errors, or the four-second timeout. No IP
+  lookup is persisted or used as a selected journey endpoint. Form selection,
+  clearing, and swapping synchronize A/B map markers; late IP responses cannot
+  override selected points. Google processes map/place and walking coordinates;
+  shared links can reveal precise endpoints. Walking responses are not cached
+  or persisted between plans. Repeated pedestrian checks during one automatic
+  radius expansion share a request-local promise and are then discarded.
+  Provider outages leave the selected places and form usable.
 - Per worker/minute: 20 plans, 120 network reads, 5 reports per peer IP; up to 160
   outbound walking requests by default and 32 concurrent provider calls.
   `WEB_CONCURRENCY` defaults to one. Set shared gateway limits before scaling;

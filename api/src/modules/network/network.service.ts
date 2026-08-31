@@ -40,6 +40,7 @@ import {
   snapshotRevision,
 } from './transfer-review';
 import { WalkingProviderUnavailable, WalkingService } from './walking.service';
+import { unverifiedAccessWalk } from './access-walk';
 import type {
   JourneyLocation,
   JourneyPlan,
@@ -442,7 +443,22 @@ export class NetworkService {
       if (this.durations.length > 1000) this.durations.shift();
     }
   }
-  private async calculatePlan(input: PlanJourneyDto): Promise<JourneyPlan> {
+  private async calculatePlan(
+    input: PlanJourneyDto,
+    automaticRadius = 800,
+    walkingChecks = new Map<string, Promise<WalkLeg | null>>()
+  ): Promise<JourneyPlan> {
+    const maxWalkMeters = input.maxWalkMeters ?? automaticRadius;
+    // Deduplicate retries as the radius expands; discard all data after this plan.
+    const walk = (from: ResolvedLocation, to: ResolvedLocation) => {
+      const key = JSON.stringify([from, to]);
+      let checked = walkingChecks.get(key);
+      if (!checked) {
+        checked = this.walking.route(from, to);
+        walkingChecks.set(key, checked);
+      }
+      return checked;
+    };
     const d = await this.dataset(),
       stops = this.stops(d.snapshot);
     const selectable = [
@@ -454,6 +470,8 @@ export class NetworkService {
     ];
     const origin = this.resolve(input.origin, selectable),
       destination = this.resolve(input.destination, selectable);
+    if (!origin.stopId) origin.name = 'your starting point';
+    if (!destination.stopId) destination.name = 'your destination';
     if (distance(origin.coordinates, destination.coordinates) < 1) {
       return {
         status: 'already_at_destination',
@@ -504,7 +522,7 @@ export class NetworkService {
             `SELECT stop_id, MIN(ST_Distance(location::geography,ST_SetSRID(ST_MakePoint($2,$3),4326)::geography)) AS distance
         FROM pattern_stops WHERE dataset_id=$1 AND ST_DWithin(location::geography,ST_SetSRID(ST_MakePoint($2,$3),4326)::geography,$4)
         GROUP BY stop_id ORDER BY distance,stop_id LIMIT 64`,
-            [d.id, ...location.coordinates, input.maxWalkMeters]
+            [d.id, ...location.coordinates, maxWalkMeters]
           )) as { stop_id: string }[]);
       const selected = selectBoardingCandidates(
         discovered.map((s) => s.stop_id),
@@ -533,16 +551,31 @@ export class NetworkService {
             name: stop.name,
             coordinates: stop.coordinates,
           };
-          try {
-            const leg = await this.walking.route(
+          const addNavigationHandoff = () => {
+            // Only arbitrary endpoints get an unverified handoff. This never
+            // invents a transfer/crossing between explicitly selected stops.
+            if (location.stopId) return;
+            const leg = unverifiedAccessWalk(
               reversed ? stopLocation : location,
               reversed ? location : stopLocation
             );
-            if (leg && leg.distanceMeters <= input.maxWalkMeters)
+            if (leg.distanceMeters <= maxWalkMeters) legs.set(stop.id, leg);
+          };
+          try {
+            const leg = await walk(
+              reversed ? stopLocation : location,
+              reversed ? location : stopLocation
+            );
+            if (leg && leg.distanceMeters <= maxWalkMeters)
               legs.set(stop.id, leg);
+            // A missing mapped footpath is not proof that a boarding point is
+            // unreachable. Keep the handoff explicit and the path unverified.
+            if (!leg) addNavigationHandoff();
           } catch (e) {
-            if (e instanceof WalkingProviderUnavailable) failed = true;
-            else throw e;
+            if (e instanceof WalkingProviderUnavailable) {
+              failed = true;
+              addNavigationHandoff();
+            } else throw e;
           }
         })
       );
@@ -577,13 +610,17 @@ export class NetworkService {
     // A nearby pedestrian journey must not depend on transit coverage, stop-vs-
     // coordinate selection, or a failed unrelated boarding-point lookup.
     if (
-      !result.journeys.length &&
-      distance(origin.coordinates, destination.coordinates) <=
-        input.maxWalkMeters
+      (!result.journeys.length ||
+        result.journeys.every((j) =>
+          j.legs.some(
+            (leg) => leg.kind === 'walk' && leg.quality === 'unverified-access'
+          )
+        )) &&
+      distance(origin.coordinates, destination.coordinates) <= maxWalkMeters
     ) {
       try {
-        const direct = await this.walking.route(origin, destination);
-        if (direct && direct.distanceMeters <= input.maxWalkMeters) {
+        const direct = await walk(origin, destination);
+        if (direct && direct.distanceMeters <= maxWalkMeters) {
           result.journeys = [
             enrichJourney(
               {
@@ -615,6 +652,18 @@ export class NetworkService {
         else throw error;
       }
     }
+    // Default planning seeks the nearest usable connection instead of treating
+    // an arbitrary 800 m cutoff as the boundary of the bus network.
+    if (
+      !result.journeys.length &&
+      input.maxWalkMeters === undefined &&
+      (!origin.stopId || !destination.stopId) &&
+      automaticRadius < 5000
+    ) {
+      const nextRadius =
+        automaticRadius < 1500 ? 1500 : automaticRadius < 2000 ? 2000 : 5000;
+      return this.calculatePlan(input, nextRadius, walkingChecks);
+    }
     if (result.status !== 'walking_only') {
       if (limited) result.status = 'search_limit_reached';
       else if (result.journeys.length)
@@ -636,7 +685,7 @@ export class NetworkService {
         d.snapshot,
         origin,
         destination,
-        input.maxWalkMeters
+        maxWalkMeters
       );
     if (limited)
       result.warnings.push(
@@ -646,7 +695,25 @@ export class NetworkService {
       result.warnings.push(
         'Timetable planning considers departures in the next 24 hours. Scheduled times are not live predictions; unknown waiting times remain unknown.'
       );
-    if (failed)
+    const unverifiedAccess = result.journeys.some((j) =>
+      j.legs.some(
+        (leg) => leg.kind === 'walk' && leg.quality === 'unverified-access'
+      )
+    );
+    if (
+      input.maxWalkMeters === undefined &&
+      result.journeys.some((j) =>
+        j.legs.some((leg) => leg.kind === 'walk' && leg.distanceMeters > 800)
+      )
+    )
+      result.warnings.push(
+        'The nearest connection needs more than 800 m of walking at one end. Check the distance or set a walking limit.'
+      );
+    if (unverifiedAccess)
+      result.warnings.push(
+        'Walking paths could not be checked. Access distances are straight-line minimums, not street routes. Open walking navigation for each end before travelling.'
+      );
+    else if (failed)
       result.warnings.push(
         'Some walking connections could not be checked. Select a bus stop directly or try again.'
       );

@@ -26,6 +26,36 @@ function scheduled(p: NetworkPattern, departures: number[]): NetworkPattern {
 const hours = (h: number, m = 0) => h * 3600 + m * 60;
 
 describe('Verified departure planning', () => {
+  it.each(['access', 'egress'])(
+    'keeps total arrival unknown when %s walking time is unchecked',
+    (end) => {
+      const p = scheduled(pattern('101', ['A', 'B']), [hours(8, 5)]);
+      const origin = access('A', 60),
+        destination = access('B', 60);
+      const unchecked =
+        end === 'access' ? origin.get('A')! : destination.get('B')!;
+      unchecked.durationSeconds = null;
+      unchecked.quality = 'unverified-access';
+      const data = { patterns: [p], transfers: [] };
+      const result = searchJourneys(data, origin, destination, options)
+        .journeys[0];
+      expect(result).toMatchObject({
+        durationSeconds: null,
+        arrivalAt: null,
+        timingStatus: 'unknown',
+      });
+      const timed = applyDepartureTiming(
+        result,
+        new Map([[p.id, p]]),
+        new Date(options.departureAt)
+      );
+      expect(timed).toMatchObject({
+        durationSeconds: null,
+        arrivalAt: null,
+        timingStatus: 'unknown',
+      });
+    }
+  );
   it('never promotes historical relative times or headways into a schedule or total', () => {
     const data = snapshot();
     data.patterns.forEach(

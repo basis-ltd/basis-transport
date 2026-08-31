@@ -189,10 +189,10 @@ export interface WalkLeg {
   from: ResolvedLocation;
   to: ResolvedLocation;
   distanceMeters: number;
-  durationSeconds: number;
+  durationSeconds: number | null;
   geometry: Coordinates[];
   instructions: string[];
-  quality: 'pedestrian-route' | 'reviewed-transfer';
+  quality: 'pedestrian-route' | 'reviewed-transfer' | 'unverified-access';
 }
 export interface RideLeg {
   kind: 'ride';

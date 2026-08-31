@@ -4,6 +4,7 @@ import Button from "@/components/inputs/Button";
 import { journeyMessages as copy } from "./messages";
 import { metres, minutes } from "./locations";
 import type { Journey } from "./types";
+import WalkingDirections from "./WalkingDirections";
 
 export default function JourneyCard({
   journey,
@@ -26,6 +27,9 @@ export default function JourneyCard({
 }) {
   const rides = journey.legs.filter((l) => l.kind === "ride");
   const steps = journey.steps ?? [];
+  const unverifiedWalking = journey.legs.some(
+    (leg) => leg.kind === "walk" && leg.quality === "unverified-access",
+  );
   return (
     <article className={`journey-card ${expanded ? "is-selected" : ""}`}>
       <Button
@@ -51,7 +55,8 @@ export default function JourneyCard({
                 : "Direct connection"}
           </strong>
           <span>
-            {metres(journey.walkingMeters)} walking ·{" "}
+            {metres(journey.walkingMeters)}
+            {unverifiedWalking ? " minimum" : ""} walking ·{" "}
             {metres(journey.ridingMeters)} ride
           </span>
         </span>
@@ -131,34 +136,18 @@ export default function JourneyCard({
                           {step.paymentInstructions}
                         </p>
                       )}
-                      {step.timing.label && (
-                        <p className="journey-timing-note">
-                          {step.timing.label}
-                          {step.timing.seconds !== null &&
-                            ` · about ${Math.ceil(step.timing.seconds / 60)} min`}
-                        </p>
-                      )}
-                      {leg?.kind === "walk" && (
-                        <>
-                          {leg.quality === "pedestrian-route" && (
-                            <p className="journey-google-credit">
-                              <span translate="no">Google Maps</span> · walking
-                              directions
-                            </p>
-                          )}
-                          <details>
-                            <summary>Walking directions</summary>
-                            <ol>
-                              {leg.instructions.map((instruction, i) => (
-                                <li key={i}>{instruction}</li>
-                              ))}
-                            </ol>
-                            <small>
-                              Check pedestrian access and crossings locally.
-                            </small>
-                          </details>
-                        </>
-                      )}
+                      {step.timing.label &&
+                        !(
+                          leg?.kind === "walk" &&
+                          leg.quality === "unverified-access"
+                        ) && (
+                          <p className="journey-timing-note">
+                            {step.timing.label}
+                            {step.timing.seconds !== null &&
+                              ` · about ${Math.ceil(step.timing.seconds / 60)} min`}
+                          </p>
+                        )}
+                      {leg?.kind === "walk" && <WalkingDirections leg={leg} />}
                       {step.kind === "ride" && leg?.kind === "ride" && (
                         <>
                           <details>
@@ -215,29 +204,12 @@ export default function JourneyCard({
                     {leg.kind === "walk" ? (
                       <>
                         <p>
-                          {metres(leg.distanceMeters)} · About{" "}
-                          {minutes(leg.durationSeconds)}
+                          {metres(leg.distanceMeters)}
+                          {leg.durationSeconds !== null
+                            ? ` · About ${minutes(leg.durationSeconds)}`
+                            : " minimum · time unknown"}
                         </p>
-                        {leg.quality === "pedestrian-route" && (
-                          <p className="journey-google-credit">
-                            <span translate="no">Google Maps</span> · walking
-                            directions
-                          </p>
-                        )}
-                        {leg.instructions.length > 0 && (
-                          <details>
-                            <summary>Walking directions</summary>
-                            <ol>
-                              {leg.instructions.map((instruction, i) => (
-                                <li key={i}>{instruction}</li>
-                              ))}
-                            </ol>
-                            <small>
-                              Check pedestrian access and crossings locally.
-                              Walking routes can be missing clear paths.
-                            </small>
-                          </details>
-                        )}
+                        <WalkingDirections leg={leg} />
                       </>
                     ) : (
                       <>

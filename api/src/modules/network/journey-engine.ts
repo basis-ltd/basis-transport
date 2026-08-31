@@ -39,7 +39,12 @@ export function compareJourneys(
   b: Journey,
   preference: SearchOptions['preference']
 ): number {
+  const unchecked = (j: Journey) =>
+    j.legs.some(
+      (leg) => leg.kind === 'walk' && leg.quality === 'unverified-access'
+    );
   return (
+    Number(unchecked(a)) - Number(unchecked(b)) ||
     (preference === 'least_walking'
       ? a.walkingMeters - b.walkingMeters || a.transfers - b.transfers
       : a.transfers - b.transfers || a.walkingMeters - b.walkingMeters) ||
@@ -155,7 +160,10 @@ export function searchJourneys(
     walking: leg.distanceMeters,
     riding: 0,
     usedRoutes: [],
-    arrivalMs: start === null ? null : start + leg.durationSeconds * 1000,
+    arrivalMs:
+      start === null || leg.durationSeconds === null
+        ? null
+        : start + leg.durationSeconds * 1000,
   }));
   const results: Journey[] = [];
   let expansions = 0;
@@ -236,12 +244,17 @@ export function searchJourneys(
               walkingMeters: label.walking + lastWalk.distanceMeters,
               ridingMeters: riding,
               durationSeconds:
-                start !== null && arrivalMs !== null
+                start !== null &&
+                arrivalMs !== null &&
+                lastWalk.durationSeconds !== null
                   ? (arrivalMs - start) / 1000 + lastWalk.durationSeconds
                   : null,
-              timingStatus: arrivalMs === null ? 'unknown' : 'scheduled',
+              timingStatus:
+                arrivalMs === null || lastWalk.durationSeconds === null
+                  ? 'unknown'
+                  : 'scheduled',
               arrivalAt:
-                arrivalMs === null
+                arrivalMs === null || lastWalk.durationSeconds === null
                   ? null
                   : new Date(
                       arrivalMs + lastWalk.durationSeconds * 1000
@@ -269,7 +282,7 @@ export function searchJourneys(
                 riding,
                 usedRoutes,
                 arrivalMs:
-                  arrivalMs === null
+                  arrivalMs === null || transfer.durationSeconds === null
                     ? null
                     : arrivalMs + transfer.durationSeconds * 1000,
               });

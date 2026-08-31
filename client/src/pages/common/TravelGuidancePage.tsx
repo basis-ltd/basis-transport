@@ -39,7 +39,7 @@ export default function TravelGuidancePage() {
     Number(params.get("maxWalkMeters")),
   )
     ? Number(params.get("maxWalkMeters"))
-    : 800;
+    : undefined;
   const rawTransfers = params.get("maxTransfers");
   const maxTransfers =
     rawTransfers !== null && /^[0-4]$/.test(rawTransfers)
@@ -204,9 +204,10 @@ export default function TravelGuidancePage() {
         />
         <Select
           label="Walk at each end"
-          value={String(maxWalk)}
+          value={maxWalk === undefined ? "auto" : String(maxWalk)}
           onChange={(value) => changePreference("maxWalkMeters", value)}
           options={[
+            { label: "Auto · nearest connection", value: "auto" },
             { label: "Up to 800 m", value: "800" },
             { label: "Up to 1.5 km", value: "1500" },
             { label: "Up to 2 km", value: "2000" },

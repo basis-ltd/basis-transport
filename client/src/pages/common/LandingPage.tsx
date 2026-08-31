@@ -1,11 +1,5 @@
-import { Link, useNavigate } from "react-router-dom";
-import {
-  ArrowRight,
-  Bookmark,
-  BusFront,
-  Footprints,
-  MapPin,
-} from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { BusFront, Footprints, MapPin } from "lucide-react";
 import { useState } from "react";
 import PublicNavbar from "@/containers/public/PublicNavbar";
 import PublicFooter from "@/containers/public/PublicFooter";
@@ -14,6 +8,8 @@ import LandingHeroForm from "./components/landing/LandingHeroForm";
 import { useNetworkResource } from "@/features/journey/api";
 import { requestLocation, travelUrl } from "@/features/journey/locations";
 import { NetworkNotice } from "@/features/journey/JourneyShell";
+import LandingJourneyMap from "./components/landing/LandingJourneyMap";
+import type { JourneyLocation } from "@/features/journey/types";
 import type { NetworkStatus } from "@/features/journey/types";
 import "@/styles/landingPage.css";
 import "@/features/journey/journey.css";
@@ -21,6 +17,10 @@ import "@/features/journey/journey.css";
 export default function LandingPage() {
   const navigate = useNavigate(),
     { data: network } = useNetworkResource<NetworkStatus>("/network/status");
+  const [endpoints, setEndpoints] = useState<{
+    origin?: JourneyLocation;
+    destination?: JourneyLocation;
+  }>({});
   const [error, setError] = useState(""),
     [locating, setLocating] = useState(false);
   const nearby = async () => {
@@ -54,12 +54,15 @@ export default function LandingPage() {
                   <span>Stop by stop.</span>
                 </h1>
                 <p className="landing-body journey-hero-intro">
-                  Find the bus, the boarding point, and the changes along the way.
-                  Start with where you are going.
+                  Find the bus, the boarding point, and the changes along the
+                  way. Start with where you are going.
                 </p>
               </div>
               <LandingHeroForm
                 variant="hero"
+                onLocationsChange={(origin, destination) =>
+                  setEndpoints({ origin, destination })
+                }
                 onNearby={() => void nearby()}
                 nearbyBusy={locating}
                 onSearch={(a, b) => navigate(travelUrl(a, b))}
@@ -70,52 +73,7 @@ export default function LandingPage() {
                 </p>
               )}
             </div>
-            <aside className="journey-hero-board">
-              <p className="journey-eyebrow">Your public transport guide</p>
-              <h2>A little clarity before you go.</h2>
-              <p>
-                Explore the network, check your boarding stop, and keep useful
-                connections close.
-              </p>
-              <div className="journey-hero-links">
-                <Link to="/routes">
-                  <BusFront size={22} />
-                  <span>
-                    <strong>Explore bus routes</strong>
-                    <small>
-                      {network?.ready
-                        ? network.routes + " lines in this dataset"
-                        : "Published routes and directional patterns"}
-                    </small>
-                  </span>
-                  <ArrowRight size={17} />
-                </Link>
-                <Link to="/stops">
-                  <MapPin size={22} />
-                  <span>
-                    <strong>Find your boarding point</strong>
-                    <small>
-                      {network?.ready
-                        ? network.stops + " named stops"
-                        : "Stops, landmarks, and nearby connections"}
-                    </small>
-                  </span>
-                  <ArrowRight size={17} />
-                </Link>
-                <Link to="/saved">
-                  <Bookmark size={22} />
-                  <span>
-                    <strong>Keep your usual journeys</strong>
-                    <small>Saved on your device. No sign-in needed.</small>
-                  </span>
-                  <ArrowRight size={17} />
-                </Link>
-              </div>
-              <p className="journey-field-hint">
-                Network guidance, not live arrivals. Confirm service before you
-                travel.
-              </p>
-            </aside>
+            <LandingJourneyMap {...endpoints} />
           </div>
           {network?.verification && network.sourceUrl ? (
             <NetworkNotice

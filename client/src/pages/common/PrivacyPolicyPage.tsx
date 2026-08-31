@@ -16,10 +16,17 @@ const PrivacyPolicyPage = () => (
       Favorites stay on your device unless you explicitly synchronize them.
     </p>
     <p>
-      Location is requested only when you choose Use my location. Google processes
+      Precise location is requested only when you choose Use my location. Google processes
       place searches and coordinates needed for maps and walking directions.
       Shared links can contain precise coordinates. Technical metrics record
       counts and durations, not journey endpoints.
+    </p>
+
+    <p>
+      The home map uses ipapi to approximate your city from your IP address. If
+      that location is in Kigali, it centers the map nearby; otherwise it shows
+      a point in Kigali. This does not select your journey origin. Basis does
+      not save the IP lookup or its result as passenger history.
     </p>
 
     <h2>How we use it</h2>

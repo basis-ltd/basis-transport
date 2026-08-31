@@ -20,6 +20,10 @@ function Paths({
     const lines = journey.legs.map((leg, index) => {
       const path = leg.geometry.map(([lng, lat]) => ({ lat, lng }));
       path.forEach((p) => bounds.extend(p));
+      if (leg.kind === "walk") {
+        for (const [lng, lat] of [leg.from.coordinates, leg.to.coordinates])
+          bounds.extend({ lat, lng });
+      }
       const dashed = leg.kind === "walk" || leg.geometryQuality === "schematic";
       const line = new google.maps.Polyline({
         map,
@@ -74,7 +78,26 @@ function Paths({
                 onClick={() => onSelectLeg(i)}
               />,
             ]
-          : [],
+          : [
+              <Marker
+                key={`${i}-walk-from`}
+                position={{
+                  lat: leg.from.coordinates[1],
+                  lng: leg.from.coordinates[0],
+                }}
+                title={`Walk from ${leg.from.name}`}
+                onClick={() => onSelectLeg(i)}
+              />,
+              <Marker
+                key={`${i}-walk-to`}
+                position={{
+                  lat: leg.to.coordinates[1],
+                  lng: leg.to.coordinates[0],
+                }}
+                title={`Walk to ${leg.to.name}`}
+                onClick={() => onSelectLeg(i)}
+              />,
+            ],
       )}
     </>
   );
@@ -129,6 +152,10 @@ export default function JourneyMap({
       </APIProvider>
       <p className="journey-map-caption">
         Solid: source route shape · Dashed: walking or schematic connection
+        {journey.legs.some(
+          (leg) => leg.kind === "walk" && leg.quality === "unverified-access",
+        ) &&
+          ". Unchecked walks show endpoints only; use walking navigation for the street path."}
       </p>
     </div>
   );

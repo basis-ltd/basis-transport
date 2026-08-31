@@ -9,6 +9,24 @@ import { validateSnapshot } from './network.validation';
 
 const options = { maxTransfers: 2, preference: 'fewest_transfers' as const };
 describe('Directional network planner', () => {
+  it('prefers checked pedestrian access over a shorter unverified handoff', () => {
+    const data = { patterns: [pattern('101', ['A', 'B', 'C'])], transfers: [] };
+    const unverified = access('A', 20);
+    unverified.get('A')!.quality = 'unverified-access';
+    unverified.get('A')!.durationSeconds = null;
+    const result = searchJourneys(
+      data,
+      new Map([...unverified, ...access('B', 200)]),
+      access('C'),
+      options
+    );
+    expect(result.journeys[0].walkingMeters).toBe(200);
+    expect(
+      result.journeys[0].legs.some(
+        (leg) => leg.kind === 'walk' && leg.quality === 'unverified-access'
+      )
+    ).toBe(false);
+  });
   it('reports search exhaustion without misclassifying it as no connection', () => {
     const result = searchJourneys(snapshot(), access('A'), access('F'), {
       ...options,

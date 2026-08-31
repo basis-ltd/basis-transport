@@ -99,9 +99,12 @@ export function buildPassengerSteps(
             `Walk to ${leg.to.name} to change buses (${leg.distanceMeters} m).`,
           confidence: walkConfidence(leg),
           timing: {
-            status: 'estimated',
+            status: leg.durationSeconds === null ? 'unknown' : 'estimated',
             seconds: leg.durationSeconds,
-            label: 'Pedestrian route estimate',
+            label:
+              leg.quality === 'unverified-access'
+                ? 'Walking path not checked'
+                : 'Pedestrian route estimate',
           },
           fareAmount: null,
           fareCurrency: null,
@@ -119,9 +122,12 @@ export function buildPassengerSteps(
             `Walk to ${leg.to.name} (${leg.distanceMeters} m).`,
           confidence: walkConfidence(leg),
           timing: {
-            status: 'estimated',
+            status: leg.durationSeconds === null ? 'unknown' : 'estimated',
             seconds: leg.durationSeconds,
-            label: 'Pedestrian route estimate',
+            label:
+              leg.quality === 'unverified-access'
+                ? 'Walking path not checked'
+                : 'Pedestrian route estimate',
           },
           fareAmount: null,
           fareCurrency: null,

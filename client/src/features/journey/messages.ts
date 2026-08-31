@@ -9,7 +9,7 @@ export const journeyMessages = {
     "Select both locations from the suggestions, or use your location.",
   differentDestination: "Choose a different destination.",
   locationConsent:
-    "Location is shared only when you choose it. Google processes place searches and coordinates for address lookups and walking directions.",
+    "Precise location is requested only when you choose it. Google processes selected places and coordinates for maps, address lookups, and walking directions.",
   connections: (count: number) =>
     `${count} ${count === 1 ? "connection" : "connections"}`,
   stops: (count: number) => `${count} ${count === 1 ? "stop" : "stops"}`,

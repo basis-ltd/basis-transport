@@ -153,7 +153,7 @@ export interface WalkLeg {
   from: ResolvedLocation;
   to: ResolvedLocation;
   distanceMeters: number;
-  durationSeconds: number;
+  durationSeconds: number | null;
   geometry: Coordinates[];
   instructions: string[];
   quality: string;

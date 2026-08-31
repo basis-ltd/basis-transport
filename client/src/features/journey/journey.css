@@ -1139,44 +1139,73 @@
   border-radius: 50%;
   background: var(--accent-ink);
 }
-.journey-hero-board {
-  background: var(--surface-sunken);
+/* The live map shares the form's quiet paper/ink palette. A/B carry direction. */
+.landing-journey-map {
+  min-width: 0;
+  overflow: hidden;
   border: 1px solid var(--line);
-  border-radius: 16px;
-  padding: 30px;
+  border-radius: var(--radius-card);
+  background: var(--paper);
 }
-.journey-hero-board h2 {
-  font-size: 20px;
-  margin-bottom: 6px;
-}
-.journey-hero-board > p {
-  color: var(--muted);
-  font-size: 13px;
-  line-height: 1.7;
-}
-.journey-hero-links {
-  display: grid;
-  margin-top: 24px;
-}
-.journey-hero-links a {
+.landing-map-header {
   display: flex;
-  gap: 15px;
+  flex-wrap: wrap;
   align-items: center;
-  padding-block: 20px;
-  border-top: 1px solid var(--line);
+  justify-content: space-between;
+  gap: 8px;
+  padding: 16px 20px;
+  font-size: 12px;
+  color: var(--muted);
 }
-.journey-hero-links a > span {
-  flex: 1;
+.landing-map-header .journey-eyebrow {
+  margin: 0;
 }
-.journey-hero-links strong {
-  font-size: 15px;
-  font-weight: 500;
+.landing-map-canvas {
+  height: clamp(320px, 35vw, 470px);
+  background: var(--surface);
 }
-.journey-hero-links small {
+.landing-map-canvas .journey-map-unavailable {
+  height: 100%;
+  min-height: 0;
+}
+.landing-map-endpoints {
+  padding: 16px 20px;
+  display: grid;
+  gap: 12px;
+}
+.landing-map-endpoints p {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.landing-map-endpoints small {
   display: block;
   color: var(--muted);
+  font-size: 11px;
+  margin-bottom: 2px;
+}
+.landing-map-marker {
+  display: grid;
+  place-items: center;
+  flex: 0 0 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--paper);
   font-size: 12px;
-  margin-top: 4px;
+  font-weight: 600;
+}
+.landing-map-marker.is-origin {
+  background: var(--accent-ink);
+  color: #fff;
+}
+.landing-map-note {
+  padding: 0 20px 16px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.6;
 }
 .journey-how {
   padding-block: 50px 70px;
@@ -1297,9 +1326,6 @@
   }
   .journey-hero {
     padding-top: 36px;
-  }
-  .journey-hero-board {
-    padding: 22px;
   }
   .journey-hero .journey-form .journey-route-swap {
     display: inline-flex;
@@ -1519,4 +1545,30 @@
   gap: 12px;
   margin-top: 12px;
   max-width: 480px;
+}
+
+.journey-walking-directions {
+  display: grid;
+  gap: 10px;
+}
+.journey-walking-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  max-width: 100%;
+  min-height: 36px;
+  color: var(--accent-strong);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.journey-walking-link svg {
+  flex-shrink: 0;
+}
+.journey-walking-link:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+  border-radius: 2px;
 }

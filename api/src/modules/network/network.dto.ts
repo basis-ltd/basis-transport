@@ -29,7 +29,8 @@ export class PlanJourneyDto {
   @Type(() => JourneyLocationDto)
   destination: JourneyLocationDto;
   @IsOptional() @IsInt() @Min(0) @Max(4) maxTransfers = 2;
-  @IsOptional() @IsInt() @Min(100) @Max(2000) maxWalkMeters = 800;
+  // Omitted: expand the nearest-stop search as needed. Explicit limits stay hard.
+  @IsOptional() @IsInt() @Min(100) @Max(2000) maxWalkMeters?: number;
   @IsOptional() @IsIn(['fewest_transfers', 'least_walking']) preference:
     'fewest_transfers' | 'least_walking' = 'fewest_transfers';
   @IsOptional()

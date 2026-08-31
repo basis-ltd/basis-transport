@@ -106,7 +106,10 @@ export function applyDepartureTiming(
   const legs: Journey['legs'] = [];
   for (const leg of journey.legs) {
     if (leg.kind === 'walk') {
-      if (cursor !== null) cursor += leg.durationSeconds * 1000;
+      cursor =
+        cursor === null || leg.durationSeconds === null
+          ? null
+          : cursor + leg.durationSeconds * 1000;
       legs.push(leg);
       continue;
     }

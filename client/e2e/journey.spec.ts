@@ -592,7 +592,7 @@ test("preferences survive reload and browser history, including explicit extra t
   await page.goBack();
   await expect(
     page.getByRole("combobox", { name: "Walk at each end", exact: true }),
-  ).toContainText("Up to 800 m");
+  ).toContainText("Auto · nearest connection");
 });
 test("missing a stop requires choosing an actual replanning origin", async ({
   page,

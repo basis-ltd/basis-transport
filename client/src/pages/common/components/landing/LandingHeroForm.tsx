@@ -14,6 +14,10 @@ interface Props {
   fromText?: string;
   toText?: string;
   onSearch: (origin: JourneyLocation, destination: JourneyLocation) => void;
+  onLocationsChange?: (
+    origin: JourneyLocation | undefined,
+    destination: JourneyLocation | undefined,
+  ) => void;
   busy?: boolean;
   /** Hero landing layout — stacked fields and peekaboo-style action row. */
   variant?: "hero" | "compact";
@@ -27,6 +31,7 @@ export default function LandingHeroForm({
   fromText,
   toText,
   onSearch,
+  onLocationsChange,
   busy = false,
   variant = "compact",
   onNearby,
@@ -41,6 +46,7 @@ export default function LandingHeroForm({
   const swap = () => {
     setOrigin(destination);
     setDestination(origin);
+    onLocationsChange?.(destination, origin);
     setRevision((v) => v + 1);
     setError("");
   };
@@ -56,6 +62,7 @@ export default function LandingHeroForm({
       appearance={isHero ? "field" : "composite"}
       onChange={(v) => {
         setOrigin(v);
+        onLocationsChange?.(v, destination);
         setError("");
       }}
     />
@@ -72,6 +79,7 @@ export default function LandingHeroForm({
       appearance={isHero ? "field" : "composite"}
       onChange={(v) => {
         setDestination(v);
+        onLocationsChange?.(origin, v);
         setError("");
       }}
     />
