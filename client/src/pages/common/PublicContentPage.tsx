@@ -1,10 +1,9 @@
 import '@/styles/landingPage.css';
 import { Seo } from '@/components/seo';
-import Button from '@/components/inputs/Button';
+import BackButton from '@/components/inputs/BackButton';
 import PublicFooter from '@/containers/public/PublicFooter';
 import PublicLayout from '@/containers/public/PublicLayout';
 import PublicNavbar from '@/containers/public/PublicNavbar';
-import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import type { ReactNode } from 'react';
 
 interface PublicContentPageProps {
@@ -33,9 +32,9 @@ const PublicContentPage = ({
       <main className="landing-page landing-paper min-h-[calc(100vh-4rem)]">
         <div className="landing-container py-10 lg:py-14">
           <nav aria-label="Breadcrumb" className="mb-6">
-            <Button variant="breadcrumb" route="/" icon={faArrowLeft}>
+            <BackButton route="/">
               Back to home
-            </Button>
+            </BackButton>
           </nav>
 
           <header className="mb-10 max-w-3xl">

@@ -29,10 +29,12 @@ import {
   DatasetMetadataDto,
   DraftSnapshotDto,
   NetworkQueryDto,
+  NetworkMapQueryDto,
   PlanJourneyDto,
   PublishDto,
   ReportDto,
   ReviewReportDto,
+  ReviewTransferDto,
   SavedItemDto,
 } from './network.dto';
 import { NetworkService } from './network.service';
@@ -51,6 +53,9 @@ export class NetworkController {
   constructor(private readonly network: NetworkService) {}
   @Get('network/status') async status() {
     return envelope(await this.network.status());
+  }
+  @Get('network/map') async map(@Query() query: NetworkMapQueryDto) {
+    return envelope(await this.network.map(query));
   }
   @Post('journeys/plan') @HttpCode(200) async plan(
     @Body() body: PlanJourneyDto
@@ -76,13 +81,11 @@ export class SavedItemsController {
   constructor(@InjectDataSource() private readonly db: DataSource) {}
   @Get() async list(@CurrentUser() user: AuthenticatedUser) {
     return envelope(
-      await this.db
-        .getRepository(SavedItem)
-        .find({
-          where: { userId: user.id },
-          order: { createdAt: 'DESC' },
-          take: 100,
-        })
+      await this.db.getRepository(SavedItem).find({
+        where: { userId: user.id },
+        order: { createdAt: 'DESC' },
+        take: 100,
+      })
     );
   }
   @Post() async save(
@@ -127,16 +130,14 @@ export class ReportsController {
       throw new BadRequestException(
         'An email address is required for contact messages.'
       );
-    const report = await this.db
-      .getRepository(PassengerReport)
-      .save({
-        kind: body.kind,
-        referenceId: body.referenceId || null,
-        email: body.email || null,
-        name: body.name || null,
-        message: body.message.trim(),
-        status: 'open',
-      });
+    const report = await this.db.getRepository(PassengerReport).save({
+      kind: body.kind,
+      referenceId: body.referenceId || null,
+      email: body.email || null,
+      name: body.name || null,
+      message: body.message.trim(),
+      status: 'open',
+    });
     return envelope({ id: report.id }, 'Your message has been received.');
   }
 }
@@ -156,6 +157,11 @@ export class NetworkAdminController {
   }
   @Get('datasets/:id') async dataset(@Param('id', ParseUUIDPipe) id: string) {
     return envelope(await this.network.draft(id));
+  }
+  @Get('datasets/:id/comparison') async comparison(
+    @Param('id', ParseUUIDPipe) id: string
+  ) {
+    return envelope(await this.network.compareDraft(id));
   }
   @Post('datasets/:id/clone') async clone(
     @Param('id', ParseUUIDPipe) id: string
@@ -180,6 +186,20 @@ export class NetworkAdminController {
   ) {
     if (!body.confirm) throw new BadRequestException('Confirm publication.');
     return envelope(await this.network.publish(id));
+  }
+  @Post('datasets/:id/transfers/:transferId/review') async reviewTransfer(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('transferId') transferId: string,
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() body: ReviewTransferDto
+  ) {
+    if (!body.confirm)
+      throw new BadRequestException(
+        'Confirm the pedestrian path and crossing review.'
+      );
+    return envelope(
+      await this.network.reviewTransfer(id, transferId, user.id, body)
+    );
   }
   @Get('reports') async reports(@Query() q: NetworkQueryDto) {
     const [rows, totalCount] = await this.db

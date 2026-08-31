@@ -6,7 +6,7 @@ import {
   ServiceUnavailableException,
 } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { randomUUID } from 'crypto';
+import { createHash, randomUUID } from 'crypto';
 import { DataSource, EntityManager } from 'typeorm';
 import {
   NetworkDataset,
@@ -14,9 +14,31 @@ import {
   RoutePattern,
 } from '../../entities/networkDataset.entity';
 import { distance, normalizeName } from './geo';
+import { compareSnapshots } from './network-comparison';
+import { projectNetworkMap, NetworkMapQuery } from './network-map';
 import { searchJourneys } from './journey-engine';
+import { describeSearchStops, nearbyStopConnections } from './stop-search';
+import {
+  boardingPointsForArea,
+  dedupeCandidateStops,
+  expandStopSelection,
+  stopAreas,
+  terminalSearchResults,
+  selectBoardingCandidates,
+} from './stop-areas';
+import {
+  filterRouteSummaries,
+  routeAgencies,
+  routeHeadsigns,
+} from './route-filters';
+import { enrichJourney } from './passenger-steps';
 import { NetworkQueryDto, PlanJourneyDto } from './network.dto';
 import { validateSnapshot } from './network.validation';
+import {
+  transferContentHash,
+  transferPathIssues,
+  snapshotRevision,
+} from './transfer-review';
 import { WalkingProviderUnavailable, WalkingService } from './walking.service';
 import type {
   JourneyLocation,
@@ -134,6 +156,13 @@ export class NetworkService {
       };
     }
   }
+  async map(query: NetworkMapQuery) {
+    const d = await this.dataset();
+    return {
+      ...projectNetworkMap(d.snapshot, query),
+      network: this.metadata(d),
+    };
+  }
   stops(snapshot: NetworkSnapshot): NetworkStop[] {
     return [
       ...new Map(
@@ -150,6 +179,10 @@ export class NetworkService {
                     name: s.name,
                     coordinates: s.coordinates,
                     aliases: s.aliases,
+                    stopAreaId: s.stopAreaId,
+                    displayNames: s.displayNames,
+                    platformCode: s.platformCode,
+                    sourceRecord: s.sourceRecord,
                   },
                 ] as const
             )
@@ -173,8 +206,25 @@ export class NetworkService {
     let stops = this.stops(d.snapshot).filter(
       (s) =>
         !q ||
-        [s.name, s.code, ...s.aliases].some((n) => normalizeName(n).includes(q))
+        [
+          s.name,
+          s.code,
+          s.platformCode || '',
+          ...s.aliases,
+          ...Object.values(s.displayNames ?? {}),
+        ].some((n) => normalizeName(n).includes(q))
     ) as (NetworkStop & { distanceMeters?: number })[];
+    if (q) {
+      const terminals = terminalSearchResults(
+        d.snapshot,
+        query.q || '',
+        normalizeName
+      );
+      const seen = new Set(stops.map((s) => s.id));
+      for (const terminal of terminals) {
+        if (!seen.has(terminal.id)) stops.unshift(terminal);
+      }
+    }
     if (query.lat !== undefined && query.lng !== undefined) {
       const distances = (await this.db.query(
         `SELECT stop_id, MIN(ST_Distance(location::geography, ST_SetSRID(ST_MakePoint($2,$3),4326)::geography)) AS metres
@@ -190,42 +240,111 @@ export class NetworkService {
             a.distanceMeters - b.distanceMeters || a.name.localeCompare(b.name)
         );
     } else stops.sort((a, b) => a.name.localeCompare(b.name));
-    const page = this.page(stops, query);
+    const described = describeSearchStops(
+      d.snapshot,
+      stops,
+      query.endpoint,
+      query.otherStopId
+    );
+    // Prioritize a same-pattern directional connection before pagination, while
+    // retaining other stops (they may have a valid transfer journey).
+    if (query.endpoint && query.otherStopId)
+      described.sort(
+        (a, b) => Number(b.directConnection) - Number(a.directConnection)
+      );
+    const page = this.page(described, query);
     return {
       ...page,
-      rows: page.rows.map((s) => ({
-        ...s,
-        routeNumbers: [
-          ...new Set(
-            d.snapshot.patterns
-              .filter(
-                (p) =>
-                  p.enabled &&
-                  p.stops.some((occurrence) => occurrence.id === s.id)
-              )
-              .map((p) => p.routeNumber)
-          ),
-        ],
-      })),
+      rows: page.rows.map((s) => {
+        const area = stopAreas(d.snapshot).find((a) => a.id === s.id);
+        const routeNumbers = area
+          ? [
+              ...new Set(
+                d.snapshot.patterns
+                  .filter(
+                    (p) =>
+                      p.enabled &&
+                      p.stops.some((occurrence) =>
+                        area.boardingPointIds.includes(occurrence.id)
+                      )
+                  )
+                  .map((p) => p.routeNumber)
+              ),
+            ]
+          : [
+              ...new Set(
+                d.snapshot.patterns
+                  .filter(
+                    (p) =>
+                      p.enabled &&
+                      p.stops.some((occurrence) => occurrence.id === s.id)
+                  )
+                  .map((p) => p.routeNumber)
+              ),
+            ];
+        return {
+          ...s,
+          routeNumbers,
+          ...(area
+            ? {
+                terminalArea: true,
+                boardingPointCount: area.boardingPointIds.length,
+              }
+            : {}),
+        };
+      }),
       network: this.metadata(d),
     };
   }
   async stop(id: string) {
     const d = await this.dataset();
-    const stop = this.stops(d.snapshot).find(
-      (s) => s.id === id || s.code === id
-    );
+    const stops = this.stops(d.snapshot);
+    const terminal = stopAreas(d.snapshot).find((a) => a.id === id);
+    const matches = stops.filter((s) => s.code === id);
+    const exact = stops.find((s) => s.id === id);
+    if (!exact && !terminal && matches.length > 1)
+      throw new BadRequestException(
+        'This stop code is shared by multiple platforms. Select the exact stop ID.'
+      );
+    const stop =
+      exact || (terminal ? { ...terminal, code: terminal.id } : matches[0]);
     if (!stop)
       throw new NotFoundException('Stop not found in the published network.');
+    const servingIds = terminal?.boardingPointIds ?? [stop.id];
     const routes = this.routes(d.snapshot).filter((r) =>
       d.snapshot.patterns.some(
         (p) =>
           p.enabled &&
           p.routeId === r.id &&
-          p.stops.some((s) => s.id === stop.id)
+          p.stops.some((s) => servingIds.includes(s.id))
       )
     );
-    return { ...stop, routes, network: this.metadata(d) };
+    const area =
+      terminal ||
+      ('stopAreaId' in stop && stop.stopAreaId
+        ? stopAreas(d.snapshot).find((a) => a.id === stop.stopAreaId)
+        : stopAreas(d.snapshot).find((a) =>
+            a.boardingPointIds.includes(stop.id)
+          ));
+    const boardingPoints = area
+      ? boardingPointsForArea(d.snapshot, area.id, this.stops(d.snapshot))
+      : [];
+    return {
+      ...stop,
+      routes,
+      stopArea: area
+        ? {
+            id: area.id,
+            name: area.name,
+            boardingPoints: boardingPoints.map((p) => ({
+              id: p.id,
+              name: p.name,
+              code: p.code,
+            })),
+          }
+        : null,
+      network: this.metadata(d),
+    };
   }
   routes(snapshot: NetworkSnapshot) {
     return [
@@ -250,14 +369,20 @@ export class NetworkService {
     );
   }
   async listRoutes(query: NetworkQueryDto) {
-    const d = await this.dataset(),
-      q = normalizeName(query.q || '');
-    const routes = this.routes(d.snapshot).filter(
-      (r) =>
-        !q ||
-        normalizeName(`${r.shortName} ${r.longName} ${r.agency}`).includes(q)
-    );
-    return { ...this.page(routes, query), network: this.metadata(d) };
+    const d = await this.dataset();
+    const routes = filterRouteSummaries(this.routes(d.snapshot), d.snapshot, {
+      q: query.q,
+      agency: query.agency,
+      headsign: query.headsign,
+    });
+    return {
+      ...this.page(routes, query),
+      network: this.metadata(d),
+      filters: {
+        agencies: routeAgencies(this.routes(d.snapshot)),
+        headsigns: routeHeadsigns(d.snapshot),
+      },
+    };
   }
   async route(id: string) {
     const d = await this.dataset();
@@ -320,12 +445,30 @@ export class NetworkService {
   private async calculatePlan(input: PlanJourneyDto): Promise<JourneyPlan> {
     const d = await this.dataset(),
       stops = this.stops(d.snapshot);
-    const origin = this.resolve(input.origin, stops),
-      destination = this.resolve(input.destination, stops);
-    if (distance(origin.coordinates, destination.coordinates) < 1)
-      throw new BadRequestException(
-        'Origin and destination must be different.'
-      );
+    const selectable = [
+      ...stops,
+      ...(d.snapshot.stopAreas || []).map((a) => ({
+        ...a,
+        code: a.id,
+      })),
+    ];
+    const origin = this.resolve(input.origin, selectable),
+      destination = this.resolve(input.destination, selectable);
+    if (distance(origin.coordinates, destination.coordinates) < 1) {
+      return {
+        status: 'already_at_destination',
+        validFrom: d.validFrom,
+        validTo: d.validTo,
+        departureAt: input.departureAt ?? null,
+        datasetVersion: d.version,
+        verification: d.verification,
+        sourceUrl: d.sourceUrl,
+        origin,
+        destination,
+        journeys: [],
+        warnings: ['You are already at your destination.'],
+      };
+    }
     const warnings = [
       'Bus waiting time is unknown. Journey times and fares are not guaranteed.',
       'Walking directions can be incomplete. Check crossings and local conditions.',
@@ -338,6 +481,7 @@ export class NetworkService {
       status: 'no_connection',
       validFrom: d.validFrom,
       validTo: d.validTo,
+      departureAt: input.departureAt ?? null,
       datasetVersion: d.version,
       verification: d.verification,
       sourceUrl: d.sourceUrl,
@@ -347,18 +491,38 @@ export class NetworkService {
       warnings,
     };
     let failed = false;
+    let candidatesTruncated = false;
     const candidates = async (
       location: ResolvedLocation,
       reversed: boolean
     ) => {
-      const found = location.stopId
-        ? [{ stop_id: location.stopId }]
+      const discovered = location.stopId
+        ? dedupeCandidateStops(
+            expandStopSelection(d.snapshot, location.stopId, stops)
+          ).map((stop_id) => ({ stop_id }))
         : ((await this.db.query(
             `SELECT stop_id, MIN(ST_Distance(location::geography,ST_SetSRID(ST_MakePoint($2,$3),4326)::geography)) AS distance
         FROM pattern_stops WHERE dataset_id=$1 AND ST_DWithin(location::geography,ST_SetSRID(ST_MakePoint($2,$3),4326)::geography,$4)
-        GROUP BY stop_id ORDER BY distance,stop_id LIMIT 8`,
+        GROUP BY stop_id ORDER BY distance,stop_id LIMIT 64`,
             [d.id, ...location.coordinates, input.maxWalkMeters]
           )) as { stop_id: string }[]);
+      const selected = selectBoardingCandidates(
+        discovered.map((s) => s.stop_id),
+        d.snapshot,
+        16,
+        reversed
+      );
+      if (
+        selectBoardingCandidates(
+          discovered.map((s) => s.stop_id),
+          d.snapshot,
+          Number.MAX_SAFE_INTEGER,
+          reversed
+        ).length > selected.length ||
+        discovered.length === 64
+      )
+        candidatesTruncated = true;
+      const found = selected.map((stop_id) => ({ stop_id }));
       const legs = new Map<string, WalkLeg>();
       await Promise.all(
         found.map(async (candidate) => {
@@ -382,25 +546,106 @@ export class NetworkService {
           }
         })
       );
-      return { found, legs };
+      return { found: discovered, legs };
     };
     const [access, egress] = await Promise.all([
       candidates(origin, false),
       candidates(destination, true),
     ]);
-    if (!access.found.length || !egress.found.length)
-      return { ...result, status: 'outside_coverage' };
-    result.journeys = searchJourneys(
-      d.snapshot,
-      access.legs,
-      egress.legs,
-      input
-    );
-    result.status = result.journeys.length
-      ? 'ok'
-      : failed
-        ? 'provider_unavailable'
-        : 'no_connection';
+    const search = searchJourneys(d.snapshot, access.legs, egress.legs, {
+      ...input,
+      allowScheduled: d.verification === 'verified',
+    });
+    result.journeys = search.journeys;
+    let limited = search.searchLimitReached || candidatesTruncated;
+    let noService = false;
+    if (
+      input.departureAt &&
+      !result.journeys.length &&
+      d.verification === 'verified'
+    ) {
+      // Distinguish missing timetable service from a disconnected network. Run
+      // this bounded topology check only after the time-aware search finds none.
+      const topology = searchJourneys(d.snapshot, access.legs, egress.legs, {
+        ...input,
+        departureAt: undefined,
+      });
+      limited ||= topology.searchLimitReached;
+      noService = topology.journeys.length > 0;
+    }
+
+    // A nearby pedestrian journey must not depend on transit coverage, stop-vs-
+    // coordinate selection, or a failed unrelated boarding-point lookup.
+    if (
+      !result.journeys.length &&
+      distance(origin.coordinates, destination.coordinates) <=
+        input.maxWalkMeters
+    ) {
+      try {
+        const direct = await this.walking.route(origin, destination);
+        if (direct && direct.distanceMeters <= input.maxWalkMeters) {
+          result.journeys = [
+            enrichJourney(
+              {
+                id: createHash('sha256')
+                  .update(
+                    JSON.stringify([
+                      'walk',
+                      origin.coordinates,
+                      destination.coordinates,
+                    ])
+                  )
+                  .digest('hex')
+                  .slice(0, 16),
+                legs: [direct],
+                transfers: 0,
+                walkingMeters: direct.distanceMeters,
+                ridingMeters: 0,
+                durationSeconds: direct.durationSeconds,
+                fareRwf: 0,
+                timingStatus: 'estimated',
+              },
+              d.snapshot.patterns
+            ),
+          ];
+          result.status = 'walking_only';
+        }
+      } catch (error) {
+        if (error instanceof WalkingProviderUnavailable) failed = true;
+        else throw error;
+      }
+    }
+    if (result.status !== 'walking_only') {
+      if (limited) result.status = 'search_limit_reached';
+      else if (result.journeys.length)
+        result.status =
+          input.departureAt &&
+          result.journeys.some((j) => j.timingStatus !== 'scheduled')
+            ? 'service_timing_unknown'
+            : 'ok';
+      else if (failed) result.status = 'provider_unavailable';
+      else if (!access.found.length || !egress.found.length)
+        result.status = 'outside_coverage';
+      else result.status = noService ? 'no_service_at_time' : 'no_connection';
+    }
+    if (
+      result.status === 'no_connection' ||
+      result.status === 'provider_unavailable'
+    )
+      result.nearbyConnections = nearbyStopConnections(
+        d.snapshot,
+        origin,
+        destination,
+        input.maxWalkMeters
+      );
+    if (limited)
+      result.warnings.push(
+        'The bounded search omitted some candidates or alternatives. This is not proof that no connection exists. Select precise stops or adjust preferences.'
+      );
+    if (input.departureAt)
+      result.warnings.push(
+        'Timetable planning considers departures in the next 24 hours. Scheduled times are not live predictions; unknown waiting times remain unknown.'
+      );
     if (failed)
       result.warnings.push(
         'Some walking connections could not be checked. Select a bus stop directly or try again.'
@@ -408,6 +653,24 @@ export class NetworkService {
     return result;
   }
 
+  async compareDraft(id: string) {
+    const draft = await this.draft(id);
+    let published: NetworkSnapshot | null = null;
+    let publishedVersion: string | null = null;
+    try {
+      const current = await this.dataset();
+      published = current.snapshot;
+      publishedVersion = current.version;
+    } catch {
+      published = null;
+    }
+    return {
+      draftId: draft.id,
+      draftVersion: draft.version,
+      publishedVersion,
+      report: compareSnapshots(published, draft.snapshot),
+    };
+  }
   async project(manager: EntityManager, d: NetworkDataset) {
     await manager.delete(RoutePattern, { datasetId: d.id });
     for (const p of d.snapshot.patterns.filter((p) => p.enabled)) {
@@ -437,6 +700,20 @@ export class NetworkService {
         message: 'Network validation failed',
         data: issues,
       });
+    if (values.snapshot!.transfers.some((t) => t.reviewed || t.review))
+      throw new BadRequestException(
+        'Imported transfers require a new staff review. Keep them unreviewed without approval metadata.'
+      );
+    const provenance = values.snapshot!.importProvenance;
+    if (
+      provenance &&
+      (provenance.namespace !== values.source ||
+        provenance.sourceUrl !== values.sourceUrl ||
+        provenance.checksum !== values.checksum)
+    )
+      throw new BadRequestException(
+        'Imported source metadata must match the archive provenance.'
+      );
     return this.db.transaction(async (manager) => {
       const draft = await manager.save(
         NetworkDataset,
@@ -453,7 +730,7 @@ export class NetworkService {
   async draft(id: string) {
     const d = await this.repo.findOneBy({ id });
     if (!d) throw new NotFoundException('Dataset not found');
-    return d;
+    return { ...d, snapshotRevision: snapshotRevision(d.snapshot) };
   }
   async listDatasets() {
     const rows = await this.repo.find({ order: { importedAt: 'DESC' } });
@@ -466,6 +743,10 @@ export class NetworkService {
     const d = await this.draft(id);
     const snapshot: NetworkSnapshot = JSON.parse(JSON.stringify(d.snapshot));
     snapshot.patterns.forEach((p) => (p.id = randomUUID()));
+    snapshot.transfers.forEach((t) => {
+      t.reviewed = false;
+      delete t.review;
+    });
     return this.createDraft({
       source: d.source,
       sourceUrl: d.sourceUrl,
@@ -497,11 +778,77 @@ export class NetworkService {
         throw new ConflictException(
           'Only drafts can be changed. Clone a published version first.'
         );
+      if (
+        d.snapshot.importProvenance &&
+        snapshotRevision(d.snapshot.importProvenance) !==
+          snapshotRevision(snapshot.importProvenance ?? null)
+      )
+        throw new BadRequestException(
+          'Original import provenance cannot be changed or removed. Import a new archive instead.'
+        );
+      for (const t of snapshot.transfers) {
+        if (
+          t.reviewed &&
+          JSON.stringify(t.review) !==
+            JSON.stringify(
+              d.snapshot.transfers.find((old) => old.id === t.id)?.review
+            )
+        )
+          throw new BadRequestException(
+            'Transfer approval can only be created through staff review, not the snapshot editor.'
+          );
+      }
       d.snapshot = snapshot;
       d.validFrom = snapshot.patterns.map((p) => p.service.validFrom).sort()[0];
       d.validTo = snapshot.patterns.map((p) => p.service.validTo).sort()[0];
       await manager.save(d);
       await this.project(manager, d);
+      return d;
+    });
+  }
+  async reviewTransfer(
+    id: string,
+    transferId: string,
+    reviewerId: string,
+    evidence: { evidenceUrl: string; notes: string; expectedRevision: string }
+  ) {
+    return this.db.transaction(async (manager) => {
+      const d = await manager.findOne(NetworkDataset, {
+        where: { id },
+        lock: { mode: 'pessimistic_write' },
+      });
+      if (!d || d.status !== 'draft')
+        throw new ConflictException(
+          'Only saved draft transfers can be reviewed.'
+        );
+      if (snapshotRevision(d.snapshot) !== evidence.expectedRevision)
+        throw new ConflictException(
+          'This draft changed. Reload and inspect the path before approving it.'
+        );
+      const t = d.snapshot.transfers.find((t) => t.id === transferId);
+      if (!t) throw new NotFoundException('Transfer not found in this draft.');
+      const stops = new Map(
+        d.snapshot.patterns.flatMap((p) =>
+          p.stops.map((s) => [s.id, s] as const)
+        )
+      );
+      const issues = transferPathIssues(t, stops);
+      if (issues.length) throw new BadRequestException(issues);
+      t.reviewed = true;
+      t.review = {
+        reviewerId,
+        reviewedAt: new Date().toISOString(),
+        evidenceUrl: evidence.evidenceUrl,
+        notes: evidence.notes.trim(),
+        contentHash: transferContentHash(t, stops),
+      };
+      const validation = validateSnapshot(d.snapshot);
+      if (validation.length)
+        throw new BadRequestException({
+          message: 'Resolve draft validation errors before review.',
+          data: validation,
+        });
+      await manager.save(d);
       return d;
     });
   }

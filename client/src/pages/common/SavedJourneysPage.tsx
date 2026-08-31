@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Bookmark, Trash2 } from "lucide-react";
+import Button from "@/components/inputs/Button";
 import { useAppSelector } from "@/states/hooks";
 import JourneyShell, { LoadState } from "@/features/journey/JourneyShell";
 import { networkRequest, useNetworkResource } from "@/features/journey/api";
@@ -55,9 +56,8 @@ export default function SavedJourneysPage() {
             </p>
           </div>
           {cloud && (
-            <button
+            <Button
               type="button"
-              className="journey-button secondary"
               onClick={() => {
                 try {
                   saveItem(item);
@@ -67,10 +67,11 @@ export default function SavedJourneysPage() {
               }}
             >
               Keep here
-            </button>
+            </Button>
           )}
-          <button
+          <Button
             type="button"
+            size="icon-sm"
             className="journey-icon-button"
             aria-label={`Remove ${item.label}`}
             onClick={() => {
@@ -91,7 +92,7 @@ export default function SavedJourneysPage() {
             }}
           >
             <Trash2 size={17} />
-          </button>
+          </Button>
         </article>
       ))}
     </div>
@@ -113,9 +114,9 @@ export default function SavedJourneysPage() {
         <div className="journey-empty">
           <h2>Your next journey starts here</h2>
           <p>Save a route, stop, or journey to find it again easily.</p>
-          <Link className="journey-button" to="/">
+          <Button variant="primary" route="/">
             Plan a journey
-          </Link>
+          </Button>
         </div>
       )}
       <section className="journey-search-panel">
@@ -126,14 +127,13 @@ export default function SavedJourneysPage() {
         </p>
         {token ? (
           <>
-            <button
+            <Button
               type="button"
-              className="journey-button secondary"
-              onClick={() => setConfirm(true)}
               disabled={!items.length}
+              onClick={() => setConfirm(true)}
             >
               Copy device favorites to account
-            </button>
+            </Button>
             <LoadState
               loading={remote.loading}
               error={remote.error}
@@ -143,12 +143,9 @@ export default function SavedJourneysPage() {
           </>
         ) : (
           <div className="journey-actions">
-            <Link
-              className="journey-button secondary"
-              to="/auth/login?returnTo=%2Fsaved"
-            >
+            <Button route="/auth/login?returnTo=%2Fsaved">
               Sign in to synchronize
-            </Link>
+            </Button>
           </div>
         )}
       </section>
@@ -162,14 +159,14 @@ export default function SavedJourneysPage() {
           coordinates. Existing matching favorites will be updated.
         </p>
         <div className="journey-actions">
-          <button
+          <Button
             type="button"
-            className="journey-button"
+            variant="primary"
             disabled={syncing}
             onClick={() => void upload()}
           >
             {syncing ? "Copying…" : "Copy favorites"}
-          </button>
+          </Button>
         </div>
       </Modal>
     </JourneyShell>

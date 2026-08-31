@@ -1,5 +1,6 @@
 import { Bookmark, Check } from "lucide-react";
 import { toast } from "sonner";
+import Button from "@/components/inputs/Button";
 import { removeSavedItem, savedKey, saveItem, useSavedItems } from "./saved";
 import type { SavedItem } from "./types";
 
@@ -16,9 +17,8 @@ export default function SaveButton({
     items = useSavedItems(),
     saved = items.some((s) => s.key === key);
   return (
-    <button
+    <Button
       type="button"
-      className="journey-button secondary"
       aria-pressed={saved}
       onClick={() => {
         try {
@@ -34,6 +34,6 @@ export default function SaveButton({
     >
       {saved ? <Check size={16} /> : <Bookmark size={16} />}{" "}
       {saved ? "Saved" : "Save"}
-    </button>
+    </Button>
   );
 }

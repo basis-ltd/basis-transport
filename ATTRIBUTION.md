@@ -5,9 +5,17 @@
 The active planner no longer uses the flattened seed described below. It imports
 the original GTFS archive into immutable, directional dataset versions, retaining
 source stop IDs and repeated occurrences. The local import has 195 patterns,
-55 routes, 828 source-qualified named stop IDs and 28 quality notices. Shapes,
+55 routes and 828 source-qualified named stop IDs. A read-only validation with the
+latest importer reports 27 stop/pattern notices and 191 unverified-fare notices;
+the older stored import had 28 notices. Shapes,
 calendars, calendar exceptions, overnight frequency windows and relative observed
 times are imported. Historic fares are not treated as current fares.
+
+New imports retain archive checksum/URL, separate import and known retrieval
+timestamps, and original route/trip/stop/stop-time references. GTFS parent stations
+and translated stop names are supported where supplied. The historic archive has
+no terminal groups; synthetic terminal/translation test fixtures are invented
+test data, not additional Kigali coverage or evidence of current service.
 
 The feed remains historic (service calendar 2019-02-25–2021-02-25), with unresolved
 usage rights. It is restricted to local/internal testing. Public publication

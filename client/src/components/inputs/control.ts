@@ -22,6 +22,10 @@ export const controlClassName =
 export const readOnlyControlClassName =
   'cursor-default border-transparent bg-(--surface) text-(--disabled-fg) hover:border-transparent focus-visible:border-transparent focus-visible:shadow-none';
 
+/** Input embedded inside a composite control — the shell owns the edge and focus. */
+export const nestedControlInputClassName =
+  'h-12 min-h-12 flex-1 border-0 bg-transparent px-0 shadow-none outline-none focus-visible:border-0 focus-visible:shadow-none focus-visible:ring-0 focus-visible:outline-none';
+
 /** A textarea is the same control with its height released. */
 export const textareaClassName =
   'min-h-24 w-full min-w-0 rounded-(--radius-control) border border-(--line) bg-(--paper) px-3.5 py-2.5 text-sm font-normal text-(--ink) shadow-none outline-none transition-[border-color,box-shadow] duration-200 ease-(--ease-flat) placeholder:text-(--muted) hover:border-(--line-strong) focus-visible:border-(--ink) focus-visible:ring-0 focus-visible:shadow-[var(--ink)_0_0_0_1px_inset] aria-invalid:border-(--danger) aria-invalid:ring-0 aria-invalid:shadow-[var(--danger)_0_0_0_1px_inset] disabled:cursor-not-allowed disabled:bg-(--surface) disabled:text-(--disabled-fg)';

@@ -5,7 +5,6 @@ import {
   BusFront,
   Footprints,
   MapPin,
-  Navigation,
 } from "lucide-react";
 import { useState } from "react";
 import PublicNavbar from "@/containers/public/PublicNavbar";
@@ -16,6 +15,7 @@ import { useNetworkResource } from "@/features/journey/api";
 import { requestLocation, travelUrl } from "@/features/journey/locations";
 import { NetworkNotice } from "@/features/journey/JourneyShell";
 import type { NetworkStatus } from "@/features/journey/types";
+import "@/styles/landingPage.css";
 import "@/features/journey/journey.css";
 
 export default function LandingPage() {
@@ -46,31 +46,24 @@ export default function LandingPage() {
       <main className="landing-container">
         <section className="journey-hero">
           <div className="journey-hero-grid">
-            <div>
-              <p className="journey-eyebrow">
-                Kigali, one connection at a time
-              </p>
-              <h1>
-                Your way there.
-                <br />
-                <span>Stop by stop.</span>
-              </h1>
-              <p className="journey-hero-intro">
-                Find the bus, the boarding point, and the changes along the way.
-                Start with where you are going.
-              </p>
-              <LandingHeroForm onSearch={(a, b) => navigate(travelUrl(a, b))} />
-              <div className="journey-actions">
-                <button
-                  className="journey-button secondary"
-                  type="button"
-                  disabled={locating}
-                  onClick={() => void nearby()}
-                >
-                  <Navigation size={16} />
-                  {locating ? "Finding you…" : "Find nearby stops"}
-                </button>
+            <div className="journey-hero-copy landing-enter">
+              <div className="journey-hero-headline">
+                <h1 className="landing-display text-balance">
+                  Your way there.
+                  <br />
+                  <span>Stop by stop.</span>
+                </h1>
+                <p className="landing-body journey-hero-intro">
+                  Find the bus, the boarding point, and the changes along the way.
+                  Start with where you are going.
+                </p>
               </div>
+              <LandingHeroForm
+                variant="hero"
+                onNearby={() => void nearby()}
+                nearbyBusy={locating}
+                onSearch={(a, b) => navigate(travelUrl(a, b))}
+              />
               {error && (
                 <p className="journey-error" role="alert">
                   {error}

@@ -1,4 +1,5 @@
 import Button from '@/components/inputs/Button';
+import BackButton from '@/components/inputs/BackButton';
 import Input from '@/components/inputs/Input';
 import validateInputs from '@/helpers/validations.helper';
 import { useResetPasswordMutation } from '@/api/mutations/apiSlice';
@@ -90,12 +91,9 @@ const ResetPassword = () => {
               >
                 Request a new reset link
               </Link>
-              <Link
-                to="/auth/login"
-                className="type-body-sm mt-2 inline-block text-(--muted)"
-              >
+              <BackButton route="/auth/login" className="mx-auto mt-2">
                 Back to login
-              </Link>
+              </BackButton>
             </section>
           ) : (
             <form className="card-framed flex w-full flex-col gap-5 p-8 max-sm:p-5" onSubmit={onSubmit}>
@@ -173,12 +171,9 @@ const ResetPassword = () => {
                 >
                   Update password
                 </Button>
-                <Link
-                  to="/auth/login"
-                  className="type-body-sm text-(--ink) hover:underline transition-colors duration-200 ease-in-out"
-                >
+                <BackButton route="/auth/login">
                   Back to login
-                </Link>
+                </BackButton>
               </menu>
             </form>
           )}

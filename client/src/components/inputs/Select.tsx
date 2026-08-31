@@ -5,12 +5,17 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { cn } from '@/lib/utils';
-import { controlClassName, panelClassName, panelItemClassName } from './control';
-import type { InputErrorMessageProp } from './ErrorLabels';
-import { resolveErrorText } from './ErrorLabels';
-import { FieldShell } from './Field';
+} from "@/components/ui/select";
+import { cn } from "@/lib/utils";
+import {
+  controlClassName,
+  panelClassName,
+  panelItemClassName,
+} from "./control";
+import type { InputErrorMessageProp } from "./ErrorLabels";
+import { resolveErrorText } from "./ErrorLabels";
+import { FieldShell } from "./Field";
+import { useId } from "react";
 
 export interface SelectOption {
   label: string | undefined;
@@ -42,9 +47,9 @@ type SelectProps = {
 const Select = ({
   options = [],
   defaultValue,
-  placeholder = 'Select here...',
+  placeholder = "Select here...",
   className,
-  value = '',
+  value = "",
   onChange,
   label,
   required = false,
@@ -55,6 +60,10 @@ const Select = ({
   errorMessage,
 }: SelectProps) => {
   const hasError = Boolean(resolveErrorText(errorMessage));
+  const id = useId();
+  const emptyValue = `__basis-empty-${id}`;
+  const encode = (v: string | undefined) =>
+    v === "" && options.some((o) => o.value === "") ? emptyValue : v;
 
   return (
     <FieldShell
@@ -63,30 +72,40 @@ const Select = ({
       description={description}
       errorMessage={errorMessage}
       className={labelClassName}
+      htmlFor={id}
     >
       <SelectRoot
-        onValueChange={onChange}
-        defaultValue={defaultValue}
-        value={value}
+        onValueChange={(v) => onChange?.(v === emptyValue ? "" : v)}
+        defaultValue={encode(defaultValue)}
+        value={encode(value)}
         name={name}
         disabled={readOnly}
       >
         <SelectTrigger
+          id={id}
           aria-invalid={hasError}
           className={cn(
             controlClassName,
-            'cursor-pointer justify-between data-[placeholder]:text-(--muted) [&>span]:line-clamp-1 [&_svg]:text-(--muted)',
-            className
+            "w-full cursor-pointer justify-between data-[placeholder]:text-(--muted) [&>span]:line-clamp-1 [&_svg]:text-(--muted)",
+            className,
           )}
         >
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
-        <SelectContent className={panelClassName}>
+        <SelectContent
+          position="popper"
+          sideOffset={6}
+          align="start"
+          className={cn(
+            panelClassName,
+            "z-[var(--z-popover)] w-[var(--radix-select-trigger-width)]",
+          )}
+        >
           <SelectGroup>
             {options.map((option) => (
               <SelectItem
                 key={option.value}
-                value={option.value}
+                value={encode(option.value)!}
                 disabled={option.disabled}
                 className={panelItemClassName}
               >

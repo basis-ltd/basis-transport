@@ -1,6 +1,46 @@
 import { loadGoogleMapsLibrary } from "@/utils/googleMapsApi.util";
 import type { JourneyLocation } from "./types";
 
+/** Resolve a display address without moving the GPS point to an address centroid. */
+export async function reverseGeocodeLocation(
+  location: JourneyLocation,
+  signal: AbortSignal,
+): Promise<JourneyLocation> {
+  let active = true;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  let onAbort: () => void = () => {};
+  try {
+    return await Promise.race([
+      (async () => {
+        const library = await loadGoogleMapsLibrary("geocoding");
+        if (!active || signal.aborted)
+          throw new Error("Address lookup cancelled.");
+        const { results } = await new library.Geocoder().geocode({
+          location: { lat: location.latitude, lng: location.longitude },
+        });
+        const name = results.find((r) =>
+          r.formatted_address?.trim(),
+        )?.formatted_address;
+        if (!name) throw new Error("No address found.");
+        return { ...location, name };
+      })(),
+      new Promise<never>((_, reject) => {
+        onAbort = () => reject(new Error("Address lookup cancelled."));
+        if (signal.aborted) onAbort();
+        else signal.addEventListener("abort", onAbort, { once: true });
+        timer = setTimeout(
+          () => reject(new Error("Address lookup timed out.")),
+          5000,
+        );
+      }),
+    ]);
+  } finally {
+    active = false;
+    clearTimeout(timer);
+    signal.removeEventListener("abort", onAbort);
+  }
+}
+
 export interface PlaceSuggestion {
   id: string;
   label: string;

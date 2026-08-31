@@ -1,5 +1,7 @@
 import { useState } from "react";
 import Modal from "@/components/cards/Modal";
+import Button from "@/components/inputs/Button";
+import TextArea from "@/components/inputs/TextArea";
 import { networkRequest } from "./api";
 
 export default function ReportIssue({
@@ -16,13 +18,9 @@ export default function ReportIssue({
     [busy, setBusy] = useState(false);
   return (
     <>
-      <button
-        type="button"
-        className="journey-button secondary"
-        onClick={() => setOpen(true)}
-      >
+      <Button type="button" onClick={() => setOpen(true)}>
         Report a problem
-      </button>
+      </Button>
       <Modal
         isOpen={open}
         onClose={() => setOpen(false)}
@@ -35,6 +33,7 @@ export default function ReportIssue({
           </p>
         ) : (
           <form
+            className="grid gap-4"
             onSubmit={(e) => {
               e.preventDefault();
               setBusy(true);
@@ -48,28 +47,18 @@ export default function ReportIssue({
                 .finally(() => setBusy(false));
             }}
           >
-            <label htmlFor="report-message">
-              Describe the stop or route issue
-            </label>
-            <textarea
-              id="report-message"
-              className="journey-directory-search"
-              style={{ maxWidth: "none", minHeight: 140 }}
+            <TextArea
+              label="Describe the stop or route issue"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              minLength={10}
-              maxLength={3000}
+              rows={6}
               required
+              errorMessage={error || undefined}
             />
-            {error && (
-              <p className="journey-error" role="alert">
-                {error}
-              </p>
-            )}
             <div className="journey-actions">
-              <button type="submit" className="journey-button" disabled={busy}>
+              <Button type="submit" variant="primary" disabled={busy}>
                 {busy ? "Sending…" : "Send report"}
-              </button>
+              </Button>
             </div>
           </form>
         )}

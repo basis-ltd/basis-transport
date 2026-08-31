@@ -1,5 +1,4 @@
 import {
-  faArrowLeft,
   faBus,
   faCreditCard,
   faGaugeHigh,
@@ -8,7 +7,8 @@ import {
   faRoute,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
+import BackButton from '@/components/inputs/BackButton';
 import Button from '@/components/inputs/Button';
 import { Seo } from '@/components/seo';
 import AppLayout from '@/containers/navigation/AppLayout';
@@ -70,7 +70,6 @@ const MissingStopDiagram = () => (
 );
 
 const NotFoundPage = () => {
-  const navigate = useNavigate();
   const { pathname } = useLocation();
   const { user, token } = useAppSelector((state) => state.auth);
   const isSignedIn = Boolean(user && token);
@@ -112,14 +111,7 @@ const NotFoundPage = () => {
         <Button primary route={isSignedIn ? '/saved' : '/'}>
           {isSignedIn ? 'Go to dashboard' : 'Go to home'}
         </Button>
-        <Button
-          type="button"
-          variant="breadcrumb"
-          icon={faArrowLeft}
-          onClick={() => navigate(-1)}
-        >
-          Go back
-        </Button>
+        <BackButton>Go back</BackButton>
       </div>
 
       <nav aria-label="Other places to go" className="flex w-full flex-col gap-3">

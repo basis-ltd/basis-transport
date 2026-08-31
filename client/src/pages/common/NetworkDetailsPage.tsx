@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import Button from "@/components/inputs/Button";
+import Select from "@/components/inputs/Select";
 import JourneyShell, {
   LoadState,
   NetworkNotice,
@@ -7,6 +9,7 @@ import JourneyShell, {
 import { useNetworkResource } from "@/features/journey/api";
 import SaveButton from "@/features/journey/SaveButton";
 import ReportIssue from "@/features/journey/ReportIssue";
+import StopIdentity from "@/features/journey/StopIdentity";
 import { locationFromStop, travelUrl } from "@/features/journey/locations";
 import type { RouteDetail, StopDetail } from "@/features/journey/types";
 
@@ -52,19 +55,38 @@ export default function NetworkDetailsPage({
           </div>
           {stop && (
             <>
+              <StopIdentity stop={stop} />
+              {stop.stopArea && stop.stopArea.boardingPoints.length > 1 && (
+                <div className="journey-stop-area">
+                  <h2>{stop.stopArea.name}</h2>
+                  <p className="journey-field-hint">
+                    This terminal has {stop.stopArea.boardingPoints.length}{" "}
+                    boarding points. Select the platform your route uses.
+                  </p>
+                  <ul className="journey-route-stops">
+                    {stop.stopArea.boardingPoints.map((p) => (
+                      <li key={p.id}>
+                        <Link to={`/stops/${encodeURIComponent(p.id)}`}>
+                          {p.name}
+                          {p.id === stop.id ? " (this stop)" : ""}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
               <div className="journey-actions">
-                <Link
-                  className="journey-button"
-                  to={`/travel?originLat=${stop.coordinates[1]}&originLon=${stop.coordinates[0]}&originStopId=${encodeURIComponent(stop.id)}&from=${encodeURIComponent(stop.name)}`}
+                <Button
+                  variant="primary"
+                  route={`/travel?originLat=${stop.coordinates[1]}&originLon=${stop.coordinates[0]}&originStopId=${encodeURIComponent(stop.id)}&from=${encodeURIComponent(stop.name)}`}
                 >
                   Start here
-                </Link>
-                <Link
-                  className="journey-button secondary"
-                  to={`/travel?destLat=${stop.coordinates[1]}&destLon=${stop.coordinates[0]}&destStopId=${encodeURIComponent(stop.id)}&to=${encodeURIComponent(stop.name)}`}
+                </Button>
+                <Button
+                  route={`/travel?destLat=${stop.coordinates[1]}&destLon=${stop.coordinates[0]}&destStopId=${encodeURIComponent(stop.id)}&to=${encodeURIComponent(stop.name)}`}
                 >
                   Travel here
-                </Link>
+                </Button>
               </div>
               <h2>Routes serving this stop</h2>
               <div className="journey-directory">
@@ -87,19 +109,15 @@ export default function NetworkDetailsPage({
           {route && pattern && (
             <>
               <div className="journey-preferences">
-                <label>
-                  Direction / variant
-                  <select
-                    value={pattern.id}
-                    onChange={(e) => setPatternId(e.target.value)}
-                  >
-                    {route.patterns.map((p, i) => (
-                      <option value={p.id} key={p.id}>
-                        To {p.headsign} · variant {i + 1}
-                      </option>
-                    ))}
-                  </select>
-                </label>
+                <Select
+                  label="Direction / variant"
+                  value={pattern.id}
+                  onChange={setPatternId}
+                  options={route.patterns.map((p, i) => ({
+                    value: p.id,
+                    label: `To ${p.headsign} · variant ${i + 1}`,
+                  }))}
+                />
               </div>
               <p>
                 {pattern.agency} · Towards {pattern.headsign}
@@ -113,15 +131,15 @@ export default function NetworkDetailsPage({
                   </li>
                 ))}
               </ol>
-              <Link
-                className="journey-button"
-                to={travelUrl(
+              <Button
+                variant="primary"
+                route={travelUrl(
                   locationFromStop(pattern.stops[0]),
                   locationFromStop(pattern.stops[pattern.stops.length - 1]),
                 )}
               >
                 Plan this direction
-              </Link>
+              </Button>
               <details className="journey-data-notes">
                 <summary>Source operating information</summary>
                 <p>

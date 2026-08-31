@@ -1,8 +1,15 @@
 import { useState } from "react";
+import Button from "@/components/inputs/Button";
+import Input from "@/components/inputs/Input";
+import Select from "@/components/inputs/Select";
+import TextArea from "@/components/inputs/TextArea";
 import JourneyShell, { LoadState } from "@/features/journey/JourneyShell";
 import { networkRequest, useNetworkResource } from "@/features/journey/api";
 import type { Dataset, PassengerReport } from "@/features/journey/types";
 import Modal from "@/components/cards/Modal";
+import NetworkDraftReview, {
+  parseDraftSnapshot,
+} from "@/features/journey/NetworkDraftReview";
 
 export default function NetworkAdminPage() {
   const datasets = useNetworkResource<Dataset[]>(
@@ -14,13 +21,24 @@ export default function NetworkAdminPage() {
       totalCount: number;
     }>("/admin/network/reports?size=50", true);
   const [selected, setSelected] = useState<Dataset>(),
+    [comparison, setComparison] = useState<{
+      summary: {
+        addedRoutes: number;
+        withdrawnRoutes: number;
+        modifiedRoutes: number;
+      };
+      entries: { category: string; message: string }[];
+    }>(),
     [editor, setEditor] = useState(""),
     [error, setError] = useState(""),
     [notice, setNotice] = useState(""),
     [busy, setBusy] = useState(false),
     [publishId, setPublishId] = useState("");
+  const [comparisonCount, setComparisonCount] = useState(20);
   const open = async (id: string) => {
     setError("");
+    setComparison(undefined);
+    setComparisonCount(20);
     try {
       const d = await networkRequest<Dataset>(
         `/admin/network/datasets/${id}`,
@@ -29,6 +47,17 @@ export default function NetworkAdminPage() {
       );
       setSelected(d);
       setEditor(JSON.stringify(d.snapshot, null, 2));
+      const c = await networkRequest<{
+        report: {
+          summary: {
+            addedRoutes: number;
+            withdrawnRoutes: number;
+            modifiedRoutes: number;
+          };
+          entries: { category: string; message: string }[];
+        };
+      }>(`/admin/network/datasets/${id}/comparison`, {}, true);
+      setComparison(c.report);
     } catch (e) {
       setError((e as Error).message);
     }
@@ -47,8 +76,10 @@ export default function NetworkAdminPage() {
       reports.refresh();
       setPublishId("");
       setNotice("Changes saved.");
+      return true;
     } catch (e) {
       setError((e as Error).message);
+      return false;
     } finally {
       setBusy(false);
     }
@@ -90,34 +121,29 @@ export default function NetworkAdminPage() {
               </p>
               <p>{d.issues.length} import notices</p>
               <div className="journey-actions">
-                <button
-                  type="button"
-                  className="journey-button secondary"
-                  onClick={() => void open(d.id)}
-                >
+                <Button type="button" onClick={() => void open(d.id)}>
                   Inspect
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
-                  className="journey-button secondary"
                   disabled={busy}
                   onClick={() =>
                     void act(`/admin/network/datasets/${d.id}/clone`)
                   }
                 >
                   Create editable copy
-                </button>
+                </Button>
                 {d.status !== "published" && (
-                  <button
+                  <Button
                     type="button"
-                    className="journey-button"
+                    variant="primary"
                     disabled={busy}
                     onClick={() => setPublishId(d.id)}
                   >
                     {d.status === "archived"
                       ? "Restore this version"
                       : "Publish draft"}
-                  </button>
+                  </Button>
                 )}
               </div>
             </div>
@@ -132,37 +158,124 @@ export default function NetworkAdminPage() {
               ? "Edit stop names, aliases, pattern sequences, calendars, sourced fares, and reviewed transfer links in the validated snapshot. Stop metadata must agree across all occurrences."
               : "Published and archived snapshots are immutable. Create an editable copy to make changes."}
           </p>
-          <label htmlFor="network-snapshot" className="block my-3 text-sm">
-            Network snapshot
-          </label>
-          <textarea
-            id="network-snapshot"
-            className="journey-admin-editor"
+          {"patterns" in selected.snapshot && (
+            <div
+              className="journey-admin-inventory"
+              aria-label="Snapshot inventory"
+            >
+              <p>
+                <strong>{selected.snapshot.patterns.length}</strong> patterns ·{" "}
+                <strong>
+                  {(selected.snapshot as { transfers?: unknown[] }).transfers
+                    ?.length ?? 0}
+                </strong>{" "}
+                transfer links ·{" "}
+                <strong>
+                  {(selected.snapshot as { stopAreas?: unknown[] }).stopAreas
+                    ?.length ?? 0}
+                </strong>{" "}
+                stop areas
+              </p>
+              <p className="journey-field-hint">
+                Reviewed transfers:{" "}
+                {
+                  (
+                    (
+                      selected.snapshot as {
+                        transfers?: { reviewed?: boolean }[];
+                      }
+                    ).transfers ?? []
+                  ).filter((t) => t.reviewed).length
+                }{" "}
+                · Unreviewed:{" "}
+                {
+                  (
+                    (
+                      selected.snapshot as {
+                        transfers?: { reviewed?: boolean }[];
+                      }
+                    ).transfers ?? []
+                  ).filter((t) => !t.reviewed).length
+                }
+              </p>
+            </div>
+          )}
+          <NetworkDraftReview
+            editor={editor}
+            readonly={selected.status !== "draft" || busy}
+            onChange={setEditor}
+            canReview={
+              !busy &&
+              Boolean(selected.snapshotRevision) &&
+              JSON.stringify(parseDraftSnapshot(editor)) ===
+                JSON.stringify(selected.snapshot)
+            }
+            onReview={async (id, evidence) => {
+              setBusy(true);
+              setError("");
+              setNotice("");
+              try {
+                await networkRequest(
+                  `/admin/network/datasets/${selected.id}/transfers/${encodeURIComponent(id)}/review`,
+                  {
+                    method: "POST",
+                    body: JSON.stringify({
+                      ...evidence,
+                      confirm: true,
+                      expectedRevision: selected.snapshotRevision,
+                    }),
+                  },
+                  true,
+                );
+                await open(selected.id);
+                setNotice(
+                  "Pedestrian path review recorded. Publish the draft to make the approved link available to routing.",
+                );
+              } catch (e) {
+                setError((e as Error).message);
+                throw e;
+              } finally {
+                setBusy(false);
+              }
+            }}
+          />
+          <TextArea
+            label="Network snapshot"
+            className="journey-admin-editor font-mono text-sm"
             value={editor}
-            readOnly={selected.status !== "draft"}
+            readonly={selected.status !== "draft" || busy}
             onChange={(e) => setEditor(e.target.value)}
-            spellCheck={false}
+            rows={18}
+            resize
           />
           {selected.status === "draft" && (
             <div className="journey-actions">
-              <button
+              <Button
                 type="button"
-                className="journey-button"
+                variant="primary"
                 disabled={busy}
-                onClick={() => {
+                onClick={async () => {
                   try {
-                    void act(
+                    const saved = await act(
                       `/admin/network/datasets/${selected.id}/snapshot`,
                       JSON.parse(editor),
                       "PATCH",
                     );
+                    if (saved) await open(selected.id);
                   } catch {
                     setError("The snapshot is not valid JSON.");
                   }
                 }}
               >
                 Validate and save draft
-              </button>
+              </Button>
+              <Button
+                type="button"
+                disabled={busy}
+                onClick={() => void open(selected.id)}
+              >
+                Discard editor edits and reload saved draft
+              </Button>
             </div>
           )}
           <details className="journey-data-notes">
@@ -175,9 +288,37 @@ export default function NetworkAdminPage() {
               ))}
             </ul>
           </details>
+          {comparison && (
+            <details className="journey-data-notes" open>
+              <summary>Import comparison report</summary>
+              <p>
+                {comparison.summary.addedRoutes} routes added ·{" "}
+                {comparison.summary.withdrawnRoutes} withdrawn ·{" "}
+                {comparison.summary.modifiedRoutes} modified
+              </p>
+              <ul>
+                {comparison.entries.slice(0, comparisonCount).map((e, n) => (
+                  <li key={n}>
+                    <strong>{e.category}</strong>: {e.message}
+                  </li>
+                ))}
+              </ul>
+              {comparison.entries.length > comparisonCount && (
+                <Button
+                  type="button"
+                  onClick={() => setComparisonCount((n) => n + 20)}
+                >
+                  Show next{" "}
+                  {Math.min(20, comparison.entries.length - comparisonCount)}{" "}
+                  changes ({comparison.entries.length - comparisonCount}{" "}
+                  remaining)
+                </Button>
+              )}
+            </details>
+          )}
           {selected.status === "draft" && (
             <form
-              className="grid gap-3 mt-6"
+              className="grid gap-4 mt-6"
               onSubmit={(e) => {
                 e.preventDefault();
                 void act(
@@ -192,66 +333,57 @@ export default function NetworkAdminPage() {
                 );
               }}
             >
-              <label>
-                Usage rights
-                <select
-                  className="journey-directory-search block"
-                  value={selected.rightsStatus}
-                  onChange={(e) =>
-                    setSelected({ ...selected, rightsStatus: e.target.value })
-                  }
-                >
-                  <option value="unclear">Unclear — internal only</option>
-                  <option value="approved">Approved for public use</option>
-                </select>
-              </label>
-              <label>
-                Rights evidence
-                <input
-                  className="journey-directory-search block"
-                  value={selected.rightsEvidence}
-                  onChange={(e) =>
-                    setSelected({ ...selected, rightsEvidence: e.target.value })
-                  }
-                />
-              </label>
-              <label>
-                Verification
-                <select
-                  className="journey-directory-search block"
-                  value={selected.verification}
-                  onChange={(e) =>
-                    setSelected({
-                      ...selected,
-                      verification: e.target.value as Dataset["verification"],
-                    })
-                  }
-                >
-                  <option value="historic">Historic</option>
-                  <option value="unverified">Unverified</option>
-                  <option value="verified">Verified current service</option>
-                </select>
-              </label>
-              <label>
-                Verification evidence
-                <input
-                  className="journey-directory-search block"
-                  value={selected.verificationEvidence}
-                  onChange={(e) =>
-                    setSelected({
-                      ...selected,
-                      verificationEvidence: e.target.value,
-                    })
-                  }
-                />
-              </label>
-              <button
+              <Select
+                label="Usage rights"
+                value={selected.rightsStatus}
+                onChange={(value) =>
+                  setSelected({ ...selected, rightsStatus: value })
+                }
+                options={[
+                  { label: "Unclear — internal only", value: "unclear" },
+                  { label: "Approved for public use", value: "approved" },
+                ]}
+              />
+              <Input
+                label="Rights evidence"
+                value={selected.rightsEvidence}
+                onChange={(e) =>
+                  setSelected({ ...selected, rightsEvidence: e.target.value })
+                }
+              />
+              <Select
+                label="Verification"
+                value={selected.verification}
+                onChange={(value) =>
+                  setSelected({
+                    ...selected,
+                    verification: value as Dataset["verification"],
+                  })
+                }
+                options={[
+                  { label: "Historic", value: "historic" },
+                  { label: "Unverified", value: "unverified" },
+                  { label: "Verified current service", value: "verified" },
+                ]}
+              />
+              <Input
+                label="Verification evidence"
+                value={selected.verificationEvidence}
+                onChange={(e) =>
+                  setSelected({
+                    ...selected,
+                    verificationEvidence: e.target.value,
+                  })
+                }
+              />
+              <Button
                 type="submit"
-                className="journey-button w-fit"
+                variant="primary"
+                className="w-fit"
                 disabled={busy}
               >
                 Save review evidence
-              </button>
+              </Button>
             </form>
           )}
         </section>
@@ -273,9 +405,9 @@ export default function NetworkAdminPage() {
               <p>
                 {r.referenceId || ""} {r.email || ""}
               </p>
-              <button
+              <Button
                 type="button"
-                className="journey-button secondary mt-3"
+                className="mt-3"
                 disabled={busy}
                 onClick={() =>
                   void act(
@@ -286,7 +418,7 @@ export default function NetworkAdminPage() {
                 }
               >
                 {r.status === "open" ? "Mark resolved" : "Reopen"}
-              </button>
+              </Button>
             </div>
           </article>
         ))}
@@ -302,9 +434,9 @@ export default function NetworkAdminPage() {
           current or grant usage rights.
         </p>
         <div className="journey-actions">
-          <button
+          <Button
             type="button"
-            className="journey-button"
+            variant="primary"
             disabled={busy}
             onClick={() =>
               void act(`/admin/network/datasets/${publishId}/publish`, {
@@ -313,7 +445,7 @@ export default function NetworkAdminPage() {
             }
           >
             Confirm publication
-          </button>
+          </Button>
         </div>
         {error && (
           <p role="alert" className="journey-error">

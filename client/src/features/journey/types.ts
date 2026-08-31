@@ -13,6 +13,14 @@ export interface NetworkStop {
   aliases: string[];
   coordinates: Coordinates;
   distanceMeters?: number;
+  routeNumbers?: string[];
+  services?: { routeNumber: string; headsign: string }[];
+  directConnection?: boolean;
+  terminalArea?: boolean;
+  boardingPointCount?: number;
+  platformCode?: string;
+  displayNames?: Record<string, string>;
+  sourceRecord?: { namespace: string; file: string; recordId: string };
 }
 export interface PatternStop extends NetworkStop {
   sequence: number;
@@ -53,6 +61,37 @@ export interface Fare {
   validTo: string;
   verified: boolean;
 }
+export interface NetworkMapPattern {
+  id: string;
+  routeId: string;
+  routeNumber: string;
+  routeName: string;
+  agency: string;
+  direction: string;
+  headsign: string;
+  geometry: Coordinates[];
+  geometryQuality: "source-shape" | "schematic";
+  generalized: boolean;
+  stops: Pick<
+    PatternStop,
+    "id" | "code" | "name" | "coordinates" | "sequence"
+  >[];
+  stopCount: number;
+  stopsTruncated: boolean;
+}
+export interface NetworkMapData {
+  patterns: NetworkMapPattern[];
+  totalPatterns: number;
+  totalRoutes: number;
+  truncated: boolean;
+  network: NetworkMetadata;
+  filters: {
+    routes: { id: string; number: string; name: string }[];
+    routesTruncated: boolean;
+    agencies: string[];
+    headsigns: string[];
+  };
+}
 export interface Pattern {
   id: string;
   routeId: string;
@@ -86,6 +125,11 @@ export interface RouteDetail extends Omit<RouteSummary, "patterns"> {
 }
 export interface StopDetail extends NetworkStop {
   routes: RouteSummary[];
+  stopArea?: {
+    id: string;
+    name: string;
+    boardingPoints: { id: string; name: string; code: string }[];
+  } | null;
   network: NetworkMetadata;
 }
 export interface Page<T> {
@@ -94,6 +138,10 @@ export interface Page<T> {
   totalPages: number;
   currentPage: number;
   network: NetworkMetadata;
+  filters?: {
+    agencies: string[];
+    headsigns: string[];
+  };
 }
 export interface ResolvedLocation {
   name: string;
@@ -126,25 +174,80 @@ export interface RideLeg {
   geometryQuality: "source-shape" | "schematic";
   fare: Fare | null;
 }
+export interface FareQuote {
+  status: "known" | "partial" | "unknown";
+  legFares: {
+    legIndex: number;
+    amount: number | null;
+    paymentTiming: string | null;
+    instructions: string | null;
+  }[];
+  transferAdjustments: { amount: number; description: string }[];
+  subtotal: number | null;
+  total: number | null;
+  warnings?: string[];
+}
+export type PassengerStepKind =
+  "walk" | "wait" | "board" | "ride" | "alight" | "transfer" | "arrive";
+export interface PassengerStep {
+  id: string;
+  kind: PassengerStepKind;
+  legIndex: number | null;
+  location?: { name: string; stopId?: string };
+  text: string;
+  confidence: "verified" | "estimated" | "unknown";
+  timing: {
+    status: "scheduled" | "estimated" | "unknown";
+    seconds: number | null;
+    label: string | null;
+  };
+  fareAmount: number | null;
+  fareCurrency: "RWF" | null;
+  paymentTiming: "boarding" | "alighting" | "other" | null;
+  paymentInstructions: string | null;
+}
 export interface Journey {
   id: string;
   legs: (WalkLeg | RideLeg)[];
+  steps?: PassengerStep[];
   transfers: number;
   walkingMeters: number;
   ridingMeters: number;
   durationSeconds: number | null;
   fareRwf: number | null;
+  fareQuote?: FareQuote;
+  timingStatus?: "scheduled" | "estimated" | "unknown";
+  arrivalAt?: string | null;
 }
+export type JourneyPlanStatus =
+  | "ok"
+  | "walking_only"
+  | "already_at_destination"
+  | "no_connection"
+  | "outside_coverage"
+  | "no_service_at_time"
+  | "service_timing_unknown"
+  | "provider_unavailable"
+  | "search_limit_reached";
 export interface JourneyPlan {
   validFrom: string | null;
   validTo: string | null;
-  status: "ok" | "no_connection" | "outside_coverage" | "provider_unavailable";
+  departureAt?: string | null;
+  status: JourneyPlanStatus;
   datasetVersion: string;
   verification: NetworkMetadata["verification"];
   sourceUrl: string;
   origin: ResolvedLocation;
   destination: ResolvedLocation;
   journeys: Journey[];
+  nearbyConnections?: {
+    origin: ResolvedLocation;
+    destination: ResolvedLocation;
+    originDistanceMeters: number;
+    destinationDistanceMeters: number;
+    routeNumber: string;
+    headsign: string;
+  }[];
   warnings: string[];
 }
 export interface SavedItem {
@@ -155,6 +258,7 @@ export interface SavedItem {
   kind: "journey" | "stop" | "route";
 }
 export interface Dataset extends NetworkMetadata {
+  snapshotRevision?: string;
   id: string;
   status: "draft" | "published" | "archived";
   checksum: string;

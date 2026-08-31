@@ -16,6 +16,8 @@ async function main() {
   if (!/^[a-z0-9-]{3,40}$/.test(source) || !sourceUrl.startsWith('https://'))
     throw new Error('Provide a safe source identifier and HTTPS source URL.');
   const path = args.find((a) => !a.startsWith('--'));
+  let retrievedAt =
+    args.find((a) => a.startsWith('--retrieved-at='))?.slice(15) || null;
   if (source !== 'dt4a-2019' && !path)
     throw new Error('A reviewed source requires a local GTFS archive path.');
   let bytes: Buffer;
@@ -27,8 +29,9 @@ async function main() {
     if (!response.ok)
       throw new Error('Unable to download the public GTFS archive');
     bytes = Buffer.from(await response.arrayBuffer());
+    retrievedAt = new Date().toISOString();
   }
-  const imported = await importGtfs(bytes, source);
+  const imported = await importGtfs(bytes, source, sourceUrl, retrievedAt);
   await db.initialize();
   const service = new NetworkService(db, new WalkingService());
   try {
@@ -46,6 +49,7 @@ async function main() {
       rightsEvidence: '',
       verificationEvidence: '',
     });
+    const comparison = await service.compareDraft(draft.id);
     console.log(
       JSON.stringify({
         id: draft.id,
@@ -53,6 +57,7 @@ async function main() {
         patterns: draft.snapshot.patterns.length,
         issues: draft.issues.length,
         status: draft.status,
+        comparison: comparison.report.summary,
       })
     );
     if (args.includes('--publish-internal')) {

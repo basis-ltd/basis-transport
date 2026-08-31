@@ -1,4 +1,5 @@
 import Button from "@/components/inputs/Button";
+import BackButton from "@/components/inputs/BackButton";
 import Input from "@/components/inputs/Input";
 import { Controller, useForm } from "react-hook-form";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
@@ -174,12 +175,9 @@ const PhoneResetOtp = () => {
                     ? "Resending..."
                     : "Resend code"}
                 </Link>
-                <Link
-                  to="/auth/login"
-                  className="type-body-sm hover:underline transition-colors duration-200 ease-in-out text-(--muted)"
-                >
+                <BackButton route="/auth/login">
                   Back to login
-                </Link>
+                </BackButton>
               </menu>
             </form>
           )}

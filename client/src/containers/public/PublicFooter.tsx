@@ -52,7 +52,7 @@ function FooterNavLink({
 const PublicFooter = () => {
   return (
     <footer className="py-16" style={{ backgroundColor: publicColors.bgAlt }}>
-      <section className={publicClasses.containerWide}>
+      <section className="landing-container">
         <article className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
           <section>
             <Link to="/" className="flex items-center gap-2 mb-4">

@@ -25,6 +25,18 @@ async function feed(overrides: Record<string, string> = {}) {
   return zip.generateAsync({ type: 'nodebuffer' });
 }
 describe('GTFS directional import', () => {
+  it('keeps an empty agency timezone unknown without breaking historical re-import', async () => {
+    const result = await importGtfs(
+      await feed({
+        'agency.txt':
+          'agency_id,agency_name,agency_timezone\na,Synthetic operator,',
+      })
+    );
+    expect(
+      result.snapshot.patterns.every((p) => p.service.timezone === undefined)
+    ).toBe(true);
+    expect(validateSnapshot(result.snapshot)).toEqual([]);
+  });
   it('retains source journeys, directions, repeated occurrences, and historical calendars', async () => {
     const result = await importGtfs(await feed());
     expect(result.snapshot.patterns).toHaveLength(3);
@@ -81,5 +93,65 @@ describe('GTFS directional import', () => {
     ).rejects.toThrow('Missing agency.txt');
     expect(serviceSeconds('25:10:00')).toBe(90600);
     expect(() => serviceSeconds('08:99:00')).toThrow();
+  });
+  it('preserves GTFS fare zone IDs without misidentifying them as stop IDs', async () => {
+    const result = await importGtfs(
+      await feed({
+        'fare_attributes.txt':
+          'fare_id,price,currency_type\nf1,250,RWF\nf2,400,RWF',
+        'fare_rules.txt':
+          'fare_id,route_id,origin_id,destination_id\nf1,r,,\nf2,r,A,C',
+      })
+    );
+    const pattern = result.snapshot.patterns.find(
+      (p) => p.sourceTripId === 'out'
+    )!;
+    expect(pattern.fareRules?.length).toBe(2);
+    expect(pattern.fareRules?.find((r) => r.kind === 'zone')).toMatchObject({
+      amount: 400,
+      fromZoneId: 'dt4a-2019:A',
+      toZoneId: 'dt4a-2019:C',
+    });
+    expect(pattern.fareRules?.every((r) => r.fromStopId === undefined)).toBe(
+      true
+    );
+    expect(pattern.fareRules?.every((r) => !r.verified)).toBe(true);
+    expect(result.issues.some((i) => i.message.includes('unverified'))).toBe(
+      true
+    );
+  });
+  it('quarantines foreign currency instead of relabeling it RWF', async () => {
+    const result = await importGtfs(
+      await feed({
+        'fare_attributes.txt': 'fare_id,price,currency_type\nf1,10,USD',
+        'fare_rules.txt': 'fare_id,route_id\nf1,r',
+      })
+    );
+    expect(result.snapshot.patterns.every((p) => !p.fareRules?.length)).toBe(
+      true
+    );
+    expect(
+      result.issues.some((i) => i.message.includes('No conversion inferred'))
+    ).toBe(true);
+  });
+  it('preserves absolute service starts and agency timezone without verifying imports', async () => {
+    const result = await importGtfs(
+      await feed({
+        'agency.txt':
+          'agency_id,agency_name,agency_timezone\na,Test operator,Africa/Kigali',
+      })
+    );
+    const back = result.snapshot.patterns.find(
+      (p) => p.sourceTripId === 'back'
+    )!;
+    expect(back.service).toMatchObject({
+      timezone: 'Africa/Kigali',
+      timetable: { departures: [28800], verified: false },
+    });
+    expect(
+      result.snapshot.patterns.find((p) => p.sourceTripId === 'out')!.service
+        .timetable
+    ).toBeUndefined();
+    expect(validateSnapshot(result.snapshot)).toEqual([]);
   });
 });

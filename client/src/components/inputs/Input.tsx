@@ -24,6 +24,7 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   type?:
     | 'text'
     | 'email'
+    | 'url'
     | 'password'
     | 'number'
     | 'tel'
@@ -100,9 +101,12 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       suffixIconHandler,
       suffixIconLabel,
       accept = 'image/*',
+      ...rest
     },
     ref: ForwardedRef<HTMLInputElement>
   ) => {
+    const generatedId = React.useId();
+    const controlId = id || generatedId;
     /* Checked state is the inversion rule: the box fills with ink and its
        check goes to paper. Never a tint, never an accent colour. */
     if (['checkbox', 'radio'].includes(type)) {
@@ -157,11 +161,12 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
     const hasError = Boolean(resolveErrorText(errorMessage));
     const messageId =
-      id && (hasError || description) ? `${id}-message` : undefined;
+      hasError || description ? `${controlId}-message` : undefined;
 
     return (
       <FieldShell
         label={label}
+        htmlFor={controlId}
         required={required}
         description={description}
         errorMessage={errorMessage}
@@ -225,11 +230,12 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             <SkeletonLoader type="input" />
           ) : (
             <UIInput
-              id={id}
+              id={controlId}
               defaultValue={defaultValue}
               value={value}
               type={type || 'text'}
-              min={type === 'number' ? 0 : min}
+              min={min ?? (type === 'number' ? 0 : undefined)}
+              required={required}
               readOnly={readOnly}
               accept={accept}
               name={name}
@@ -252,6 +258,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
                 readOnly && readOnlyControlClassName,
                 className
               )}
+              {...rest}
             />
           )}
         </section>

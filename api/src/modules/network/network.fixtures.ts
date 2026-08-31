@@ -1,5 +1,11 @@
 import { randomUUID } from 'crypto';
-import type { NetworkPattern, NetworkSnapshot, WalkLeg } from './network.types';
+import type {
+  NetworkPattern,
+  NetworkSnapshot,
+  WalkLeg,
+  TransferLink,
+} from './network.types';
+import { transferContentHash } from './transfer-review';
 
 // Synthetic topology only: these fixtures are not field-verified Kigali service.
 export const pattern = (route: string, ids: string[]): NetworkPattern => ({
@@ -43,6 +49,32 @@ export const snapshot = (): NetworkSnapshot => ({
   ],
   transfers: [],
 });
+// Synthetic approval for isolated tests only, not evidence about real crossings.
+export function reviewedFixtureTransfer(
+  snapshot: NetworkSnapshot,
+  link: TransferLink
+): TransferLink {
+  const stops = new Map(
+    snapshot.patterns.flatMap((p) => p.stops.map((s) => [s.id, s] as const))
+  );
+  const t: TransferLink = {
+    ...link,
+    pathKind: 'surveyed',
+    source: 'synthetic-test-path',
+    instructions: [
+      'Follow the synthetic test pathway to the next boarding point.',
+    ],
+    reviewed: true,
+  };
+  t.review = {
+    reviewerId: '00000000-0000-4000-8000-000000000001',
+    reviewedAt: '2026-08-30T12:00:00Z',
+    evidenceUrl: 'https://example.org/synthetic-test-only',
+    notes: 'Synthetic fixture, not a reviewed real-world pedestrian crossing.',
+    contentHash: transferContentHash(t, stops),
+  };
+  return t;
+}
 export const access = (id: string, distanceMeters = 0): Map<string, WalkLeg> =>
   new Map([
     [

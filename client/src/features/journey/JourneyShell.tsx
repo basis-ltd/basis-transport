@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
-import { Link } from "react-router-dom";
-import { ArrowLeft, Info } from "lucide-react";
+import { Info } from "lucide-react";
+import BackButton from "@/components/inputs/BackButton";
+import Button from "@/components/inputs/Button";
 import PublicNavbar from "@/containers/public/PublicNavbar";
 import PublicFooter from "@/containers/public/PublicFooter";
 import { Seo } from "@/components/seo";
@@ -47,13 +48,9 @@ export function LoadState({
         <h2>We couldn’t load this information</h2>
         <p>{error}</p>
         {retry && (
-          <button
-            type="button"
-            className="journey-button secondary"
-            onClick={retry}
-          >
+          <Button type="button" onClick={retry}>
             Try again
-          </button>
+          </Button>
         )}
       </div>
     );
@@ -96,10 +93,9 @@ export default function JourneyShell({
       <PublicNavbar />
       <main className="landing-container journey-main">
         {back && (
-          <Link className="journey-back" to="/">
-            <ArrowLeft size={16} />
-            Back to journey search
-          </Link>
+          <nav aria-label="Breadcrumb" className="mb-6">
+            <BackButton route="/">Back to journey search</BackButton>
+          </nav>
         )}
         <header className="journey-heading">
           <h1>{title}</h1>

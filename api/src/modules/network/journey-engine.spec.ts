@@ -1,16 +1,31 @@
 import { searchJourneys, rideLeg } from './journey-engine';
-import { snapshot, pattern, access } from './network.fixtures';
+import {
+  snapshot,
+  pattern,
+  access,
+  reviewedFixtureTransfer,
+} from './network.fixtures';
 import { validateSnapshot } from './network.validation';
 
 const options = { maxTransfers: 2, preference: 'fewest_transfers' as const };
 describe('Directional network planner', () => {
+  it('reports search exhaustion without misclassifying it as no connection', () => {
+    const result = searchJourneys(snapshot(), access('A'), access('F'), {
+      ...options,
+      limits: { expansions: 1 },
+    });
+    expect(result.searchLimitReached).toBe(true);
+    expect(result.journeys).toEqual([]);
+    const frontier = searchJourneys(snapshot(), access('A'), access('F'), {
+      ...options,
+      limits: { frontier: 1 },
+    });
+    expect(frontier.searchLimitReached).toBe(true);
+  });
   it('plans a direct connection with exact occurrences, unknown total and fare', () => {
-    const [journey] = searchJourneys(
-      snapshot(),
-      access('A'),
-      access('C'),
-      options
-    );
+    const {
+      journeys: [journey],
+    } = searchJourneys(snapshot(), access('A'), access('C'), options);
     expect(journey).toMatchObject({
       transfers: 0,
       walkingMeters: 0,
@@ -26,24 +41,26 @@ describe('Directional network planner', () => {
   });
   it('rejects reverse direction and disconnected endpoints', () => {
     expect(
-      searchJourneys(snapshot(), access('C'), access('A'), options)
+      searchJourneys(snapshot(), access('C'), access('A'), options).journeys
     ).toEqual([]);
     expect(
-      searchJourneys(snapshot(), access('A'), access('Z'), options)
+      searchJourneys(snapshot(), access('A'), access('Z'), options).journeys
     ).toEqual([]);
   });
   it('supports one and two transfers, bounded by preference', () => {
     expect(
-      searchJourneys(snapshot(), access('A'), access('E'), options)[0].transfers
+      searchJourneys(snapshot(), access('A'), access('E'), options).journeys[0]
+        .transfers
     ).toBe(1);
     expect(
-      searchJourneys(snapshot(), access('A'), access('F'), options)[0].transfers
+      searchJourneys(snapshot(), access('A'), access('F'), options).journeys[0]
+        .transfers
     ).toBe(2);
     expect(
       searchJourneys(snapshot(), access('A'), access('F'), {
         ...options,
         maxTransfers: 1,
-      })
+      }).journeys
     ).toEqual([]);
   });
   it('never connects distinct nearby platforms without a reviewed transfer', () => {
@@ -51,14 +68,19 @@ describe('Directional network planner', () => {
       patterns: [pattern('101', ['A', 'B']), pattern('202', ['C', 'D'])],
       transfers: [],
     };
-    expect(searchJourneys(data, access('A'), access('D'), options)).toEqual([]);
+    expect(
+      searchJourneys(data, access('A'), access('D'), options).journeys
+    ).toEqual([]);
     const transfer = {
       id: 't',
       fromStopId: 'B',
       toStopId: 'C',
       distanceMeters: 100,
       durationSeconds: 90,
-      geometry: [],
+      geometry: [
+        data.patterns[0].stops[1].coordinates,
+        data.patterns[1].stops[0].coordinates,
+      ],
       source: 'field inspection',
       reviewed: false,
     };
@@ -68,15 +90,15 @@ describe('Directional network planner', () => {
         access('A'),
         access('D'),
         options
-      )
+      ).journeys
     ).toEqual([]);
     expect(
       searchJourneys(
-        { ...data, transfers: [{ ...transfer, reviewed: true }] },
+        { ...data, transfers: [reviewedFixtureTransfer(data, transfer)] },
         access('A'),
         access('D'),
         options
-      )[0].walkingMeters
+      ).journeys[0].walkingMeters
     ).toBe(100);
     expect(
       searchJourneys(
@@ -87,7 +109,7 @@ describe('Directional network planner', () => {
         access('A'),
         access('D'),
         options
-      )
+      ).journeys
     ).toEqual([]);
   });
   it('preserves repeated visits, reports missing times, and ignores expired fares', () => {
@@ -114,13 +136,13 @@ describe('Directional network planner', () => {
     data.patterns.push(pattern('direct', ['X', 'F']));
     const origins = new Map([...access('A'), ...access('X', 600)]);
     expect(
-      searchJourneys(data, origins, access('F'), options)[0].transfers
+      searchJourneys(data, origins, access('F'), options).journeys[0].transfers
     ).toBe(0);
     expect(
       searchJourneys(data, origins, access('F'), {
         ...options,
         preference: 'least_walking',
-      })[0].walkingMeters
+      }).journeys[0].walkingMeters
     ).toBe(0);
   });
   it('rejects malformed nested snapshots without writing anything', () => {

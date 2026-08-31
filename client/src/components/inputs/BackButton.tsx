@@ -1,29 +1,32 @@
-import type { ReactNode } from 'react';
+import type { ComponentProps } from 'react';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { useNavigate } from 'react-router-dom';
 import Button from './Button';
 
-interface BackButtonProps {
-  children?: ReactNode;
-  className?: string;
-}
+type BackButtonProps = Pick<
+  ComponentProps<typeof Button>,
+  'children' | 'className' | 'route' | 'onClick'
+>;
 
 /**
- * Wayfinding back control — breadcrumb tone, arrow icon, browser history.
+ * Shared breadcrumb control for a parent route, a local view, or browser history.
  */
 const BackButton = ({
   children = 'Back',
   className,
+  route,
+  onClick,
 }: BackButtonProps) => {
   const navigate = useNavigate();
 
   return (
     <Button
-      type="button"
+      type={route ? null : 'button'}
       variant="breadcrumb"
       icon={faArrowLeft}
       className={className}
-      onClick={() => navigate(-1)}
+      route={route}
+      onClick={onClick ?? (route ? undefined : () => navigate(-1))}
     >
       {children}
     </Button>

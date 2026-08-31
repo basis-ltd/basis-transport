@@ -3,6 +3,8 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Share2, X } from "lucide-react";
 import { toast } from "sonner";
 import Modal from "@/components/cards/Modal";
+import Button from "@/components/inputs/Button";
+import Select from "@/components/inputs/Select";
 import LandingHeroForm from "./components/landing/LandingHeroForm";
 import JourneyShell, {
   LoadState,
@@ -10,16 +12,18 @@ import JourneyShell, {
 } from "@/features/journey/JourneyShell";
 import { journeyMessages as copy } from "@/features/journey/messages";
 import JourneyCard from "@/features/journey/JourneyCard";
+import FollowJourney from "@/features/journey/FollowJourney";
 import SaveButton from "@/features/journey/SaveButton";
 import { networkRequest } from "@/features/journey/api";
 import { parseTravelQuery, travelUrl } from "@/features/journey/locations";
-import type { JourneyPlan } from "@/features/journey/types";
+import { loadGuidance } from "@/features/journey/guidance-state";
+import type { JourneyPlan, PassengerStep } from "@/features/journey/types";
 
 const JourneyMap = lazy(() => import("@/features/journey/JourneyMap"));
 const states = copy;
 
 export default function TravelGuidancePage() {
-  const [params] = useSearchParams(),
+  const [params, setParams] = useSearchParams(),
     navigate = useNavigate(),
     query = params.toString();
   const parsed = parseTravelQuery(params);
@@ -27,12 +31,46 @@ export default function TravelGuidancePage() {
     [loading, setLoading] = useState(false),
     [error, setError] = useState(""),
     [revision, setRevision] = useState(0);
-  const [preference, setPreference] = useState("fewest_transfers"),
-    [maxWalk, setMaxWalk] = useState(800),
-    [selected, setSelected] = useState(""),
+  const preference =
+    params.get("preference") === "least_walking"
+      ? "least_walking"
+      : "fewest_transfers";
+  const maxWalk = [800, 1500, 2000].includes(
+    Number(params.get("maxWalkMeters")),
+  )
+    ? Number(params.get("maxWalkMeters"))
+    : 800;
+  const rawTransfers = params.get("maxTransfers");
+  const maxTransfers =
+    rawTransfers !== null && /^[0-4]$/.test(rawTransfers)
+      ? Number(rawTransfers)
+      : 2;
+  const rawDeparture = params.get("departureAt") || "";
+  const departureAt =
+    rawDeparture && Number.isFinite(Date.parse(rawDeparture))
+      ? rawDeparture
+      : "";
+  const localDeparture = departureAt
+    ? new Date(
+        Date.parse(departureAt) -
+          new Date(departureAt).getTimezoneOffset() * 60000,
+      )
+        .toISOString()
+        .slice(0, 16)
+    : "";
+  const changePreference = (key: string, value: string) => {
+    const next = new URLSearchParams(params);
+    if (value) next.set(key, value);
+    else next.delete(key);
+    setParams(next);
+  };
+  const [completedSteps, setCompletedSteps] = useState<PassengerStep[]>([]);
+  const [selected, setSelected] = useState(""),
     [selectedLeg, setSelectedLeg] = useState(0),
     [showMap, setShowMap] = useState(false),
-    [shareOpen, setShareOpen] = useState(false);
+    [shareOpen, setShareOpen] = useState(false),
+    [guidance, setGuidance] = useState(false),
+    [replanned, setReplanned] = useState(false);
   const selectLeg = useCallback((index: number) => setSelectedLeg(index), []);
   useEffect(() => {
     const controller = new AbortController();
@@ -59,14 +97,21 @@ export default function TravelGuidancePage() {
         origin: location(origin),
         destination: location(destination),
         maxWalkMeters: maxWalk,
-        maxTransfers: 2,
+        maxTransfers,
         preference,
+        ...(departureAt
+          ? { departureAt: new Date(departureAt).toISOString() }
+          : {}),
       }),
     })
       .then((p) => {
         if (!controller.signal.aborted) {
           setPlan(p);
-          setSelected(p.journeys[0]?.id || "");
+          const resumed = p.journeys.find(
+            (j) => loadGuidance(j, p.datasetVersion)?.active,
+          );
+          setSelected(resumed?.id || p.journeys[0]?.id || "");
+          setGuidance(Boolean(resumed));
         }
       })
       .catch((e) => {
@@ -76,7 +121,7 @@ export default function TravelGuidancePage() {
         if (!controller.signal.aborted) setLoading(false);
       });
     return () => controller.abort();
-  }, [query, preference, maxWalk, revision]);
+  }, [query, preference, maxWalk, maxTransfers, departureAt, revision]);
   const [mobileMap, setMobileMap] = useState(
     () => window.matchMedia("(max-width: 767px)").matches,
   );
@@ -93,7 +138,7 @@ export default function TravelGuidancePage() {
       : "Find your connection";
   const href =
     parsed.origin && parsed.destination
-      ? travelUrl(parsed.origin, parsed.destination)
+      ? travelUrl(parsed.origin, parsed.destination, params)
       : "/travel";
   return (
     <JourneyShell
@@ -108,7 +153,7 @@ export default function TravelGuidancePage() {
           destination={parsed.destination}
           fromText={parsed.from}
           toText={parsed.to}
-          onSearch={(a, b) => navigate(travelUrl(a, b))}
+          onSearch={(a, b) => navigate(travelUrl(a, b, params))}
         />
       </section>
       {parsed.invalid && (
@@ -140,38 +185,57 @@ export default function TravelGuidancePage() {
           </div>
           <div className="journey-actions">
             <SaveButton href={href} label={title} kind="journey" />
-            <button
-              type="button"
-              className="journey-button secondary"
-              onClick={() => setShareOpen(true)}
-            >
+            <Button type="button" onClick={() => setShareOpen(true)}>
               <Share2 size={16} />
               Share
-            </button>
+            </Button>
           </div>
         </div>
       )}
       <div className="journey-preferences">
-        <label>
-          Prefer
-          <select
-            value={preference}
-            onChange={(e) => setPreference(e.target.value)}
-          >
-            <option value="fewest_transfers">Fewest changes</option>
-            <option value="least_walking">Least walking</option>
-          </select>
-        </label>
-        <label>
-          Walk at each end
-          <select
-            value={maxWalk}
-            onChange={(e) => setMaxWalk(Number(e.target.value))}
-          >
-            <option value={800}>Up to 800 m</option>
-            <option value={1500}>Up to 1.5 km</option>
-            <option value={2000}>Up to 2 km</option>
-          </select>
+        <Select
+          label="Prefer"
+          value={preference}
+          onChange={(value) => changePreference("preference", value)}
+          options={[
+            { label: "Fewest changes", value: "fewest_transfers" },
+            { label: "Least walking", value: "least_walking" },
+          ]}
+        />
+        <Select
+          label="Walk at each end"
+          value={String(maxWalk)}
+          onChange={(value) => changePreference("maxWalkMeters", value)}
+          options={[
+            { label: "Up to 800 m", value: "800" },
+            { label: "Up to 1.5 km", value: "1500" },
+            { label: "Up to 2 km", value: "2000" },
+          ]}
+        />
+        <Select
+          label="Bus changes"
+          value={String(maxTransfers)}
+          onChange={(value) => changePreference("maxTransfers", value)}
+          options={[0, 1, 2, 3, 4].map((n) => ({
+            value: String(n),
+            label: n === 0 ? "Direct only" : `Up to ${n} changes`,
+          }))}
+        />
+        <label className="journey-field">
+          <span>Leave at (your device time)</span>
+          <input
+            type="datetime-local"
+            value={localDeparture}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (!value || Number.isFinite(Date.parse(value)))
+                changePreference(
+                  "departureAt",
+                  value ? new Date(value).toISOString() : "",
+                );
+            }}
+            className="journey-datetime"
+          />
         </label>
       </div>
       <LoadState
@@ -179,58 +243,181 @@ export default function TravelGuidancePage() {
         error={error}
         retry={() => setRevision((v) => v + 1)}
       />
-      {!loading && !error && plan && plan.status !== "ok" && (
-        <div className="journey-empty">
-          <h2>{states[plan.status][0]}</h2>
-          <p>{states[plan.status][1]}</p>
-          <Link className="journey-button secondary" to="/stops">
-            Browse stops
-          </Link>
-        </div>
-      )}
-      {!loading && !error && plan?.status === "ok" && (
-        <div className={"journey-results " + (showMap ? "with-map" : "")}>
-          <div className="journey-results-list">
-            {plan.journeys.map((j) => (
-              <JourneyCard
-                key={j.id}
-                journey={j}
-                sourceDate={plan.validTo}
-                expanded={selected === j.id}
-                selectedLeg={selectedLeg}
-                onSelectLeg={selectLeg}
-                onExpand={() => {
-                  setSelected(j.id);
-                  setSelectedLeg(0);
-                }}
-                onMap={() => {
-                  setSelected(j.id);
-                  setShowMap(true);
+      {!loading &&
+        !error &&
+        plan &&
+        plan.status !== "ok" &&
+        plan.status !== "walking_only" &&
+        plan.status !== "search_limit_reached" &&
+        plan.status !== "service_timing_unknown" && (
+          <div className="journey-empty">
+            <h2>{states[plan.status][0]}</h2>
+            <p>{states[plan.status][1]}</p>
+            {!!plan.nearbyConnections?.length && (
+              <section
+                className="journey-stop-alternatives"
+                aria-label="Nearby boarding alternatives"
+              >
+                <h3>Try different boarding points</h3>
+                <p>
+                  These stops have a direct link in the published network.
+                  Selecting one changes your endpoints. Getting to and from
+                  these stops is not included; distances below are straight-line
+                  distances, not checked walking routes. Confirm service before
+                  travelling.
+                </p>
+                {plan.nearbyConnections.map((choice) => (
+                  <article
+                    className="journey-card journey-stop-alternative"
+                    key={`${choice.origin.stopId}-${choice.destination.stopId}`}
+                  >
+                    <h4>
+                      {choice.origin.name} → {choice.destination.name}
+                    </h4>
+                    <p>
+                      <span
+                        className="journey-route-badge"
+                        aria-label={`Route ${choice.routeNumber}`}
+                      >
+                        {choice.routeNumber}
+                      </span>{" "}
+                      towards {choice.headsign}
+                    </p>
+                    <p>
+                      {choice.originDistanceMeters} m from your start ·{" "}
+                      {choice.destinationDistanceMeters} m from your destination
+                    </p>
+                    <Button
+                      type="button"
+                      onClick={() =>
+                        navigate(
+                          travelUrl(
+                            {
+                              ...choice.origin,
+                              latitude: choice.origin.coordinates[1],
+                              longitude: choice.origin.coordinates[0],
+                            },
+                            {
+                              ...choice.destination,
+                              latitude: choice.destination.coordinates[1],
+                              longitude: choice.destination.coordinates[0],
+                            },
+                            params,
+                          ),
+                        )
+                      }
+                    >
+                      Use these stops
+                    </Button>
+                  </article>
+                ))}
+              </section>
+            )}
+            <Button route="/stops">Browse stops</Button>
+          </div>
+        )}
+      {!loading &&
+        !error &&
+        plan &&
+        (plan.status === "ok" ||
+          plan.status === "walking_only" ||
+          plan.status === "search_limit_reached" ||
+          plan.status === "service_timing_unknown") && (
+          <div className={"journey-results " + (showMap ? "with-map" : "")}>
+            {plan.status === "walking_only" && (
+              <p className="journey-notice" role="status">
+                {states.walking_only[1]}
+              </p>
+            )}
+            {plan.status === "search_limit_reached" && (
+              <p className="journey-notice is-historic" role="status">
+                {states.search_limit_reached[1]}
+              </p>
+            )}
+            {plan.status === "service_timing_unknown" && (
+              <p className="journey-notice is-historic" role="status">
+                {states.service_timing_unknown[1]}
+              </p>
+            )}
+            {replanned && (
+              <p className="journey-notice" role="status">
+                This is your remaining journey from the location you selected.
+              </p>
+            )}
+            {completedSteps.length > 0 && (
+              <details className="journey-data-notes">
+                <summary>Completed steps before replanning</summary>
+                <ol>
+                  {completedSteps.map((s, i) => (
+                    <li key={`${s.id}-${i}`}>{s.text}</li>
+                  ))}
+                </ol>
+              </details>
+            )}
+            {guidance && selectedJourney ? (
+              <FollowJourney
+                key={`${plan.datasetVersion}:${selectedJourney.id}`}
+                journey={selectedJourney}
+                datasetVersion={plan.datasetVersion}
+                onClose={() => setGuidance(false)}
+                onReplanFrom={(location, completed) => {
+                  const dest = parsed.destination;
+                  if (!dest || !selectedJourney) return;
+                  setGuidance(false);
+                  setReplanned(true);
+                  setCompletedSteps((previous) => [...previous, ...completed]);
+                  const next = new URLSearchParams(params);
+                  next.delete("departureAt"); // Replan now, not at a missed past departure.
+                  navigate(travelUrl(location, dest, next));
                 }}
               />
-            ))}
+            ) : (
+              <div className="journey-results-list">
+                {plan.journeys.map((j) => (
+                  <JourneyCard
+                    key={j.id}
+                    journey={j}
+                    sourceDate={plan.validTo}
+                    expanded={selected === j.id}
+                    selectedLeg={selectedLeg}
+                    onSelectLeg={selectLeg}
+                    onExpand={() => {
+                      setSelected(j.id);
+                      setSelectedLeg(0);
+                    }}
+                    onMap={() => {
+                      setSelected(j.id);
+                      setShowMap(true);
+                    }}
+                    onStart={() => {
+                      setSelected(j.id);
+                      setGuidance(true);
+                    }}
+                  />
+                ))}
+              </div>
+            )}
+            {showMap && !mobileMap && selectedJourney && (
+              <section className="journey-map-panel" aria-label="Journey map">
+                <Button
+                  type="button"
+                  className="journey-map-close"
+                  onClick={() => setShowMap(false)}
+                >
+                  <X size={17} />
+                  Close map
+                </Button>
+                <Suspense fallback={<p>Loading map…</p>}>
+                  <JourneyMap
+                    journey={selectedJourney}
+                    selectedLeg={selectedLeg}
+                    onSelectLeg={selectLeg}
+                  />
+                </Suspense>
+              </section>
+            )}
           </div>
-          {showMap && !mobileMap && selectedJourney && (
-            <section className="journey-map-panel" aria-label="Journey map">
-              <button
-                type="button"
-                className="journey-map-close journey-button secondary"
-                onClick={() => setShowMap(false)}
-              >
-                <X size={17} />
-                Close map
-              </button>
-              <Suspense fallback={<p>Loading map…</p>}>
-                <JourneyMap
-                  journey={selectedJourney}
-                  selectedLeg={selectedLeg}
-                  onSelectLeg={selectLeg}
-                />
-              </Suspense>
-            </section>
-          )}
-        </div>
-      )}
+        )}
       {mobileMap && (
         <Modal
           isOpen={showMap && Boolean(selectedJourney)}
@@ -277,9 +464,9 @@ export default function TravelGuidancePage() {
           the link can see them.
         </p>
         <div className="journey-actions">
-          <button
+          <Button
             type="button"
-            className="journey-button"
+            variant="primary"
             onClick={() =>
               void Promise.resolve()
                 .then(() =>
@@ -297,7 +484,7 @@ export default function TravelGuidancePage() {
             }
           >
             Copy journey link
-          </button>
+          </Button>
         </div>
       </Modal>
     </JourneyShell>

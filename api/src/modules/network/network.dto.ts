@@ -7,10 +7,13 @@ import {
   IsInt,
   IsNumber,
   IsOptional,
+  IsISO8601,
   IsString,
+  IsUrl,
   Length,
   Max,
   MaxLength,
+  Matches,
   Min,
   ValidateNested,
 } from 'class-validator';
@@ -25,10 +28,14 @@ export class PlanJourneyDto {
   @ValidateNested()
   @Type(() => JourneyLocationDto)
   destination: JourneyLocationDto;
-  @IsOptional() @IsInt() @Min(0) @Max(2) maxTransfers = 2;
+  @IsOptional() @IsInt() @Min(0) @Max(4) maxTransfers = 2;
   @IsOptional() @IsInt() @Min(100) @Max(2000) maxWalkMeters = 800;
   @IsOptional() @IsIn(['fewest_transfers', 'least_walking']) preference:
     'fewest_transfers' | 'least_walking' = 'fewest_transfers';
+  @IsOptional()
+  @IsISO8601({ strict: true })
+  @Matches(/T\d{2}:\d{2}(:\d{2}(\.\d{1,3})?)?(Z|[+-]\d{2}:\d{2})$/)
+  departureAt?: string;
 }
 export class NetworkQueryDto {
   @IsOptional() @Type(() => Number) @IsInt() @Min(0) page = 0;
@@ -42,6 +49,17 @@ export class NetworkQueryDto {
   @Max(180)
   lng?: number;
   @IsOptional() @Type(() => Number) @IsInt() @Min(100) @Max(5000) radius = 1000;
+  @IsOptional() @IsString() @MaxLength(100) agency?: string;
+  @IsOptional() @IsString() @MaxLength(100) headsign?: string;
+  @IsOptional() @IsIn(['origin', 'destination']) endpoint?:
+    'origin' | 'destination';
+  @IsOptional() @IsString() @Length(1, 100) otherStopId?: string;
+}
+export class NetworkMapQueryDto {
+  @IsOptional() @IsString() @MaxLength(100) q?: string;
+  @IsOptional() @IsString() @MaxLength(100) agency?: string;
+  @IsOptional() @IsString() @MaxLength(100) headsign?: string;
+  @IsOptional() @IsString() @Length(1, 100) routeId?: string;
 }
 export class SavedItemDto {
   @IsString() @Length(1, 100) key: string;
@@ -60,6 +78,14 @@ export class ReportDto {
 export class ReviewReportDto {
   @IsIn(['open', 'resolved']) status: 'open' | 'resolved';
 }
+export class ReviewTransferDto {
+  @IsString() @Matches(/^[a-f0-9]{64}$/) expectedRevision: string;
+  @IsUrl({ protocols: ['https'], require_protocol: true })
+  @MaxLength(2000)
+  evidenceUrl: string;
+  @IsString() @Length(20, 2000) notes: string;
+  @IsBoolean() confirm: boolean;
+}
 export class DatasetMetadataDto {
   @IsOptional() @IsIn(['historic', 'unverified', 'verified']) verification?:
     'historic' | 'unverified' | 'verified';
@@ -74,4 +100,6 @@ export class PublishDto {
 export class DraftSnapshotDto {
   @IsArray() patterns: unknown[];
   @IsArray() transfers: unknown[];
+  @IsOptional() @IsArray() stopAreas?: unknown[];
+  @IsOptional() @IsArray() fareRules?: unknown[];
 }

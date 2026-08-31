@@ -1,10 +1,11 @@
 import Button from "@/components/inputs/Button";
+import BackButton from "@/components/inputs/BackButton";
 import Input from "@/components/inputs/Input";
 import TelInput from "@/components/inputs/TelInput";
 import validateInputs, { normalizePhoneNumber } from "@/helpers/validations.helper";
 import { validatePhoneNumber } from "@/utils/phone.util";
 import { Controller, useForm } from "react-hook-form";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Seo } from "@/components/seo";
 import { toast } from "sonner";
 import { useCallback, useEffect, useState } from "react";
@@ -181,12 +182,9 @@ const ForgotPassword = () => {
                 className="type-body-sm text-(--muted)"
               >
                 Remember your password?{" "}
-                <Link
-                  to="/auth/login"
-                  className="text-(--ink) hover:underline transition-colors duration-200 ease-in-out type-body-sm"
-                >
+                <BackButton route="/auth/login">
                   Back to login
-                </Link>
+                </BackButton>
               </p>
             </form>
           </section>
