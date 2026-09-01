@@ -1,12 +1,12 @@
-import { FC } from 'react';
-import ReactDOM from 'react-dom';
+import { FC } from "react";
+import ReactDOM from "react-dom";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 
 interface ModalProps {
   isOpen: boolean;
@@ -32,23 +32,21 @@ const JSX_MODAL: FC<ModalProps> = ({
         className={`min-w-[40vw] ${className} max-h-[90vh] overflow-y-auto bg-(--paper)`}
       >
         <DialogHeader>
-          <DialogTitle
-            className={`type-h3 mt-[-10px] ${headingClassName}`}
-          >
+          <DialogTitle className={`type-h3 mt-[-10px] ${headingClassName}`}>
             {heading}
           </DialogTitle>
           <DialogDescription></DialogDescription>
         </DialogHeader>
-        <section className="h-fit overflow-y-scroll">{children}</section>
+        <section className="h-fit">{children}</section>
       </DialogContent>
     </Dialog>
   );
 };
 
 const Modal: FC<ModalProps> = (props) => {
-  const modalContainer = document.querySelector('#modal');
+  const modalContainer = document.querySelector("#modal");
   if (!modalContainer) {
-    throw new Error('Modal container not found');
+    throw new Error("Modal container not found");
   }
 
   return ReactDOM.createPortal(<JSX_MODAL {...props} />, modalContainer);

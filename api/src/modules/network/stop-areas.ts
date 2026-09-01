@@ -36,6 +36,36 @@ export function dedupeCandidateStops(stopIds: string[]): string[] {
   return [...new Set(stopIds)];
 }
 
+/**
+ * Put nearby stops with a direct, correctly directed link to an explicitly
+ * selected endpoint first. Distance ordering is retained within both groups.
+ */
+export function prioritizeDirectCandidates(
+  ids: string[],
+  snapshot: NetworkSnapshot,
+  endpointIds: string[],
+  reversed: boolean
+): string[] {
+  const candidates = dedupeCandidateStops(ids);
+  if (!endpointIds.length) return candidates;
+
+  const endpoints = new Set(endpointIds),
+    connected = new Set<string>();
+  for (const pattern of snapshot.patterns.filter((p) => p.enabled)) {
+    for (const [index, stop] of pattern.stops.entries()) {
+      if (!endpoints.has(stop.id)) continue;
+      const reachable = reversed
+        ? pattern.stops.slice(index + 1)
+        : pattern.stops.slice(0, index);
+      reachable.forEach((candidate) => connected.add(candidate.id));
+    }
+  }
+  return [
+    ...candidates.filter((id) => connected.has(id)),
+    ...candidates.filter((id) => !connected.has(id)),
+  ];
+}
+
 /** Retain service diversity without merging source platforms by name/proximity. */
 export function selectBoardingCandidates(
   ids: string[],

@@ -25,6 +25,7 @@ import {
   stopAreas,
   terminalSearchResults,
   selectBoardingCandidates,
+  prioritizeDirectCandidates,
 } from './stop-areas';
 import {
   filterRouteSummaries,
@@ -446,7 +447,8 @@ export class NetworkService {
   private async calculatePlan(
     input: PlanJourneyDto,
     automaticRadius = 800,
-    walkingChecks = new Map<string, Promise<WalkLeg | null>>()
+    walkingChecks = new Map<string, Promise<WalkLeg | null>>(),
+    candidateLimit = 16
   ): Promise<JourneyPlan> {
     const maxWalkMeters = input.maxWalkMeters ?? automaticRadius;
     // Deduplicate retries as the radius expands; discard all data after this plan.
@@ -470,6 +472,12 @@ export class NetworkService {
     ];
     const origin = this.resolve(input.origin, selectable),
       destination = this.resolve(input.destination, selectable);
+    const originStopIds = dedupeCandidateStops(
+        expandStopSelection(d.snapshot, origin.stopId, stops)
+      ),
+      destinationStopIds = dedupeCandidateStops(
+        expandStopSelection(d.snapshot, destination.stopId, stops)
+      );
     if (!origin.stopId) origin.name = 'your starting point';
     if (!destination.stopId) destination.name = 'your destination';
     if (distance(origin.coordinates, destination.coordinates) < 1) {
@@ -512,7 +520,8 @@ export class NetworkService {
     let candidatesTruncated = false;
     const candidates = async (
       location: ResolvedLocation,
-      reversed: boolean
+      reversed: boolean,
+      oppositeStopIds: string[]
     ) => {
       const discovered = location.stopId
         ? dedupeCandidateStops(
@@ -524,10 +533,16 @@ export class NetworkService {
         GROUP BY stop_id ORDER BY distance,stop_id LIMIT 64`,
             [d.id, ...location.coordinates, maxWalkMeters]
           )) as { stop_id: string }[]);
-      const selected = selectBoardingCandidates(
+      const prioritized = prioritizeDirectCandidates(
         discovered.map((s) => s.stop_id),
         d.snapshot,
-        16,
+        oppositeStopIds,
+        reversed
+      );
+      const selected = selectBoardingCandidates(
+        prioritized,
+        d.snapshot,
+        candidateLimit,
         reversed
       );
       if (
@@ -582,8 +597,8 @@ export class NetworkService {
       return { found: discovered, legs };
     };
     const [access, egress] = await Promise.all([
-      candidates(origin, false),
-      candidates(destination, true),
+      candidates(origin, false, destinationStopIds),
+      candidates(destination, true, originStopIds),
     ]);
     const search = searchJourneys(d.snapshot, access.legs, egress.legs, {
       ...input,
@@ -592,6 +607,11 @@ export class NetworkService {
     result.journeys = search.journeys;
     let limited = search.searchLimitReached || candidatesTruncated;
     let noService = false;
+    // The initial cap protects walking providers and graph search latency. If
+    // it discarded all usable boarding points, retry this request once with a
+    // wider set instead of making the passenger submit the same search again.
+    if (!result.journeys.length && candidatesTruncated && candidateLimit < 48)
+      return this.calculatePlan(input, automaticRadius, walkingChecks, 48);
     if (
       input.departureAt &&
       !result.journeys.length &&
@@ -662,7 +682,12 @@ export class NetworkService {
     ) {
       const nextRadius =
         automaticRadius < 1500 ? 1500 : automaticRadius < 2000 ? 2000 : 5000;
-      return this.calculatePlan(input, nextRadius, walkingChecks);
+      return this.calculatePlan(
+        input,
+        nextRadius,
+        walkingChecks,
+        candidateLimit
+      );
     }
     if (result.status !== 'walking_only') {
       if (limited) result.status = 'search_limit_reached';

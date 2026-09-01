@@ -37,10 +37,12 @@ export function LoadState({
   loading,
   error,
   retry,
+  className,
 }: {
   loading: boolean;
   error?: string;
   retry?: () => void;
+  className?: string;
 }) {
   if (error)
     return (
@@ -56,7 +58,11 @@ export function LoadState({
     );
   if (loading)
     return (
-      <div role="status" aria-label="Loading" className="journey-skeletons">
+      <div
+        role="status"
+        aria-label="Loading"
+        className={`journey-skeletons ${className || ""}`}
+      >
         {[1, 2, 3].map((i) => (
           <div key={i} className="journey-skeleton" />
         ))}

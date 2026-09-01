@@ -163,7 +163,7 @@ export default function LandingHeroForm({
             )}
             <button
               type="submit"
-              className="landing-btn-primary max-sm:w-full"
+              className="journey-find-button landing-btn-primary max-sm:w-full"
               disabled={busy}
             >
               {busy ? copy.finding : copy.find}
@@ -173,7 +173,12 @@ export default function LandingHeroForm({
       ) : (
         <div className="journey-form-actions">
           <p>{copy.locationConsent}</p>
-          <Button type="submit" variant="primary" disabled={busy}>
+          <Button
+            type="submit"
+            variant="primary"
+            className="journey-find-button"
+            disabled={busy}
+          >
             {busy ? copy.finding : copy.find}
             <ArrowRight size={17} />
           </Button>

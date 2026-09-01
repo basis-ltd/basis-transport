@@ -1,11 +1,12 @@
 import {
   expandStopSelection,
   dedupeCandidateStops,
+  prioritizeDirectCandidates,
   terminalSearchResults,
 } from './stop-areas';
 import { kabugaDowntownWithTransferSnapshot } from './kigali-reference.fixtures';
 import { searchJourneys } from './journey-engine';
-import { access } from './network.fixtures';
+import { access, pattern } from './network.fixtures';
 
 describe('Stop areas', () => {
   it('expands area selection into boarding points', () => {
@@ -24,12 +25,10 @@ describe('Stop areas', () => {
 
   it('plans Kabuga–Downtown when area transfer is reviewed', () => {
     const snap = kabugaDowntownWithTransferSnapshot();
-    const { journeys } = searchJourneys(
-      snap,
-      access('KABUGA'),
-      access('CBD'),
-      { maxTransfers: 2, preference: 'fewest_transfers' }
-    );
+    const { journeys } = searchJourneys(snap, access('KABUGA'), access('CBD'), {
+      maxTransfers: 2,
+      preference: 'fewest_transfers',
+    });
     expect(journeys[0].transfers).toBe(1);
   });
 
@@ -40,5 +39,18 @@ describe('Stop areas', () => {
     );
     expect(results).toHaveLength(1);
     expect(results[0].id).toBe('AREA_REMERA');
+  });
+
+  it('prioritizes nearby candidates that connect in the requested direction', () => {
+    const snap = {
+      patterns: [pattern('direct', ['A', 'B', 'C'])],
+      transfers: [],
+    };
+    expect(
+      prioritizeDirectCandidates(['X', 'A', 'B'], snap, ['C'], false)
+    ).toEqual(['A', 'B', 'X']);
+    expect(
+      prioritizeDirectCandidates(['X', 'C', 'B'], snap, ['A'], true)
+    ).toEqual(['C', 'B', 'X']);
   });
 });

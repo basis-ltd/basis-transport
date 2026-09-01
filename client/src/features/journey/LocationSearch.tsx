@@ -318,63 +318,65 @@ export default function LocationSearch({
         focused && !value && "journey-field--open",
       )}
     >
-      {isField ? (
-        <Input
-          ref={inputRef}
-          {...inputProps}
-          label={label}
-          errorMessage={error || undefined}
-          isLoading={locating}
-          suffixIcon={hasText ? faXmark : faCrosshairs}
-          suffixIconHandler={hasText ? clear : () => void locate()}
-          suffixIconLabel={
-            hasText
-              ? `Clear ${label.toLowerCase()}`
-              : `Use my location for ${label.toLowerCase()}`
-          }
-          className="h-11 text-base md:text-base"
-        />
-      ) : (
-        <FieldShell
-          label={label}
-          htmlFor={id}
-          errorMessage={error || undefined}
-        >
-          <div className="journey-location-control">
-            <MapPin size={17} aria-hidden="true" />
-            <UIInput
-              ref={inputRef}
-              {...inputProps}
-              className={cn(
-                "journey-location-input",
-                nestedControlInputClassName,
+      <div className="journey-location-search-anchor">
+        {isField ? (
+          <Input
+            ref={inputRef}
+            {...inputProps}
+            label={label}
+            errorMessage={error || undefined}
+            isLoading={locating}
+            suffixIcon={hasText ? faXmark : faCrosshairs}
+            suffixIconHandler={hasText ? clear : () => void locate()}
+            suffixIconLabel={
+              hasText
+                ? `Clear ${label.toLowerCase()}`
+                : `Use my location for ${label.toLowerCase()}`
+            }
+            className="h-11 text-base md:text-base"
+          />
+        ) : (
+          <FieldShell
+            label={label}
+            htmlFor={id}
+            errorMessage={error || undefined}
+          >
+            <div className="journey-location-control">
+              <MapPin size={17} aria-hidden="true" />
+              <UIInput
+                ref={inputRef}
+                {...inputProps}
+                className={cn(
+                  "journey-location-input",
+                  nestedControlInputClassName,
+                )}
+              />
+              {hasText && (
+                <Button
+                  type="button"
+                  size="icon-sm"
+                  className="journey-icon-button"
+                  aria-label={`Clear ${label.toLowerCase()}`}
+                  onClick={clear}
+                >
+                  <span aria-hidden="true">×</span>
+                </Button>
               )}
-            />
-            {hasText && (
               <Button
                 type="button"
                 size="icon-sm"
                 className="journey-icon-button"
-                aria-label={`Clear ${label.toLowerCase()}`}
-                onClick={clear}
+                aria-label={`Use my location for ${label.toLowerCase()}`}
+                disabled={locating}
+                onClick={() => void locate()}
               >
-                <span aria-hidden="true">×</span>
+                <span aria-hidden="true">◎</span>
               </Button>
-            )}
-            <Button
-              type="button"
-              size="icon-sm"
-              className="journey-icon-button"
-              aria-label={`Use my location for ${label.toLowerCase()}`}
-              disabled={locating}
-              onClick={() => void locate()}
-            >
-              <span aria-hidden="true">◎</span>
-            </Button>
-          </div>
-        </FieldShell>
-      )}
-      {suggestions}
+            </div>
+          </FieldShell>
+        )}
+        {suggestions}
+      </div>
       {addressSource && (
         <p className="journey-google-attribution">
           Address by <span translate="no">Google Maps</span>

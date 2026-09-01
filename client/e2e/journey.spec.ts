@@ -117,7 +117,12 @@ const journey = {
 };
 const link =
   "/travel?originLat=-1.979&originLon=30.223&destLat=-1.943&destLon=30.057&from=Kabuga&to=Downtown&originStopId=A&destStopId=B";
-async function fixture(page: Page, status = "ok") {
+async function fixture(
+  page: Page,
+  status = "ok",
+  onPlanRequest?: () => void,
+  planDelayMs = 0,
+) {
   await page.route(/maps\.googleapis\.com/, (route) => route.abort());
   const routeList = () => ({
     rows: [
@@ -241,6 +246,9 @@ async function fixture(page: Page, status = "ok") {
           },
         };
       } else if (url.pathname.endsWith("/journeys/plan")) {
+        onPlanRequest?.();
+        if (planDelayMs)
+          await new Promise((resolve) => setTimeout(resolve, planDelayMs));
         const body = (route.request().postDataJSON() || {}) as {
           departureAt?: string;
         };
@@ -276,6 +284,78 @@ async function fixture(page: Page, status = "ok") {
     },
   );
 }
+
+test("submitting unchanged endpoints starts a fresh plan request", async ({
+  page,
+}) => {
+  let planRequests = 0;
+  await fixture(page, "ok", () => planRequests++);
+  await page.goto(link);
+  await expect(page.getByText("1 connection", { exact: true })).toBeVisible();
+  const initialRequests = planRequests;
+
+  await page
+    .getByRole("button", { name: "Find a journey", exact: true })
+    .click();
+
+  await expect.poll(() => planRequests).toBeGreaterThan(initialRequests);
+  await expect(page.getByText("1 connection", { exact: true })).toBeVisible();
+});
+
+test("location suggestions overlay both journey forms without changing their layout", async ({
+  page,
+}) => {
+  await fixture(page);
+  for (const example of [
+    { url: "/", container: ".journey-form--hero" },
+    { url: "/travel", container: ".journey-search-panel" },
+  ]) {
+    await page.goto(example.url);
+    const container = page.locator(example.container);
+    const heightBefore = await container.evaluate(
+      (element) => element.getBoundingClientRect().height,
+    );
+
+    await page
+      .getByRole("combobox", { name: "From", exact: true })
+      .fill("Kab");
+    await expect(page.getByRole("option", { name: /Kabuga/ })).toBeVisible();
+
+    const heightAfter = await container.evaluate(
+      (element) => element.getBoundingClientRect().height,
+    );
+    const dropdownStyle = await page.locator(".journey-suggestions").evaluate(
+      (element) => ({
+        position: getComputedStyle(element).position,
+        zIndex: getComputedStyle(element).zIndex,
+      }),
+    );
+    expect(heightAfter).toBe(heightBefore);
+    expect(dropdownStyle).toEqual({ position: "absolute", zIndex: "100" });
+  }
+});
+
+test("planning keeps a stable result stage and action width while loading", async ({
+  page,
+}) => {
+  await fixture(page, "ok", undefined, 1500);
+  await page.goto(link);
+  const stage = page.locator(".journey-plan-stage");
+  const action = page.getByRole("button", { name: /Finding connections/ });
+  await expect(action).toBeVisible();
+  const loadingBox = await stage.boundingBox();
+  const loadingWidth = (await action.boundingBox())?.width;
+  expect(loadingBox?.height).toBeGreaterThanOrEqual(388);
+
+  await expect(page.getByText("1 connection", { exact: true })).toBeVisible();
+  const readyWidth = (
+    await page
+      .getByRole("button", { name: "Find a journey", exact: true })
+      .boundingBox()
+  )?.width;
+  expect(readyWidth).toBe(loadingWidth);
+});
+
 test("map pin fallback is explicit, cancels safely and survives journey URL reload", async ({
   page,
 }, testInfo) => {

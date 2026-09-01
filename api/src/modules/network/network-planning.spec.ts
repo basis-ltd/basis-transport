@@ -296,4 +296,67 @@ describe('Arbitrary endpoints and nearest boarding access', () => {
     });
     expect(result.warnings.join(' ')).toContain('straight-line minimums');
   });
+
+  it('keeps a directly connected mixed-endpoint stop inside the candidate cap', async () => {
+    const decoys = Array.from({ length: 16 }, (_, index) =>
+      pattern(`decoy-${index}`, [`D${index}`, `Q${index}`])
+    );
+    const h = harness({
+      patterns: [...decoys, pattern('direct', ['GOOD', 'TARGET'])],
+      transfers: [],
+    });
+    h.query.mockResolvedValue([
+      ...decoys.map((p) => ({ stop_id: p.stops[0].id })),
+      { stop_id: 'GOOD' },
+    ]);
+    h.route.mockImplementation(async (from, to) =>
+      walk(from, to, distance(from.coordinates, to.coordinates) < 1 ? 0 : 100)
+    );
+
+    const result = await h.plan({
+      origin: { latitude: -1.951, longitude: 30.06 },
+      destination: { stopId: 'TARGET' },
+      maxWalkMeters: 800,
+    });
+
+    expect(result.journeys[0].legs).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: 'ride', routeNumber: 'direct' }),
+      ])
+    );
+  });
+
+  it('widens a truncated candidate set within the same request', async () => {
+    const decoys = Array.from({ length: 16 }, (_, index) =>
+      pattern(`decoy-${index}`, [`D${index}`, `Q${index}`])
+    );
+    const h = harness({
+      patterns: [...decoys, pattern('recovered', ['GOOD', 'TARGET'])],
+      transfers: [],
+    });
+    h.query.mockImplementation(async (_sql, args) =>
+      args[1] < 30.5
+        ? [
+            ...decoys.map((p) => ({ stop_id: p.stops[0].id })),
+            { stop_id: 'GOOD' },
+          ]
+        : [{ stop_id: 'TARGET' }]
+    );
+    h.route.mockImplementation(async (from, to) =>
+      walk(from, to, distance(from.coordinates, to.coordinates) < 1 ? 0 : 100)
+    );
+
+    const result = await h.plan({
+      origin: { latitude: -1.951, longitude: 30.06 },
+      destination: { latitude: -1.951, longitude: 30.8 },
+      maxWalkMeters: 800,
+    });
+
+    expect(result.journeys[0].legs).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: 'ride', routeNumber: 'recovered' }),
+      ])
+    );
+    expect(h.query).toHaveBeenCalledTimes(4);
+  });
 });

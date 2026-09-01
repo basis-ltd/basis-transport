@@ -153,7 +153,12 @@ export default function TravelGuidancePage() {
           destination={parsed.destination}
           fromText={parsed.from}
           toText={parsed.to}
-          onSearch={(a, b) => navigate(travelUrl(a, b, params))}
+          busy={loading}
+          onSearch={(a, b) => {
+            const next = travelUrl(a, b, params);
+            if (next === href) setRevision((value) => value + 1);
+            else navigate(next);
+          }}
         />
       </section>
       {parsed.invalid && (
@@ -239,186 +244,206 @@ export default function TravelGuidancePage() {
           />
         </label>
       </div>
-      <LoadState
-        loading={loading}
-        error={error}
-        retry={() => setRevision((v) => v + 1)}
-      />
-      {!loading &&
-        !error &&
-        plan &&
-        plan.status !== "ok" &&
-        plan.status !== "walking_only" &&
-        plan.status !== "search_limit_reached" &&
-        plan.status !== "service_timing_unknown" && (
-          <div className="journey-empty">
-            <h2>{states[plan.status][0]}</h2>
-            <p>{states[plan.status][1]}</p>
-            {!!plan.nearbyConnections?.length && (
-              <section
-                className="journey-stop-alternatives"
-                aria-label="Nearby boarding alternatives"
-              >
-                <h3>Try different boarding points</h3>
-                <p>
-                  These stops have a direct link in the published network.
-                  Selecting one changes your endpoints. Getting to and from
-                  these stops is not included; distances below are straight-line
-                  distances, not checked walking routes. Confirm service before
-                  travelling.
-                </p>
-                {plan.nearbyConnections.map((choice) => (
-                  <article
-                    className="journey-card journey-stop-alternative"
-                    key={`${choice.origin.stopId}-${choice.destination.stopId}`}
-                  >
-                    <h4>
-                      {choice.origin.name} → {choice.destination.name}
-                    </h4>
-                    <p>
-                      <span
-                        className="journey-route-badge"
-                        aria-label={`Route ${choice.routeNumber}`}
-                      >
-                        {choice.routeNumber}
-                      </span>{" "}
-                      towards {choice.headsign}
-                    </p>
-                    <p>
-                      {choice.originDistanceMeters} m from your start ·{" "}
-                      {choice.destinationDistanceMeters} m from your destination
-                    </p>
-                    <Button
-                      type="button"
-                      onClick={() =>
-                        navigate(
-                          travelUrl(
-                            {
-                              ...choice.origin,
-                              latitude: choice.origin.coordinates[1],
-                              longitude: choice.origin.coordinates[0],
-                            },
-                            {
-                              ...choice.destination,
-                              latitude: choice.destination.coordinates[1],
-                              longitude: choice.destination.coordinates[0],
-                            },
-                            params,
-                          ),
-                        )
-                      }
+      <div
+        className={`journey-plan-stage ${
+          parsed.origin && parsed.destination ? "is-active" : ""
+        }`}
+      >
+        <LoadState
+          loading={loading}
+          error={error}
+          retry={() => setRevision((v) => v + 1)}
+          className="journey-plan-loading"
+        />
+        {!loading &&
+          !error &&
+          plan &&
+          plan.status !== "ok" &&
+          plan.status !== "walking_only" &&
+          plan.status !== "search_limit_reached" &&
+          plan.status !== "service_timing_unknown" && (
+            <div className="journey-empty">
+              <h2>{states[plan.status][0]}</h2>
+              <p>{states[plan.status][1]}</p>
+              {!!plan.nearbyConnections?.length && (
+                <section
+                  className="journey-stop-alternatives"
+                  aria-label="Nearby boarding alternatives"
+                >
+                  <h3>Try different boarding points</h3>
+                  <p>
+                    These stops have a direct link in the published network.
+                    Selecting one changes your endpoints. Getting to and from
+                    these stops is not included; distances below are
+                    straight-line distances, not checked walking routes. Confirm
+                    service before travelling.
+                  </p>
+                  {plan.nearbyConnections.map((choice) => (
+                    <article
+                      className="journey-card journey-stop-alternative"
+                      key={`${choice.origin.stopId}-${choice.destination.stopId}`}
                     >
-                      Use these stops
-                    </Button>
-                  </article>
-                ))}
-              </section>
-            )}
-            <Button route="/stops">Browse stops</Button>
-          </div>
-        )}
-      {!loading &&
-        !error &&
-        plan &&
-        (plan.status === "ok" ||
-          plan.status === "walking_only" ||
-          plan.status === "search_limit_reached" ||
-          plan.status === "service_timing_unknown") && (
-          <div className={"journey-results " + (showMap ? "with-map" : "")}>
-            {plan.status === "walking_only" && (
-              <p className="journey-notice" role="status">
-                {states.walking_only[1]}
-              </p>
-            )}
-            {plan.status === "search_limit_reached" && (
-              <p className="journey-notice is-historic" role="status">
-                {states.search_limit_reached[1]}
-              </p>
-            )}
-            {plan.status === "service_timing_unknown" && (
-              <p className="journey-notice is-historic" role="status">
-                {states.service_timing_unknown[1]}
-              </p>
-            )}
-            {replanned && (
-              <p className="journey-notice" role="status">
-                This is your remaining journey from the location you selected.
-              </p>
-            )}
-            {completedSteps.length > 0 && (
-              <details className="journey-data-notes">
-                <summary>Completed steps before replanning</summary>
-                <ol>
-                  {completedSteps.map((s, i) => (
-                    <li key={`${s.id}-${i}`}>{s.text}</li>
+                      <h4>
+                        {choice.origin.name} → {choice.destination.name}
+                      </h4>
+                      <p>
+                        <span
+                          className="journey-route-badge"
+                          aria-label={`Route ${choice.routeNumber}`}
+                        >
+                          {choice.routeNumber}
+                        </span>{" "}
+                        towards {choice.headsign}
+                      </p>
+                      <p>
+                        {choice.originDistanceMeters} m from your start ·{" "}
+                        {choice.destinationDistanceMeters} m from your
+                        destination
+                      </p>
+                      <Button
+                        type="button"
+                        onClick={() =>
+                          navigate(
+                            travelUrl(
+                              {
+                                ...choice.origin,
+                                latitude: choice.origin.coordinates[1],
+                                longitude: choice.origin.coordinates[0],
+                              },
+                              {
+                                ...choice.destination,
+                                latitude: choice.destination.coordinates[1],
+                                longitude: choice.destination.coordinates[0],
+                              },
+                              params,
+                            ),
+                          )
+                        }
+                      >
+                        Use these stops
+                      </Button>
+                    </article>
                   ))}
-                </ol>
-              </details>
-            )}
-            {guidance && selectedJourney ? (
-              <FollowJourney
-                key={`${plan.datasetVersion}:${selectedJourney.id}`}
-                journey={selectedJourney}
-                datasetVersion={plan.datasetVersion}
-                onClose={() => setGuidance(false)}
-                onReplanFrom={(location, completed) => {
-                  const dest = parsed.destination;
-                  if (!dest || !selectedJourney) return;
-                  setGuidance(false);
-                  setReplanned(true);
-                  setCompletedSteps((previous) => [...previous, ...completed]);
-                  const next = new URLSearchParams(params);
-                  next.delete("departureAt"); // Replan now, not at a missed past departure.
-                  navigate(travelUrl(location, dest, next));
-                }}
-              />
-            ) : (
-              <div className="journey-results-list">
-                {plan.journeys.map((j) => (
-                  <JourneyCard
-                    key={j.id}
-                    journey={j}
-                    sourceDate={plan.validTo}
-                    expanded={selected === j.id}
-                    selectedLeg={selectedLeg}
-                    onSelectLeg={selectLeg}
-                    onExpand={() => {
-                      setSelected(j.id);
-                      setSelectedLeg(0);
-                    }}
-                    onMap={() => {
-                      setSelected(j.id);
-                      setShowMap(true);
-                    }}
-                    onStart={() => {
-                      setSelected(j.id);
-                      setGuidance(true);
-                    }}
-                  />
-                ))}
-              </div>
-            )}
-            {showMap && !mobileMap && selectedJourney && (
-              <section className="journey-map-panel" aria-label="Journey map">
+                </section>
+              )}
+              <div className="journey-empty-actions">
                 <Button
                   type="button"
-                  className="journey-map-close"
-                  onClick={() => setShowMap(false)}
+                  variant="primary"
+                  onClick={() => setRevision((value) => value + 1)}
                 >
-                  <X size={17} />
-                  Close map
+                  Search again
                 </Button>
-                <Suspense fallback={<p>Loading map…</p>}>
-                  <JourneyMap
-                    journey={selectedJourney}
-                    selectedLeg={selectedLeg}
-                    onSelectLeg={selectLeg}
-                  />
-                </Suspense>
-              </section>
-            )}
-          </div>
-        )}
+                <Button route="/stops">Browse stops</Button>
+              </div>
+            </div>
+          )}
+        {!loading &&
+          !error &&
+          plan &&
+          (plan.status === "ok" ||
+            plan.status === "walking_only" ||
+            plan.status === "search_limit_reached" ||
+            plan.status === "service_timing_unknown") && (
+            <div className={"journey-results " + (showMap ? "with-map" : "")}>
+              {plan.status === "walking_only" && (
+                <p className="journey-notice" role="status">
+                  {states.walking_only[1]}
+                </p>
+              )}
+              {plan.status === "search_limit_reached" && (
+                <p className="journey-notice is-historic" role="status">
+                  {states.search_limit_reached[1]}
+                </p>
+              )}
+              {plan.status === "service_timing_unknown" && (
+                <p className="journey-notice is-historic" role="status">
+                  {states.service_timing_unknown[1]}
+                </p>
+              )}
+              {replanned && (
+                <p className="journey-notice" role="status">
+                  This is your remaining journey from the location you selected.
+                </p>
+              )}
+              {completedSteps.length > 0 && (
+                <details className="journey-data-notes">
+                  <summary>Completed steps before replanning</summary>
+                  <ol>
+                    {completedSteps.map((s, i) => (
+                      <li key={`${s.id}-${i}`}>{s.text}</li>
+                    ))}
+                  </ol>
+                </details>
+              )}
+              {guidance && selectedJourney ? (
+                <FollowJourney
+                  key={`${plan.datasetVersion}:${selectedJourney.id}`}
+                  journey={selectedJourney}
+                  datasetVersion={plan.datasetVersion}
+                  onClose={() => setGuidance(false)}
+                  onReplanFrom={(location, completed) => {
+                    const dest = parsed.destination;
+                    if (!dest || !selectedJourney) return;
+                    setGuidance(false);
+                    setReplanned(true);
+                    setCompletedSteps((previous) => [
+                      ...previous,
+                      ...completed,
+                    ]);
+                    const next = new URLSearchParams(params);
+                    next.delete("departureAt"); // Replan now, not at a missed past departure.
+                    navigate(travelUrl(location, dest, next));
+                  }}
+                />
+              ) : (
+                <div className="journey-results-list">
+                  {plan.journeys.map((j) => (
+                    <JourneyCard
+                      key={j.id}
+                      journey={j}
+                      sourceDate={plan.validTo}
+                      expanded={selected === j.id}
+                      selectedLeg={selectedLeg}
+                      onSelectLeg={selectLeg}
+                      onExpand={() => {
+                        setSelected(j.id);
+                        setSelectedLeg(0);
+                      }}
+                      onMap={() => {
+                        setSelected(j.id);
+                        setShowMap(true);
+                      }}
+                      onStart={() => {
+                        setSelected(j.id);
+                        setGuidance(true);
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
+              {showMap && !mobileMap && selectedJourney && (
+                <section className="journey-map-panel" aria-label="Journey map">
+                  <Button
+                    type="button"
+                    className="journey-map-close"
+                    onClick={() => setShowMap(false)}
+                  >
+                    <X size={17} />
+                    Close map
+                  </Button>
+                  <Suspense fallback={<p>Loading map…</p>}>
+                    <JourneyMap
+                      journey={selectedJourney}
+                      selectedLeg={selectedLeg}
+                      onSelectLeg={selectLeg}
+                    />
+                  </Suspense>
+                </section>
+              )}
+            </div>
+          )}
+      </div>
       {mobileMap && (
         <Modal
           isOpen={showMap && Boolean(selectedJourney)}
