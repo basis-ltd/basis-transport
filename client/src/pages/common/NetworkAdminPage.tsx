@@ -5,8 +5,10 @@ import Select from "@/components/inputs/Select";
 import TextArea from "@/components/inputs/TextArea";
 import { LoadState } from "@/features/journey/JourneyShell";
 import {
+  DetailList,
   PageBody,
   PageHeader,
+  PageNote,
   PageSection,
 } from "@/components/layout/PageShell";
 import "@/features/journey/journey.css";
@@ -93,6 +95,7 @@ export default function NetworkAdminPage() {
   return (
     <PageBody>
       <PageHeader
+        eyebrow="Network"
         title="Network administration"
         description="Review source data, correct drafts, and publish a network passengers can trust."
       />
@@ -106,11 +109,11 @@ export default function NetworkAdminPage() {
           {notice}
         </p>
       )}
-      <p className="journey-notice">
+      <PageNote>
         Import a GTFS archive with the API’s network:import command. Imports
         create drafts only. Public publication requires current service, rights
         approval, and verification evidence.
-      </p>
+      </PageNote>
       <LoadState
         loading={datasets.loading}
         error={datasets.error}
@@ -119,13 +122,23 @@ export default function NetworkAdminPage() {
       <div className="journey-directory">
         {datasets.data?.map((d) => (
           <article className="journey-directory-item" key={d.id}>
-            <div>
-              <h2>{d.version}</h2>
-              <p>
-                {d.status} · {d.verification} · rights {d.rightsStatus} ·{" "}
-                {d.patternCount} patterns
-              </p>
-              <p>{d.issues.length} import notices</p>
+            <div className="flex flex-col gap-4">
+              {/* The version is a dataset id, so it says so. On its own it read
+                  as a heading someone had forgotten to write. */}
+              <header className="flex flex-col gap-1">
+                <p className="type-eyebrow">Network version</p>
+                <h2 className="tabular">{d.version}</h2>
+              </header>
+              <DetailList
+                columns={3}
+                items={[
+                  { label: "Status", value: d.status },
+                  { label: "Verification", value: d.verification },
+                  { label: "Rights", value: d.rightsStatus },
+                  { label: "Patterns", value: d.patternCount },
+                  { label: "Import notices", value: d.issues.length },
+                ]}
+              />
               <div className="journey-actions">
                 <Button type="button" onClick={() => void open(d.id)}>
                   Inspect

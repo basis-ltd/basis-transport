@@ -55,43 +55,47 @@
      scoped to route numbers alone; nothing else in the app is allowed it. */
   --font-family-route: "Barlow Condensed", "DM Sans", sans-serif;
 
-  /* Ground and ink — these two invert in dark mode, everything follows */
+  /* ── Ground and ink ──────────────────────────────────────────────────────
+     Black and white, with nothing mixed into either. These two invert in dark
+     mode and the whole ramp follows.
+
+     The ramp below had drifted green — a sage ground, sage borders, sage
+     "grey" text — which is how a white card on a near-white ground ended up
+     separated by a border that had no contrast against either surface. The
+     hue is not decoration in a system like this; it is noise sitting between
+     the reader and the only two values that carry structure. */
   --paper: #ffffff;
-  --ink: #172019;
+  --ink: #000000;
 
-  /* Neutral ramp.
-
-     `--canvas` is the ground the authenticated app is laid on and is a step
-     below `--surface`, which stays an *inline* fill for chips, menu hover, and
-     disabled controls. They used to be the same token, which is why a white
-     card on the page ground was a 1.14:1 edge — a card you had to look for.
-     Split apart, a card now sits 1.22:1 above its ground with a border that
-     carries real contrast, and `--surface` chips inside that card still read
-     as recessed. */
-  --canvas: #e2eae5;
-  --surface: #eef2ef;
-  --surface-hover: #dde6e0;
-  --surface-sunken: #eff4f1;
-  --line: #c2d0c7;
-  --line-strong: #7d8e84;
-  --muted: #4c5b53;
-  --muted-weak: #5a6961;
-  --disabled-fg: #8a968f;
+  /* Neutral ramp — pure greyscale, no hue at any step.
+     `--surface` is an *inline* fill: chips, menu hover, disabled controls.
+     Pages are laid on `--paper`; a card is told apart by its edge, not by a
+     tinted ground behind it. */
+  --surface: #f3f3f3;
+  --surface-hover: #e2e2e2;
+  --surface-sunken: #fafafa;
+  --line: #e2e2e2;
+  --line-strong: #afafaf;
+  --muted: #6e6e6e;
+  --muted-weak: #757575;
+  --disabled-fg: #afafaf;
 
   /* Press overlays — chosen by the SURFACE the control sits on, not by theme */
-  --press-on-ink: rgba(255, 255, 255, 0.2);
-  --press-on-paper: rgba(0, 0, 0, 0.08);
+  --press-on-ink: rgba(255, 255, 255, 0.22);
+  --press-on-paper: rgba(0, 0, 0, 0.1);
 
   --overlay: rgba(0, 0, 0, 0.6);
-  --shadow-card:
-    0 1px 2px rgba(23, 32, 25, 0.06), 0 8px 20px rgba(23, 32, 25, 0.06);
-  --shadow-card-hover:
-    0 2px 4px rgba(23, 32, 25, 0.08), 0 12px 28px rgba(23, 32, 25, 0.1);
-  --shadow-menu: 0 8px 24px rgba(23, 32, 25, 0.16);
-  --shadow-modal: 0 18px 56px rgba(23, 32, 25, 0.25);
 
-  --radius-control: 9px;
-  --radius-card: 16px;
+  /* Cards do not float. Separation is one hairline, which is why the hairline
+     has to be a real grey rather than a tinted one. Only things that genuinely
+     leave the page — menus, dialogs — cast anything. */
+  --shadow-card: none;
+  --shadow-card-hover: none;
+  --shadow-menu: 0 4px 16px rgba(0, 0, 0, 0.16);
+  --shadow-modal: 0 8px 40px rgba(0, 0, 0, 0.24);
+
+  --radius-control: 8px;
+  --radius-card: 12px;
   --radius-pill: 999px;
 
   /* Control heights — one scale for every input, select, and button, so a
@@ -120,23 +124,25 @@
   --dur-state: 200ms;
   --dur-sweep: 500ms;
 
-  /* ── Brand secondary ─────────────────────────────────────────────────────
-     The one decorative hue. It marks things worth noticing — icons, active
-     highlights, chart-adjacent accents — and never states what a control
-     does: primary actions, input focus, and selection stay `--ink`, because
-     "this is the main button" is a job for contrast, not colour.
+  /* ── The accent ──────────────────────────────────────────────────────────
+     One colour, and the only one in the chrome. Everything structural is
+     black, white, or a grey between them; this green is what says the product
+     is Basis and not the platform it is built on.
 
-     `--approve` is derived from it rather than being a second, near-identical
-     green. Two greens twelve steps apart would have read as the same colour
-     while meaning different things — one decorative, one an outcome — so the
-     system carries one green and lets the icon and label say which is which. */
-  --accent-ink: #087a4b;
-  --accent-strong: #05613b;
-  --accent-surface: #e2f4ea;
-  --accent-line: #98d4b2;
+     It marks position in the network — the stop you are on, the route you
+     would board — and never states what a control does. Primary actions,
+     input focus, and selection stay `--ink`, because "this is the main
+     button" is a job for contrast, not hue. `--approve` is the same green
+     rather than a second one twelve steps away: the system carries one, and
+     the icon and label say which meaning is in play. */
+  --accent-ink: #318549;
+  --accent-strong: #26663a;
+  --accent-surface: #eef6f1;
+  --accent-line: #a9d0b7;
 
-  /* Consequence — colour is spent only where something failed, is about to be
-     destroyed, or has resolved. Icon and label always come first. */
+  /* Consequence — the one exception to the single accent, because "this failed"
+     and "this is about to be destroyed" must not depend on a reader telling two
+     greys apart. Icon and label always come first; the hue only reinforces. */
   --danger: #b91c1c;
   --danger-surface: #fef2f2;
   --danger-line: #fecaca;
@@ -151,8 +157,9 @@
   --info-line: #bfdbfe;
   --on-consequence: #ffffff;
 
-  /* Chart series carry real hue — four grey strokes are not tellable apart.
-     Multi-series charts must also vary strokeDasharray. */
+  /* Charts are the other exception: four grey strokes are not tellable apart.
+     The accent leads; multi-series charts must also vary strokeDasharray so
+     the series survive greyscale printing and colour-blind readers. */
   --chart-1: var(--accent-ink);
   --chart-2: #1d4ed8;
   --chart-3: #b45309;
@@ -162,36 +169,36 @@
 
 .dark {
   color-scheme: dark;
-  --paper: #111513;
-  --ink: #f6faf7;
+  --paper: #000000;
+  --ink: #ffffff;
 
-  --canvas: #080b09;
-  --surface: #1c2320;
-  --surface-hover: #2a352d;
-  --surface-sunken: #161c18;
-  --line: #3a4a40;
-  --line-strong: #7a8a80;
-  --muted: #bdc8c0;
-  --muted-weak: #aebbb2;
-  --disabled-fg: #718076;
+  --surface: #141414;
+  --surface-hover: #232323;
+  --surface-sunken: #0a0a0a;
+  --line: #2e2e2e;
+  --line-strong: #5e5e5e;
+  --muted: #a3a3a3;
+  --muted-weak: #8f8f8f;
+  --disabled-fg: #5e5e5e;
 
   /* Overlays do NOT flip with theme — a black button in dark mode is a WHITE
      button, so it still needs the dark press overlay. Surface decides. */
-  --press-on-ink: rgba(255, 255, 255, 0.2);
-  --press-on-paper: rgba(0, 0, 0, 0.08);
+  --press-on-ink: rgba(255, 255, 255, 0.22);
+  --press-on-paper: rgba(0, 0, 0, 0.1);
 
   --overlay: rgba(0, 0, 0, 0.72);
-  --shadow-card:
-    0 1px 2px rgba(0, 0, 0, 0.32), 0 12px 30px rgba(0, 0, 0, 0.28);
-  --shadow-card-hover:
-    0 2px 4px rgba(0, 0, 0, 0.38), 0 16px 38px rgba(0, 0, 0, 0.35);
-  --shadow-menu: 0 8px 24px rgba(0, 0, 0, 0.62);
-  --shadow-modal: 0 18px 56px rgba(0, 0, 0, 0.72);
 
-  --accent-ink: #4ad087;
-  --accent-strong: #75dfa3;
-  --accent-surface: #10271b;
-  --accent-line: #286b46;
+  --shadow-card: none;
+  --shadow-card-hover: none;
+  --shadow-menu: 0 4px 16px rgba(0, 0, 0, 0.72);
+  --shadow-modal: 0 8px 40px rgba(0, 0, 0, 0.8);
+
+  /* The accent lightens rather than shifting hue — it is the same green seen
+     against black. */
+  --accent-ink: #4cbe72;
+  --accent-strong: #74d492;
+  --accent-surface: #10231a;
+  --accent-line: #2c6b45;
 
   --danger: #f87171;
   --danger-surface: #1f1010;
@@ -371,8 +378,9 @@
 }
 
 @layer utilities {
-  /* Cards need both an edge and restrained depth on the route-map ground.
-     The edge carries contrast; the shadow establishes hierarchy. */
+  /* One hairline is the whole card. There is no fill change and no shadow:
+     on a white page, an `--ink`-free grey edge at 1px is what tells a card
+     from the ground, which is only true while the ramp stays neutral. */
   .surface-card,
   .card-framed {
     border-radius: var(--radius-card);
@@ -407,10 +415,14 @@
   .invert-surface {
     --paper: #000000;
     --ink: #ffffff;
-    --surface: #1a1a1a;
-    --surface-hover: #2b2b2b;
+    --surface: #141414;
+    --surface-hover: #232323;
+    --surface-sunken: #0a0a0a;
     --line: #2e2e2e;
+    --line-strong: #5e5e5e;
     --muted: #a3a3a3;
+    --accent-ink: #4cbe72;
+    --accent-line: #2c6b45;
     background-color: var(--paper);
     color: var(--ink);
   }
@@ -420,8 +432,12 @@
     --ink: #000000;
     --surface: #f3f3f3;
     --surface-hover: #e2e2e2;
+    --surface-sunken: #fafafa;
     --line: #e2e2e2;
+    --line-strong: #afafaf;
     --muted: #6e6e6e;
+    --accent-ink: #318549;
+    --accent-line: #a9d0b7;
   }
 
   /* DM Sans has proportional figures. Tables, money, phone numbers, and
@@ -491,10 +507,13 @@
   font-weight: 500;
 }
 
+/* The page title is the largest thing on any screen and it is set at 500, not
+   at a heavier weight one size down. Hierarchy in this system comes from size,
+   space, and colour; the weight ladder stops at 500 so nothing has to shout. */
 @utility type-page-title {
-  font-size: clamp(1.5rem, 1.35rem + 0.55vw, 1.875rem);
-  line-height: 1.16;
-  font-weight: 600;
+  font-size: clamp(1.75rem, 1.15rem + 2.5vw, 2.875rem);
+  line-height: 1.08;
+  font-weight: 500;
 }
 
 @utility type-card-title {
@@ -559,34 +578,36 @@
    pill every selected thing in this app gets, and turns its icon to the accent
    so the same green marks "here" in the navigation and on the page. One rail,
    one place; nothing else in the chrome gets this treatment. */
-.app-page-header {
+/* The marker hangs off the title block, not off the header row — the row also
+   holds the page's actions, so anchoring to it made the line as tall as
+   whatever button happened to sit on the right. */
+.app-page-stop {
   position: relative;
-  min-height: 3.75rem;
-  padding-block: 0.125rem;
-  padding-inline-start: 1.75rem;
+  padding-inline-start: 1.375rem;
 }
 
-.app-page-header::before {
+/* The stop, set on the eyebrow's line. */
+.app-page-stop::before {
   content: "";
   position: absolute;
-  inset-block: 0.375rem 0;
-  inset-inline-start: 0.3125rem;
-  width: 2px;
-  border-radius: var(--radius-pill);
-  background: var(--accent-ink);
-}
-
-.app-page-header::after {
-  content: "";
-  position: absolute;
-  inset-block-start: 0.125rem;
+  inset-block-start: 0.3125rem;
   inset-inline-start: 0;
-  width: 0.75rem;
-  height: 0.75rem;
-  border: 3px solid var(--paper);
+  width: 0.5rem;
+  height: 0.5rem;
   border-radius: 50%;
   background: var(--accent-ink);
-  box-shadow: 0 0 0 1.5px var(--accent-ink);
+}
+
+/* The line leaves the stop and runs the height of the title. It is the only
+   place in the chrome the accent appears at full strength. */
+.app-page-stop::after {
+  content: "";
+  position: absolute;
+  inset-block: 1rem 0.25rem;
+  inset-inline-start: 0.1875rem;
+  width: 2px;
+  border-radius: var(--radius-pill);
+  background: var(--accent-line);
 }
 
 

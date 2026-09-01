@@ -91,6 +91,7 @@ const CreateUserPage = () => {
   return (
     <PageBody>
       <PageHeader
+        eyebrow="People"
         title="Create user"
         description="Add someone to Basis Transport and set their access."
       />

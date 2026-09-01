@@ -17,7 +17,7 @@ export function NetworkNotice({
   if (!network) return null;
   return (
     <aside
-      className={`journey-notice ${network.verification !== "verified" ? "is-historic" : ""}`}
+      className={`journey-notice mt-4 ${network.verification !== "verified" ? "is-historic" : ""}`}
     >
       <Info size={17} aria-hidden="true" />
       <p>

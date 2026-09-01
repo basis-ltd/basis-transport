@@ -31,6 +31,7 @@ const UsersPage = () => {
   return (
     <PageBody>
       <PageHeader
+        eyebrow="People"
         title="Users"
         description="Everyone with access to Basis Transport."
         actions={

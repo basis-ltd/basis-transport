@@ -28,7 +28,7 @@ function Paths({
       const line = new google.maps.Polyline({
         map,
         path,
-        strokeColor: leg.kind === "walk" ? "#6e6e6e" : "#308449",
+        strokeColor: leg.kind === "walk" ? "#6e6e6e" : "#318549",
         strokeWeight: index === selectedLeg ? 7 : 4,
         strokeOpacity: dashed ? 0 : 0.85,
         icons: dashed

@@ -62,7 +62,7 @@ function Endpoints({
           icon={{
             path: google.maps.SymbolPath.CIRCLE,
             scale: 14,
-            fillColor: "#308449",
+            fillColor: "#318549",
             fillOpacity: 1,
             strokeColor: "#ffffff",
             strokeWeight: 3,
@@ -90,7 +90,7 @@ function Endpoints({
 
 export default function LandingJourneyMap({ origin, destination }: Props) {
   const [center, setCenter] = useState(randomKigaliPoint);
-  const [approximate, setApproximate] = useState(false);
+  const [, setApproximate] = useState(false);
   useEffect(() => {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 4000);
@@ -107,16 +107,6 @@ export default function LandingJourneyMap({ origin, destination }: Props) {
   }, []);
   return (
     <aside className="landing-journey-map" aria-label="Journey map">
-      <header className="landing-map-header">
-        <span className="journey-eyebrow">Kigali, stop by stop</span>
-        <span>
-          {origin || destination
-            ? "Your selected places"
-            : approximate
-              ? "Near you · approximate"
-              : "Explore Kigali"}
-        </span>
-      </header>
       <div className="landing-map-canvas">
         <GoogleMapFrame
           fallback={

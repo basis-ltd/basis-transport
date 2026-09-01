@@ -1,11 +1,68 @@
 import { useMap, useMapsLibrary } from '@vis.gl/react-google-maps';
-import { useEffect, useState } from 'react';
-import { Heading } from '../inputs/TextInputs';
+import { useEffect, useState, type ReactNode } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faChevronCircleLeft,
-  faChevronCircleRight,
+  faChevronLeft,
+  faChevronRight,
+  faClock,
+  faRoute,
+  faTriangleExclamation,
 } from '@fortawesome/free-solid-svg-icons';
+
+/**
+ * The overlay that sits on the map. It reads the same as every other floating
+ * panel in the app: the shared card edge, the menu shadow, and the popover rung
+ * of the z-ladder — not the `shadow-xl rounded-xl backdrop-blur z-[1000]` it
+ * used to carry, which was four decisions this design system had already made.
+ */
+const panelClasses = [
+  'card-framed absolute right-2 top-2 z-(--z-popover) flex w-[96vw] max-w-md',
+  'flex-col gap-3 p-3 shadow-(--shadow-menu) sm:p-4 md:w-[32vw]',
+].join(' ');
+
+/**
+ * Origin and destination drawn as what they are: two stops on a line. It is
+ * the page header's route rail at panel scale, so the map overlay belongs to
+ * the same drawing as the rest of the app.
+ */
+const Endpoints = ({
+  fromLabel,
+  toLabel,
+  fromDetail,
+  toDetail,
+}: {
+  fromLabel?: string;
+  toLabel?: string;
+  fromDetail?: ReactNode;
+  toDetail?: ReactNode;
+}) => (
+  <ol className="card-quiet flex flex-col gap-3 p-3">
+    {[
+      { mark: 'A', label: fromLabel, detail: fromDetail, filled: true },
+      { mark: 'B', label: toLabel, detail: toDetail, filled: false },
+    ].map(({ mark, label, detail, filled }, index) => (
+      <li key={mark} className="relative flex items-start gap-3">
+        {index === 0 ? (
+          <span
+            className="absolute left-[5px] top-4 h-[calc(100%+0.35rem)] w-0.5 rounded-(--radius-pill) bg-(--accent-line)"
+            aria-hidden="true"
+          />
+        ) : null}
+        <span
+          className={`relative mt-1 size-3 shrink-0 rounded-(--radius-pill) border-2 border-(--accent-ink) ${
+            filled ? 'bg-(--accent-ink)' : 'bg-(--paper)'
+          }`}
+          aria-hidden="true"
+        />
+        <span className="flex min-w-0 flex-col gap-0.5">
+          <span className="sr-only">{mark}:</span>
+          <span className="type-body-sm font-medium text-(--ink)">{label}</span>
+          {detail ? <span className="type-meta">{detail}</span> : null}
+        </span>
+      </li>
+    ))}
+  </ol>
+);
 
 const MapDirections = ({
   origin,
@@ -96,33 +153,29 @@ const MapDirections = ({
     }
   }, [routeIndex, routes, directionsRenderer, origin, destination]);
 
-  // If there's an error, show error message
   if (error) {
     return (
-      <aside
-        className="absolute top-2 right-2 bg-(--paper) backdrop-blur-sm shadow-xl rounded-xl p-2 sm:p-4 w-[96vw] max-w-md md:w-[32vw] flex flex-col gap-3 z-[1000] border border-(--line)"
-        aria-label="Route information"
-      >
-        <header className="space-y-2">
-          <Heading className="text-xl font-medium text-(--ink)">Location Information</Heading>
-          <section className="bg-(--surface) rounded-lg p-2 sm:p-3 space-y-2">
-            <article className="flex items-start gap-2">
-              <span className="font-medium text-(--ink)">A</span>
-              <section className="text-(--muted) text-sm">
-                <p className="font-medium">{fromLabel}</p>
-                <p className="text-(--muted)">({origin.lat}, {origin.lng})</p>
-              </section>
-            </article>
-            <article className="flex items-start gap-2">
-              <span className="font-medium text-(--ink)">B</span>
-              <section className="text-(--muted) text-sm">
-                <p className="font-medium">{toLabel}</p>
-                <p className="text-(--muted)">({destination.lat}, {destination.lng})</p>
-              </section>
-            </article>
-          </section>
+      <aside className={panelClasses} aria-label="Route information">
+        <header className="flex flex-col gap-2">
+          <h2 className="type-card-title">Where you are going</h2>
+          <Endpoints
+            fromLabel={fromLabel}
+            toLabel={toLabel}
+            fromDetail={`${origin.lat}, ${origin.lng}`}
+            toDetail={`${destination.lat}, ${destination.lng}`}
+          />
         </header>
-        <p className="text-yellow-600 bg-yellow-50 p-3 rounded-lg text-sm">{error}</p>
+        <p
+          role="alert"
+          className="flex items-start gap-2 rounded-(--radius-control) border border-(--warning-line) bg-(--warning-surface) p-3 text-[0.8125rem] leading-[1.5] text-(--warning)"
+        >
+          <FontAwesomeIcon
+            icon={faTriangleExclamation}
+            className="mt-[0.2em] size-3.5 shrink-0"
+            aria-hidden="true"
+          />
+          {error}
+        </p>
       </aside>
     );
   }
@@ -130,72 +183,63 @@ const MapDirections = ({
   if (!leg) return null;
 
   return (
-    <aside
-      className="absolute top-2 right-2 bg-(--paper) backdrop-blur-sm shadow-xl rounded-xl p-2 sm:p-4 w-[96vw] max-w-md md:w-[32vw] flex flex-col gap-3 z-[1000] border border-(--line)"
-      aria-label="Route information"
-    >
-      <header className="space-y-2">
-        <Heading className="text-xl font-medium text-(--ink)">Route Overview</Heading>
-        <section className="bg-(--surface) rounded-lg p-2 sm:p-3 space-y-2">
-          <article className="flex items-start gap-2">
-            <span className="font-medium text-(--ink)">A</span>
-            <section className="text-(--muted) text-sm">
-              <p className="font-medium">{fromLabel}</p>
-              <p className="text-(--muted)">{leg.start_address?.split(',')?.slice(1)?.join(', ')}</p>
-            </section>
-          </article>
-          <article className="flex items-start gap-2">
-            <span className="font-medium text-(--ink)">B</span>
-            <section className="text-(--muted) text-sm">
-              <p className="font-medium">{toLabel}</p>
-              <p className="text-(--muted)">{leg.end_address?.split(',')?.slice(1)?.join(', ')}</p>
-            </section>
-          </article>
-        </section>
+    <aside className={panelClasses} aria-label="Route information">
+      <header className="flex flex-col gap-2">
+        <h2 className="type-card-title">Route overview</h2>
+        <Endpoints
+          fromLabel={fromLabel}
+          toLabel={toLabel}
+          fromDetail={leg.start_address?.split(',')?.slice(1)?.join(', ')}
+          toDetail={leg.end_address?.split(',')?.slice(1)?.join(', ')}
+        />
       </header>
-      <section className="flex items-center justify-between bg-(--surface) rounded-lg p-2 sm:p-3">
-        <article className="flex items-center gap-2">
-          <span className="text-(--ink)">🛣️</span>
-          <span className="font-medium text-(--ink)">{leg.distance?.text}</span>
-        </article>
-        <article className="flex items-center gap-2">
-          <span className="text-(--ink)">⏱️</span>
-          <span className="font-medium text-(--ink)">{leg.duration?.text}</span>
-        </article>
-      </section>
+
+      <dl className="card-quiet flex items-center justify-between gap-3 p-3">
+        <div className="flex items-center gap-2">
+          <dt className="flex items-center gap-2 text-(--muted)">
+            <FontAwesomeIcon icon={faRoute} className="size-3.5" aria-hidden="true" />
+            <span className="sr-only">Distance</span>
+          </dt>
+          <dd className="tabular text-sm font-medium text-(--ink)">
+            {leg.distance?.text}
+          </dd>
+        </div>
+        <div className="flex items-center gap-2">
+          <dt className="flex items-center gap-2 text-(--muted)">
+            <FontAwesomeIcon icon={faClock} className="size-3.5" aria-hidden="true" />
+            <span className="sr-only">Travel time</span>
+          </dt>
+          <dd className="tabular text-sm font-medium text-(--ink)">
+            {leg.duration?.text}
+          </dd>
+        </div>
+      </dl>
+
       {hasAlternatives && (
-        <section className="w-full space-y-2">
-          <header>
-            <Heading type="h3" className="text-center text-(--ink) font-medium">
-              Possible Routes
-            </Heading>
-          </header>
-          <nav className="flex items-center justify-between bg-(--surface) rounded-lg p-2">
-            <button 
-              onClick={handlePrev}
-              className="p-[2px] hover:bg-(--surface) cursor-pointer rounded-full transition-colors"
-              aria-label="Previous route"
-            >
-              <FontAwesomeIcon
-                icon={faChevronCircleLeft}
-                className="text-(--ink) text-xl"
-              />
-            </button>
-            <span className="text-(--muted) text-sm font-medium">
-              Route {routeIndex + 1} of {routes.length}
-            </span>
-            <button 
-              onClick={handleNext}
-              className="p-[2px] hover:bg-(--surface) cursor-pointer rounded-full transition-colors"
-              aria-label="Next route"
-            >
-              <FontAwesomeIcon
-                icon={faChevronCircleRight}
-                className="text-(--ink) text-xl"
-              />
-            </button>
-          </nav>
-        </section>
+        <nav
+          className="card-quiet flex items-center justify-between gap-2 p-1.5"
+          aria-label="Other routes"
+        >
+          <button
+            type="button"
+            onClick={handlePrev}
+            className="flex size-8 items-center justify-center rounded-(--radius-control) text-(--ink) transition-colors duration-200 ease-(--ease-flat) hover:bg-(--surface-hover) focus-visible:outline-none focus-visible:shadow-[var(--surface)_0_0_0_2px_inset,var(--ink)_0_0_0_2px]"
+            aria-label="Previous route"
+          >
+            <FontAwesomeIcon icon={faChevronLeft} className="size-3.5" />
+          </button>
+          <span className="tabular type-body-sm text-(--muted)" aria-live="polite">
+            Route {routeIndex + 1} of {routes.length}
+          </span>
+          <button
+            type="button"
+            onClick={handleNext}
+            className="flex size-8 items-center justify-center rounded-(--radius-control) text-(--ink) transition-colors duration-200 ease-(--ease-flat) hover:bg-(--surface-hover) focus-visible:outline-none focus-visible:shadow-[var(--surface)_0_0_0_2px_inset,var(--ink)_0_0_0_2px]"
+            aria-label="Next route"
+          >
+            <FontAwesomeIcon icon={faChevronRight} className="size-3.5" />
+          </button>
+        </nav>
       )}
     </aside>
   );

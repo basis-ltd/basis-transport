@@ -195,7 +195,7 @@ const Sidebar = () => {
               <li key={nav.title} className="flex flex-col">
                 <Link
                   to={nav.path}
-                  className={`group relative flex items-center gap-3 overflow-hidden rounded-(--radius-pill) text-sm font-medium transition-colors duration-200 ease-(--ease-flat)
+                  className={`group relative flex items-center gap-3 overflow-hidden rounded-md text-sm font-medium transition-colors duration-200 ease-(--ease-flat)
                     ${sidebarExpanded ? 'px-3 py-2.5' : 'justify-center p-2.5'}
                     ${
                       isActive

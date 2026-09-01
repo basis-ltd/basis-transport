@@ -108,6 +108,7 @@ export default function SavedJourneysPage() {
   return (
     <PageBody>
       <PageHeader
+        eyebrow="Journey planner"
         title="Saved places and journeys"
         description="Keep the connections you use on this account."
       />

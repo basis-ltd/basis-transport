@@ -44,7 +44,7 @@ export default function LandingPage() {
       />
       <PublicNavbar />
       <main className="landing-container">
-        <section className="journey-hero">
+        <section className="journey-hero grid gap-4">
           <div className="journey-hero-grid">
             <div className="journey-hero-copy landing-enter">
               <div className="journey-hero-headline">
@@ -84,7 +84,7 @@ export default function LandingPage() {
               }}
             />
           ) : network && !network.ready ? (
-            <p className="journey-notice">{network.notice}</p>
+            <p className="journey-notice">{network?.notice}</p>
           ) : null}
         </section>
         <section className="journey-how" id="how-it-works">

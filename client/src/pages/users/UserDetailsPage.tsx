@@ -30,7 +30,7 @@ const UserDetailsPage = () => {
   if (userIsFetching || !user) {
     return (
       <PageBody>
-        <PageHeader title="User details" />
+        <PageHeader eyebrow="People" title="User details" />
         <PageSection>
           <p className="type-body-sm text-(--muted)">
             {userIsFetching
@@ -50,6 +50,7 @@ const UserDetailsPage = () => {
   return (
     <PageBody>
       <PageHeader
+        eyebrow="People"
         title="User details"
         description={`Profile, roles, and access for ${user.name}.`}
       />

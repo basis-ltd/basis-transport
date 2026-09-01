@@ -31,7 +31,7 @@ function renderPane(children: ReactNode) {
 }
 
 describe("Authenticated app pane", () => {
-  it("sits PageShell cards on --surface, not a nested paper panel", () => {
+  it("sits PageShell cards on --paper, not a nested paper panel", () => {
     const { container } = renderPane(
       <>
         <IdentityCard name="Ada" email="ada@example.com" />
@@ -42,12 +42,12 @@ describe("Authenticated app pane", () => {
     );
     const pane = container.querySelector("[data-app-pane]")!;
     expect(pane.tagName).toBe("SECTION");
-    expect(pane).toHaveClass("bg-(--surface)");
+    expect(pane).toHaveClass("bg-(--paper)");
     expect(pane).toHaveClass("min-h-[calc(100vh-var(--navbar-height))]");
     expect(pane).not.toHaveClass("absolute");
     expect(pane).not.toHaveClass("overflow-y-auto");
     expect(pane).not.toHaveClass("card-framed");
-    expect(container.firstElementChild).toHaveClass("bg-(--surface)");
+    expect(container.firstElementChild).toHaveClass("bg-(--paper)");
     const cards = pane.querySelectorAll("section.card-framed");
     expect(cards.length).toBe(2);
     for (const card of cards) {

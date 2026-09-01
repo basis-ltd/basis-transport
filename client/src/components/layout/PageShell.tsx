@@ -1,4 +1,6 @@
 import type { ReactNode } from "react";
+import { faCircleInfo } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { cn } from "@/lib/utils";
 
 /**
@@ -35,11 +37,14 @@ export const PageBody = ({
  * edge instead of floating against each other.
  */
 export const PageHeader = ({
+  eyebrow,
   title,
   description,
   actions,
   className,
 }: {
+  /** The area this page belongs to — wayfinding, not a restated title. */
+  eyebrow?: ReactNode;
   title: ReactNode;
   description?: ReactNode;
   actions?: ReactNode;
@@ -51,10 +56,17 @@ export const PageHeader = ({
       className,
     )}
   >
-    <div className="flex min-w-0 flex-col gap-1">
+    <div className="flex min-w-0 flex-col gap-1.5">
+      {eyebrow ? (
+        <p className="type-eyebrow" data-page-eyebrow>
+          {eyebrow}
+        </p>
+      ) : null}
       <h1 className="type-page-title text-(--ink)">{title}</h1>
       {description ? (
-        <p className="type-meta max-w-2xl">{description}</p>
+        <p className="type-meta max-w-2xl" data-page-description>
+          {description}
+        </p>
       ) : null}
     </div>
     {actions ? (
@@ -103,6 +115,36 @@ export const PageSection = ({
     ) : null}
     <div className={cn("flex flex-col gap-5", bodyClassName)}>{children}</div>
   </section>
+);
+
+/**
+ * A standing constraint or caveat — not a status, not an error. The admin and
+ * network pages were borrowing `.journey-notice` for this, which is the
+ * journey feature's *live* status strip; a page-level rule and a "we couldn't
+ * reach the network" message were being drawn as the same object. This is the
+ * app's own, and it is deliberately quieter than either.
+ */
+export const PageNote = ({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) => (
+  <aside
+    className={cn(
+      "flex items-start gap-2.5 rounded-(--radius-control) border border-(--line)",
+      "bg-(--surface-sunken) px-4 py-3.5 text-(--muted)",
+      className,
+    )}
+  >
+    <FontAwesomeIcon
+      icon={faCircleInfo}
+      className="mt-[0.2em] size-3.5 shrink-0 text-(--accent-ink)"
+      aria-hidden="true"
+    />
+    <p className="type-body-sm">{children}</p>
+  </aside>
 );
 
 export interface DetailItem {

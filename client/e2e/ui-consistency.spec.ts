@@ -182,41 +182,66 @@ async function persistSession(
   );
 }
 
+/**
+ * A card is told from the page by exactly one thing: its edge.
+ *
+ * This used to assert a different fill and a shadow as well. That contract is
+ * what produced a tinted ground with a tinted hairline on it — three surfaces
+ * a step apart, none of which read. The card now sits on the same white as the
+ * page and earns its outline instead, so what has to be checked is that the
+ * outline actually carries contrast rather than that it merely exists.
+ */
 async function assertCardSitsOnSurface(page: Page) {
   const pane = page.locator("[data-app-pane]");
   await expect(pane).toBeVisible();
   const card = pane.locator("section.card-framed").first();
   await expect(card).toBeVisible();
   const contrast = await page.evaluate(() => {
+    const luminance = (color: string) => {
+      const [r, g, b] = (color.match(/\d+(\.\d+)?/g) ?? ["0", "0", "0"])
+        .slice(0, 3)
+        .map((value) => {
+          const channel = Number(value) / 255;
+          return channel <= 0.03928
+            ? channel / 12.92
+            : ((channel + 0.055) / 1.055) ** 2.4;
+        });
+      return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    };
     const paneEl = document.querySelector("[data-app-pane]") as HTMLElement;
     const cardEl = paneEl?.querySelector(
       "section.card-framed",
     ) as HTMLElement | null;
     if (!paneEl || !cardEl) return null;
-    const paneBg = getComputedStyle(paneEl).backgroundColor;
-    const cardBg = getComputedStyle(cardEl).backgroundColor;
     const cardStyle = getComputedStyle(cardEl);
+    const cardBg = cardStyle.backgroundColor;
+    const borderColor = cardStyle.borderTopColor;
+    const ratio = (a: string, b: string) => {
+      const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+      return (hi + 0.05) / (lo + 0.05);
+    };
     return {
-      paneBg,
       cardBg,
+      borderColor,
       borderWidth: cardStyle.borderTopWidth,
-      borderColor: cardStyle.borderTopColor,
-      boxShadow: cardStyle.boxShadow,
+      borderRadius: cardStyle.borderTopLeftRadius,
+      edgeContrast: ratio(borderColor, cardBg),
     };
   });
   expect(contrast).toBeTruthy();
-  expect(contrast!.cardBg).not.toBe(contrast!.paneBg);
   expect(contrast!.cardBg).toMatch(/rgb\(255,\s*255,\s*255\)/);
   expect(contrast!.borderWidth).toBe("1px");
   expect(contrast!.borderColor).not.toBe("rgba(0, 0, 0, 0)");
-  expect(contrast!.boxShadow).not.toBe("none");
+  expect(contrast!.borderRadius).toBe("12px");
+  // A hairline the reader cannot see is the bug this whole check exists for.
+  expect(contrast!.edgeContrast).toBeGreaterThan(1.2);
 }
 
 async function assertReadableAuthenticatedPage(page: Page) {
   const metrics = await page.evaluate(() => {
     const heading = document.querySelector("[data-app-pane] h1");
     const description = document.querySelector(
-      "[data-app-pane] .app-page-header p",
+      "[data-app-pane] [data-page-description]",
     );
     return {
       headingSize: heading

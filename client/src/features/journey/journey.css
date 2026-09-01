@@ -1165,7 +1165,6 @@
 .journey-directory {
   display: grid;
   gap: 12px;
-  margin-block: 16px;
   padding: 0;
   list-style: none;
 }
@@ -1325,7 +1324,12 @@
 }
 .landing-map-marker.is-origin {
   background: var(--accent-ink);
-  color: #fff;
+  color: #ffffff;
+}
+/* The accent lightens in dark mode, so the label on it has to darken with it —
+   white on the light-mode green is legible, white on the dark-mode green is not. */
+.dark .landing-map-marker.is-origin {
+  color: #06120b;
 }
 .landing-map-note {
   padding: 0 20px 16px;

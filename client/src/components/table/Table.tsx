@@ -136,8 +136,13 @@ export default function Table<TData, TValue>({
 
   return (
     <>
+      {/* Two nested `overflow-x-auto` boxes were fighting over the same axis:
+          this one and the `table-container` shadcn renders inside it. The inner
+          one is the scroller, so this one clips instead — otherwise a table
+          scrolled to its last column slides out past a rounded corner that is
+          no longer clipping anything. */}
       <section
-        className={`w-full overflow-x-auto rounded-(--radius-card) border border-(--line) ${containerClassName}`}
+        className={`w-full overflow-hidden rounded-(--radius-card) border border-(--line) ${containerClassName}`}
       >
         <DataTable className={tableClassName}>
           <TableHeader className="px-0">
@@ -146,7 +151,7 @@ export default function Table<TData, TValue>({
                 {headerGroup.headers.map((header) => {
                   return (
                     <TableHead
-                      className={`h-(--control-md) px-4 text-[0.8125rem] font-medium text-(--muted) ${headerCellClassName}`}
+                      className={`h-(--control-md) px-3 text-[0.8125rem] font-medium text-(--muted) ${headerCellClassName}`}
                       key={header.id}
                       colSpan={header.colSpan}
                     >
@@ -167,7 +172,7 @@ export default function Table<TData, TValue>({
               Array.from({ length: size }).map((_, rowIdx) => (
                 <TableRow key={`skeleton-row-${rowIdx}`}>
                   {columns.map((_, cellIdx) => (
-                    <TableCell key={`skeleton-cell-${cellIdx}`} className="p-4">
+                    <TableCell key={`skeleton-cell-${cellIdx}`} className="px-3 py-4">
                       <SkeletonLoader type="text" height='0.8rem' />
                     </TableCell>
                   ))}
@@ -200,7 +205,7 @@ export default function Table<TData, TValue>({
                     );
                     return (
                       <TableCell
-                        className={`h-12 px-4 text-sm ${
+                        className={`h-12 px-3 text-sm ${
                           preventAction ? 'cursor-auto' : ''
                         } ${cellClassName}`}
                         key={cell.id}

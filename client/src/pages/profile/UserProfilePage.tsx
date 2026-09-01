@@ -48,7 +48,7 @@ const UserProfilePage = () => {
   if (!user) {
     return (
       <PageBody>
-        <PageHeader title="My profile" />
+        <PageHeader eyebrow="Account" title="My profile" />
         <PageSection>
           <p className="type-body-sm text-(--muted)">
             We couldn’t load your profile. Sign in again to continue.
@@ -66,6 +66,7 @@ const UserProfilePage = () => {
   return (
     <PageBody>
       <PageHeader
+        eyebrow="Account"
         title="My profile"
         description="Manage your personal information and preferences."
         actions={

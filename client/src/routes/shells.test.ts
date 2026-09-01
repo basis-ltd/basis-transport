@@ -35,7 +35,7 @@ describe("Public vs authenticated shells", () => {
       "utf8",
     );
     expect(layout).toMatch(/data-app-pane/);
-    expect(layout).toMatch(/bg-\(--surface\)/);
+    expect(layout).toMatch(/bg-\(--paper\)/);
     expect(layout).not.toMatch(/card-framed/);
   });
 });

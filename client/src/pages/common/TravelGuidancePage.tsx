@@ -556,7 +556,11 @@ export default function TravelGuidancePage() {
           noIndex
         />
         <PageBody className="journey-page journey-page--app">
-          <PageHeader title={PAGE_TITLE} description={PAGE_DESCRIPTION} />
+          <PageHeader
+            eyebrow="Journey planner"
+            title={PAGE_TITLE}
+            description={PAGE_DESCRIPTION}
+          />
           {content}
         </PageBody>
       </AppLayout>

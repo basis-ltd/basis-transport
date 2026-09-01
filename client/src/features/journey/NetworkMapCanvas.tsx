@@ -25,7 +25,7 @@ function Lines({
       const line = new google.maps.Polyline({
         map,
         path,
-        strokeColor: active ? "#308449" : "#6e6e6e",
+        strokeColor: active ? "#318549" : "#6e6e6e",
         strokeOpacity: schematic ? 0 : active ? 1 : 0.45,
         strokeWeight: active ? 6 : 3,
         zIndex: active ? 2 : 1,
