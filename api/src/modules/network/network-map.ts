@@ -1,3 +1,4 @@
+import { overlayRouteIds } from './ecofleet-overlay';
 import { normalizeRouteQuery } from './route-filters';
 import type { Coordinates, NetworkSnapshot } from './network.types';
 
@@ -32,6 +33,7 @@ export function projectNetworkMap(
   query: NetworkMapQuery
 ) {
   const enabled = snapshot.patterns.filter((p) => p.enabled);
+  const publishedIds = overlayRouteIds();
   const routeMap = new Map<
     string,
     { id: string; number: string; name: string }
@@ -42,15 +44,19 @@ export function projectNetworkMap(
       number: p.routeNumber,
       name: p.routeName,
     });
-  const routes = [...routeMap.values()].sort(
+  const numbered = [...routeMap.values()].sort(
     (a, b) =>
       a.number.localeCompare(b.number, undefined, { numeric: true }) ||
       a.id.localeCompare(b.id)
   );
+  const routes = [
+    ...numbered.filter((r) => publishedIds.has(r.id)),
+    ...numbered.filter((r) => !publishedIds.has(r.id)),
+  ];
   const q = normalizeRouteQuery(query.q || '');
   const agency = normalizeRouteQuery(query.agency || '');
   const headsign = normalizeRouteQuery(query.headsign || '');
-  const matching = enabled
+  const filtered = enabled
     .filter(
       (p) =>
         (!query.routeId || p.routeId === query.routeId) &&
@@ -69,6 +75,10 @@ export function projectNetworkMap(
         a.headsign.localeCompare(b.headsign) ||
         a.id.localeCompare(b.id)
     );
+  const matching = [
+    ...filtered.filter((p) => publishedIds.has(p.routeId)),
+    ...filtered.filter((p) => !publishedIds.has(p.routeId)),
+  ];
   let remainingStops = MAP_LIMITS.totalStops;
   const patterns = matching.slice(0, MAP_LIMITS.patterns).map((p) => {
     const sourceShape = Boolean(p.geometry && p.geometry.length >= 2);

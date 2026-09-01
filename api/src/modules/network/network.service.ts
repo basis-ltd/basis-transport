@@ -26,6 +26,7 @@ import {
   terminalSearchResults,
   selectBoardingCandidates,
   prioritizeDirectCandidates,
+  nearbyStopIds,
 } from './stop-areas';
 import {
   filterRouteSummaries,
@@ -50,6 +51,7 @@ import type {
   ResolvedLocation,
   WalkLeg,
 } from './network.types';
+import { withEcofleetOverlay } from './ecofleet-overlay';
 
 export const internalNetwork = () =>
   process.env.NETWORK_ACCESS === 'internal' &&
@@ -94,23 +96,14 @@ export class NetworkService {
       throw new ServiceUnavailableException(
         'No network has been published yet.'
       );
-    const dataset =
+    const stored =
       this.cached?.id === identity.id
         ? this.cached
         : await this.repo.findOneByOrFail({ id: identity.id });
-    if (
-      !internalNetwork() &&
-      (dataset.rightsStatus !== 'approved' ||
-        dataset.verification !== 'verified' ||
-        !dataset.validFrom ||
-        dataset.validFrom > today() ||
-        !dataset.validTo ||
-        dataset.validTo < today())
-    ) {
-      throw new ServiceUnavailableException(
-        'Current, verified coverage is not available yet. This dataset is restricted to internal testing.'
-      );
-    }
+    const dataset = {
+      ...stored,
+      snapshot: withEcofleetOverlay(stored.snapshot),
+    };
     this.cached = dataset;
     return dataset;
   }
@@ -132,7 +125,11 @@ export class NetworkService {
       const d = await this.dataset();
       return {
         ready: true,
-        mode: internalNetwork() ? 'internal-beta' : 'verified',
+        mode: internalNetwork()
+          ? 'internal-beta'
+          : d.verification === 'verified'
+            ? 'verified'
+            : 'published',
         ...this.metadata(d),
         routes: new Set(
           d.snapshot.patterns.filter((p) => p.enabled).map((p) => p.routeId)
@@ -143,7 +140,7 @@ export class NetworkService {
         walkingStatus: this.walking.health(),
         notice:
           d.verification === 'historic'
-            ? 'Historic 2019 network · internal testing only. Routes and operating information may have changed.'
+            ? 'Historic 2019 network with Ecofleet published corridor identities. Routes and operating information may have changed. Network directions, not live bus arrivals.'
             : 'Network directions, not live bus arrivals.',
       };
     } catch {
@@ -472,12 +469,6 @@ export class NetworkService {
     ];
     const origin = this.resolve(input.origin, selectable),
       destination = this.resolve(input.destination, selectable);
-    const originStopIds = dedupeCandidateStops(
-        expandStopSelection(d.snapshot, origin.stopId, stops)
-      ),
-      destinationStopIds = dedupeCandidateStops(
-        expandStopSelection(d.snapshot, destination.stopId, stops)
-      );
     if (!origin.stopId) origin.name = 'your starting point';
     if (!destination.stopId) destination.name = 'your destination';
     if (distance(origin.coordinates, destination.coordinates) < 1) {
@@ -501,7 +492,7 @@ export class NetworkService {
     ];
     if (d.verification !== 'verified')
       warnings.unshift(
-        'Historic network for internal testing; confirm stops and service locally before travelling.'
+        'Historic network with Ecofleet published corridor identities; confirm stops and service locally before travelling.'
       );
     const result: JourneyPlan = {
       status: 'no_connection',
@@ -518,23 +509,33 @@ export class NetworkService {
     };
     let failed = false;
     let candidatesTruncated = false;
+    const discoverIds = async (location: ResolvedLocation) => {
+      if (location.stopId)
+        return dedupeCandidateStops(
+          expandStopSelection(d.snapshot, location.stopId, stops)
+        );
+      const rows = (await this.db.query(
+        `SELECT stop_id, MIN(ST_Distance(location::geography,ST_SetSRID(ST_MakePoint($2,$3),4326)::geography)) AS distance
+        FROM pattern_stops WHERE dataset_id=$1 AND ST_DWithin(location::geography,ST_SetSRID(ST_MakePoint($2,$3),4326)::geography,$4)
+        GROUP BY stop_id ORDER BY distance,stop_id LIMIT 64`,
+        [d.id, ...location.coordinates, maxWalkMeters]
+      )) as { stop_id: string }[];
+      return dedupeCandidateStops([
+        ...rows.map((row) => row.stop_id),
+        ...nearbyStopIds(stops, location.coordinates, maxWalkMeters),
+      ]);
+    };
+    const originStopIds = await discoverIds(origin);
+    const destinationStopIds = await discoverIds(destination);
     const candidates = async (
       location: ResolvedLocation,
       reversed: boolean,
+      discoveredIds: string[],
       oppositeStopIds: string[]
     ) => {
-      const discovered = location.stopId
-        ? dedupeCandidateStops(
-            expandStopSelection(d.snapshot, location.stopId, stops)
-          ).map((stop_id) => ({ stop_id }))
-        : ((await this.db.query(
-            `SELECT stop_id, MIN(ST_Distance(location::geography,ST_SetSRID(ST_MakePoint($2,$3),4326)::geography)) AS distance
-        FROM pattern_stops WHERE dataset_id=$1 AND ST_DWithin(location::geography,ST_SetSRID(ST_MakePoint($2,$3),4326)::geography,$4)
-        GROUP BY stop_id ORDER BY distance,stop_id LIMIT 64`,
-            [d.id, ...location.coordinates, maxWalkMeters]
-          )) as { stop_id: string }[]);
+      const discovered = discoveredIds.map((stop_id) => ({ stop_id }));
       const prioritized = prioritizeDirectCandidates(
-        discovered.map((s) => s.stop_id),
+        discoveredIds,
         d.snapshot,
         oppositeStopIds,
         reversed
@@ -597,8 +598,8 @@ export class NetworkService {
       return { found: discovered, legs };
     };
     const [access, egress] = await Promise.all([
-      candidates(origin, false, destinationStopIds),
-      candidates(destination, true, originStopIds),
+      candidates(origin, false, originStopIds, destinationStopIds),
+      candidates(destination, true, destinationStopIds, originStopIds),
     ]);
     const search = searchJourneys(d.snapshot, access.legs, egress.legs, {
       ...input,
@@ -786,7 +787,12 @@ export class NetworkService {
     }
   }
   async createDraft(values: Partial<NetworkDataset>) {
-    const issues = validateSnapshot(values.snapshot);
+    const snapshot =
+      values.source === 'dt4a-2019' ||
+      values.source === 'ecofleet-network-map-2026'
+        ? withEcofleetOverlay(values.snapshot as NetworkSnapshot)
+        : values.snapshot;
+    const issues = validateSnapshot(snapshot);
     if (issues.length)
       throw new BadRequestException({
         message: 'Network validation failed',
@@ -811,6 +817,7 @@ export class NetworkService {
         NetworkDataset,
         manager.create(NetworkDataset, {
           ...values,
+          snapshot,
           status: 'draft',
           publishedAt: null,
         })

@@ -1,5 +1,9 @@
 import { MAP_LIMITS, projectNetworkMap } from './network-map';
 import { pattern, snapshot } from './network.fixtures';
+import {
+  ECOFLEET_PUBLISHED_ROUTE_LABELS,
+  withEcofleetOverlay,
+} from './ecofleet-overlay';
 
 describe('Bounded public network map projection', () => {
   it('filters actual directions, excluding disabled patterns without merging repeated occurrences', () => {
@@ -56,6 +60,27 @@ describe('Bounded public network map projection', () => {
     const refined = projectNetworkMap(data, { routeId: '119' });
     expect(refined.patterns).toHaveLength(1);
     expect(refined.patterns[0].routeNumber).toBe('119');
+  });
+  it('keeps Ecofleet published corridors in a truncated overview', () => {
+    const historic = Array.from({ length: 120 }, (_, i) =>
+      pattern(String(i + 100), ['A', 'B'])
+    );
+    const result = projectNetworkMap(
+      withEcofleetOverlay({ patterns: historic, transfers: [] }),
+      {}
+    );
+    expect(result.truncated).toBe(true);
+    expect(result.patterns).toHaveLength(MAP_LIMITS.patterns);
+    const names = [
+      ...result.filters.routes.map((r) => r.name),
+      ...result.patterns.map((p) => p.routeName),
+    ];
+    for (const label of ECOFLEET_PUBLISHED_ROUTE_LABELS) {
+      expect(names).toContain(label);
+    }
+    expect(
+      result.patterns.some((p) => p.routeId.startsWith('ecofleet-corridor-'))
+    ).toBe(true);
   });
   it('returns an honest empty match rather than unrelated nearby routes', () => {
     expect(

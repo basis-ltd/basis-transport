@@ -1,4 +1,10 @@
-import type { NetworkSnapshot, NetworkStop, StopArea } from './network.types';
+import { distance } from './geo';
+import type {
+  Coordinates,
+  NetworkSnapshot,
+  NetworkStop,
+  StopArea,
+} from './network.types';
 
 export function stopAreas(snapshot: NetworkSnapshot): StopArea[] {
   return snapshot.stopAreas ?? [];
@@ -34,6 +40,22 @@ export function expandStopSelection(
 /** Remove duplicate source stops so one platform does not crowd out useful candidates. */
 export function dedupeCandidateStops(stopIds: string[]): string[] {
   return [...new Set(stopIds)];
+}
+
+/** Snapshot stops within walking distance of a coordinate endpoint (GeoJSON order). */
+export function nearbyStopIds(
+  stops: NetworkStop[],
+  coordinates: Coordinates,
+  maxWalkMeters: number
+): string[] {
+  return stops
+    .filter((stop) => distance(stop.coordinates, coordinates) <= maxWalkMeters)
+    .sort(
+      (a, b) =>
+        distance(a.coordinates, coordinates) -
+          distance(b.coordinates, coordinates) || a.id.localeCompare(b.id)
+    )
+    .map((stop) => stop.id);
 }
 
 /**

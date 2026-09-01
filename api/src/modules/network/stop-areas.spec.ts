@@ -1,6 +1,7 @@
 import {
   expandStopSelection,
   dedupeCandidateStops,
+  nearbyStopIds,
   prioritizeDirectCandidates,
   terminalSearchResults,
 } from './stop-areas';
@@ -52,5 +53,14 @@ describe('Stop areas', () => {
     expect(
       prioritizeDirectCandidates(['X', 'C', 'B'], snap, ['A'], true)
     ).toEqual(['C', 'B', 'X']);
+  });
+
+  it('lists snapshot stops within a walking radius of a coordinate', () => {
+    const p = pattern('direct', ['A', 'B', 'C']);
+    p.stops[0].coordinates = [30.06, -1.95];
+    p.stops[1].coordinates = [30.08, -1.95];
+    p.stops[2].coordinates = [30.1, -1.95];
+    expect(nearbyStopIds(p.stops, p.stops[0].coordinates, 50)).toEqual(['A']);
+    expect(nearbyStopIds(p.stops, [0, 0], 50)).toEqual([]);
   });
 });

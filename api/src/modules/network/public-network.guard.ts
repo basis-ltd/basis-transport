@@ -1,12 +1,10 @@
 import {
   CanActivate,
   ExecutionContext,
-  ForbiddenException,
   HttpException,
   Injectable,
 } from '@nestjs/common';
 import type { Request } from 'express';
-import { internalNetwork } from './network.service';
 
 @Injectable()
 export class PublicNetworkGuard implements CanActivate {
@@ -14,26 +12,6 @@ export class PublicNetworkGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
     const req = context.switchToHttp().getRequest<Request>();
     const ip = req.socket.remoteAddress || 'unknown'; // Never trust user-supplied X-Forwarded-For.
-    if (internalNetwork()) {
-      const origin = req.get('origin');
-      let localOrigin = true;
-      if (origin) {
-        try {
-          localOrigin = ['localhost', '127.0.0.1', '[::1]'].includes(
-            new URL(origin).hostname
-          );
-        } catch {
-          localOrigin = false;
-        }
-      }
-      if (
-        !['::1', '127.0.0.1', '::ffff:127.0.0.1'].includes(ip) ||
-        !localOrigin
-      )
-        throw new ForbiddenException(
-          'This network is restricted to local testing.'
-        );
-    }
     const now = Date.now();
     if (this.buckets.size > 10000)
       for (const [key, bucket] of this.buckets)

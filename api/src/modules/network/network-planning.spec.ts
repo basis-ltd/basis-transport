@@ -4,6 +4,7 @@ import { WalkingProviderUnavailable, WalkingService } from './walking.service';
 import { NetworkDataset } from '../../entities/networkDataset.entity';
 import { PlanJourneyDto } from './network.dto';
 import { pattern, snapshot } from './network.fixtures';
+import { ecofleetHubId, ecofleetOverlaySnapshot } from './ecofleet-overlay';
 import { distance } from './geo';
 import type {
   NetworkSnapshot,
@@ -326,7 +327,7 @@ describe('Arbitrary endpoints and nearest boarding access', () => {
     );
   });
 
-  it('widens a truncated candidate set within the same request', async () => {
+  it('finds a direct place-to-place connection without a second candidate pass', async () => {
     const decoys = Array.from({ length: 16 }, (_, index) =>
       pattern(`decoy-${index}`, [`D${index}`, `Q${index}`])
     );
@@ -357,6 +358,132 @@ describe('Arbitrary endpoints and nearest boarding access', () => {
         expect.objectContaining({ kind: 'ride', routeNumber: 'recovered' }),
       ])
     );
-    expect(h.query).toHaveBeenCalledTimes(4);
+    expect(h.query).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('Ecofleet mixed Google Place and stop planning', () => {
+  const connecting = ecofleetOverlaySnapshot();
+  const remeraId = ecofleetHubId('Remera Terminal');
+  const downtownId = ecofleetHubId('Downtown Terminal');
+  const stops = [
+    ...new Map(
+      connecting.patterns.flatMap((p) => p.stops.map((s) => [s.id, s] as const))
+    ).values(),
+  ];
+  const remera = stops.find((s) => s.id === remeraId)!;
+  const downtown = stops.find((s) => s.id === downtownId)!;
+  const nearRemera = {
+    latitude: remera.coordinates[1] - 0.0002,
+    longitude: remera.coordinates[0] - 0.0002,
+  };
+  const nearDowntown = {
+    latitude: downtown.coordinates[1] + 0.0002,
+    longitude: downtown.coordinates[0] + 0.0002,
+  };
+  const connectingPattern = connecting.patterns.find(
+    (p) =>
+      p.routeName === 'Remera ↔ Downtown' &&
+      p.stops[0].id === remeraId &&
+      p.stops.some((s) => s.id === downtownId)
+  )!;
+
+  const expectConnectingRide = (
+    result: Awaited<ReturnType<ReturnType<typeof harness>['plan']>>
+  ) => {
+    expect(['ok', 'service_timing_unknown']).toContain(result.status);
+    const ride = result.journeys
+      .flatMap((journey) => journey.legs)
+      .find((leg) => leg.kind === 'ride');
+    expect(ride).toMatchObject({
+      kind: 'ride',
+      routeNumber: connectingPattern.routeNumber,
+      headsign: connectingPattern.headsign,
+    });
+  };
+
+  const cases = [
+    {
+      origin: nearRemera,
+      destination: { stopId: downtownId },
+      label: 'place+stop',
+    },
+    {
+      origin: { stopId: remeraId },
+      destination: nearDowntown,
+      label: 'stop+place',
+    },
+    {
+      origin: nearRemera,
+      destination: nearDowntown,
+      label: 'place+place',
+    },
+    {
+      origin: { stopId: remeraId },
+      destination: { stopId: downtownId },
+      label: 'stop+stop',
+    },
+  ];
+
+  for (const example of cases) {
+    it(`returns a connecting ride for ${example.label} on a published Ecofleet pattern`, async () => {
+      const h = harness(connecting);
+      const first = await h.plan(example);
+      const second = await h.plan(example);
+      expectConnectingRide(first);
+      expectConnectingRide(second);
+    });
+  }
+
+  it('does not invent a ride between disconnected named stops', async () => {
+    const isolated = {
+      patterns: [
+        ...connecting.patterns,
+        pattern('isolated-west', ['WEST_A', 'WEST_B']),
+        pattern('isolated-east', ['EAST_A', 'EAST_B']),
+      ],
+      transfers: [],
+    };
+    const result = await harness(isolated).plan({
+      origin: { stopId: 'WEST_A' },
+      destination: { stopId: 'EAST_B' },
+    });
+    expect(
+      result.journeys.some((j) => j.legs.some((l) => l.kind === 'ride'))
+    ).toBe(false);
+    expect(['no_connection', 'walking_only', 'outside_coverage']).toContain(
+      result.status
+    );
+  });
+
+  it('keeps the Ecofleet connecting boarding point when nearby decoys fill the cap', async () => {
+    const decoys = Array.from({ length: 16 }, (_, index) => {
+      const p = pattern(`decoy-${index}`, [`DX${index}`, `DY${index}`]);
+      p.stops[0].coordinates = [...remera.coordinates];
+      p.stops[1].coordinates = [29.5, -2.2];
+      return p;
+    });
+    const crowded = {
+      patterns: [...decoys, ...connecting.patterns],
+      transfers: [],
+    };
+    const h = harness(crowded);
+    h.query.mockImplementation(async (_sql, args: number[]) =>
+      args[1] > 30.08
+        ? decoys.map((p) => ({ stop_id: p.stops[0].id }))
+        : [{ stop_id: downtownId }]
+    );
+    const result = await h.plan({
+      origin: nearRemera,
+      destination: nearDowntown,
+    });
+    const ride = result.journeys
+      .flatMap((journey) => journey.legs)
+      .find((leg) => leg.kind === 'ride');
+    expect(ride).toMatchObject({
+      kind: 'ride',
+      routeNumber: connectingPattern.routeNumber,
+      headsign: connectingPattern.headsign,
+    });
   });
 });

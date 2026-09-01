@@ -209,7 +209,7 @@ describe('Public planner and migration integration (isolated PostGIS only)', () 
       .expect(200);
     expect(same.body.data.status).toBe('already_at_destination');
   });
-  it('serves a versioned network map to guests, validates filters and keeps public coverage gated', async () => {
+  it('serves a versioned network map to guests and keeps a published snapshot usable without internal access', async () => {
     const response = await request(app.getHttpServer())
       .get('/api/network/map?routeId=101&headsign=C')
       .set('Authorization', 'Bearer expired')
@@ -232,7 +232,16 @@ describe('Public planner and migration integration (isolated PostGIS only)', () 
     const mode = process.env.NETWORK_ACCESS;
     try {
       process.env.NETWORK_ACCESS = 'public';
-      await request(app.getHttpServer()).get('/api/network/map').expect(503);
+      const published = await request(app.getHttpServer())
+        .get('/api/network/map')
+        .expect(200);
+      expect(published.body.data.network.version).toMatch(/^test-/);
+      expect(JSON.stringify(published.body)).not.toMatch(
+        /restricted to local testing/i
+      );
+      expect(JSON.stringify(published.body)).not.toMatch(
+        /restricted to internal testing/i
+      );
     } finally {
       process.env.NETWORK_ACCESS = mode;
     }
