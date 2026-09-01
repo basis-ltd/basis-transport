@@ -1,4 +1,5 @@
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600&display=swap");
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -48,18 +49,33 @@
   --font-family-sans:
     "DM Sans", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
 
+  /* The second face, and the only one. Route numbers are set in a condensed
+     grotesque because that is what a route number *is* — the blind on the
+     front of the bus is condensed so four digits fit a fixed aperture. It is
+     scoped to route numbers alone; nothing else in the app is allowed it. */
+  --font-family-route: "Barlow Condensed", "DM Sans", sans-serif;
+
   /* Ground and ink — these two invert in dark mode, everything follows */
   --paper: #ffffff;
   --ink: #172019;
 
-  /* Neutral ramp */
+  /* Neutral ramp.
+
+     `--canvas` is the ground the authenticated app is laid on and is a step
+     below `--surface`, which stays an *inline* fill for chips, menu hover, and
+     disabled controls. They used to be the same token, which is why a white
+     card on the page ground was a 1.14:1 edge — a card you had to look for.
+     Split apart, a card now sits 1.22:1 above its ground with a border that
+     carries real contrast, and `--surface` chips inside that card still read
+     as recessed. */
+  --canvas: #e2eae5;
   --surface: #eef2ef;
-  --surface-hover: #dfe7e2;
-  --surface-sunken: #f7f9f8;
-  --line: #ccd6d0;
-  --line-strong: #89988f;
-  --muted: #526159;
-  --muted-weak: #5f6d65;
+  --surface-hover: #dde6e0;
+  --surface-sunken: #eff4f1;
+  --line: #c2d0c7;
+  --line-strong: #7d8e84;
+  --muted: #4c5b53;
+  --muted-weak: #5a6961;
   --disabled-fg: #8a968f;
 
   /* Press overlays — chosen by the SURFACE the control sits on, not by theme */
@@ -68,9 +84,9 @@
 
   --overlay: rgba(0, 0, 0, 0.6);
   --shadow-card:
-    0 1px 2px rgba(23, 32, 25, 0.05), 0 10px 28px rgba(23, 32, 25, 0.07);
+    0 1px 2px rgba(23, 32, 25, 0.06), 0 8px 20px rgba(23, 32, 25, 0.06);
   --shadow-card-hover:
-    0 2px 4px rgba(23, 32, 25, 0.06), 0 14px 34px rgba(23, 32, 25, 0.1);
+    0 2px 4px rgba(23, 32, 25, 0.08), 0 12px 28px rgba(23, 32, 25, 0.1);
   --shadow-menu: 0 8px 24px rgba(23, 32, 25, 0.16);
   --shadow-modal: 0 18px 56px rgba(23, 32, 25, 0.25);
 
@@ -149,11 +165,12 @@
   --paper: #111513;
   --ink: #f6faf7;
 
-  --surface: #191f1b;
-  --surface-hover: #273129;
-  --surface-sunken: #0d110f;
-  --line: #354239;
-  --line-strong: #718076;
+  --canvas: #080b09;
+  --surface: #1c2320;
+  --surface-hover: #2a352d;
+  --surface-sunken: #161c18;
+  --line: #3a4a40;
+  --line-strong: #7a8a80;
   --muted: #bdc8c0;
   --muted-weak: #aebbb2;
   --disabled-fg: #718076;
@@ -369,6 +386,21 @@
     background-color: var(--surface);
   }
 
+  /* A card inside a card cannot also be `--paper` — a hairline is then the only
+     thing separating two identical whites, and the nested one stops reading as
+     a distinct object. Nested cards step down onto the sunken tone and drop
+     their shadow, because the parent already carries the elevation. */
+  .surface-card .surface-card,
+  .surface-card .card-framed,
+  .card-framed .surface-card,
+  .card-framed .card-framed,
+  .card-framed .journey-card,
+  .journey-empty .journey-card,
+  .journey-search-panel .journey-card {
+    background-color: var(--surface-sunken);
+    box-shadow: none;
+  }
+
   /* Inverted regions swap the tokens locally, so children, focus rings,
      --muted text, and ::selection all keep working inside the black area
      without special-casing. Never hand-paint bg-(--ink) text-(--paper). */
@@ -516,36 +548,65 @@
   font-weight: 600;
 }
 
-/* Authenticated pages share a transit marker rather than a generic dashboard
-   eyebrow. It is the visual hand-off from the sidebar into the current stop. */
+/* ── The route rail ───────────────────────────────────────────────────────
+   The one thing this app is meant to be remembered by, and the only place the
+   accent is spent at full strength.
+
+   Every authenticated page opens on a station marker: a filled stop on a line
+   that runs down past the title. It is the same drawing the network itself
+   uses — a stop on a route — so the page you are on reads as the stop you are
+   at. The sidebar echoes it in colour alone — the current row keeps the ink
+   pill every selected thing in this app gets, and turns its icon to the accent
+   so the same green marks "here" in the navigation and on the page. One rail,
+   one place; nothing else in the chrome gets this treatment. */
 .app-page-header {
   position: relative;
   min-height: 3.75rem;
   padding-block: 0.125rem;
-  padding-inline-start: 1.625rem;
+  padding-inline-start: 1.75rem;
 }
 
 .app-page-header::before {
   content: "";
   position: absolute;
-  inset-block: 0.25rem;
+  inset-block: 0.375rem 0;
   inset-inline-start: 0.3125rem;
   width: 2px;
   border-radius: var(--radius-pill);
-  background: var(--accent-line);
+  background: var(--accent-ink);
 }
 
 .app-page-header::after {
   content: "";
   position: absolute;
-  inset-block-start: 0.25rem;
+  inset-block-start: 0.125rem;
   inset-inline-start: 0;
   width: 0.75rem;
   height: 0.75rem;
-  border: 2px solid var(--paper);
+  border: 3px solid var(--paper);
   border-radius: 50%;
   background: var(--accent-ink);
-  box-shadow: 0 0 0 1px var(--accent-ink);
+  box-shadow: 0 0 0 1.5px var(--accent-ink);
+}
+
+
+/* Route numbers, wherever they appear — journey cards, directories, details.
+   One recipe, so a route reads the same in a result list and on a stop page. */
+.route-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-family-route);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+  border-radius: var(--radius-control);
+  background: var(--accent-ink);
+  color: #ffffff;
+}
+
+.dark .route-badge {
+  color: #052313;
 }
 
 @media (prefers-reduced-motion: reduce) {

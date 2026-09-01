@@ -41,7 +41,7 @@ export default function JourneyCard({
       >
         <span className="journey-route-badges">
           {rides.map((r, i) => (
-            <span key={i} className="journey-route-badge">
+            <span key={i} className="route-badge journey-route-badge">
               {r.routeNumber}
             </span>
           ))}

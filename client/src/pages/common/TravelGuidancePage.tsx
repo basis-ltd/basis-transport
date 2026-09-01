@@ -1,14 +1,16 @@
 import { lazy, Suspense, useCallback, useEffect, useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAppSelector } from "@/states/hooks";
 import AppLayout from "@/containers/navigation/AppLayout";
 import { PageBody, PageHeader } from "@/components/layout/PageShell";
+import { Seo } from "@/components/seo";
 import "@/features/journey/journey.css";
 import { Share2, X } from "lucide-react";
 import { toast } from "sonner";
 import Modal from "@/components/cards/Modal";
 import Button from "@/components/inputs/Button";
 import Select from "@/components/inputs/Select";
+import { FieldShell } from "@/components/inputs/Field";
 import LandingHeroForm from "./components/landing/LandingHeroForm";
 import JourneyShell, {
   LoadState,
@@ -25,6 +27,18 @@ import type { JourneyPlan, PassengerStep } from "@/features/journey/types";
 
 const JourneyMap = lazy(() => import("@/features/journey/JourneyMap"));
 const states = copy;
+
+/**
+ * This page is the one route in the app that renders in two shells: the public
+ * `JourneyShell` when you are signed out, and `AppLayout` when you are not.
+ * The title, the description, and the head tags are declared once here so the
+ * two branches cannot drift — the signed-in branch used to render no `Seo` at
+ * all, which left /travel without a canonical link or its noindex for exactly
+ * the visitors who reach it most.
+ */
+const PAGE_TITLE = "Your journey, stop by stop";
+const PAGE_DESCRIPTION =
+  "Choose a connection. Know where to board, change buses, and get off.";
 
 export default function TravelGuidancePage() {
   const [params, setParams] = useSearchParams(),
@@ -201,8 +215,7 @@ export default function TravelGuidancePage() {
                 label: n === 0 ? "Direct only" : `Up to ${n} changes`,
               }))}
             />
-            <label className="journey-field">
-              <span>Leave at (your device time)</span>
+            <FieldShell label="Leave at (your device time)">
               <input
                 type="datetime-local"
                 value={localDeparture}
@@ -216,7 +229,7 @@ export default function TravelGuidancePage() {
                 }}
                 className="journey-datetime"
               />
-            </label>
+            </FieldShell>
           </div>
         </section>
       </section>
@@ -300,7 +313,7 @@ export default function TravelGuidancePage() {
                       </h4>
                       <p>
                         <span
-                          className="journey-route-badge"
+                          className="route-badge journey-route-badge"
                           aria-label={`Route ${choice.routeNumber}`}
                         >
                           {choice.routeNumber}
@@ -486,11 +499,17 @@ export default function TravelGuidancePage() {
         </details>
       )}
       {!query && (
-        <div className="journey-empty">
+        <section className="journey-empty">
           <h2>Where would you like to go?</h2>
-          <p>Choose stops or places above. You don’t need an account.</p>
-          <Link to="/stops">Explore nearby stops</Link>
-        </div>
+          <p>
+            {signedIn
+              ? "Pick a start and a destination above, and every connection between them shows up here."
+              : "Choose stops or places above. You don’t need an account."}
+          </p>
+          <div className="journey-empty-actions">
+            <Button route="/stops">Browse stops</Button>
+          </div>
+        </section>
       )}
       <Modal
         isOpen={shareOpen}
@@ -530,11 +549,14 @@ export default function TravelGuidancePage() {
   if (signedIn) {
     return (
       <AppLayout>
+        <Seo
+          title={`${PAGE_TITLE} | Basis Transport`}
+          description={PAGE_DESCRIPTION}
+          canonicalPath="/travel"
+          noIndex
+        />
         <PageBody className="journey-page journey-page--app">
-          <PageHeader
-            title="Your journey, stop by stop"
-            description="Choose a connection. Know where to board, change buses, and get off."
-          />
+          <PageHeader title={PAGE_TITLE} description={PAGE_DESCRIPTION} />
           {content}
         </PageBody>
       </AppLayout>
@@ -542,8 +564,8 @@ export default function TravelGuidancePage() {
   }
   return (
     <JourneyShell
-      title="Your journey, stop by stop"
-      description="Choose a connection. Know where to board, change buses, and get off."
+      title={PAGE_TITLE}
+      description={PAGE_DESCRIPTION}
       path="/travel"
     >
       {content}

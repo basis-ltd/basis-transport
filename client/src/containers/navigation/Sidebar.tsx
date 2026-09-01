@@ -227,7 +227,7 @@ const Sidebar = () => {
                   <FontAwesomeIcon
                     icon={nav.icon}
                     className={`size-4 shrink-0 ${
-                      isActive ? '' : 'text-(--accent-ink)'
+                      isActive ? 'text-(--accent-line)' : 'text-(--accent-ink)'
                     }`}
                   />
 
@@ -284,7 +284,9 @@ const Sidebar = () => {
                                 <FontAwesomeIcon
                                   icon={subCategory.icon}
                                   className={`size-3.5 shrink-0 ${
-                                    isSubActive ? '' : 'text-(--accent-ink)'
+                                    isSubActive
+                                      ? 'text-(--accent-line)'
+                                      : 'text-(--accent-ink)'
                                   }`}
                                 />
                                 <motion.span

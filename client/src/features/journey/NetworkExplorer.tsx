@@ -189,7 +189,7 @@ export default function NetworkExplorer() {
                     })}
                   />
                   <div className="journey-explorer-route">
-                    <span className="journey-route-badge">
+                    <span className="route-badge journey-route-badge">
                       {selected.routeNumber}
                     </span>
                     <div>

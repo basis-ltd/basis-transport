@@ -96,7 +96,7 @@ export default function NetworkDetailsPage({
                     key={r.id}
                     to={`/routes/${encodeURIComponent(r.id)}`}
                   >
-                    <span className="journey-route-badge">{r.shortName}</span>
+                    <span className="route-badge journey-route-badge">{r.shortName}</span>
                     <div>
                       <h2>{r.longName}</h2>
                       <p>{r.agency}</p>

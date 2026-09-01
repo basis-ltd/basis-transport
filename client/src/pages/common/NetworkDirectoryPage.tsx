@@ -194,7 +194,7 @@ export default function NetworkDirectoryPage({
                     to={`/${kind}/${encodeURIComponent(item.id)}`}
                   >
                     {"shortName" in item ? (
-                      <span className="journey-route-badge">
+                      <span className="route-badge journey-route-badge">
                         {item.shortName}
                       </span>
                     ) : (
