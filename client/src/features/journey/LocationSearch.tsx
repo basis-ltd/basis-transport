@@ -333,7 +333,7 @@ export default function LocationSearch({
                 ? `Clear ${label.toLowerCase()}`
                 : `Use my location for ${label.toLowerCase()}`
             }
-            className="h-11 text-[12px]"
+            className="h-11 text-sm"
           />
         ) : (
           <FieldShell

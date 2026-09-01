@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
  * a page composes them and inherits the rhythm instead of restating it.
  */
 
-/** One vertical rhythm for every page: 24px between sections. */
+/** One readable measure and vertical rhythm for every authenticated page. */
 export const PageBody = ({
   children,
   className,
@@ -19,7 +19,12 @@ export const PageBody = ({
   children: ReactNode;
   className?: string;
 }) => (
-  <main className={cn("flex w-full flex-col gap-6", className)}>
+  <main
+    className={cn(
+      "mx-auto flex w-full max-w-[1180px] flex-col gap-7",
+      className,
+    )}
+  >
     {children}
   </main>
 );
@@ -42,14 +47,12 @@ export const PageHeader = ({
 }) => (
   <header
     className={cn(
-      "flex w-full flex-wrap items-end justify-between gap-4",
+      "app-page-header flex w-full flex-wrap items-end justify-between gap-4",
       className,
     )}
   >
     <div className="flex min-w-0 flex-col gap-1">
-      <h1 className="type-page-title text-[13px] font-semibold text-(--ink)">
-        {title}
-      </h1>
+      <h1 className="type-page-title text-(--ink)">{title}</h1>
       {description ? (
         <p className="type-meta max-w-2xl">{description}</p>
       ) : null}
@@ -61,8 +64,8 @@ export const PageHeader = ({
 );
 
 /**
- * A framed section with an optional header. `--paper` ground plus one hairline:
- * a card is separated by a surface step OR a border, never both.
+ * A framed section with an optional header. The shared card token provides a
+ * visible edge and restrained depth against the route-map ground.
  */
 export const PageSection = ({
   title,
@@ -81,7 +84,7 @@ export const PageSection = ({
 }) => (
   <section
     className={cn(
-      "card-framed shadow-sm rounded-md flex flex-col gap-5 p-5",
+      "card-framed flex flex-col gap-5 p-5 sm:p-6",
       className,
     )}
   >
@@ -89,9 +92,7 @@ export const PageSection = ({
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex min-w-0 flex-col gap-1">
           {title ? (
-            <h2 className="type-card-title text-[13px] font-semibold">
-              {title}
-            </h2>
+            <h2 className="type-card-title">{title}</h2>
           ) : null}
           {description ? <p className="type-meta">{description}</p> : null}
         </div>
@@ -137,7 +138,7 @@ export const DetailList = ({
     {items.map((item) => (
       <div key={item.label} className="flex min-w-0 flex-col gap-1">
         <dt className="type-meta">{item.label}</dt>
-        <dd className="tabular text-[12px] font-light text-(--ink)">
+        <dd className="tabular text-sm font-medium text-(--ink)">
           {item.value}
         </dd>
       </div>
@@ -177,7 +178,7 @@ export const IdentityCard = ({
   status?: ReactNode;
   children?: ReactNode;
 }) => (
-  <section className="card-framed shadow-sm rounded-md flex flex-col gap-5 p-5 md:flex-row md:items-center">
+  <section className="card-framed flex flex-col gap-5 p-5 sm:p-6 md:flex-row md:items-center">
     <figure className="flex shrink-0 justify-center md:justify-start">
       <img
         src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
@@ -185,7 +186,7 @@ export const IdentityCard = ({
         )}&background=000000&color=ffffff&size=120`}
         alt=""
         aria-hidden="true"
-        className="size-20 rounded-md object-cover"
+        className="size-24 rounded-(--radius-card) object-cover ring-1 ring-(--line)"
       />
       <figcaption className="sr-only">{name} profile picture</figcaption>
     </figure>

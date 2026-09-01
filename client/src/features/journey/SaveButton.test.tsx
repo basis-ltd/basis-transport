@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter, useLocation } from "react-router-dom";
 import { Provider } from "react-redux";
-import { configureStore } from "@reduxjs/toolkit";
+import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import authSlice from "@/states/slices/authSlice";
 import SaveButton from "./SaveButton";
 
@@ -17,7 +17,7 @@ function LocationProbe() {
 
 function renderSave(token?: string) {
   const store = configureStore({
-    reducer: { auth: authSlice },
+    reducer: combineReducers({ auth: authSlice }),
     preloadedState: {
       auth: {
         token,

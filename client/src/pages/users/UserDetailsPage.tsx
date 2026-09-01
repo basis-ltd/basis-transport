@@ -97,7 +97,7 @@ const UserDetailsPage = () => {
             {user.userRoles.map((userRole, index) => (
               <li
                 key={index}
-                className="rounded-md bg-(--surface) px-3 py-1.5 text-[12px] font-light text-(--ink)"
+                className="rounded-(--radius-pill) border border-(--line) bg-(--surface) px-3 py-1.5 text-sm font-medium text-(--ink)"
               >
                 {capitalizeString(userRole?.role?.name)}
               </li>

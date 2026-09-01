@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { Provider } from "react-redux";
-import { configureStore } from "@reduxjs/toolkit";
+import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import authSlice from "@/states/slices/authSlice";
 import userSlice from "@/states/slices/userSlice";
 import { UserStatus } from "@/constants/user.constants";
@@ -26,7 +26,7 @@ const staffUser = {
 
 function renderDetails() {
   const store = configureStore({
-    reducer: { auth: authSlice, user: userSlice },
+    reducer: combineReducers({ auth: authSlice, user: userSlice }),
     preloadedState: {
       auth: {
         token: "staff-token",
@@ -56,8 +56,8 @@ describe("UserDetailsPage surfaces", () => {
     const cards = container.querySelectorAll("section.card-framed");
     expect(cards.length).toBeGreaterThanOrEqual(2);
     for (const card of cards) {
-      expect(card).toHaveClass("shadow-sm");
-      expect(card).toHaveClass("rounded-md");
+      expect(card).toHaveClass("card-framed");
+      expect(card.className).not.toMatch(/shadow-sm/);
     }
     expect(screen.getByText("Ada Lovelace")).toBeInTheDocument();
     expect(

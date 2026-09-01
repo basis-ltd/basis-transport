@@ -140,7 +140,7 @@ const UserProfilePage = () => {
             {user.userRoles.map((userRole, index) => (
               <li
                 key={index}
-                className="rounded-md bg-(--surface) px-3 py-1.5 text-[12px] font-light text-(--ink)"
+                className="rounded-(--radius-pill) border border-(--line) bg-(--surface) px-3 py-1.5 text-sm font-medium text-(--ink)"
               >
                 {capitalizeString(userRole?.role?.name)}
               </li>
@@ -162,7 +162,7 @@ const UserProfilePage = () => {
             <Link
               key={action.to}
               to={action.to}
-              className="group flex items-start gap-3 rounded-md p-4 shadow-sm transition-colors duration-200 ease-(--ease-flat) hover:bg-(--surface)"
+              className="group flex items-start gap-3 rounded-(--radius-control) border border-(--line) bg-(--surface-sunken) p-4 transition-[background-color,border-color,box-shadow] duration-200 ease-(--ease-flat) hover:border-(--line-strong) hover:bg-(--surface) hover:shadow-(--shadow-card)"
             >
               <span
                 aria-hidden="true"

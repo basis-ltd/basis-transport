@@ -111,7 +111,6 @@ export const requestLocation = () =>
 export function locationFromJourneyStop(
   journey: import("./types").Journey,
   stopId: string | undefined,
-  _name: string,
 ): import("./types").JourneyLocation | null {
   for (const leg of journey.legs) {
     if (leg.kind === "walk" && leg.to.stopId === stopId) {

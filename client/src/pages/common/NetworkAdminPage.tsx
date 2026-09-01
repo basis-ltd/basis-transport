@@ -4,7 +4,11 @@ import Input from "@/components/inputs/Input";
 import Select from "@/components/inputs/Select";
 import TextArea from "@/components/inputs/TextArea";
 import { LoadState } from "@/features/journey/JourneyShell";
-import { PageBody, PageHeader } from "@/components/layout/PageShell";
+import {
+  PageBody,
+  PageHeader,
+  PageSection,
+} from "@/components/layout/PageShell";
 import "@/features/journey/journey.css";
 import { networkRequest, useNetworkResource } from "@/features/journey/api";
 import type { Dataset, PassengerReport } from "@/features/journey/types";
@@ -390,43 +394,50 @@ export default function NetworkAdminPage() {
           )}
         </section>
       )}
-      <h2 className="mt-10 text-[13px] font-semibold text-primary leading-tight">
-        Passenger reports
-      </h2>
-      <LoadState
-        loading={reports.loading}
-        error={reports.error}
-        retry={reports.refresh}
-      />
-      <div className="journey-directory">
-        {reports.data?.rows.map((r) => (
-          <article key={r.id} className="journey-directory-item">
-            <div>
-              <h2>
-                {r.kind} · {r.status}
-              </h2>
-              <p>{r.message}</p>
-              <p>
-                {r.referenceId || ""} {r.email || ""}
-              </p>
-              <Button
-                type="button"
-                className="mt-3"
-                disabled={busy}
-                onClick={() =>
-                  void act(
-                    `/admin/network/reports/${r.id}`,
-                    { status: r.status === "open" ? "resolved" : "open" },
-                    "PATCH",
-                  )
-                }
-              >
-                {r.status === "open" ? "Mark resolved" : "Reopen"}
-              </Button>
-            </div>
-          </article>
-        ))}
-      </div>
+      <PageSection
+        title="Passenger reports"
+        description="Review network issues submitted by passengers."
+      >
+        <LoadState
+          loading={reports.loading}
+          error={reports.error}
+          retry={reports.refresh}
+        />
+        {reports.data && reports.data.rows.length === 0 ? (
+          <p className="type-body-sm text-(--muted)">
+            No passenger reports need review.
+          </p>
+        ) : null}
+        <div className="journey-directory">
+          {reports.data?.rows.map((r) => (
+            <article key={r.id} className="journey-directory-item">
+              <div>
+                <h2>
+                  {r.kind} · {r.status}
+                </h2>
+                <p>{r.message}</p>
+                <p>
+                  {r.referenceId || ""} {r.email || ""}
+                </p>
+                <Button
+                  type="button"
+                  className="mt-3"
+                  disabled={busy}
+                  onClick={() =>
+                    void act(
+                      `/admin/network/reports/${r.id}`,
+                      { status: r.status === "open" ? "resolved" : "open" },
+                      "PATCH",
+                    )
+                  }
+                >
+                  {r.status === "open" ? "Mark resolved" : "Reopen"}
+                </Button>
+              </div>
+            </article>
+          ))}
+        </div>
+      </PageSection>
       <Modal
         isOpen={Boolean(publishId)}
         onClose={() => setPublishId("")}

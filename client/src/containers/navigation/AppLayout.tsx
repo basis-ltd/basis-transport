@@ -25,15 +25,15 @@ const AppLayout: FC<AppLayoutProps> = ({ children }) => {
   } as CSSProperties & Record<string, string>;
 
   const sectionClasses = [
-    "absolute left-2 right-2 top-[var(--navbar-height)] mt-2",
-    "h-fit max-h-[91vh] min-h-0 overflow-y-auto",
-    "bg-(--surface) px-6 py-6 transition-all duration-300 ease-in-out",
-    "md:left-[calc(var(--app-sidebar-width)+0.75rem)] md:right-4 md:w-auto md:px-12",
+    "min-h-[calc(100vh-var(--navbar-height))] w-full bg-(--surface)",
+    "px-5 py-7 sm:px-7 sm:py-8 md:ml-[var(--app-sidebar-width)]",
+    "md:w-[calc(100%-var(--app-sidebar-width))] md:px-10 lg:px-12",
+    "transition-[margin,width,padding] duration-300 ease-in-out",
   ].join(" ");
 
   return (
     <div
-      className="relative min-h-screen overflow-x-hidden bg-(--surface)"
+      className="relative min-h-screen overflow-x-hidden bg-(--surface) pt-[var(--navbar-height)]"
       style={layoutVariables}
     >
       <Navbar />

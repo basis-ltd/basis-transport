@@ -195,11 +195,40 @@ async function assertCardSitsOnSurface(page: Page) {
     if (!paneEl || !cardEl) return null;
     const paneBg = getComputedStyle(paneEl).backgroundColor;
     const cardBg = getComputedStyle(cardEl).backgroundColor;
-    return { paneBg, cardBg };
+    const cardStyle = getComputedStyle(cardEl);
+    return {
+      paneBg,
+      cardBg,
+      borderWidth: cardStyle.borderTopWidth,
+      borderColor: cardStyle.borderTopColor,
+      boxShadow: cardStyle.boxShadow,
+    };
   });
   expect(contrast).toBeTruthy();
   expect(contrast!.cardBg).not.toBe(contrast!.paneBg);
   expect(contrast!.cardBg).toMatch(/rgb\(255,\s*255,\s*255\)/);
+  expect(contrast!.borderWidth).toBe("1px");
+  expect(contrast!.borderColor).not.toBe("rgba(0, 0, 0, 0)");
+  expect(contrast!.boxShadow).not.toBe("none");
+}
+
+async function assertReadableAuthenticatedPage(page: Page) {
+  const metrics = await page.evaluate(() => {
+    const heading = document.querySelector("[data-app-pane] h1");
+    const description = document.querySelector(
+      "[data-app-pane] .app-page-header p",
+    );
+    return {
+      headingSize: heading
+        ? parseFloat(getComputedStyle(heading).fontSize)
+        : 0,
+      descriptionSize: description
+        ? parseFloat(getComputedStyle(description).fontSize)
+        : 0,
+    };
+  });
+  expect(metrics.headingSize).toBeGreaterThanOrEqual(24);
+  expect(metrics.descriptionSize).toBeGreaterThanOrEqual(13);
 }
 
 test("guest travel keeps the public shell", async ({ page }) => {
@@ -222,6 +251,7 @@ test("signed-in travel uses the authenticated app shell", async ({ page }) => {
   await expect(
     page.getByRole("navigation", { name: "Public navigation" }),
   ).toHaveCount(0);
+  await assertReadableAuthenticatedPage(page);
   await shot(page, "travel-authenticated.png");
 });
 
@@ -233,6 +263,7 @@ test("profile IdentityCard is a paper surface on the app pane", async ({
   await expect(page.getByRole("heading", { name: "My profile" })).toBeVisible();
   await expect(page.getByText("Ada Lovelace", { exact: true })).toBeVisible();
   await assertCardSitsOnSurface(page);
+  await assertReadableAuthenticatedPage(page);
   await shot(page, "profile-cards.png");
 });
 
@@ -251,5 +282,6 @@ test("user details IdentityCard is a paper surface on the app pane", async ({
   ).toBeVisible();
   await expect(page.getByText("Ada Lovelace", { exact: true })).toBeVisible();
   await assertCardSitsOnSurface(page);
+  await assertReadableAuthenticatedPage(page);
   await shot(page, "user-details-cards.png");
 });

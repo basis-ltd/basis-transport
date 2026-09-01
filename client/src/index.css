@@ -50,28 +50,32 @@
 
   /* Ground and ink — these two invert in dark mode, everything follows */
   --paper: #ffffff;
-  --ink: #000000;
+  --ink: #172019;
 
   /* Neutral ramp */
-  --surface: #f3f3f3;
-  --surface-hover: #e2e2e2;
-  --surface-sunken: #fafafa;
-  --line: #e2e2e2;
-  --line-strong: #afafaf;
-  --muted: #6e6e6e;
-  --muted-weak: #757575;
-  --disabled-fg: #afafaf;
+  --surface: #eef2ef;
+  --surface-hover: #dfe7e2;
+  --surface-sunken: #f7f9f8;
+  --line: #ccd6d0;
+  --line-strong: #89988f;
+  --muted: #526159;
+  --muted-weak: #5f6d65;
+  --disabled-fg: #8a968f;
 
   /* Press overlays — chosen by the SURFACE the control sits on, not by theme */
   --press-on-ink: rgba(255, 255, 255, 0.2);
   --press-on-paper: rgba(0, 0, 0, 0.08);
 
   --overlay: rgba(0, 0, 0, 0.6);
-  --shadow-menu: 0 4px 16px rgba(0, 0, 0, 0.16);
-  --shadow-modal: 0 8px 40px rgba(0, 0, 0, 0.24);
+  --shadow-card:
+    0 1px 2px rgba(23, 32, 25, 0.05), 0 10px 28px rgba(23, 32, 25, 0.07);
+  --shadow-card-hover:
+    0 2px 4px rgba(23, 32, 25, 0.06), 0 14px 34px rgba(23, 32, 25, 0.1);
+  --shadow-menu: 0 8px 24px rgba(23, 32, 25, 0.16);
+  --shadow-modal: 0 18px 56px rgba(23, 32, 25, 0.25);
 
-  --radius-control: 8px;
-  --radius-card: 12px;
+  --radius-control: 9px;
+  --radius-card: 16px;
   --radius-pill: 999px;
 
   /* Control heights — one scale for every input, select, and button, so a
@@ -110,10 +114,10 @@
      green. Two greens twelve steps apart would have read as the same colour
      while meaning different things — one decorative, one an outcome — so the
      system carries one green and lets the icon and label say which is which. */
-  --accent-ink: #308449;
-  --accent-strong: #26693a;
-  --accent-surface: #eaf5ee;
-  --accent-line: #bfe0cb;
+  --accent-ink: #087a4b;
+  --accent-strong: #05613b;
+  --accent-surface: #e2f4ea;
+  --accent-line: #98d4b2;
 
   /* Consequence — colour is spent only where something failed, is about to be
      destroyed, or has resolved. Icon and label always come first. */
@@ -142,17 +146,17 @@
 
 .dark {
   color-scheme: dark;
-  --paper: #000000;
-  --ink: #ffffff;
+  --paper: #111513;
+  --ink: #f6faf7;
 
-  --surface: #141414;
-  --surface-hover: #232323;
-  --surface-sunken: #0a0a0a;
-  --line: #2e2e2e;
-  --line-strong: #5e5e5e;
-  --muted: #a3a3a3;
-  --muted-weak: #8f8f8f;
-  --disabled-fg: #5e5e5e;
+  --surface: #191f1b;
+  --surface-hover: #273129;
+  --surface-sunken: #0d110f;
+  --line: #354239;
+  --line-strong: #718076;
+  --muted: #bdc8c0;
+  --muted-weak: #aebbb2;
+  --disabled-fg: #718076;
 
   /* Overlays do NOT flip with theme — a black button in dark mode is a WHITE
      button, so it still needs the dark press overlay. Surface decides. */
@@ -160,13 +164,17 @@
   --press-on-paper: rgba(0, 0, 0, 0.08);
 
   --overlay: rgba(0, 0, 0, 0.72);
-  --shadow-menu: 0 4px 16px rgba(0, 0, 0, 0.55);
-  --shadow-modal: 0 8px 40px rgba(0, 0, 0, 0.7);
+  --shadow-card:
+    0 1px 2px rgba(0, 0, 0, 0.32), 0 12px 30px rgba(0, 0, 0, 0.28);
+  --shadow-card-hover:
+    0 2px 4px rgba(0, 0, 0, 0.38), 0 16px 38px rgba(0, 0, 0, 0.35);
+  --shadow-menu: 0 8px 24px rgba(0, 0, 0, 0.62);
+  --shadow-modal: 0 18px 56px rgba(0, 0, 0, 0.72);
 
-  --accent-ink: #4fb972;
-  --accent-strong: #6fcb8d;
-  --accent-surface: #0e1a13;
-  --accent-line: #1f4a2e;
+  --accent-ink: #4ad087;
+  --accent-strong: #75dfa3;
+  --accent-surface: #10271b;
+  --accent-line: #286b46;
 
   --danger: #f87171;
   --danger-surface: #1f1010;
@@ -346,13 +354,13 @@
 }
 
 @layer utilities {
-  /* A card is separated from the page by a surface step OR a hairline —
-     never both. A border around a --surface fill is a box around a box. */
+  /* Cards need both an edge and restrained depth on the route-map ground.
+     The edge carries contrast; the shadow establishes hierarchy. */
   .surface-card,
   .card-framed {
-    border-radius: var(--radius-control);
-    border: 0;
-    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    border-radius: var(--radius-card);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow-card);
     background-color: var(--paper);
   }
 
@@ -452,14 +460,14 @@
 }
 
 @utility type-page-title {
-  font-size: 13px;
-  line-height: 1.25;
+  font-size: clamp(1.5rem, 1.35rem + 0.55vw, 1.875rem);
+  line-height: 1.16;
   font-weight: 600;
 }
 
 @utility type-card-title {
-  font-size: 13px;
-  line-height: 1.3;
+  font-size: 1rem;
+  line-height: 1.35;
   font-weight: 600;
 }
 
@@ -477,21 +485,21 @@
 }
 
 @utility type-body-sm {
-  font-size: 12px;
-  line-height: 1.55;
-  font-weight: 300;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  font-weight: 400;
 }
 
 @utility type-label {
-  font-size: 12px;
-  line-height: 1.2;
-  font-weight: 500;
+  font-size: 0.8125rem;
+  line-height: 1.3;
+  font-weight: 600;
 }
 
 @utility type-meta {
-  font-size: 12px;
-  line-height: 1.5;
-  font-weight: 300;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  font-weight: 400;
   color: var(--muted);
 }
 
@@ -503,9 +511,41 @@
 }
 
 @utility field-label {
-  font-size: 12px;
-  line-height: 1.2;
-  font-weight: 500;
+  font-size: 0.8125rem;
+  line-height: 1.3;
+  font-weight: 600;
+}
+
+/* Authenticated pages share a transit marker rather than a generic dashboard
+   eyebrow. It is the visual hand-off from the sidebar into the current stop. */
+.app-page-header {
+  position: relative;
+  min-height: 3.75rem;
+  padding-block: 0.125rem;
+  padding-inline-start: 1.625rem;
+}
+
+.app-page-header::before {
+  content: "";
+  position: absolute;
+  inset-block: 0.25rem;
+  inset-inline-start: 0.3125rem;
+  width: 2px;
+  border-radius: var(--radius-pill);
+  background: var(--accent-line);
+}
+
+.app-page-header::after {
+  content: "";
+  position: absolute;
+  inset-block-start: 0.25rem;
+  inset-inline-start: 0;
+  width: 0.75rem;
+  height: 0.75rem;
+  border: 2px solid var(--paper);
+  border-radius: 50%;
+  background: var(--accent-ink);
+  box-shadow: 0 0 0 1px var(--accent-ink);
 }
 
 @media (prefers-reduced-motion: reduce) {

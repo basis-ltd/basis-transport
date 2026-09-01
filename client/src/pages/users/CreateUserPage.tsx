@@ -186,7 +186,7 @@ const CreateUserPage = () => {
                   .map((role) => (
                     <label
                       key={role.id}
-                      className="w-full flex items-center gap-3 p-3 rounded-md shadow-sm bg-background hover:bg-(--surface) transition-all duration-200 cursor-pointer text-[12px] font-light hover:text-foreground"
+                      className="w-full flex items-center gap-3 p-3 rounded-(--radius-control) border border-(--line) bg-(--surface-sunken) hover:border-(--line-strong) hover:bg-(--surface) transition-[background-color,border-color,box-shadow] duration-200 cursor-pointer text-sm font-medium hover:shadow-(--shadow-card)"
                     >
                       <Input
                         type="checkbox"

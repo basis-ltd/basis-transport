@@ -161,6 +161,64 @@ export default function TravelGuidancePage() {
             else navigate(next);
           }}
         />
+        <section
+          className="journey-planner-preferences"
+          aria-labelledby="journey-preferences-title"
+        >
+          <header>
+            <h2 id="journey-preferences-title">Journey preferences</h2>
+            <p>Adjust walking, changes, and departure time.</p>
+          </header>
+          <div className="journey-preferences">
+            <Select
+              label="Prefer"
+              value={preference}
+              onChange={(value) => changePreference("preference", value)}
+              options={[
+                { label: "Fewest changes", value: "fewest_transfers" },
+                { label: "Least walking", value: "least_walking" },
+              ]}
+            />
+            <Select
+              label="Walk at each end"
+              value={maxWalk === undefined ? "auto" : String(maxWalk)}
+              onChange={(value) =>
+                changePreference("maxWalkMeters", value)
+              }
+              options={[
+                { label: "Auto · nearest connection", value: "auto" },
+                { label: "Up to 800 m", value: "800" },
+                { label: "Up to 1.5 km", value: "1500" },
+                { label: "Up to 2 km", value: "2000" },
+              ]}
+            />
+            <Select
+              label="Bus changes"
+              value={String(maxTransfers)}
+              onChange={(value) => changePreference("maxTransfers", value)}
+              options={[0, 1, 2, 3, 4].map((n) => ({
+                value: String(n),
+                label: n === 0 ? "Direct only" : `Up to ${n} changes`,
+              }))}
+            />
+            <label className="journey-field">
+              <span>Leave at (your device time)</span>
+              <input
+                type="datetime-local"
+                value={localDeparture}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (!value || Number.isFinite(Date.parse(value)))
+                    changePreference(
+                      "departureAt",
+                      value ? new Date(value).toISOString() : "",
+                    );
+                }}
+                className="journey-datetime"
+              />
+            </label>
+          </div>
+        </section>
       </section>
       {parsed.invalid && (
         <p className="journey-notice">
@@ -198,53 +256,6 @@ export default function TravelGuidancePage() {
           </div>
         </div>
       )}
-      <div className="journey-preferences">
-        <Select
-          label="Prefer"
-          value={preference}
-          onChange={(value) => changePreference("preference", value)}
-          options={[
-            { label: "Fewest changes", value: "fewest_transfers" },
-            { label: "Least walking", value: "least_walking" },
-          ]}
-        />
-        <Select
-          label="Walk at each end"
-          value={maxWalk === undefined ? "auto" : String(maxWalk)}
-          onChange={(value) => changePreference("maxWalkMeters", value)}
-          options={[
-            { label: "Auto · nearest connection", value: "auto" },
-            { label: "Up to 800 m", value: "800" },
-            { label: "Up to 1.5 km", value: "1500" },
-            { label: "Up to 2 km", value: "2000" },
-          ]}
-        />
-        <Select
-          label="Bus changes"
-          value={String(maxTransfers)}
-          onChange={(value) => changePreference("maxTransfers", value)}
-          options={[0, 1, 2, 3, 4].map((n) => ({
-            value: String(n),
-            label: n === 0 ? "Direct only" : `Up to ${n} changes`,
-          }))}
-        />
-        <label className="journey-field">
-          <span>Leave at (your device time)</span>
-          <input
-            type="datetime-local"
-            value={localDeparture}
-            onChange={(e) => {
-              const value = e.target.value;
-              if (!value || Number.isFinite(Date.parse(value)))
-                changePreference(
-                  "departureAt",
-                  value ? new Date(value).toISOString() : "",
-                );
-            }}
-            className="journey-datetime"
-          />
-        </label>
-      </div>
       <div
         className={`journey-plan-stage ${
           parsed.origin && parsed.destination ? "is-active" : ""
@@ -519,7 +530,7 @@ export default function TravelGuidancePage() {
   if (signedIn) {
     return (
       <AppLayout>
-        <PageBody className="journey-page p-4 rounded-lg">
+        <PageBody className="journey-page journey-page--app">
           <PageHeader
             title="Your journey, stop by stop"
             description="Choose a connection. Know where to board, change buses, and get off."

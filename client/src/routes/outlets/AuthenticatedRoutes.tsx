@@ -9,7 +9,7 @@ const AuthenticatedRoutes = () => {
 
   if (!isHydrated) {
     return (
-      <p className="p-6 text-[12px] font-light" role="status">
+      <p className="p-6 text-sm font-normal" role="status">
         Loading account…
       </p>
     );
