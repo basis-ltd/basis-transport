@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react';
-import { cn } from '@/lib/utils';
+import type { ReactNode } from "react";
+import { cn } from "@/lib/utils";
 
 /**
  * The page grammar for the authenticated app.
@@ -19,7 +19,9 @@ export const PageBody = ({
   children: ReactNode;
   className?: string;
 }) => (
-  <main className={cn('flex w-full flex-col gap-6', className)}>{children}</main>
+  <main className={cn("flex w-full flex-col gap-6", className)}>
+    {children}
+  </main>
 );
 
 /**
@@ -40,12 +42,14 @@ export const PageHeader = ({
 }) => (
   <header
     className={cn(
-      'flex w-full flex-wrap items-end justify-between gap-4',
-      className
+      "flex w-full flex-wrap items-end justify-between gap-4",
+      className,
     )}
   >
     <div className="flex min-w-0 flex-col gap-1">
-      <h1 className="type-page-title text-(--ink)">{title}</h1>
+      <h1 className="type-page-title text-[13px] font-semibold text-(--ink)">
+        {title}
+      </h1>
       {description ? (
         <p className="type-meta max-w-2xl">{description}</p>
       ) : null}
@@ -75,11 +79,20 @@ export const PageSection = ({
   className?: string;
   bodyClassName?: string;
 }) => (
-  <section className={cn('card-framed flex flex-col gap-5 p-5', className)}>
+  <section
+    className={cn(
+      "card-framed shadow-sm rounded-md flex flex-col gap-5 p-5",
+      className,
+    )}
+  >
     {title || actions ? (
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex min-w-0 flex-col gap-1">
-          {title ? <h2 className="type-card-title">{title}</h2> : null}
+          {title ? (
+            <h2 className="type-card-title text-[13px] font-semibold">
+              {title}
+            </h2>
+          ) : null}
           {description ? <p className="type-meta">{description}</p> : null}
         </div>
         {actions ? (
@@ -87,7 +100,7 @@ export const PageSection = ({
         ) : null}
       </header>
     ) : null}
-    <div className={cn('flex flex-col gap-5', bodyClassName)}>{children}</div>
+    <div className={cn("flex flex-col gap-5", bodyClassName)}>{children}</div>
   </section>
 );
 
@@ -112,19 +125,21 @@ export const DetailList = ({
 }) => (
   <dl
     className={cn(
-      'grid gap-5',
+      "grid gap-5",
       columns === 1
-        ? 'grid-cols-1'
+        ? "grid-cols-1"
         : columns === 3
-          ? 'sm:grid-cols-2 lg:grid-cols-3'
-          : 'sm:grid-cols-2',
-      className
+          ? "sm:grid-cols-2 lg:grid-cols-3"
+          : "sm:grid-cols-2",
+      className,
     )}
   >
     {items.map((item) => (
       <div key={item.label} className="flex min-w-0 flex-col gap-1">
         <dt className="type-meta">{item.label}</dt>
-        <dd className="tabular text-sm text-(--ink)">{item.value}</dd>
+        <dd className="tabular text-[12px] font-light text-(--ink)">
+          {item.value}
+        </dd>
       </div>
     ))}
   </dl>
@@ -139,7 +154,9 @@ export const PageFooter = ({
   meta?: ReactNode;
 }) => (
   <footer className="flex flex-col-reverse gap-4 pt-2 sm:flex-row sm:items-center sm:justify-between">
-    {children ? <div className="flex items-center gap-3">{children}</div> : null}
+    {children ? (
+      <div className="flex items-center gap-3">{children}</div>
+    ) : null}
     {meta ? <p className="type-meta">{meta}</p> : null}
   </footer>
 );
@@ -160,15 +177,15 @@ export const IdentityCard = ({
   status?: ReactNode;
   children?: ReactNode;
 }) => (
-  <section className="card-framed flex flex-col gap-5 p-5 md:flex-row md:items-center">
+  <section className="card-framed shadow-sm rounded-md flex flex-col gap-5 p-5 md:flex-row md:items-center">
     <figure className="flex shrink-0 justify-center md:justify-start">
       <img
         src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
-          name ?? ''
+          name ?? "",
         )}&background=000000&color=ffffff&size=120`}
         alt=""
         aria-hidden="true"
-        className="size-20 rounded-(--radius-card) object-cover"
+        className="size-20 rounded-md object-cover"
       />
       <figcaption className="sr-only">{name} profile picture</figcaption>
     </figure>

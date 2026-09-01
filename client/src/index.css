@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap");
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -45,7 +45,8 @@
 
 :root {
   color-scheme: light;
-  --font-family-sans: 'DM Sans', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  --font-family-sans:
+    "DM Sans", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
 
   /* Ground and ink — these two invert in dark mode, everything follows */
   --paper: #ffffff;
@@ -266,12 +267,12 @@
 
   /* Highlight = inversion. Scoped on purpose: a blanket [data-state] rule
      repaints every open Radix node into a black rectangle. */
-  [role='tab'][aria-selected='true'],
-  [role='option'][aria-selected='true'],
-  [role='tab'][data-state='active'],
-  a[aria-current='page'],
-  button[aria-current='page'],
-  [data-selected='true'] {
+  [role="tab"][aria-selected="true"],
+  [role="option"][aria-selected="true"],
+  [role="tab"][data-state="active"],
+  a[aria-current="page"],
+  button[aria-current="page"],
+  [data-selected="true"] {
     background-color: var(--ink);
     color: var(--paper);
   }
@@ -290,15 +291,15 @@
   summary,
   a[href],
   select:not(:disabled),
-  [role='button']:not([aria-disabled='true']),
-  [role='option'],
-  [role='menuitem'],
-  [role='menuitemcheckbox'],
-  [role='menuitemradio'],
-  [role='tab'],
-  [role='switch'],
-  [type='checkbox']:not(:disabled),
-  [type='radio']:not(:disabled) {
+  [role="button"]:not([aria-disabled="true"]),
+  [role="option"],
+  [role="menuitem"],
+  [role="menuitemcheckbox"],
+  [role="menuitemradio"],
+  [role="tab"],
+  [role="switch"],
+  [type="checkbox"]:not(:disabled),
+  [type="radio"]:not(:disabled) {
     cursor: pointer;
   }
 
@@ -307,7 +308,7 @@
   select:disabled,
   input:disabled,
   textarea:disabled,
-  [aria-disabled='true'] {
+  [aria-disabled="true"] {
     cursor: not-allowed;
   }
 
@@ -328,19 +329,19 @@
 /* Deliberately unlayered so it outranks the `z-50` Tailwind utility baked into
    the stock shadcn components — those stay untouched and get their depth from
    the ladder above, addressed through the `data-slot` each one already emits. */
-[data-slot='dropdown-menu-content'],
-[data-slot='dropdown-menu-sub-content'],
-[data-slot='select-content'],
-[data-slot='popover-content'],
-[data-slot='tooltip-content'],
-[data-slot='command-dialog-content'] {
+[data-slot="dropdown-menu-content"],
+[data-slot="dropdown-menu-sub-content"],
+[data-slot="select-content"],
+[data-slot="popover-content"],
+[data-slot="tooltip-content"],
+[data-slot="command-dialog-content"] {
   z-index: var(--z-popover);
 }
 
-[data-slot='dialog-overlay'],
-[data-slot='dialog-content'],
-[data-slot='sheet-overlay'],
-[data-slot='sheet-content'] {
+[data-slot="dialog-overlay"],
+[data-slot="dialog-content"],
+[data-slot="sheet-overlay"],
+[data-slot="sheet-content"] {
   z-index: var(--z-modal);
 }
 
@@ -349,13 +350,14 @@
      never both. A border around a --surface fill is a box around a box. */
   .surface-card,
   .card-framed {
-    border-radius: var(--radius-card);
-    border: 1px solid var(--line);
+    border-radius: var(--radius-control);
+    border: 0;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
     background-color: var(--paper);
   }
 
   .card-quiet {
-    border-radius: var(--radius-card);
+    border-radius: var(--radius-control);
     background-color: var(--surface);
   }
 
@@ -397,7 +399,7 @@
   }
 
   .link-sweep::after {
-    content: '';
+    content: "";
     position: absolute;
     inset-inline: 0;
     bottom: -2px;
@@ -414,11 +416,11 @@
   }
 
   /* The only permitted hover transform in the system. */
-  .link-arrow [data-slot='icon'] {
+  .link-arrow [data-slot="icon"] {
     transition: transform var(--dur-state) var(--ease-glide);
   }
 
-  .link-arrow:hover [data-slot='icon'] {
+  .link-arrow:hover [data-slot="icon"] {
     transform: translateX(12px);
   }
 }
@@ -450,15 +452,15 @@
 }
 
 @utility type-page-title {
-  font-size: 1.375rem;
+  font-size: 13px;
   line-height: 1.25;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 @utility type-card-title {
-  font-size: 1rem;
-  line-height: 1.4;
-  font-weight: 500;
+  font-size: 13px;
+  line-height: 1.3;
+  font-weight: 600;
 }
 
 @utility type-metric {
@@ -475,21 +477,21 @@
 }
 
 @utility type-body-sm {
-  font-size: 0.875rem;
+  font-size: 12px;
   line-height: 1.55;
-  font-weight: 400;
+  font-weight: 300;
 }
 
 @utility type-label {
-  font-size: 0.875rem;
+  font-size: 12px;
   line-height: 1.2;
   font-weight: 500;
 }
 
 @utility type-meta {
-  font-size: 0.8125rem;
+  font-size: 12px;
   line-height: 1.5;
-  font-weight: 400;
+  font-weight: 300;
   color: var(--muted);
 }
 
@@ -501,7 +503,7 @@
 }
 
 @utility field-label {
-  font-size: 0.875rem;
+  font-size: 12px;
   line-height: 1.2;
   font-weight: 500;
 }

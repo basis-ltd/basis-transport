@@ -47,7 +47,6 @@ export default function Router() {
         <Route path="/routes/:id" element={<Details kind="routes" />} />
         <Route path="/stops" element={<Directory kind="stops" />} />
         <Route path="/stops/:id" element={<Details kind="stops" />} />
-        <Route path="/saved" element={<Saved />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />
@@ -65,6 +64,7 @@ export default function Router() {
           element={<CompleteRegistration />}
         />
         <Route element={<AuthenticatedRoutes />}>
+          <Route path="/saved" element={<Saved />} />
           <Route path="/account/profile" element={<UserProfile />} />
         </Route>
         <Route element={<StaffRoutes />}>

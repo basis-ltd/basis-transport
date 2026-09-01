@@ -1,5 +1,9 @@
 import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useAppSelector } from "@/states/hooks";
+import AppLayout from "@/containers/navigation/AppLayout";
+import { PageBody, PageHeader } from "@/components/layout/PageShell";
+import "@/features/journey/journey.css";
 import { Share2, X } from "lucide-react";
 import { toast } from "sonner";
 import Modal from "@/components/cards/Modal";
@@ -140,12 +144,9 @@ export default function TravelGuidancePage() {
     parsed.origin && parsed.destination
       ? travelUrl(parsed.origin, parsed.destination, params)
       : "/travel";
-  return (
-    <JourneyShell
-      title="Your journey, stop by stop"
-      description="Choose a connection. Know where to board, change buses, and get off."
-      path="/travel"
-    >
+  const signedIn = Boolean(useAppSelector((s) => s.auth.token));
+  const content = (
+    <>
       <section className="journey-search-panel">
         <LandingHeroForm
           key={query}
@@ -513,6 +514,28 @@ export default function TravelGuidancePage() {
           </Button>
         </div>
       </Modal>
+    </>
+  );
+  if (signedIn) {
+    return (
+      <AppLayout>
+        <PageBody className="journey-page p-4 rounded-lg">
+          <PageHeader
+            title="Your journey, stop by stop"
+            description="Choose a connection. Know where to board, change buses, and get off."
+          />
+          {content}
+        </PageBody>
+      </AppLayout>
+    );
+  }
+  return (
+    <JourneyShell
+      title="Your journey, stop by stop"
+      description="Choose a connection. Know where to board, change buses, and get off."
+      path="/travel"
+    >
+      {content}
     </JourneyShell>
   );
 }

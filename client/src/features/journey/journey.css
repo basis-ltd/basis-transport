@@ -142,11 +142,34 @@
   margin-top: 12px;
   line-height: 1.65;
 }
+.journey-heading--compact {
+  margin-bottom: 20px;
+  max-width: 40rem;
+}
+.journey-heading--compact h1 {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 1.25;
+}
+.journey-heading--compact p {
+  font-size: 12px;
+  font-weight: 300;
+  margin-top: 6px;
+  line-height: 1.55;
+}
 .journey-search-panel {
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 24px;
+  border: 0;
+  border-radius: var(--radius-control);
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  background: var(--paper);
+  padding: 16px;
   margin-bottom: 24px;
+}
+.journey-search-panel > h2 {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.25;
 }
 .journey-fields {
   display: grid;
@@ -423,7 +446,7 @@
   }
 }
 .journey-field .field-label {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
 }
 .journey-location-control {
@@ -625,7 +648,39 @@
   font-size: 11px;
 }
 .journey-google-attribution {
-  border-top: 1px solid var(--line);
+  margin: 0;
+  border: 0;
+  font-size: 12px;
+  font-weight: 300;
+  line-height: 18px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.journey-google-attribution--overlay {
+  display: block;
+  position: static;
+  box-sizing: content-box;
+  flex: none;
+  padding: 0;
+  height: auto;
+  min-height: 18px;
+  max-height: none;
+  pointer-events: none;
+  white-space: nowrap;
+}
+.journey-google-attribution--overlay.is-idle {
+  visibility: hidden;
+}
+.journey-suggestions .journey-google-attribution {
+  position: static;
+  box-sizing: border-box;
+  height: auto;
+  min-height: 0;
+  max-height: none;
+  padding: 8px 12px 4px;
+  line-height: 18px;
 }
 .journey-form-actions {
   display: flex;
@@ -741,6 +796,13 @@
   font-size: 13px;
   font-weight: 500;
   margin-bottom: 6px;
+}
+.journey-field > .journey-google-attribution--overlay > span {
+  display: inline;
+  white-space: nowrap;
+  font-size: inherit;
+  font-weight: inherit;
+  margin: 0;
 }
 .journey-datetime {
   display: block;
@@ -1003,15 +1065,17 @@
   overflow-wrap: anywhere;
 }
 .journey-empty {
-  padding: 36px;
-  margin-block: 24px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: var(--surface-sunken);
+  padding: 20px;
+  margin-block: 16px;
+  border: 0;
+  border-radius: var(--radius-control);
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  background: var(--paper);
 }
 .journey-empty h2 {
-  font-size: 20px;
-  font-weight: 500;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.25;
 }
 .journey-stop-alternatives {
   display: grid;
@@ -1033,8 +1097,10 @@
 }
 .journey-empty p {
   color: var(--muted);
-  line-height: 1.7;
-  margin: 10px 0 18px;
+  font-size: 12px;
+  font-weight: 300;
+  line-height: 1.55;
+  margin: 8px 0 14px;
   max-width: 620px;
 }
 .journey-empty-actions {
@@ -1056,7 +1122,7 @@
 .journey-skeleton {
   height: 120px;
   background: var(--surface);
-  border-radius: 12px;
+  border-radius: var(--radius-control);
   animation: journey-pulse 1.5s ease-in-out infinite alternate;
 }
 @keyframes journey-pulse {
@@ -1067,34 +1133,39 @@
 .journey-directory {
   display: grid;
   gap: 12px;
-  margin-block: 24px;
+  margin-block: 16px;
+  padding: 0;
+  list-style: none;
 }
 .journey-directory-item {
-  padding: 20px;
-  border: 1px solid var(--line);
-  border-radius: 10px;
+  padding: 12px 14px;
+  border: 0;
+  border-radius: var(--radius-control);
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  background: var(--paper);
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
 }
 .journey-directory-item:hover {
   background: var(--surface-sunken);
-  border-color: var(--line-strong);
 }
 .journey-directory-item > div {
   min-width: 0;
   flex: 1;
 }
 .journey-directory-item h2 {
-  font-size: 16px;
-  font-weight: 500;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.25;
   overflow-wrap: anywhere;
 }
 .journey-directory-item p {
   color: var(--muted);
-  font-size: 13px;
-  margin-top: 5px;
-  line-height: 1.6;
+  font-size: 12px;
+  font-weight: 300;
+  margin-top: 4px;
+  line-height: 1.55;
 }
 .journey-pagination {
   display: flex;

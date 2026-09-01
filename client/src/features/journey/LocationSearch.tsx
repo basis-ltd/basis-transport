@@ -333,7 +333,7 @@ export default function LocationSearch({
                 ? `Clear ${label.toLowerCase()}`
                 : `Use my location for ${label.toLowerCase()}`
             }
-            className="h-11 text-base md:text-base"
+            className="h-11 text-[12px]"
           />
         ) : (
           <FieldShell
@@ -356,32 +356,34 @@ export default function LocationSearch({
                   type="button"
                   size="icon-sm"
                   className="journey-icon-button"
+                  icon={faXmark}
                   aria-label={`Clear ${label.toLowerCase()}`}
                   onClick={clear}
-                >
-                  <span aria-hidden="true">×</span>
-                </Button>
+                />
               )}
               <Button
                 type="button"
                 size="icon-sm"
                 className="journey-icon-button"
+                icon={faCrosshairs}
                 aria-label={`Use my location for ${label.toLowerCase()}`}
                 disabled={locating}
                 onClick={() => void locate()}
-              >
-                <span aria-hidden="true">◎</span>
-              </Button>
+              />
             </div>
           </FieldShell>
         )}
         {suggestions}
       </div>
-      {addressSource && (
-        <p className="journey-google-attribution">
-          Address by <span translate="no">Google Maps</span>
-        </p>
-      )}
+      <p
+        className={
+          addressSource
+            ? "journey-google-attribution journey-google-attribution--overlay"
+            : "journey-google-attribution journey-google-attribution--overlay is-idle"
+        }
+      >
+        Address by <span translate="no">Google Maps</span>
+      </p>
       <button
         type="button"
         className="journey-pin-trigger"

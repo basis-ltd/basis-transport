@@ -76,12 +76,14 @@ export default function JourneyShell({
   children,
   path,
   back = true,
+  compact = false,
 }: {
   title: string;
   description?: string;
   children: ReactNode;
   path: string;
   back?: boolean;
+  compact?: boolean;
 }) {
   return (
     <div className="landing-page journey-page">
@@ -103,7 +105,13 @@ export default function JourneyShell({
             <BackButton route="/">Back to journey search</BackButton>
           </nav>
         )}
-        <header className="journey-heading">
+        <header
+          className={
+            compact
+              ? "journey-heading journey-heading--compact"
+              : "journey-heading"
+          }
+        >
           <h1>{title}</h1>
           {description && <p>{description}</p>}
         </header>

@@ -7,18 +7,19 @@ import {
   useVerifyPhoneResetOtpMutation,
   useVerifyPhoneOtpMutation,
   useForgotPasswordMutation,
-} from '@/api/mutations/apiSlice';
-import { useAppDispatch } from '@/states/hooks';
-import { setLogout, setToken, setUser } from '@/states/slices/authSlice';
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
-import { useSignupMutation } from '@/api/mutations/apiSlice';
+} from "@/api/mutations/apiSlice";
+import { useAppDispatch } from "@/states/hooks";
+import { setLogout, setToken, setUser } from "@/states/slices/authSlice";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { useSignupMutation } from "@/api/mutations/apiSlice";
 import {
   clearPersistedAuthSession,
   persistAuthSession,
-} from '@/states/authSession';
-import { User } from '@/types/user.type';
+} from "@/states/authSession";
+import { User } from "@/types/user.type";
+import { isSafeReturnTo } from "@/helpers/authRedirect.helper";
 
 const readApiErrorMessage = (error: unknown): string =>
   (
@@ -27,16 +28,20 @@ const readApiErrorMessage = (error: unknown): string =>
         message?: string;
       };
     }
-  )?.data?.message || 'Something went wrong';
+  )?.data?.message || "Something went wrong";
 
 export const getAuthRedirectPath = (user?: User) => {
   if (user?.mustCompleteRegistration) {
-    return '/auth/complete-registration';
+    return "/auth/complete-registration";
   }
 
-  const returnTo = new URLSearchParams(window.location.search).get('returnTo');
-  if (returnTo && /^\/(saved|travel)(\?|$)/.test(returnTo) && !returnTo.includes('\\')) return returnTo;
-  return user?.userRoles?.some(r => ['ADMIN','SUPER_ADMIN'].includes(r.role?.name || '')) ? '/admin/network' : '/saved';
+  const returnTo = new URLSearchParams(window.location.search).get("returnTo");
+  if (isSafeReturnTo(returnTo)) return returnTo;
+  return user?.userRoles?.some((r) =>
+    ["ADMIN", "SUPER_ADMIN"].includes(r.role?.name || ""),
+  )
+    ? "/admin/network"
+    : "/saved";
 };
 
 /**
@@ -63,7 +68,7 @@ export const useLogin = () => {
 
   useEffect(() => {
     if (loginIsSuccess) {
-      toast.success('Login successful');
+      toast.success("Login successful");
       const token = loginData?.data.token;
       const user = loginData?.data.user;
       void persistAuthSession({ user, token });
@@ -97,7 +102,7 @@ export const useSignup = () => {
 
   useEffect(() => {
     if (signupIsSuccess) {
-      toast.success('Signup successful');
+      toast.success("Signup successful");
       const token = signupData?.data.token;
       const user = signupData?.data.user;
       void persistAuthSession({ user, token });
@@ -107,9 +112,22 @@ export const useSignup = () => {
     } else if (signupIsError) {
       toast.error(readApiErrorMessage(signupError));
     }
-  }, [dispatch, signupData, signupIsSuccess, signupIsError, signupError, navigate]);
+  }, [
+    dispatch,
+    signupData,
+    signupIsSuccess,
+    signupIsError,
+    signupError,
+    navigate,
+  ]);
 
-  return { signup, signupIsLoading, signupIsError, signupIsSuccess, signupError };
+  return {
+    signup,
+    signupIsLoading,
+    signupIsError,
+    signupIsSuccess,
+    signupError,
+  };
 };
 
 export const useLogout = () => {
@@ -119,7 +137,7 @@ export const useLogout = () => {
   return async () => {
     await clearPersistedAuthSession();
     dispatch(setLogout());
-    navigate('/');
+    navigate("/");
   };
 };
 
@@ -127,7 +145,8 @@ export const useLogout = () => {
  * PHONE LOGIN PRECHECK
  */
 export const usePhoneLoginPrecheck = () => {
-  const [precheck, { isLoading: precheckIsLoading }] = usePhoneLoginPrecheckMutation();
+  const [precheck, { isLoading: precheckIsLoading }] =
+    usePhoneLoginPrecheckMutation();
 
   const runPrecheck = async ({ phoneNumber }: { phoneNumber: string }) => {
     const response = await precheck({ phoneNumber }).unwrap();
@@ -144,7 +163,8 @@ export const usePhoneLoginPrecheck = () => {
  * SEND PHONE OTP
  */
 export const useSendPhoneOtp = () => {
-  const [sendOtp, { isLoading: sendPhoneOtpIsLoading }] = useSendPhoneOtpMutation();
+  const [sendOtp, { isLoading: sendPhoneOtpIsLoading }] =
+    useSendPhoneOtpMutation();
 
   const sendPhoneOtp = async ({ phoneNumber }: { phoneNumber: string }) => {
     const response = await sendOtp({ phoneNumber }).unwrap();
@@ -163,7 +183,8 @@ export const useSendPhoneOtp = () => {
 export const useVerifyPhoneOtp = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const [verifyOtp, { isLoading: verifyPhoneOtpIsLoading }] = useVerifyPhoneOtpMutation();
+  const [verifyOtp, { isLoading: verifyPhoneOtpIsLoading }] =
+    useVerifyPhoneOtpMutation();
 
   const verifyPhoneOtp = async ({
     phoneNumber,
@@ -192,7 +213,8 @@ export const useVerifyPhoneOtp = () => {
  * SEND PHONE RESET OTP
  */
 export const useSendPhoneResetOtp = () => {
-  const [sendPhoneResetOtp, { isLoading, isSuccess, reset, data }] = useSendPhoneResetOtpMutation();
+  const [sendPhoneResetOtp, { isLoading, isSuccess, reset, data }] =
+    useSendPhoneResetOtpMutation();
 
   return {
     sendPhoneResetOtp,
@@ -204,7 +226,8 @@ export const useSendPhoneResetOtp = () => {
 };
 
 export const useForgotPassword = () => {
-  const [forgotPassword, { isLoading, isSuccess, reset, data }] = useForgotPasswordMutation();
+  const [forgotPassword, { isLoading, isSuccess, reset, data }] =
+    useForgotPasswordMutation();
 
   return {
     forgotPassword,
@@ -219,7 +242,8 @@ export const useForgotPassword = () => {
  * VERIFY PHONE RESET OTP
  */
 export const useVerifyPhoneResetOtp = () => {
-  const [verifyOtp, { isLoading: verifyPhoneResetOtpIsLoading }] = useVerifyPhoneResetOtpMutation();
+  const [verifyOtp, { isLoading: verifyPhoneResetOtpIsLoading }] =
+    useVerifyPhoneResetOtpMutation();
 
   const verifyPhoneResetOtp = async ({
     phoneNumber,

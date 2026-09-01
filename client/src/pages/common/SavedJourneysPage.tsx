@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Bookmark, Trash2 } from "lucide-react";
 import Button from "@/components/inputs/Button";
 import { useAppSelector } from "@/states/hooks";
-import JourneyShell, { LoadState } from "@/features/journey/JourneyShell";
+import { LoadState } from "@/features/journey/JourneyShell";
 import { networkRequest, useNetworkResource } from "@/features/journey/api";
 import {
   removeSavedItem,
@@ -12,6 +12,12 @@ import {
 } from "@/features/journey/saved";
 import type { SavedItem } from "@/features/journey/types";
 import Modal from "@/components/cards/Modal";
+import {
+  PageBody,
+  PageHeader,
+  PageSection,
+} from "@/components/layout/PageShell";
+import "@/features/journey/journey.css";
 
 export default function SavedJourneysPage() {
   const items = useSavedItems(),
@@ -42,67 +48,69 @@ export default function SavedJourneysPage() {
     }
   };
   const list = (values: SavedItem[], cloud = false) => (
-    <div className="journey-directory">
+    <ul className="journey-directory">
       {values.map((item) => (
-        <article key={item.key} className="journey-directory-item">
-          <Bookmark size={20} />
-          <div>
-            <Link to={item.href}>
-              <h2>{item.label}</h2>
-            </Link>
-            <p>
-              {item.kind} ·{" "}
-              {cloud ? "Account favorite" : "Saved on this device"}
-            </p>
-          </div>
-          {cloud && (
+        <li key={item.key}>
+          <article className="journey-directory-item">
+            <Bookmark size={16} aria-hidden="true" />
+            <div>
+              <Link to={item.href}>
+                <h2>{item.label}</h2>
+              </Link>
+              <p>
+                {item.kind} ·{" "}
+                {cloud ? "Account favorite" : "Saved on this device"}
+              </p>
+            </div>
+            {cloud && (
+              <Button
+                type="button"
+                onClick={() => {
+                  try {
+                    saveItem(item);
+                  } catch (e) {
+                    setError((e as Error).message);
+                  }
+                }}
+              >
+                Keep here
+              </Button>
+            )}
             <Button
               type="button"
+              size="icon-sm"
+              className="journey-icon-button"
+              aria-label={`Remove ${item.label}`}
               onClick={() => {
-                try {
-                  saveItem(item);
-                } catch (e) {
-                  setError((e as Error).message);
-                }
+                if (cloud)
+                  void networkRequest(
+                    `/me/saved-items/${item.id}`,
+                    { method: "DELETE" },
+                    true,
+                  )
+                    .then(remote.refresh)
+                    .catch((e) => setError(e.message));
+                else
+                  try {
+                    removeSavedItem(item.key);
+                  } catch (e) {
+                    setError((e as Error).message);
+                  }
               }}
             >
-              Keep here
+              <Trash2 size={14} />
             </Button>
-          )}
-          <Button
-            type="button"
-            size="icon-sm"
-            className="journey-icon-button"
-            aria-label={`Remove ${item.label}`}
-            onClick={() => {
-              if (cloud)
-                void networkRequest(
-                  `/me/saved-items/${item.id}`,
-                  { method: "DELETE" },
-                  true,
-                )
-                  .then(remote.refresh)
-                  .catch((e) => setError(e.message));
-              else
-                try {
-                  removeSavedItem(item.key);
-                } catch (e) {
-                  setError((e as Error).message);
-                }
-            }}
-          >
-            <Trash2 size={17} />
-          </Button>
-        </article>
+          </article>
+        </li>
       ))}
-    </div>
+    </ul>
   );
   return (
-    <JourneyShell
-      title="Your saved places and journeys"
-      description="Keep the connections you use. No account needed to save on this device."
-      path="/saved"
-    >
+    <PageBody>
+      <PageHeader
+        title="Saved places and journeys"
+        description="Keep the connections you use on this account."
+      />
       {error && (
         <p className="journey-error" role="alert">
           {error}
@@ -111,44 +119,33 @@ export default function SavedJourneysPage() {
       {items.length ? (
         list(items)
       ) : (
-        <div className="journey-empty">
+        <section className="journey-empty">
           <h2>Your next journey starts here</h2>
-          <p>Save a route, stop, or journey to find it again easily.</p>
-          <Button variant="primary" route="/">
+          <p>Save a route, stop, or journey from a plan to find it again.</p>
+          <Button variant="primary" route="/travel">
             Plan a journey
           </Button>
-        </div>
+        </section>
       )}
-      <section className="journey-search-panel">
-        <h2>Use favorites across devices</h2>
-        <p className="journey-field-hint">
-          Account synchronization is optional. Nothing saved on this device is
-          uploaded automatically.
-        </p>
-        {token ? (
-          <>
-            <Button
-              type="button"
-              disabled={!items.length}
-              onClick={() => setConfirm(true)}
-            >
-              Copy device favorites to account
-            </Button>
-            <LoadState
-              loading={remote.loading}
-              error={remote.error}
-              retry={remote.refresh}
-            />
-            {remote.data && list(remote.data, true)}
-          </>
-        ) : (
-          <div className="journey-actions">
-            <Button route="/auth/login?returnTo=%2Fsaved">
-              Sign in to synchronize
-            </Button>
-          </div>
-        )}
-      </section>
+      <PageSection
+        title="Use favorites across devices"
+        description="Copy this device’s saved items to your account when you want them on another phone or computer."
+      >
+        <Button
+          type="button"
+          className="w-fit"
+          disabled={!items.length}
+          onClick={() => setConfirm(true)}
+        >
+          Copy device favorites to account
+        </Button>
+        <LoadState
+          loading={remote.loading}
+          error={remote.error}
+          retry={remote.refresh}
+        />
+        {remote.data && list(remote.data, true)}
+      </PageSection>
       <Modal
         isOpen={confirm}
         onClose={() => setConfirm(false)}
@@ -169,6 +166,6 @@ export default function SavedJourneysPage() {
           </Button>
         </div>
       </Modal>
-    </JourneyShell>
+    </PageBody>
   );
 }

@@ -511,14 +511,7 @@ test("guest search, keyboard selection, reload, share warning, and device favori
   await expect(page.getByRole("dialog")).toContainText("precise coordinates");
   await page.keyboard.press("Escape");
   await page.getByRole("button", { name: "Save", exact: true }).click();
-  await expect(
-    page.getByRole("button", { name: "Saved", exact: true }),
-  ).toBeVisible();
-  await page.goto("/saved");
-  await expect(
-    page.getByRole("link", { name: /Kabuga → Downtown/ }),
-  ).toBeVisible();
-  await expect(page).not.toHaveURL(/auth/);
+  await expect(page).toHaveURL(/\/auth\/login\?returnTo=/);
 });
 test("legacy links retain the origin but do not invent a destination", async ({
   page,

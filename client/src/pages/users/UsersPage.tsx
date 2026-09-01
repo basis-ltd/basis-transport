@@ -1,10 +1,14 @@
-import Button from '@/components/inputs/Button';
-import Table from '@/components/table/Table';
-import AppLayout from '@/containers/navigation/AppLayout';
-import { useUserColumns } from '@/usecases/users/columns.user';
-import { useFetchUsers } from '@/usecases/users/user.hooks';
-import { faPlus } from '@fortawesome/free-solid-svg-icons';
-import { PageBody, PageHeader } from "@/components/layout/PageShell";
+import Button from "@/components/inputs/Button";
+import Table from "@/components/table/Table";
+
+import { useUserColumns } from "@/usecases/users/columns.user";
+import { useFetchUsers } from "@/usecases/users/user.hooks";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
+import {
+  PageBody,
+  PageHeader,
+  PageSection,
+} from "@/components/layout/PageShell";
 
 const UsersPage = () => {
   /**
@@ -25,32 +29,34 @@ const UsersPage = () => {
   const { userColumns } = useUserColumns({ page, size });
 
   return (
-    <AppLayout>
-      <PageBody>
-        <PageHeader
-          title="Users"
-          description="Everyone with access to Basis Transport."
-          actions={
-            <Button route="/users/create" icon={faPlus} primary>
-              Create
-            </Button>
-          }
+    <PageBody>
+      <PageHeader
+        title="Users"
+        description="Everyone with access to Basis Transport."
+        actions={
+          <Button route="/users/create" icon={faPlus} primary>
+            Create
+          </Button>
+        }
+      />
+      <PageSection
+        title="Directory"
+        description="Search and open anyone with access."
+        bodyClassName="gap-4"
+      >
+        <Table
+          columns={userColumns}
+          data={usersList}
+          isLoading={usersIsFetching}
+          page={page}
+          size={size}
+          totalCount={totalCount}
+          totalPages={totalPages}
+          setPage={setPage}
+          setSize={setSize}
         />
-        <section className="w-full flex flex-col gap-4">
-          <Table
-            columns={userColumns}
-            data={usersList}
-            isLoading={usersIsFetching}
-            page={page}
-            size={size}
-            totalCount={totalCount}
-            totalPages={totalPages}
-            setPage={setPage}
-            setSize={setSize}
-          />
-        </section>
-      </PageBody>
-    </AppLayout>
+      </PageSection>
+    </PageBody>
   );
 };
 

@@ -3,7 +3,9 @@ import Button from "@/components/inputs/Button";
 import Input from "@/components/inputs/Input";
 import Select from "@/components/inputs/Select";
 import TextArea from "@/components/inputs/TextArea";
-import JourneyShell, { LoadState } from "@/features/journey/JourneyShell";
+import { LoadState } from "@/features/journey/JourneyShell";
+import { PageBody, PageHeader } from "@/components/layout/PageShell";
+import "@/features/journey/journey.css";
 import { networkRequest, useNetworkResource } from "@/features/journey/api";
 import type { Dataset, PassengerReport } from "@/features/journey/types";
 import Modal from "@/components/cards/Modal";
@@ -85,11 +87,11 @@ export default function NetworkAdminPage() {
     }
   };
   return (
-    <JourneyShell
-      title="Network administration"
-      description="Review source data, correct drafts, and publish a network passengers can trust."
-      path="/admin/network"
-    >
+    <PageBody>
+      <PageHeader
+        title="Network administration"
+        description="Review source data, correct drafts, and publish a network passengers can trust."
+      />
       {error && (
         <p className="journey-error" role="alert">
           {error}
@@ -388,7 +390,9 @@ export default function NetworkAdminPage() {
           )}
         </section>
       )}
-      <h2 className="text-xl mt-10">Passenger reports</h2>
+      <h2 className="mt-10 text-[13px] font-semibold text-primary leading-tight">
+        Passenger reports
+      </h2>
       <LoadState
         loading={reports.loading}
         error={reports.error}
@@ -453,6 +457,6 @@ export default function NetworkAdminPage() {
           </p>
         )}
       </Modal>
-    </JourneyShell>
+    </PageBody>
   );
 }

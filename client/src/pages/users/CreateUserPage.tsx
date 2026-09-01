@@ -1,23 +1,29 @@
-import BackButton from '@/components/inputs/BackButton';
-import Button from '@/components/inputs/Button';
-import Input from '@/components/inputs/Input';
-import TelInput from '@/components/inputs/TelInput';
-import { SkeletonLoader } from '@/components/inputs/Loader';
-import Select from '@/components/inputs/Select';
-import { Heading } from '@/components/inputs/TextInputs';
-import { Gender } from '@/constants/user.constants';
-import AppLayout from '@/containers/navigation/AppLayout';
-import { capitalizeString } from '@/helpers/strings.helper';
-import validateInputs, { normalizePhoneNumber } from '@/helpers/validations.helper';
-import { validatePhoneNumber } from '@/utils/phone.util';
-import { useAppSelector } from '@/states/hooks';
-import { Role } from '@/types/role.type';
-import { useFetchRoles } from '@/usecases/roles/role.hooks';
-import { useCreateUser } from '@/usecases/users/user.hooks';
-import { useEffect, useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
-import { PageBody, PageHeader } from '@/components/layout/PageShell';
+import BackButton from "@/components/inputs/BackButton";
+import Button from "@/components/inputs/Button";
+import Input from "@/components/inputs/Input";
+import TelInput from "@/components/inputs/TelInput";
+import { SkeletonLoader } from "@/components/inputs/Loader";
+import Select from "@/components/inputs/Select";
+import { Heading } from "@/components/inputs/TextInputs";
+import { Gender } from "@/constants/user.constants";
+
+import { capitalizeString } from "@/helpers/strings.helper";
+import validateInputs, {
+  normalizePhoneNumber,
+} from "@/helpers/validations.helper";
+import { validatePhoneNumber } from "@/utils/phone.util";
+import { useAppSelector } from "@/states/hooks";
+import { Role } from "@/types/role.type";
+import { useFetchRoles } from "@/usecases/roles/role.hooks";
+import { useCreateUser } from "@/usecases/users/user.hooks";
+import { useEffect, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
+import {
+  PageBody,
+  PageHeader,
+  PageSection,
+} from "@/components/layout/PageShell";
 
 const CreateUserPage = () => {
   /**
@@ -78,18 +84,21 @@ const CreateUserPage = () => {
   useEffect(() => {
     if (createUserIsSuccess) {
       createUserReset();
-      navigate('/users');
+      navigate("/users");
     }
   }, [createUserIsSuccess, createUserReset, navigate]);
 
   return (
-    <AppLayout>
-      <PageBody>
-        <PageHeader
-          title="Create user"
-          description="Add someone to Basis Transport and set their access."
-        />
-        <form className="w-full flex flex-col gap-4" onSubmit={onSubmit}>
+    <PageBody>
+      <PageHeader
+        title="Create user"
+        description="Add someone to Basis Transport and set their access."
+      />
+      <form className="w-full flex flex-col gap-4" onSubmit={onSubmit}>
+        <PageSection
+          title="Account details"
+          description="Name, contact, and the roles this person should have."
+        >
           <fieldset className="w-full grid grid-cols-2 gap-4 justify-between">
             <Controller
               name="name"
@@ -111,8 +120,8 @@ const CreateUserPage = () => {
               rules={{
                 required: `Please enter user's email`,
                 validate: (value) =>
-                  validateInputs(value, 'email') ||
-                  'Please enter a valid email',
+                  validateInputs(value, "email") ||
+                  "Please enter a valid email",
               }}
               render={({ field }) => (
                 <Input
@@ -161,9 +170,7 @@ const CreateUserPage = () => {
             />
           </fieldset>
           <article className="w-full flex flex-col gap-4 mt-4">
-            <Heading type="h3">
-              Assign roles
-            </Heading>
+            <Heading type="h3">Assign roles</Heading>
             {rolesIsFetching ? (
               <menu className="w-full grid grid-cols-4 gap-4 items-center justify-between">
                 {Array.from({ length: 4 }).map((_, index) => (
@@ -174,12 +181,12 @@ const CreateUserPage = () => {
               <menu className="w-full grid grid-cols-3 gap-4 justify-between">
                 {rolesList
                   ?.filter(
-                    (role) => !['SUPER_ADMIN', 'USER'].includes(role.name)
+                    (role) => !["SUPER_ADMIN", "USER"].includes(role.name),
                   )
                   .map((role) => (
                     <label
                       key={role.id}
-                      className="w-full flex items-center gap-3 p-3 rounded-lg border border-(--line) bg-background hover:border-(--line) hover:bg-(--surface) transition-all duration-200 cursor-pointer text-[13px] hover:text-foreground"
+                      className="w-full flex items-center gap-3 p-3 rounded-md shadow-sm bg-background hover:bg-(--surface) transition-all duration-200 cursor-pointer text-[12px] font-light hover:text-foreground"
                     >
                       <Input
                         type="checkbox"
@@ -188,7 +195,7 @@ const CreateUserPage = () => {
                           setSelectedRoles((prev) =>
                             prev.some((r) => r.id === role.id)
                               ? prev.filter((r) => r.id !== role.id)
-                              : [...prev, role]
+                              : [...prev, role],
                           );
                         }}
                       />
@@ -206,9 +213,9 @@ const CreateUserPage = () => {
               Save
             </Button>
           </menu>
-        </form>
-      </PageBody>
-    </AppLayout>
+        </PageSection>
+      </form>
+    </PageBody>
   );
 };
 
