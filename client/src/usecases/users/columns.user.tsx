@@ -9,7 +9,7 @@ import { capitalizeString } from '@/helpers/strings.helper';
 import { User } from '@/types/user.type';
 import { faCircleInfo, faEllipsisH } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { ColumnDef } from '@tanstack/react-table';
+import type { AppColumnDef } from '@/components/table/tableFeatures';
 import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -23,7 +23,7 @@ export const useUserColumns = ({
   /**
    * COLUMN DEFINITIONS
    */
-  const userColumns: ColumnDef<User>[] = useMemo(
+  const userColumns: AppColumnDef<User>[] = useMemo(
     () => [
       {
         header: 'No.',
@@ -63,22 +63,23 @@ export const useUserColumns = ({
           }
           return (
             <span className="flex items-center gap-2">
-              <span className="text-[13px]">
+              <span className="text-sm">
                 {capitalizeString(roles[0] as string)}
               </span>
               <CustomPopover
                 trigger={
-                  <span className="text-(--ink) cursor-pointer text-[13px]">
+                  <button
+                    type="button"
+                    className="cursor-pointer text-sm text-(--ink) underline underline-offset-4"
+                    aria-label={`Show all ${roles.length} roles`}
+                  >
                     (+{roles.length - 1})
-                  </span>
+                  </button>
                 }
               >
                 <menu className="flex flex-col w-full gap-1 p-1">
                   {roles?.map((role, index) => (
-                    <li
-                      key={index}
-                      className="text-sm p-1 px-3 rounded-md hover:bg-(--surface)"
-                    >
+                    <li key={index} className={tableActionClassName}>
                       {capitalizeString(role as string)}
                     </li>
                   ))}
@@ -100,10 +101,13 @@ export const useUserColumns = ({
           return (
             <CustomPopover
               trigger={
-                <FontAwesomeIcon
-                  icon={faEllipsisH}
+                <button
+                  type="button"
                   className={ellipsisHClassName}
-                />
+                  aria-label="Row actions"
+                >
+                  <FontAwesomeIcon icon={faEllipsisH} aria-hidden="true" />
+                </button>
               }
             >
               <menu className="w-full flex flex-col gap-1">

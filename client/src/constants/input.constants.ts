@@ -16,7 +16,7 @@ const tableActionBase = `flex h-(--control-sm) w-full cursor-pointer items-cente
  * further along the same string, so the later one won and the hover did
  * nothing at all.
  */
-export const ellipsisHClassName = `inline-flex size-(--control-sm) cursor-pointer items-center justify-center rounded-(--radius-control) border border-(--line) bg-(--paper) text-sm text-(--ink) transition-[background-color,border-color] duration-200 ease-(--ease-flat) hover:border-(--line-strong) hover:bg-(--surface) focus-visible:border-(--ink) focus-visible:outline-none focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px] active:shadow-[var(--press-on-paper)_999px_999px_0_inset]`;
+export const ellipsisHClassName = `inline-flex p-2 px-4 cursor-pointer items-center justify-center rounded-(--radius-control) border border-(--line) bg-(--paper) text-sm text-(--ink) transition-[background-color,border-color] duration-200 ease-(--ease-flat) hover:bg-(--surface) focus-visible:border-(--ink) focus-visible:outline-none focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px] active:shadow-[var(--press-on-paper)_999px_999px_0_inset]`;
 
 /** Navigate, open, copy, edit — anything reversible. */
 export const tableActionClassName = `${tableActionBase} text-(--ink) hover:bg-(--surface-hover)`;

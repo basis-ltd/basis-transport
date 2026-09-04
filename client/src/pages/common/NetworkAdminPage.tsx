@@ -461,7 +461,7 @@ export default function NetworkAdminPage() {
           switch to this version. Publication does not make historic data
           current or grant usage rights.
         </p>
-        <div className="journey-actions">
+        <div className="journey-actions mt-2">
           <Button
             type="button"
             variant="primary"

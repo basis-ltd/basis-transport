@@ -9,12 +9,12 @@ import Button from "../inputs/Button";
 import { controlClassName, panelClassName, panelItemClassName } from "../inputs/control";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { UnknownAction } from "@reduxjs/toolkit";
-import { Table } from "@tanstack/react-table";
+import type { AppTable } from "./tableFeatures";
 import { useMemo } from "react";
 import { formatNumbers } from "@/helpers/strings.helper";
 
 interface DataTablePaginationProps<TData> {
-  table: Table<TData>;
+  table: AppTable<TData>;
   page?: number;
   size?: number;
   totalCount?: number;

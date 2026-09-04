@@ -14,6 +14,7 @@ import { HttpAuditInterceptor } from './common/interceptors/http-audit.intercept
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { LogsModule } from './modules/logs/logs.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { UsersModule } from './modules/users/users.module';
 import { RolesModule } from './modules/roles/roles.module';
 import { AuditLogsModule } from './modules/audit-logs/audit-logs.module';
@@ -34,6 +35,7 @@ import { NetworkModule } from './modules/network/network.module';
     LogsModule,
     SmsModule,
     AuthModule,
+    DashboardModule,
     UsersModule,
     RolesModule,
     AuditLogsModule,

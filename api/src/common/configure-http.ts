@@ -9,6 +9,12 @@ import { json, urlencoded } from 'express';
 export function configureHttp(app: INestApplication) {
   app.use(json({ limit: '8mb' })); // bounded administrative snapshots
   app.use(urlencoded({ extended: false, limit: '32kb' }));
+  // CORS first so every response — including the retired-service 410 below
+  // and preflight handling — carries access headers instead of surfacing
+  // in browsers as an opaque CORS exception that hides the real status.
+  app.enableCors({
+    origin: (process.env.CLIENT_APP_URL || 'http://localhost:5173').split(','),
+  });
   app.use(
     (
       req: import('express').Request,
@@ -35,9 +41,6 @@ export function configureHttp(app: INestApplication) {
       next();
     }
   );
-  app.enableCors({
-    origin: (process.env.CLIENT_APP_URL || 'http://localhost:5173').split(','),
-  });
   app.setGlobalPrefix('api', { exclude: ['/'] });
   app.useGlobalPipes(
     new ValidationPipe({

@@ -1,6 +1,7 @@
 import {
   faBus,
   faChartLine,
+  faGauge,
   faMapMarkerAlt,
   faUsers,
   IconDefinition,
@@ -15,6 +16,12 @@ export interface NavigationItem {
 }
 
 export const SIDEBAR_NAV_ITEMS: NavigationItem[] = [
+  {
+    title: 'Dashboard',
+    path: `/dashboard`,
+    icon: faGauge,
+    roles: ['ADMIN', 'USER', 'DRIVER', 'SUPER_ADMIN'],
+  },
   {
     title: 'Saved journeys',
     path: `/saved`,

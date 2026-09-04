@@ -8,6 +8,7 @@ const Travel = lazy(() => import("@/pages/common/TravelGuidancePage"));
 const Directory = lazy(() => import("@/pages/common/NetworkDirectoryPage"));
 const Details = lazy(() => import("@/pages/common/NetworkDetailsPage"));
 const Saved = lazy(() => import("@/pages/common/SavedJourneysPage"));
+const Dashboard = lazy(() => import("@/pages/dashboard/DashboardPage"));
 const Admin = lazy(() => import("@/pages/common/NetworkAdminPage"));
 const Retired = lazy(() => import("@/pages/common/RetiredServicePage"));
 const Login = lazy(() => import("@/pages/auth/Login"));
@@ -64,6 +65,7 @@ export default function Router() {
           element={<CompleteRegistration />}
         />
         <Route element={<AuthenticatedRoutes />}>
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/saved" element={<Saved />} />
           <Route path="/account/profile" element={<UserProfile />} />
         </Route>
@@ -73,7 +75,6 @@ export default function Router() {
           <Route path="/users/create" element={<CreateUser />} />
           <Route path="/users/:id" element={<UserDetails />} />
         </Route>
-        <Route path="/dashboard" element={<Navigate to="/saved" replace />} />
         <Route path="/trips" element={<Navigate to="/travel" replace />} />
         <Route path="/user-trips" element={<Navigate to="/saved" replace />} />
         <Route path="/locations" element={<Navigate to="/stops" replace />} />

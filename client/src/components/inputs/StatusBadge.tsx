@@ -43,7 +43,7 @@ const StatusBadge = ({
         className="size-3 shrink-0"
         aria-hidden="true"
       />
-      {capitalizeString(status.replace(/_/g, ' '))}
+      {capitalizeString(status)}
     </span>
   );
 };

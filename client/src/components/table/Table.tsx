@@ -1,17 +1,11 @@
 import {
-  ColumnDef,
   ColumnFiltersState,
   SortingState,
   VisibilityState,
   flexRender,
-  getCoreRowModel,
-  getFacetedRowModel,
-  getFacetedUniqueValues,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  useReactTable,
+  useTable,
 } from '@tanstack/react-table';
+import { appTableFeatures, type AppColumnDef } from './tableFeatures';
 
 import {
   Table as DataTable,
@@ -28,7 +22,7 @@ import { UnknownAction } from '@reduxjs/toolkit';
 import { SkeletonLoader } from '../inputs/Loader';
 
 interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[];
+  columns: AppColumnDef<TData, TValue>[];
   data: TData[];
   rowClickHandler?: undefined | ((row: TData) => void);
   showFilter?: boolean;
@@ -97,7 +91,8 @@ export default function Table<TData, TValue>({
     [pagination.pageIndex, pagination.pageSize]
   );
 
-  const table = useReactTable({
+  const table = useTable({
+    features: appTableFeatures,
     data,
     columns,
     state: {
@@ -124,14 +119,6 @@ export default function Table<TData, TValue>({
       }
     },
     manualPagination: resolvedManualPagination,
-    getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFacetedRowModel: getFacetedRowModel(),
-    getFacetedUniqueValues: getFacetedUniqueValues(),
-    getPaginationRowModel: resolvedManualPagination
-      ? undefined
-      : getPaginationRowModel(),
   });
 
   return (

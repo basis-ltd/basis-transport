@@ -62,7 +62,7 @@ export const formatDate = (
  * treatment only reinforces it.
  */
 const statusBadgeBase =
-  'inline-flex items-center gap-1.5 text-center px-2.5 h-6 rounded-(--radius-pill) text-[0.8125rem] font-normal leading-none';
+  'inline-flex items-center gap-1.5 text-center px-4 py-2.5 border-none rounded-md bg-(--surface) hover:bg-(--surface-hover) text-(--muted) h-6 text-[0.8125rem] font-normal leading-none';
 
 export type StatusTone = 'active' | 'done' | 'pending' | 'failed' | 'draft';
 
