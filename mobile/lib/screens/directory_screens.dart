@@ -21,7 +21,7 @@ class DirectoryScreen extends ConsumerStatefulWidget {
   @override ConsumerState<DirectoryScreen> createState() => _DirectoryScreenState();
 }
 class _DirectoryScreenState extends ConsumerState<DirectoryScreen> {
-  String _q = ''; int _page = 0; double? _lat; double? _lng;
+  String _q = ''; int _page = 0;
   @override Widget build(BuildContext context) {
     final t = BasisTokens.of(context);
     final isRoutes = widget.kind == 'routes';

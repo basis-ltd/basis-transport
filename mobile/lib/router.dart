@@ -12,7 +12,6 @@ import 'screens/saved_screen.dart';
 import 'screens/staff/network_admin_screen.dart';
 import 'screens/staff/users_screens.dart';
 import 'screens/travel_screen.dart';
-import 'theme/tokens.dart';
 import 'widgets/nav/app_nav.dart';
 
 bool _staff(List<String> r) => r.contains('ADMIN') || r.contains('SUPER_ADMIN');

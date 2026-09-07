@@ -35,8 +35,9 @@ flutter run --dart-define API_URL=http://localhost:8080/api \
 
 Only `flutter create`, `flutter pub get`, `flutter pub add`, `flutter analyze`
 work on this machine (no Android SDK / full Xcode, so no `flutter build`/`run`
-for devices). Per the overnight brief, `flutter analyze` was intentionally not
-run in this pass.
+for devices). Per the overnight brief, `flutter analyze` was initially skipped; it was run
+on request during verification and reports zero errors and zero warnings
+(8 info-level style suggestions remain).
 
 ## Structure
 

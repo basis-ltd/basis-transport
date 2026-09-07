@@ -6,7 +6,6 @@ import '../features/journey/messages.dart';
 import '../models/journey.dart';
 import '../providers/providers.dart';
 import '../theme/tokens.dart';
-import '../widgets/badges.dart';
 import '../widgets/cards.dart';
 import '../widgets/inputs/app_button.dart';
 import '../widgets/page_shell.dart';

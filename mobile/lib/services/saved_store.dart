@@ -27,7 +27,7 @@ class SavedStore {
   static Future<void> save(SavedItem item) async {
     final p = await SharedPreferences.getInstance();
     final cur = parse(p.getString(key));
-    await p.setString(key, jsonEncode([item.toJson(), ...cur.where((i) => i.key != item.key)].take(cap).map((e) => e.toJson()).toList()));
+    await p.setString(key, jsonEncode([item.toJson(), ...cur.where((i) => i.key != item.key).map((e) => e.toJson())].take(cap).toList()));
   }
   static Future<void> remove(String itemKey) async {
     final p = await SharedPreferences.getInstance();

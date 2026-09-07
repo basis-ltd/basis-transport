@@ -78,7 +78,7 @@ class _DonutPainter extends CustomPainter {
     var start = -1.5708;
     final r = size.width / 2;
     for (var i = 0; i < v.length; i++) {
-      final sweep = total == 0 ? 0 : (v[i] / total) * 6.28318;
+      final sweep = total == 0 ? 0.0 : (v[i] / total) * 6.28318;
       canvas.drawArc(Rect.fromCircle(center: Offset(r, r), radius: r - 12), start, sweep, false,
         Paint()..color = c[i % c.length]..strokeWidth = 20..style = PaintingStyle.stroke..strokeCap = StrokeCap.butt);
       start += sweep;

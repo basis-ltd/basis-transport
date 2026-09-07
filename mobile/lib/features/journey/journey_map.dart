@@ -12,7 +12,7 @@ class JourneyMapView extends StatelessWidget {
   static const _secondary = Color(0xFF6E6E6E);
 
   Set<Polyline> _lines() {
-    final out = <Polyline>[];
+    final out = <Polyline>{};
     final legs = journey?.legs ?? [];
     for (var i = 0; i < legs.length; i++) {
       final l = legs[i];

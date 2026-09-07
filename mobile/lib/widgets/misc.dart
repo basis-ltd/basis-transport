@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../theme/tokens.dart';
 
-class Combobox<T> extends StatelessWidget {
+class Combobox<T extends Object> extends StatelessWidget {
   final String? hint; final List<T> options; final String Function(T) label;
   final ValueChanged<T?>? onChanged; final T? value;
   const Combobox({super.key, this.hint, required this.options, required this.label, this.onChanged, this.value});
   @override Widget build(BuildContext context) => Autocomplete<T>(
     displayStringForOption: label,
-    options: options,
+    optionsBuilder: (v) => options.where((o) => label(o).toLowerCase().contains(v.text.toLowerCase())),
     onSelected: onChanged,
     fieldViewBuilder: (c, ctrl, focus, submit) => TextField(controller: ctrl, focusNode: focus,
       decoration: InputDecoration(hintText: hint, border: const OutlineInputBorder())),

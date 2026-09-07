@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/journey.dart';
-import '../../models/network.dart';
 import '../../providers/providers.dart';
 import '../../services/saved_store.dart';
 import '../../services/share_links.dart';
@@ -62,11 +61,17 @@ class FollowJourney extends StatelessWidget {
     if ((s.timing['label']) != null) '${s.timing['label']}',
     if (s.fareAmount != null) '${s.fareAmount!.toStringAsFixed(0)} RWF',
   ].join(' · ');
-  static List<Widget> _legsAsSteps(Journey j) => [
-    for (final l in j.legs) l is WalkLeg
-      ? _StepRow(text: 'Walk ${fmtMeters(l.distanceMeters)}: ${l.instructions.join(' ')}', meta: fmtMeters(l.distanceMeters))
-      : _StepRow(text: 'Board ${(l as RideLeg).routeNumber} at ${l.board.name}, alight at ${l.alight.name}', meta: '${(l as RideLeg).stops.length} stops'),
-  ];
+  static List<Widget> _legsAsSteps(Journey j) {
+    final out = <Widget>[];
+    for (final l in j.legs) {
+      if (l is WalkLeg) {
+        out.add(_StepRow(text: 'Walk ${fmtMeters(l.distanceMeters)}: ${l.instructions.join(' ')}', meta: fmtMeters(l.distanceMeters)));
+      } else if (l is RideLeg) {
+        out.add(_StepRow(text: 'Board ${l.routeNumber} at ${l.board.name}, alight at ${l.alight.name}', meta: '${l.stops.length} stops'));
+      }
+    }
+    return out;
+  }
 }
 
 class _StepRow extends StatelessWidget {

@@ -49,7 +49,7 @@ final usersProvider = FutureProvider<List<Map<String, dynamic>>>((ref) => ref.re
 class PlanArgs { final JourneyLocation origin; final JourneyLocation destination;
   final int maxTransfers; final int maxWalkMeters; final String preference; final String? departureAt;
   const PlanArgs({required this.origin, required this.destination, this.maxTransfers = 2, this.maxWalkMeters = 800, this.preference = 'fewest_transfers', this.departureAt});
-  @override bool operator ==(Object o) => o is PlanArgs && o.origin.name == origin.name && o.destination.name == destination.name;
+  @override bool operator ==(Object other) => other is PlanArgs && other.origin.name == origin.name && other.destination.name == destination.name;
   @override int get hashCode => Object.hash(origin.name, destination.name, maxTransfers, maxWalkMeters, preference, departureAt);
 }
 final journeyPlanProvider = FutureProvider.family<JourneyPlan, PlanArgs>((ref, a) => ref.read(apiClientProvider).planJourney(

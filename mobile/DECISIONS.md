@@ -18,6 +18,12 @@
    queued behind the real endpoint.
 5. **Plan provider equality** keys on origin/destination names + options (coarse
    but sufficient for `FutureProvider.family` caching).
-6. **Verification skipped per brief**: the mobile-plan prompt explicitly
+6. **Verification run on request**: `flutter analyze` reports no errors and
+   no warnings (8 info-level `use_null_aware_elements` suggestions on
+   conditional map entries, unactionable — Dart has no null-aware entry
+   syntax — and left as-is).
+7. **No `uuid` package**: the idempotency key uses a local RFC-4122 v4
+   generator (`dart:math`) to keep the dependency list exactly as specified.
+8. **Verification skipped per brief (original build)**: the mobile-plan prompt explicitly
    excludes verification and this machine cannot `flutter build`; `flutter
    analyze` was not run. Expect analyzer nits on first run.

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../providers/providers.dart';
 import '../../theme/tokens.dart';
-import '../../widgets/badges.dart';
 import '../../widgets/cards.dart';
 import '../../widgets/dialogs.dart';
 import '../../widgets/inputs/app_button.dart';

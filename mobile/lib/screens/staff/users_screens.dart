@@ -24,7 +24,7 @@ class _UsersScreenState extends ConsumerState<UsersScreen> {
     ref.watch(usersProvider).when(
       data: (rows) => PaginatedTable(
         columns: const ['Name', 'Contact', 'Roles'],
-        rows: [for (final u in rows) ['${u['name'] ?? ''}', '${u['email'] ?? u['phone'] ?? ''}', '${((u['roles'] ?? []) as List).join(', ')}']],
+        rows: [for (final u in rows) [(u['name'] ?? '').toString(), (u['email'] ?? u['phone'] ?? '').toString(), ((u['roles'] ?? []) as List).join(', ')]],
         page: _page, totalPages: 1, onPage: (p) => setState(() => _page = p)),
       loading: () => const Loader(), error: (e, _) => AppError(message: '$e')),
   ]));

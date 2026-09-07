@@ -35,11 +35,11 @@ class PageHeader extends StatelessWidget {
       ]),
       const SizedBox(width: 14),
       Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        if (eyebrow != null) Text(eyebrow!, style: t.typeEyebrow),
+        if (eyebrow case final e?) Text(e, style: t.typeEyebrow),
         Text(title, style: t.typePageTitle.copyWith(color: t.ink)),
-        if (description != null) Padding(padding: const EdgeInsets.only(top: 6), child: Text(description!, style: t.typeMeta)),
+        if (description case final d?) Padding(padding: const EdgeInsets.only(top: 6), child: Text(d, style: t.typeMeta)),
       ])),
-      if (actions != null) actions!,
+      if (actions case final a?) a,
     ]);
   }
 }

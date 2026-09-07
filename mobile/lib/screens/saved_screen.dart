@@ -41,10 +41,10 @@ class SavedScreen extends ConsumerWidget {
               for (final i in items) QuietCard(child: InkWell(onTap: () => context.go(i.href), child: Text(i.label))),
               AppButton(label: 'Import device favourites', variant: AppButtonVariant.outline, onPressed: () async {
                 final ok = await ConfirmDialog.show(context, title: 'Import favourites?',
-                  body: 'Copy every device favourite to your account? This adds ${device.valueOrNull?.length ?? 0} items.', confirmLabel: 'Import');
+                  body: 'Copy every device favourite to your account? This adds ${device.value?.length ?? 0} items.', confirmLabel: 'Import');
                 if (ok != true) return;
                 final api = ref.read(apiClientProvider);
-                for (final i in (device.valueOrNull ?? [])) { try { await api.addSavedItem(i); } catch (_) {} }
+                for (final i in (device.value ?? [])) { try { await api.addSavedItem(i); } catch (_) {} }
                 ref.invalidate(savedRemoteProvider);
               }),
             ])),

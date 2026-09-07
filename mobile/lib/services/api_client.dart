@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:uuid/uuid.dart';
+import 'dart:math';
 import '../config/environment.dart';
 import '../models/journey.dart';
 import '../models/network.dart';
@@ -41,9 +41,18 @@ class ApiClient {
   Future<Map<String, String>> _headers({required bool auth, required bool mutation}) async {
     final h = <String, String>{'Content-Type': 'application/json'};
     if (auth) { final t = await _auth.readToken(); if (t != null && t.isNotEmpty) h['Authorization'] = 'Bearer $t'; }
-    if (mutation) h['x-idempotency-key'] = const Uuid().v4();
+    if (mutation) h['x-idempotency-key'] = _uuidV4();
     return h;
   }
+  static String _uuidV4() {
+    final r = Random.secure();
+    final b = List<int>.generate(16, (_) => r.nextInt(256));
+    b[6] = (b[6] & 0x0f) | 0x40;
+    b[8] = (b[8] & 0x3f) | 0x80;
+    final h = b.map((x) => x.toRadixString(16).padLeft(2, '0')).join();
+    return '${h.substring(0, 8)}-${h.substring(8, 12)}-${h.substring(12, 16)}-${h.substring(16, 20)}-${h.substring(20)}';
+  }
+
   static String _msg(DioException e) {
     final d = e.response?.data;
     if (d is Map && d['message'] != null) {
@@ -58,17 +67,17 @@ class ApiClient {
   Future<NetworkStatus> networkStatus() => _get('/network/status', (d) => NetworkStatus.fromJson((d ?? {}) as Map<String, dynamic>));
   Future<Map<String, dynamic>> networkMap() => _get('/network/map', (d) => (d ?? {}) as Map<String, dynamic>);
   Future<JourneyPlan> planJourney({required JourneyLocation origin, required JourneyLocation destination, int maxTransfers = 2, int maxWalkMeters = 800, String preference = 'fewest_transfers', String? departureAt}) =>
-    _mut('/journeys/plan', 'POST', {'origin': origin.toJson(), 'destination': destination.toJson(), 'maxTransfers': maxTransfers.clamp(0, 4), 'maxWalkMeters': maxWalkMeters.clamp(100, 2000), 'preference': preference, if (departureAt != null) 'departureAt': departureAt},
+    _mut('/journeys/plan', 'POST', {'origin': origin.toJson(), 'destination': destination.toJson(), 'maxTransfers': maxTransfers.clamp(0, 4), 'maxWalkMeters': maxWalkMeters.clamp(100, 2000), 'preference': preference, if (departureAt case final d?) 'departureAt': d},
       (d) => JourneyPlan.fromJson(d as Map<String, dynamic>), auth: false);
   Future<PageResult<NetworkStop>> stops({int page = 1, int size = 20, String? q, double? lat, double? lng}) async {
-    final d = await _get('/stops', (x) => x, query: {'page': page, 'size': size, if (q != null) 'q': q, if (lat != null) 'lat': lat, if (lng != null) 'lng': lng});
+    final d = await _get('/stops', (x) => x, query: {'page': page, 'size': size, if (q case final v?) 'q': v, if (lat case final v?) 'lat': v, if (lng case final v?) 'lng': v});
     final m = (d ?? {}) as Map<String, dynamic>;
     return PageResult(rows: ((m['rows'] ?? m['data'] ?? []) as List).map((e) => NetworkStop.fromJson(e)).toList(),
       totalCount: (m['totalCount'] ?? 0) as int, totalPages: (m['totalPages'] ?? 1) as int, currentPage: (m['currentPage'] ?? page) as int);
   }
   Future<StopDetail> stop(String id) => _get('/stops/$id', (d) => StopDetail.fromJson((d ?? {}) as Map<String, dynamic>));
   Future<PageResult<RouteSummary>> routes({int page = 1, int size = 20, String? q, double? lat, double? lng}) async {
-    final d = await _get('/routes', (x) => x, query: {'page': page, 'size': size, if (q != null) 'q': q, if (lat != null) 'lat': lat, if (lng != null) 'lng': lng});
+    final d = await _get('/routes', (x) => x, query: {'page': page, 'size': size, if (q case final v?) 'q': v, if (lat case final v?) 'lat': v, if (lng case final v?) 'lng': v});
     final m = (d ?? {}) as Map<String, dynamic>;
     return PageResult(rows: ((m['rows'] ?? m['data'] ?? []) as List).map((e) => RouteSummary.fromJson(e as Map<String, dynamic>)).toList(),
       totalCount: (m['totalCount'] ?? 0) as int, totalPages: (m['totalPages'] ?? 1) as int, currentPage: (m['currentPage'] ?? page) as int);
