@@ -54,7 +54,9 @@ class AppToggle extends StatelessWidget {
   final bool value; final ValueChanged<bool>? onChanged; final String? label;
   const AppToggle({super.key, required this.value, this.onChanged, this.label});
   @override Widget build(BuildContext context) => Row(spacing: 8, children: [
-    Switch(value: value, onChanged: onChanged), if (label != null) Text(label!),
+    Switch(value: value, onChanged: onChanged),
+    // Toggle copy is a sentence, not a word: let it wrap instead of overflow.
+    if (label != null) Flexible(child: Text(label!)),
   ]);
 }
 

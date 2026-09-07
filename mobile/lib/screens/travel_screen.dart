@@ -40,31 +40,37 @@ class _TravelScreenState extends ConsumerState<TravelScreen> {
     return Scaffold(body: PageBody(children: [
       PageHeader(eyebrow: 'Journeys', title: 'Plan a journey', description: 'From / To with stop and place suggestions.',
         actions: AppButton(label: _mapCollapsed ? 'Show map' : 'Hide map', variant: AppButtonVariant.outline, size: AppControlSize.sm, onPressed: () => setState(() => _mapCollapsed = !_mapCollapsed))),
-      BasisCard(child: Column(spacing: 12, children: [
+      // Stretch so the wrapped button rows and the CTA line up with the field
+      // edges instead of shrink-wrapping to the middle of the card.
+      BasisCard(child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, spacing: 12, children: [
         LocationSearch(label: JourneyMessages.from, value: _from, onChanged: (v) => setState(() => _from = v)),
         LocationSearch(label: JourneyMessages.to, value: _to, onChanged: (v) => setState(() => _to = v)),
-        Row(spacing: 8, children: [
-          Expanded(child: AppButton(label: 'Use my location', variant: AppButtonVariant.outline, size: AppControlSize.md, icon: Icons.my_location,
-            onPressed: () async { final loc = await requestPickupLocation(context); if (loc != null) setState(() => _from ??= loc); })),
-          Expanded(child: AppButton(label: JourneyMessages.swap, variant: AppButtonVariant.outline, size: AppControlSize.md, onPressed: () => setState(() { final x = _from; _from = _to; _to = x; }))),
+        // Wrap, not Row: the full swap copy does not fit beside the location
+        // button on a phone, and equal Expanded halves would clip it.
+        Wrap(spacing: 8, runSpacing: 8, children: [
+          AppButton(label: 'Use my location', variant: AppButtonVariant.outline, size: AppControlSize.md, icon: Icons.my_location,
+            onPressed: () async { final loc = await requestPickupLocation(context); if (loc != null) setState(() => _from ??= loc); }),
+          AppButton(label: JourneyMessages.swap, variant: AppButtonVariant.outline, size: AppControlSize.md, onPressed: () => setState(() { final x = _from; _from = _to; _to = x; })),
         ]),
-        Row(spacing: 8, children: [
+        // Two short numeric selects share a row; the wordier preference gets
+        // its own full-width row rather than a third cramped column.
+        Row(spacing: 8, crossAxisAlignment: CrossAxisAlignment.start, children: [
           Expanded(child: AppSelect<int>(label: 'Max transfers', value: _maxTransfers,
             items: [for (var i = 0; i <= 4; i++) DropdownMenuItem(value: i, child: Text('$i'))],
             onChanged: (v) => setState(() => _maxTransfers = v ?? 2))),
           Expanded(child: AppSelect<int>(label: 'Max walk (m)', value: _maxWalk,
             items: [for (final m in [100, 400, 800, 1200, 2000]) DropdownMenuItem(value: m, child: Text('$m m'))],
             onChanged: (v) => setState(() => _maxWalk = v ?? 800))),
-          Expanded(child: AppSelect<String>(label: 'Preference', value: _pref,
-            items: const [DropdownMenuItem(value: 'fewest_transfers', child: Text('Fewest transfers')), DropdownMenuItem(value: 'least_walking', child: Text('Least walking'))],
-            onChanged: (v) => setState(() => _pref = v ?? 'fewest_transfers'))),
         ]),
+        AppSelect<String>(label: 'Preference', value: _pref,
+          items: const [DropdownMenuItem(value: 'fewest_transfers', child: Text('Fewest transfers')), DropdownMenuItem(value: 'least_walking', child: Text('Least walking'))],
+          onChanged: (v) => setState(() => _pref = v ?? 'fewest_transfers')),
         Text(JourneyMessages.locationConsent, style: t.typeMeta),
         AppButton(label: JourneyMessages.find, size: AppControlSize.lg, onPressed: (_from == null || _to == null) ? null : () {
           if (_from!.name == _to!.name) { setState(() => _plan = null); return; }
           setState(() { _open = -1; _plan = PlanArgs(origin: _from!, destination: _to!, maxTransfers: _maxTransfers, maxWalkMeters: _maxWalk, preference: _pref); });
         }),
-        Row(spacing: 8, children: [ShareJourneyButton(origin: _from, destination: _to),
+        Wrap(spacing: 8, runSpacing: 8, children: [ShareJourneyButton(origin: _from, destination: _to),
           if (_from != null && _to != null) SaveButton(href: '/travel?o=${Uri.encodeComponent(_from!.name)}&d=${Uri.encodeComponent(_to!.name)}', label: '${_from!.name} → ${_to!.name}', kind: 'journey'),
         ]),
       ])),

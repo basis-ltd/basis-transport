@@ -6,7 +6,9 @@ plugins {
 
 android {
     namespace = "rw.basis.transport.basis_transport"
-    compileSdk = flutter.compileSdkVersion
+    // flutter_secure_storage compiles against SDK 37, so floor compileSdk there
+    // (backward compatible — min/target SDKs are unchanged).
+    compileSdk = 37
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -27,6 +29,14 @@ android {
         // flag during build.
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        // `--dart-define` never reaches the manifest merger, so resolve the
+        // Maps placeholder here: `-PGOOGLE_MAPS_API_KEY=...`, else the
+        // `GOOGLE_MAPS_API_KEY` env var, else "" (build succeeds; the map
+        // shows its error tile at runtime until a real key is supplied).
+        manifestPlaceholders["GOOGLE_MAPS_API_KEY"] =
+            (project.findProperty("GOOGLE_MAPS_API_KEY") as String?)
+                ?: System.getenv("GOOGLE_MAPS_API_KEY")
+                ?: ""
     }
 
     buildTypes {

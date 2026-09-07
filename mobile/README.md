@@ -28,10 +28,19 @@ they are declared in `pubspec.yaml` and never fetched at runtime.
 
 ```sh
 export PATH="$HOME/Downloads/flutter/bin:$PATH"
-flutter run --dart-define API_URL=http://localhost:8080/api \
+GOOGLE_MAPS_API_KEY=KEY flutter run \
+  --dart-define API_URL=http://10.0.2.2:8080/api \
   --dart-define GOOGLE_MAPS_API_KEY=KEY \
   --dart-define PUBLIC_SITE_URL=https://transport.basis.rw
 ```
+
+`--dart-define` only reaches Dart code, never the Android manifest merger, so
+the native Maps key is read separately: `android/app/build.gradle.kts` takes it
+from the `GOOGLE_MAPS_API_KEY` env var (or `-PGOOGLE_MAPS_API_KEY=...`) and
+defaults to `""` so the build succeeds without one. Pass both the env var and
+the `--dart-define` above: the env var stamps the key into
+`AndroidManifest.xml`, the define exposes it to `lib/config/environment.dart`.
+Use `10.0.2.2` (not `localhost`) for the API URL on the Android emulator.
 
 Only `flutter create`, `flutter pub get`, `flutter pub add`, `flutter analyze`
 work on this machine (no Android SDK / full Xcode, so no `flutter build`/`run`

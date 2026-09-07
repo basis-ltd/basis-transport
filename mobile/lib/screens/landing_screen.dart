@@ -30,9 +30,11 @@ class _LandingScreenState extends ConsumerState<LandingScreen> {
         BasisCard(child: Column(spacing: 12, children: [
           LocationSearch(label: JourneyMessages.from, value: _from, onChanged: (v) => setState(() => _from = v)),
           LocationSearch(label: JourneyMessages.to, value: _to, onChanged: (v) => setState(() => _to = v)),
-          Row(spacing: 8, children: [
-            Expanded(child: AppButton(label: JourneyMessages.find, size: AppControlSize.lg, onPressed: (_from == null || _to == null) ? null : () =>
-              context.go('/travel?o=${Uri.encodeComponent(_from!.name)}&d=${Uri.encodeComponent(_to!.name)}'))),
+          // Stacked, not side by side: the full swap copy leaves the primary
+          // CTA too narrow for its own label on a phone.
+          Column(crossAxisAlignment: CrossAxisAlignment.stretch, spacing: 8, children: [
+            AppButton(label: JourneyMessages.find, size: AppControlSize.lg, onPressed: (_from == null || _to == null) ? null : () =>
+              context.go('/travel?o=${Uri.encodeComponent(_from!.name)}&d=${Uri.encodeComponent(_to!.name)}')),
             AppButton(label: JourneyMessages.swap, variant: AppButtonVariant.outline, size: AppControlSize.lg, onPressed: () => setState(() { final x = _from; _from = _to; _to = x; })),
           ]),
           Text(JourneyMessages.selectLocations, style: t.typeMeta),

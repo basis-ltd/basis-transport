@@ -6,8 +6,10 @@ import 'inputs/app_button.dart';
 class ConfirmDialog extends StatelessWidget {
   final String title; final String body; final String confirmLabel; final VoidCallback onConfirm;
   const ConfirmDialog({super.key, required this.title, required this.body, required this.confirmLabel, required this.onConfirm});
+  // Confirm pops the dialog's own route: `c` belongs to the calling page, and
+  // popping through it takes the page down once the dialog has already closed.
   static Future<bool?> show(BuildContext c, {required String title, required String body, required String confirmLabel}) =>
-    showDialog<bool>(context: c, builder: (_) => ConfirmDialog(title: title, body: body, confirmLabel: confirmLabel, onConfirm: () => Navigator.pop(c, true)));
+    showDialog<bool>(context: c, builder: (dialogContext) => ConfirmDialog(title: title, body: body, confirmLabel: confirmLabel, onConfirm: () => Navigator.of(dialogContext).pop(true)));
   @override Widget build(BuildContext context) {
     final t = BasisTokens.of(context);
     return AlertDialog(title: Text(title, style: t.typeCardTitle), content: Text(body, style: t.typeBodySm),

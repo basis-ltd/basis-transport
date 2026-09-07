@@ -9,7 +9,8 @@ class FieldShell extends StatelessWidget {
   @override Widget build(BuildContext context) {
     final t = BasisTokens.of(context);
     return Column(crossAxisAlignment: CrossAxisAlignment.start, spacing: 6, children: [
-      if (label != null) Text(label!, style: t.typeLabel),
+      // Labels sit in narrow side-by-side columns: clip rather than overflow.
+      if (label != null) Text(label!, style: t.typeLabel, maxLines: 1, overflow: TextOverflow.ellipsis, softWrap: false),
       child,
       if (error != null) Row(crossAxisAlignment: CrossAxisAlignment.start, spacing: 6, children: [
         Icon(Icons.error_outline, size: 16, color: t.danger, semanticLabel: 'Error'),

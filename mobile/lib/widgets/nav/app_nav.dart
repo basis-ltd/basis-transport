@@ -44,11 +44,13 @@ class AppDrawer extends StatelessWidget {
     final items = navForRoles(roles);
     return Drawer(child: ListView(children: [
       DrawerHeader(child: Text('Basis Transport', style: t.typeCardTitle)),
+      // closeDrawer, not Navigator.pop: pop dismisses whatever route is on top,
+      // which is the page itself if the drawer has already started closing.
       for (final n in items) ListTile(leading: Icon(n.icon, color: t.accentInk), title: Text(n.title),
-        onTap: () { Navigator.pop(context); context.go(n.path); }),
+        onTap: () { Scaffold.of(context).closeDrawer(); context.go(n.path); }),
       const Divider(),
       for (final e in const [('/about','About'),('/help','Help centre'),('/cities','Supported cities'),('/contact','Contact'),('/privacy','Privacy'),('/terms','Terms'),('/cookies','Cookies')])
-        ListTile(title: Text(e.$2), onTap: () { Navigator.pop(context); context.go(e.$1); }),
+        ListTile(title: Text(e.$2), onTap: () { Scaffold.of(context).closeDrawer(); context.go(e.$1); }),
     ]));
   }
 }

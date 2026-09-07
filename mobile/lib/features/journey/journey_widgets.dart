@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/journey.dart';
@@ -86,27 +88,64 @@ class _StepRow extends StatelessWidget {
 }
 
 /// LocationSearch: stops first, route numbers disambiguate same names.
-class LocationSearch extends ConsumerWidget {
+class LocationSearch extends ConsumerStatefulWidget {
   final String label; final JourneyLocation? value; final ValueChanged<JourneyLocation?> onChanged;
   const LocationSearch({super.key, required this.label, required this.value, required this.onChanged});
-  @override Widget build(BuildContext context, WidgetRef ref) {
-    final ctrl = TextEditingController(text: value?.name ?? '');
-    return AppTextField(label: label, hint: 'Search stops or places', controller: ctrl,
-      onChanged: (q) async {
-        if (q.length < 2) return;
-        try {
-          final page = await ref.read(apiClientProvider).stops(q: q, size: 6);
-          if (!context.mounted) return;
-          final stops = page.rows;
-          showDialog(context: context, builder: (_) => SimpleDialog(title: Text(label), children: [
-            for (final s in stops) SimpleDialogOption(
-              onPressed: () { Navigator.pop(context); onChanged(JourneyLocation(stopId: s.id, latitude: s.coordinates[1], longitude: s.coordinates[0], name: StopIdentity.label(s.name, s.routeNumbers))); },
-              child: Text(StopIdentity.label(s.name, s.routeNumbers))),
-            SimpleDialogOption(onPressed: () { Navigator.pop(context); onChanged(JourneyLocation(latitude: -1.9441, longitude: 30.0619, name: q)); }, child: Text('Use “$q” as a place')),
-          ]));
-        } catch (_) {}
-      });
+  @override ConsumerState<LocationSearch> createState() => _LocationSearchState();
+}
+
+class _LocationSearchState extends ConsumerState<LocationSearch> {
+  late final TextEditingController _ctrl = TextEditingController(text: widget.value?.name ?? '');
+  Timer? _debounce;
+  bool _pickerOpen = false;
+
+  @override void didUpdateWidget(LocationSearch old) {
+    super.didUpdateWidget(old);
+    // Swap and deep links set the value from outside; the field follows them.
+    final name = widget.value?.name ?? '';
+    if (widget.value?.name != old.value?.name && name != _ctrl.text) _ctrl.text = name;
   }
+
+  @override void dispose() { _debounce?.cancel(); _ctrl.dispose(); super.dispose(); }
+
+  void _queryChanged(String q) {
+    _debounce?.cancel();
+    if (q.trim().length < 2) return;
+    _debounce = Timer(const Duration(milliseconds: 350), () => _openPicker(q.trim()));
+  }
+
+  Future<void> _openPicker(String q) async {
+    // One picker at a time. Firing a dialog per keystroke stacked routes, and
+    // popping past the last of them took the page off the router stack.
+    if (_pickerOpen || !mounted) return;
+    _pickerOpen = true;
+    try {
+      final page = await ref.read(apiClientProvider).stops(q: q, size: 6);
+      if (!mounted) return;
+      final picked = await showDialog<JourneyLocation>(context: context, builder: (dialogContext) => SimpleDialog(
+        title: Text(widget.label), children: [
+          // Pop the dialog's own route and return the choice, so the caller
+          // runs once the route is gone rather than during another pop.
+          for (final s in page.rows) SimpleDialogOption(
+            onPressed: () => Navigator.of(dialogContext).pop(
+              JourneyLocation(stopId: s.id, latitude: s.coordinates[1], longitude: s.coordinates[0], name: StopIdentity.label(s.name, s.routeNumbers))),
+            child: Text(StopIdentity.label(s.name, s.routeNumbers))),
+          SimpleDialogOption(
+            onPressed: () => Navigator.of(dialogContext).pop(JourneyLocation(latitude: -1.9441, longitude: 30.0619, name: q)),
+            child: Text('Use “$q” as a place')),
+        ]));
+      if (!mounted || picked == null) return;
+      _ctrl.text = picked.name;
+      widget.onChanged(picked);
+    } catch (_) {
+      // Suggestions are best effort; the typed text still stands on its own.
+    } finally {
+      _pickerOpen = false;
+    }
+  }
+
+  @override Widget build(BuildContext context) =>
+    AppTextField(label: widget.label, hint: 'Search stops or places', controller: _ctrl, onChanged: _queryChanged);
 }
 
 class StopIdentity {
@@ -174,10 +213,11 @@ class ShareJourneyButton extends StatelessWidget {
   @override Widget build(BuildContext context) {
     return AppButton(label: 'Share', variant: AppButtonVariant.outline, size: AppControlSize.sm, icon: Icons.share, onPressed: () {
       final url = buildTravelUrl(origin: origin, destination: destination);
-      showDialog(context: context, builder: (_) => AlertDialog(
+      showDialog(context: context, builder: (dialogContext) => AlertDialog(
         title: const Text('Share this journey'),
         content: Text('This link carries your precise selected coordinates.\n\n$url'),
-        actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('Done'))]));
+        // Pop the dialog's own route, not whatever sits on top of this page.
+        actions: [TextButton(onPressed: () => Navigator.of(dialogContext).pop(), child: const Text('Done'))]));
     });
   }
 }
