@@ -878,6 +878,13 @@
 }
 .journey-results.with-map {
   grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  align-items: stretch;
+}
+/* Notices above the results must span both columns, otherwise the first
+   notice steals column 1 and the map wraps below the journey list. */
+.journey-results > .journey-notice,
+.journey-results > .journey-data-notes {
+  grid-column: 1 / -1;
 }
 .journey-results-list {
   display: grid;
@@ -1053,9 +1060,24 @@
   overflow: hidden;
   min-width: 0;
 }
+/* Beside the journey list the map stretches to the same row height so it
+   sits alongside the journey instead of ending short below it. The viewport
+   cap keeps it sticky on long journeys rather than growing without bound. */
+.journey-results.with-map > .journey-map-panel {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  min-height: 420px;
+  max-height: calc(100vh - 110px);
+}
 .journey-map {
   height: 500px;
   position: relative;
+}
+.journey-results.with-map .journey-map {
+  flex: 1;
+  height: auto;
+  min-height: 0;
 }
 .journey-map > div {
   height: 100%;
@@ -1372,7 +1394,8 @@
   .journey-results.with-map {
     grid-template-columns: 1fr;
   }
-  .journey-map-panel {
+  .journey-map-panel,
+  .journey-results.with-map > .journey-map-panel {
     position: fixed;
     inset: 0;
     top: 0;
@@ -1381,6 +1404,8 @@
     background: var(--paper);
     display: flex;
     flex-direction: column;
+    min-height: 0;
+    max-height: none;
   }
   .journey-map {
     flex: 1;
