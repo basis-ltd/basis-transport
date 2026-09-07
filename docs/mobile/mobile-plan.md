@@ -7,6 +7,28 @@ is complete. Do not stop to ask questions. Where a detail is genuinely ambiguous
 pick the option that most closely mirrors `client/src`, record the decision in
 `mobile/DECISIONS.md`, and keep going.
 
+## Toolchain
+
+Flutter is installed at `~/Downloads/flutter` but is **not** on the default
+PATH. Export it at the start of every shell you open:
+
+```
+export PATH="$HOME/Downloads/flutter/bin:$PATH"
+```
+
+Installed: Flutter 3.47.2 stable, Dart 3.13.2. There is **no Android SDK and no
+full Xcode** on this machine, so `flutter build` and `flutter run` for Android
+and iOS are impossible. Do not attempt them and do not try to install a
+toolchain. `flutter create`, `flutter pub get`, `flutter pub add` and
+`flutter analyze` all work without them — those are your only build commands.
+
+Resolve dependencies with `flutter pub add` rather than hand-writing version
+constraints, then write code against the versions that actually resolve. Note
+that this pulls Riverpod 3.x and go_router 18.x, whose APIs differ from the 2.x
+and 6.x generations most examples are written against — read the resolved
+package source in `~/.pub-cache` when an API is not what you expect rather than
+guessing from memory.
+
 ## Ground rules
 
 1. `client/src/index.css` is the single source of truth for the design system.
@@ -52,9 +74,9 @@ Create the Flutter project at `mobile/` with package name `rw.basis.transport`,
 Android and iOS targets only. Add `mobile/.gitignore`, and a `mobile/README.md`
 covering setup, environment variables, and how to run.
 
-Dependencies: `flutter_riverpod`, `go_router`, `dio`, `google_maps_flutter`,
-`geolocator`, `shared_preferences`, `flutter_secure_storage`, `url_launcher`,
-`intl`. Do not add code generation (`freezed`, `json_serializable`,
+Dependencies, added with `flutter pub add`: `flutter_riverpod`, `go_router`,
+`dio`, `google_maps_flutter`, `geolocator`, `shared_preferences`,
+`flutter_secure_storage`, `url_launcher`, `intl`. Do not add code generation (`freezed`, `json_serializable`,
 `build_runner`) — write `fromJson` / `toJson` by hand so the build never depends
 on a generator step.
 
@@ -213,3 +235,11 @@ commit message. Keep files small and one concern each, matching the structure
 and comment density of `client/src`. If a phase turns out to be blocked, write
 the blocker into `mobile/DECISIONS.md` and move to the next phase rather than
 stopping — return to it once the rest is done.
+
+---
+
+*Optional, left out per your request that the prompt contain no verification.
+Paste this into the working-discipline section if you want it:*
+
+> Run `flutter analyze` after each phase and fix every error it reports before
+> starting the next phase.
